@@ -42,6 +42,9 @@ const Header = () => {
                 Dashboard
               </NavDropdown.Item>
             )}
+            <NavDropdown.Item as={Link} to="/chatlist" style={styles.dropdownItem}>
+              Chat
+            </NavDropdown.Item>
             <NavDropdown.Item onClick={logoutHandler} style={styles.logout}>
               Logout
             </NavDropdown.Item>
