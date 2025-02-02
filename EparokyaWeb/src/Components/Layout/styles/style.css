@@ -1,0 +1,1647 @@
+
+/* WeddingList */
+.wedding-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #154314;
+  margin-bottom: 20px;
+}
+
+.wedding-filters {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.wedding-filter-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ddd;
+  color: #000;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.wedding-filter-button.active {
+  background-color: #1c5739;
+  color: #fff;
+}
+
+.wedding-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.wedding-card {
+  background-color: #fff;
+  border-left: 6px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  padding: 16px;
+}
+
+.wedding-card.confirmed {
+  border-left-color: #4caf50;
+}
+
+.wedding-card.pending {
+  border-left-color: #ffd700;
+}
+
+.wedding-card.declined {
+  border-left-color: #ff5722;
+}
+
+.status-badge {
+  background-color: #e8f5e9;
+  color: #154314;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #154314;
+}
+
+.card-details p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.loading-text,
+.empty-text,
+.error-text {
+  text-align: center;
+  font-size: 1rem;
+  color: #666;
+}
+
+
+  /* baptismList */
+  
+  .baptism-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+  }
+  
+  .baptism-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #154314;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .baptism-filters {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .baptism-filter-button {
+    padding: 10px 15px;
+    margin: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #154314;
+  }
+  
+  .baptism-filter-button.active {
+    background-color: #1c5739;
+    color: #fff;
+    border-color: #1c5739;
+  }
+  
+  .loading-text,
+  .empty-text {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #666;
+    margin-top: 20px;
+  }
+  
+  .baptism-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .baptism-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-left: 6px solid;
+  }
+  
+  .baptism-card.pending {
+    border-left-color: #ffd700;
+  }
+  .baptism-card.confirmed {
+    border-left-color: #4caf50;
+  }
+  .baptism-card.cancelled {
+    border-left-color: #ff5722;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  
+  .baptism-card.pending .status-badge {
+    background-color: #ffd700;
+  }
+  
+  .baptism-card.confirmed .status-badge {
+    background-color: #4caf50;
+  }
+  
+  .baptism-card.declined .status-badge {
+    background-color: #ff5722;
+  }
+  
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #154314;
+    margin-bottom: 10px;
+  }
+  
+  .card-details p {
+    margin: 5px 0;
+    font-size: 0.95rem;
+  }
+  
+  /* FuneralList */
+
+  /* Container */
+.funeral-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+/* Title */
+.funeral-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #154314;
+  margin-bottom: 20px;
+}
+
+/* Filters */
+.funeral-filters {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.funeral-filter-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ddd;
+  color: #000;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.funeral-filter-button.active {
+  background-color: #1c5739;
+  color: #fff;
+}
+
+/* Cards */
+.funeral-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.funeral-card {
+  background-color: #fff;
+  border-left: 6px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  padding: 16px;
+}
+
+.funeral-card.pending {
+  border-left-color: #ffd700;
+}
+.funeral-card.confirmed {
+  border-left-color: #4caf50;
+}
+.funeral-card.cancelled {
+  border-left-color: #ff5722;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #154314;
+}
+
+.card-details p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.status-badge {
+  background-color: #e8f5e9;
+  color: #154314;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+/* Misc */
+.loading-text,
+.empty-text,
+.error-text {
+  text-align: center;
+  font-size: 1rem;
+  color: #666;
+}
+
+/* Counseling */
+/* General layout */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  
+}
+
+.counseling-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.counseling-filters {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.counseling-filter-button {
+  background-color: #fff6f6;
+  border: none;
+  padding: 10px 20px;
+  margin: 0 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.counseling-filter-button.active {
+  background-color: #1c5739;
+  color: white;
+}
+
+.counseling-filter-button:hover {
+  background-color: #1c5739;
+  color: white;
+}
+
+.counseling-card.pending .status-badge {
+  background-color: #ffd700;
+}
+
+.counseling-card.confirmed .status-badge {
+  background-color: #4caf50;
+}
+
+.counseling-card.declined .status-badge {
+  background-color: #ff5722;
+}
+
+.search-bar input {
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.counseling-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.counseling-card {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.counseling-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.status-badge {
+  display: inline-block;
+  background-color: #f0f0f0;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.status-badge.pending {
+  background-color: #ffc107;
+  color: #fff;
+}
+
+.status-badge.confirmed {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.status-badge.cancelled {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.card-details p {
+  margin: 5px 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.error-text {
+  color: red;
+  text-align: center;
+  font-weight: bold;
+}
+
+.loading-text {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.empty-text {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #777;
+}
+
+/* PrayerRequest */
+
+.prayerRequest-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+}
+
+.prayerRequest-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #154314;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.prayerRequest-filters {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.prayerRequest-filter-button {
+  padding: 10px 15px;
+  margin: 0 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #154314;
+}
+
+.prayerRequest-filter-button.active {
+  background-color: #1c5739;
+  color: #fff;
+  border-color: #1c5739;
+}
+
+.search-bar input {
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.loading-text,
+.empty-text,
+.error-text {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  margin-top: 20px;
+}
+
+.prayerRequest-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.prayerRequest-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-left: 6px solid;
+}
+
+.prayerRequest-card.eternal-repose {
+  border-left-color: #ffd700;
+}
+
+.prayerRequest-card.thanks-giving {
+  border-left-color: #4caf50;
+}
+
+.prayerRequest-card.special-intentions {
+  border-left-color: #2196f3;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: black;
+  margin-bottom: 10px;
+}
+
+.prayerRequest-card.eternal-repose .status-badge {
+  background-color: #ffd700;
+}
+
+.prayerRequest-card.thanks-giving .status-badge {
+  background-color: #4caf50;
+}
+
+.prayerRequest-card.special-intentions .status-badge {
+  background-color: #2196f3;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #154314;
+  margin-bottom: 10px;
+}
+
+.card-details p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
+
+/* HouseBlessingList */
+.houseBlessing-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.houseBlessing-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-left: 6px solid;
+}
+
+.houseBlessing-card.pending {
+  border-left-color: #ff9800;
+}
+
+.houseBlessing-card.confirmed {
+  border-left-color: #4caf50;
+}
+
+.houseBlessing-card.cancelled {
+  border-left-color: #f44336;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: black;
+  margin-bottom: 10px;
+}
+
+.houseBlessing-card.pending .status-badge {
+  background-color: #ff9800;
+}
+
+.houseBlessing-card.confirmed .status-badge {
+  background-color: #4caf50;
+}
+
+.houseBlessing-card.cancelled .status-badge {
+  background-color: #f44336;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #1a237e;
+  margin-bottom: 10px;
+}
+
+.card-details p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
+
+.houseBlessing-filters {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.houseBlessing-filter-button {
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #e0e0e0;
+}
+
+.houseBlessing-filter-button.active {
+  background-color: #1c5739;
+  color: white;
+}
+
+
+/* adminPrayerRequest */
+.adminPrayerReview-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.prayer-box {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-left: 6px solid;
+}
+
+.prayer-box.pending {
+  border-left-color: #ff9800;
+}
+
+.prayer-box.confirmed {
+  border-left-color: #4caf50;
+}
+
+.prayer-box.cancelled {
+  border-left-color: #f44336;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: black;
+  margin-bottom: 10px;
+}
+
+.status-badge.pending {
+  background-color: #ff9800;
+}
+
+.status-badge.confirmed {
+  background-color: #4caf50;
+}
+
+.status-badge.cancelled {
+  background-color: #f44336;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #1a237e;
+  margin-bottom: 10px;
+}
+
+.card-details p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.approve-button,
+.reject-button {
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.approve-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.reject-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.approve-button:hover {
+  background-color: #45a049;
+}
+
+.reject-button:hover {
+  background-color: #e53935;
+}
+
+.pagination button {
+  margin: 5px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background-color: #1a73e8;
+  color: white;
+}
+
+/* WeddingDetails Layout */
+.wedding-details-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+}
+
+.wedding-details-page .wedding-details-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  border-radius: 8px;
+}
+
+.wedding-details-page .wedding-details-content h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #154314;
+  margin-bottom: 20px;
+}
+
+.wedding-details-page .details {
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.wedding-details-page .details p {
+  font-size: 1rem;
+  margin: 5px 0;
+}
+
+.wedding-details-page .admin-section {
+  margin-bottom: 20px;
+}
+
+.wedding-details-page .admin-section h2 {
+  font-size: 1.5rem;
+  color: #154314;
+  margin-bottom: 10px;
+}
+
+.wedding-details-page input,
+.wedding-details-page select,
+.wedding-details-page textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.wedding-details-page .button-container {
+  display: flex;
+  gap: 10px;
+}
+
+.wedding-details-page .button-container button {
+  padding: 10px 15px;
+  background-color: #1c5739;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.wedding-details-page .button-container button:hover {
+  background-color: #154314;
+}
+
+/* funeral details */
+.funeral-details-page {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.funeral-details-content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.details p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.admin-comments-section, .admin-section {
+  margin-top: 20px;
+}
+
+.admin-comment {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: #fff;
+}
+
+textarea, input, select, button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.funeral-details-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px; 
+}
+
+.funeral-details-content {
+  flex: 1; 
+  padding: 20px;
+  background-color: #f9f9f9; 
+  border-radius: 8px; 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.details, .admin-comments-section, .admin-section {
+  margin-bottom: 20px; 
+}
+
+.admin-comments-section .admin-comment {
+  margin-bottom: 15px; 
+  padding: 10px;
+  border: 1px solid #ddd; 
+  border-radius: 5px; 
+  background-color: #fff; 
+}
+
+
+/* General Styles */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+h2, h3 {
+  color: #555;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin: 5px 0;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+/* SideBar Styles */
+.sidebar {
+  width: 250px;
+  background-color: #2c3e50;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+
+.sidebar a {
+  text-decoration: none;
+  color: white;
+  padding: 10px 15px;
+  margin: 5px 0;
+  border-radius: 5px;
+}
+
+.sidebar a:hover {
+  background-color: #34495e;
+}
+
+/* Main Content Styles */
+.baptism-details-page {
+  display: flex;
+}
+
+.baptism-details {
+  margin-left: 260px;
+  padding: 20px;
+  flex: 1;
+  background-color: white;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.baptism-details h2 {
+  font-size: 1.8em;
+  margin-bottom: 20px;
+}
+
+.baptism-details p {
+  margin: 5px 0;
+  line-height: 1.6;
+}
+
+/* Funeral Form */
+
+.funeral-form-container {
+  display: flex;
+  align-items: flex-start;
+}
+
+.guest-sidebar {
+  width: 25%;
+  margin-right: 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #f8f9fa;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.form-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+
+
+
+/* Form Styles */
+form {
+  margin: 20px 0;
+  background-color: #f4f4f4;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+form h3 {
+  margin-bottom: 15px;
+}
+
+form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+form button {
+  background-color: #27ae60;
+  color: white;
+  font-weight: bold;
+}
+
+/* Comments Section */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+ul li p {
+  margin: 5px 0;
+}
+
+/* Actions Section */
+.actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.actions button {
+  background-color: #3498db;
+  color: white;
+  font-weight: bold;
+}
+
+.actions button:last-child {
+  background-color: #e74c3c;
+}
+
+
+/* //profile */
+/* General Layout */
+.profile-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  max-width: 1588px;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Left Side */
+.profile-left {
+  flex: 1;
+  text-align: center;
+  margin-right: 120px;
+  margin-top: 150px; 
+  height: 90vh;
+}
+
+.profile-title {
+  font-size: 32px; /* Larger title */
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.profile-avatar img {
+  width: 195px; 
+  height: 210px;
+  border-radius: 50%;
+  border: 5px solid #28a745;
+  margin-bottom: 20px;
+}
+
+.profile-joined {
+  font-size: 25px; 
+  text-align: center;
+  margin-top: 15px;
+  color: #6c757d;
+}
+
+.profile-joined strong {
+  font-weight: bold;
+  color: #000;
+}
+
+.profile-joined span {
+  display: block;
+  color: gray;
+  font-size: 18px; 
+}
+
+/* Buttons Section */
+.profile-buttons {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: center; 
+  gap: 20px; 
+  margin-top: 25px; 
+}
+
+.btn-profile {
+  padding: 15px 30px; 
+  font-size: 15px;
+  color: #fff;
+  background-color: #154314; 
+  border: none;
+  border-radius: 40px; 
+  text-decoration: none;
+  text-align: center;
+  height: 6vh;
+  width: 210px; 
+}
+
+.btn-profile:hover {
+  background-color: #196619; 
+}
+
+.btn-profile:nth-child(5) {
+  width: 100%; 
+  text-align: center;
+}
+
+/* Right Side */
+.profile-right {
+  flex: 2;
+  background-color: #c7ddb5;
+  padding: 30px; 
+  border-radius: 15px;
+  height: 55vh;
+  margin-top: 150px;
+}
+
+.profile-greeting {
+  color: #154314;
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 40px;
+  font-family: 'Canva Sans', sans-serif;
+}
+
+.profile-details p {
+  font-size: 20px; 
+  margin-bottom: 15px; 
+}
+
+.profile-details p strong {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+/* funeral modal */
+.death-certificate-thumbnail {
+  width: 100px;
+  height: auto;
+  cursor: pointer;
+}
+
+.modal-content {
+  text-align: center;
+}
+
+.close-modal-button {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* CAALENDAR */
+.rbc-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rbc-toolbar-label {
+  
+  text-align: center; /* Center the month name */
+  /* font-weight: 3px; */
+  width: 10px;
+  white-space: nowrap; /* Prevent wrapping */
+  overflow: hidden; /* Hide overflow */
+}
+
+.rbc-btn-group {
+  display: flex;
+  gap: 5px;
+}
+
+
+
+
+/* CAALENDAR */
+.rbc-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rbc-toolbar-label {
+  
+  text-align: center; /* Center the month name */
+  /* font-weight: 3px; */
+  width: 10px;
+  white-space: nowrap; /* Prevent wrapping */
+  overflow: hidden; /* Hide overflow */
+}
+
+.rbc-btn-group {
+  display: flex;
+  gap: 5px;
+}
+
+/* createAnnouncement */
+.create-announcement {
+  display: flex;
+  justify-content: flex-start;
+  gap: 20px;
+  padding: 20px;
+}
+
+.container {
+  flex-grow: 1; 
+  display: flex;
+  flex-direction: column;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%; 
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar {
+  width: 250px;
+}
+
+.sidebar + .container {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Announcement List - Main Layout */
+.admin-announcement-list {
+  display: flex;  
+  gap: 20px;
+  height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.sidebar {
+  width: 20%; 
+  background-color: #f8f9fa;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.categories {
+  width: 20%; 
+  background-color: #f8f9fa;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.categories h3 {
+  font-size: 18px;
+  color: #343a40;
+  text-align: center;
+}
+
+.categories ul {
+  list-style: none;
+  padding: 0;
+}
+
+.categories ul li {
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  color: #495057;
+}
+
+.categories ul li:hover,
+.categories ul li.active {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Main Content */
+.main-content {
+  flex-grow: 1;  
+  padding: 20px;
+  background-color: #f1f3f5;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Announcement List Grid */
+.announcement-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 20px;
+  margin: 0 auto;  /* Center the grid */
+  width: 100%;  /* Ensure it takes full width */
+}
+
+/* Announcement Box Styling */
+.announcement-box {
+  background-color: white;
+  min-height: 450px; /* Consistent height */
+  max-height: 450px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.announcement-header {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+  border: 2px solid #007bff;
+}
+
+.announcement-header h3 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #343a40;
+}
+
+.announcement-header p {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.actions {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+}
+
+.actions svg {
+  cursor: pointer;
+  color: #6c757d;
+  transition: color 0.2s ease;
+}
+
+.actions svg:hover {
+  color: #dc3545;
+}
+
+/* Announcement Body */
+.announcement-body {
+  padding: 15px;
+  flex-grow: 1;
+  overflow: auto;
+}
+
+.announcement-body p {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.4;
+}
+
+.announcement-body p.rich-description {
+  color: #343a40;
+}
+
+.image-slider {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.image-slider img {
+  height: 100px; /* Adjust image height */
+  width: 100px;
+  border-radius: 5px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.image-slider img:hover {
+  transform: scale(1.1);
+}
+
+/* Announcement Footer */
+.announcement-footer {
+  padding: 15px;
+  border-top: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.announcement-footer label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.announcement-footer p {
+  margin: 0;
+  font-size: 12px;
+  color: #495057;
+}
+
+/* Prevent Sections from Overlapping */
+.admin-announcement-list > * {
+  box-sizing: border-box;
+}
+
+/* Media Query for Smaller Screens */
+@media (max-width: 768px) {
+  .admin-announcement-list {
+    flex-direction: column;
+  }
+
+  .sidebar, .categories {
+    width: 100%; 
+  }
+
+  .announcement-list {
+    grid-template-columns: 1fr; 
+  }
+}
+
+/* prayerWall */
+/* General layout for the prayer wall container */
+.prayer-wall-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px; /* Increase gap between sidebar and content */
+}
+
+/* Guest Sidebar styling */
+.guest-sidebar {
+  width: 300px; /* Adjust width as per need */
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Main content area for prayer wall */
+.prayer-wall {
+  flex: 1;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for the prayer post container (like a Facebook post) */
+.prayer-post-container {
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.prayer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.prayer-form input,
+.prayer-form textarea,
+.prayer-form select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.prayer-form button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.prayer-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Style for each prayer post box */
+.prayer-box {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.prayer-box h4 {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.prayer-box p {
+  margin-bottom: 10px;
+}
+
+.prayer-box .prayer-meta {
+  font-size: 12px;
+  color: gray;
+  margin-bottom: 10px;
+}
+
+/* Styling for the like and include buttons */
+.prayer-box .like-btn,
+.prayer-box .include-btn {
+  padding: 8px 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.prayer-box .like-btn:hover,
+.prayer-box .include-btn:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.prayer-box .include-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.avatar {
+  width: 40px;  
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;  
+}
+
+/* Styling for the pagination */
+.pagination button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+
+/* admin pryaer review */
+.prayer-box button {
+  margin-right: 10px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.prayer-box button:first-child {
+  background-color: #28a745;
+  color: white;
+}
+
+.prayer-box button:first-child:hover {
+  background-color: #218838;
+}
+
+.prayer-box button:last-child {
+  background-color: #dc3545;
+  color: white;
+}
+
+.prayer-box button:last-child:hover {
+  background-color: #c82333;
+}
+
