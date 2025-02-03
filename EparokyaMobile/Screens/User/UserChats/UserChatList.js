@@ -44,7 +44,8 @@ const UserChatList = () => {
                         <Pressable
                             onPress={() =>
                                 navigation.navigate('UserChat', {
-                                    userId: item.id
+                                    userId: item.id,
+                                    email: item.email,
                                 })
                             }
                             style={styles.chatItem}

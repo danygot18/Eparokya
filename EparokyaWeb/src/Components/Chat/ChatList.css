@@ -1,0 +1,72 @@
+/* Chat Page Layout */
+.chat-page {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+  }
+  
+  /* Chat Container */
+  .chat-container {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Chat Title */
+  .chat-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  /* Chat List */
+  .chat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* Chat Card */
+  .chat-card {
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .chat-card:hover {
+    background: #e7e7e7;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Chat Email */
+  .chat-email {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* Chat ID */
+  .chat-id {
+    font-size: 0.9rem;
+    color: #777;
+  }
+  
+  /* Empty or Loading States */
+  .chat-empty,
+  .chat-loading {
+    text-align: center;
+    color: #999;
+    margin-top: 20px;
+  }
+  

@@ -19,6 +19,7 @@ export default function Main() {
     useEffect(() => {
 
         if (isLogin) {
+            console.log(isLogin)
           socket.connect();
           socket.emit("join", { userId: user._id });
         }

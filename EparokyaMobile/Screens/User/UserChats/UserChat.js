@@ -10,6 +10,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { StyleSheet } from 'react-native';
 import axios from 'axios';
 
+
+
 const UserChat = ({ route }) => {
     const { userId, email } = route.params; // Ensure userId is passed correctly
 
@@ -17,7 +19,7 @@ const UserChat = ({ route }) => {
     const [messages, setMessages] = useState([]);
     const navigation = useNavigation()
 
-    console.log('userId:', user);
+    
     // console.log('Token:', token);
 
     const getChat = async () => {
@@ -129,15 +131,30 @@ const UserChat = ({ route }) => {
 
         getChat();
 
-        socket.on("push-chat", (data) => {
-            // console.log(data)
+        socket.on("push-message", (data) => {
+            console.log("mobile chat data", data)
+            const { chat } = data
             setMessages((previousChats) =>
-                GiftedChat.append(previousChats, [data.chat])
+                GiftedChat.append(previousChats, [
+                    {
+                        _id: chat._id,
+                        text: chat.message,
+                        createdAt: chat.createdAt,
+                        user: {
+                            _id: chat.sender._id,
+                            name: chat.sender.name,
+                            avatar: chat.sender?.profile?.avatar?.url,
+    
+                        }
+    
+                    }
+                ])
             );
         })
+        socket.emit('join', { userId: user._id });
 
         return () => {
-            socket.off('push-chat')
+            socket.off('push-message')
         }
 
     }, []);
@@ -169,7 +186,7 @@ const UserChat = ({ route }) => {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerText}>
-                    {userId.email}
+                    {email}
                 </Text>
             </View>
 

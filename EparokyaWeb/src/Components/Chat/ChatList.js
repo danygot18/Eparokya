@@ -1,26 +1,25 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
+import GuestSideBar from "../GuestSideBar";
+import "./ChatList.css";
 
 const ChatList = () => {
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { user, token } = useSelector((state) => state.auth);
-  const config = {
-    withCredentials: true,
-  };
- 
-  useEffect(() => {
-    
+  const { user } = useSelector((state) => state.auth);
 
+  const config = { withCredentials: true };
+
+  useEffect(() => {
     const fetchChats = async () => {
       try {
         const { data } = await axios.get(
-          `${process.env.REACT_APP_API}/api/v1/chat/getAllMessage/${user._id}`, config
+          `${process.env.REACT_APP_API}/api/v1/chat/getAllMessage/${user._id}`,
+          config
         );
-        
         setChats(data.users || []);
       } catch (error) {
         console.error("Error fetching chat list:", error);
@@ -30,52 +29,35 @@ const ChatList = () => {
     };
 
     fetchChats();
-  }, [user._id, token]);
+  }, [user._id]);
 
+  console.log(chats);
   return (
-    <div style={styles.container}>
-      <h2>Chat List</h2>
-      {loading ? (
-        <p>Loading chats...</p>
-      ) : chats.length > 0 ? (
-        <ul style={styles.chatList}>
-          {chats.map((chat) => (
-            <li
-              key={chat.id}
-              style={styles.chatItem}
-              onClick={() => navigate(`/chat/${chat._id}/${chat.email}`)}
-            >
-              <strong>{chat.email}</strong>
-              <p>{chat.lastMessage || "No messages yet."}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No chats available.</p>
-      )}
+    <div className="chat-page">
+      <GuestSideBar />
+      <div className="chat-container">
+        <h2 className="chat-title">Chat List</h2>
+        {loading ? (
+          <p className="chat-loading">Loading chats...</p>
+        ) : chats.length > 0 ? (
+          <div className="chat-list">
+            {chats.map((chat) => (
+              <div
+                key={chat.id}
+                className="chat-card"
+                onClick={() => navigate(`/chat/${chat.id}/${chat.email}`)}
+              >
+                <p className="chat-email">{chat.email}</p>
+                <p className="chat-id">{chat.id}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="chat-empty">No chats available.</p>
+        )}
+      </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    width: "400px",
-    margin: "20px auto",
-    padding: "20px",
-    border: "1px solid #ccc",
-    borderRadius: "10px",
-    backgroundColor: "#f9f9f9",
-  },
-  chatList: {
-    listStyle: "none",
-    padding: 0,
-  },
-  chatItem: {
-    padding: "10px",
-    borderBottom: "1px solid #ddd",
-    cursor: "pointer",
-    transition: "background 0.2s",
-  },
 };
 
 export default ChatList;

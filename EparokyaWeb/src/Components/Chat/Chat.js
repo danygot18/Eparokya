@@ -1,29 +1,30 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { IoSend } from "react-icons/io5";
 import { socket } from "../../socket/index";
 import "./Chat.css"; // Import the CSS file
+import { DateLocalizer } from "react-big-calendar";
 
 const UserChat = () => {
     const { chat, email } = useParams();
     const { user } = useSelector((state) => state.auth);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
+    const messagesEndRef = useRef(null);
 
-    const config = { withCredentials: true };
-    useEffect(() => {
-        console.log("Params:", chat, email);
-    }, [chat, email]);
-    console.log("Chat", chat)
+    const config = {
+        withCredentials: true
+    };
+
     const getChat = async () => {
         try {
             const { data } = await axios.get(
                 `${process.env.REACT_APP_API}/api/v1/chat/getMessage/${chat}/${user._id}`,
                 config
             );
-            setMessages(data.messages);
+            setMessages(data.messages.reverse());
         } catch (err) {
             console.error("getChat error", err);
         }
@@ -32,30 +33,63 @@ const UserChat = () => {
     const sendChat = async () => {
         if (!newMessage.trim()) return;
         try {
-            await axios.post(
-                `${process.env.REACT_APP_API}/chat/sendMessage`,
-                { chat, senderId: user?._id, message: newMessage },
-                config
+
+            const {data} = await axios.post(
+                `${process.env.REACT_APP_API}/api/v1/chat/sendMessage`,
+                { 
+                    userId: chat,  // Fix: Change `user` to `userId`
+                    senderId: user?._id, // Fix: Change `sender` to `senderId`
+                    message: newMessage 
+                }, 
+                {
+                    headers: { "Content-Type": "application/json" },
+                    withCredentials: true
+                }
             );
+            // console.log("web chat", data)
+
             socket.emit("send-chat", {
-                id: userId,
-                message: { text: newMessage, userId: user._id },
+                id: chat,
+                message: { message: newMessage, senderId: user._id },
+                chat: data.chat
             });
-            setMessages([...messages, { text: newMessage, userId: user._id }]);
+    
+            setMessages([...messages, { message: newMessage, sender: {_id: user._id} }]);
             setNewMessage("");
         } catch (err) {
-            console.error("sendChat error", err);
+            console.error("sendChat error", err.response?.data || err.message);
         }
+    };
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
     useEffect(() => {
         getChat();
-        socket.on("push-chat", (data) => {
-            setMessages((prevChats) => [...prevChats, data.message]);
+        socket.on("push-message", (data) => {
+            const message = {
+                message: data.message.text,
+                sender: {
+                    _id: data.message.user._id
+                }
+            }
+            console.log("Message", message)
+            setMessages((prevChats) => [...prevChats, message]);
+            console.log("data sa web", data)
+            
         });
-        return () => socket.off("push-chat");
-    }, []);
+        socket.emit('join', { userId: user._id });
 
+        return () => socket.off("push-message");
+
+        
+    }, [socket]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+    console.log(messages)
     return (
         <div className="chat-container">
             <div className="chat-header">{email || "Chat"}</div>
@@ -63,11 +97,12 @@ const UserChat = () => {
                 {messages.map((msg, index) => (
                     <div
                         key={index}
-                        className={`message ${msg.userId === user._id ? "right" : "left"}`}
+                        className={`message ${msg.sender?._id === user?._id ? "right" : "left"}`}
                     >
-                        {msg.text}
+                        {msg.message}
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
             <div className="chat-input">
                 <input

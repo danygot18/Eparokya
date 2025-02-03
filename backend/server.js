@@ -33,27 +33,7 @@ const io = new Server(server, {
 
 // Store connected users
 const USERS = new Map();
-
+const socket = require('./socket');
 // Handle WebSocket connections
-io.on('connection', (socket) => {
-    console.log('A user connected');
-
-    socket.on("join", (data) => {
-        const { userId } = data;
-        USERS.set(userId, socket);
-    });
-
-    socket.on("send-message", (data) => {
-        const { id } = data;
-        const user = USERS.get(id);
-
-        if (user) {
-            user.emit('push-message', data);
-        }
-    });
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
-});
+io.on('connection', socket);
 

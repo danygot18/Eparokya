@@ -69,6 +69,47 @@ exports.getMessages = async (req, res) => {
         res.status(500).json({ error: "Could not fetch messages." });
     }
 };
+// exports.getMessages = async (req, res) => {
+//     const { userId } = req.params;
+
+//     try {
+//         // Validate userId
+//         if (!mongoose.Types.ObjectId.isValid(userId)) {
+//             return res.status(400).json({ error: "Invalid User ID." });
+//         }
+
+//         // Fetch all users (excluding the current user)
+//         const users = await User.find({ _id: { $ne: new mongoose.Types.ObjectId(userId) } });
+
+//         // Fetch the last message for each user
+//         const usersWithLastMessage = await Promise.all(
+//             users.map(async (user) => {
+//                 // Find the last message between the current user and the target user
+//                 const lastMessage = await Chat.findOne({
+//                     $or: [
+//                         { user: new mongoose.Types.ObjectId(userId), sender: user._id },
+//                         { user: user._id, sender: new mongoose.Types.ObjectId(userId) },
+//                     ],
+//                 })
+//                     .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+//                     .limit(1); // Limit to 1 result (the last message)
+
+//                 return {
+//                     id: user._id,
+//                     name: user.name,
+//                     email: user.email,
+//                     lastMessage: lastMessage ? lastMessage.message : null, // Include the message content
+//                     lastMessageAt: lastMessage ? lastMessage.createdAt : null,
+//                 };
+//             })
+//         );
+
+//         res.status(200).json({ success: true, users: usersWithLastMessage });
+//     } catch (error) {
+//         console.error("Error fetching users with last message:", error);
+//         res.status(500).json({ error: "Could not fetch users with last message." });
+//     }
+// };
 
 // Controller to get a list of chat users for a specific user
 exports.getChatUsers = async (req, res) => {

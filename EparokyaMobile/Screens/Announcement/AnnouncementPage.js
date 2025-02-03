@@ -149,7 +149,7 @@ const AnnouncementPage = ({ navigation }) => {
             style={[styles.categoryIcon, selectedCategory === category._id && styles.selectedCategory]}
             onPress={() => setSelectedCategory(category._id)}
           >
-            <Image source={{ uri: category.image || 'https://via.placeholder.com/50' }} style={styles.categoryImage} />
+            <Image source={{ url: category?.image || 'https://via.placeholder.com/50' }} style={styles.categoryImage} />
             <Text style={styles.categoryText}>{category.name}</Text>
           </TouchableOpacity>
         ))}
@@ -165,7 +165,7 @@ const AnnouncementPage = ({ navigation }) => {
           >
             <Text style={styles.title}>{item.name || 'No Title Available'}</Text>
             <Text>{item.description || 'No Description Available'}</Text>
-            {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
+            {item.image && <Image source={{ url: item?.image }} style={styles.media} />}
 
             {/* Like and Comments Count */}
             <View style={styles.interactionContainer}>

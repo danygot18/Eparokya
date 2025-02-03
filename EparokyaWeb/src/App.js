@@ -83,9 +83,28 @@ import { Sermons } from "./Components/Guest/Sermons";
 //Chat
 import ChatList from "./Components/Chat/ChatList";
 import Chat from "./Components/Chat/Chat";
+import { socket } from "./socket";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
 
 function App() {
+  const { user } = useSelector(state => state.auth);
+
+  useEffect(() => {
+
+    if (user) {
+      
+      socket.connect();
+      socket.emit("join", { userId: user._id });
+    }
+
+  }, [user])
+
+
   return (
+
+
+
     <Router>
       <Header />
       <Routes>

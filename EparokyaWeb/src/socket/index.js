@@ -4,7 +4,7 @@ const config = {
     autoConnect: false,
 };
 
-export const socket = io(`${process.env.REACT_APP_API}`, {
+export const socket = io(`http://localhost:4001`, {
     autoConnect: false,
     reconnection: true, // enables auto reconnection
     reconnectionAttempts: 10, // maximum attempts
