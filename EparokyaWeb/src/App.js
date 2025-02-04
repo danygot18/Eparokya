@@ -83,6 +83,11 @@ import { Sermons } from "./Components/Guest/Sermons";
 //Chat
 import ChatList from "./Components/Chat/ChatList";
 import Chat from "./Components/Chat/Chat";
+import ChatSidebar from "./Components/Chat/ChatSideBar";
+
+
+
+
 import { socket } from "./socket";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
@@ -93,7 +98,7 @@ function App() {
   useEffect(() => {
 
     if (user) {
-      
+
       socket.connect();
       socket.emit("join", { userId: user._id });
     }
@@ -391,6 +396,8 @@ function App() {
         <Route path="/chatlist" element={<ChatList />} exact="true" />
         {/* <Route path="/chat/:chat" element={<Chat />} exact="true" /> */}
         <Route path="/chat/:chat/:email" element={<Chat />} />
+        <Route path="/ChatSidebar" element={<ChatSidebar />} exact="true" />
+
       </Routes>
     </Router>
   );

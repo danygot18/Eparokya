@@ -1,23 +1,63 @@
-/* Chat container */
 .chat-container {
-    width: 100%;
+    display: flex;
     height: 100vh;
+}
+
+/* Sidebar */
+.chat-sidebar {
+    width: 300px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #ddd;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.chat-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.chat-list {
     display: flex;
     flex-direction: column;
-    background-color: #f9f9f9;
 }
 
-/* Chat header */
-.chat-header {
-    padding: 10px 20px;
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
     border-bottom: 1px solid #ddd;
-    background-color: white;
-    text-align: center;
-    font-weight: bold;
-    font-size: 18px;
+    transition: background 0.3s;
 }
 
-/* Chat messages */
+.chat-item:hover {
+    background: #e9ecef;
+}
+
+.chat-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+/* Chat box */
+.chat-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 15px;
+    background: #0075fd;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
 .chat-messages {
     flex: 1;
     overflow-y: auto;
@@ -26,34 +66,31 @@
     flex-direction: column;
 }
 
-/* Individual message */
+/* Messages */
 .message {
     max-width: 70%;
-    margin-bottom: 10px;
     padding: 10px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 14px;
+    margin-bottom: 10px;
 }
 
-/* Messages from other users */
 .message.left {
     background-color: #f3f3f3;
     align-self: flex-start;
 }
 
-/* Messages from the current user */
 .message.right {
     background-color: #0075fd;
     color: white;
     align-self: flex-end;
 }
 
-/* Input toolbar */
+/* Chat Input */
 .chat-input {
     display: flex;
-    align-items: center;
-    border-top: 1px solid #ddd;
     padding: 10px;
+    border-top: 1px solid #ddd;
     background: white;
 }
 
@@ -62,12 +99,11 @@
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    outline: none;
 }
 
 .chat-send {
     margin-left: 10px;
     cursor: pointer;
-    color: #0075fd;
     font-size: 24px;
+    color: #0075fd;
 }

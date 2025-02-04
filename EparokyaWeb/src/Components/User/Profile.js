@@ -8,6 +8,8 @@ import '../Layout/styles/style.css'; // Custom CSS for exact layout
 const Profile = () => {
   const { user, loading } = useSelector((state) => state.auth);
 
+  console.log(user);
+
   return (
     <Fragment>
       {loading ? (

@@ -38,8 +38,9 @@ const Register = () => {
 
         const fetchMinistryCategories = async () => {
             try {
-                const { data } = await axios.get('/api/v1/getAllMinistryCategories'); 
-                setMinistryCategories(data.categories);
+                const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllMinistryCategories`); 
+                setMinistryCategories(data);
+                console.log(data);
             } catch (err) {
                 console.error('Failed to fetch ministry categories:', err);
             }
