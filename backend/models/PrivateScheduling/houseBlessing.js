@@ -32,10 +32,13 @@ const houseBlessingSchema = new mongoose.Schema({
         default: Date.now,
     },
 
+    adminRescheduled: {
+        date: { type: Date },
+        reason: { type: String },
+      },
+
     comments: [
         {
-            priest: String,
-            scheduledDate: Date,
             selectedComment: String,
             additionalComment: String,
             createdAt: {
@@ -46,6 +49,7 @@ const houseBlessingSchema = new mongoose.Schema({
     ],
 
     priest: { type: String, required: false },
+    termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
 });
 
 module.exports = mongoose.model('houseBlessing', houseBlessingSchema);

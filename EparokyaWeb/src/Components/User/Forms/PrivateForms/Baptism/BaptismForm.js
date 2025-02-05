@@ -18,6 +18,7 @@ const BaptismForm = () => {
     const [formData, setFormData] = useState({
         baptismDate: '',
         baptismTime: '',
+        phone: '',
         child: {
             fullName: '',
             dateOfBirth: '',
@@ -47,16 +48,6 @@ const BaptismForm = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                // const token = sessionStorage.getItem('token');  
-                // if (!token) {
-                //     console.error('No token found. User is not authenticated.');
-                //     return;
-                // }
-
-                // const config = {
-                //     headers: { Authorization: `Bearer ${token}` },
-                //     withCredentials: true,
-                // };
 
                 const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config);
                 setUser(response.data.user);
@@ -159,6 +150,7 @@ const BaptismForm = () => {
             setFormData({
                 baptismDate: '',
                 baptismTime: '',
+                phone: '',
                 child: {},
                 parents: {},
                 ninong: [],
@@ -318,6 +310,12 @@ const BaptismForm = () => {
                                 type="text"
                                 value={formData.parents.address}
                                 onChange={e => handleChange(e, 'parents.address')}
+                            />
+                            <Form.Label>Contact Number</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.phone}
+                                onChange={(e) => handleChange(e, 'phone')}
                             />
                         </Form.Group>
 

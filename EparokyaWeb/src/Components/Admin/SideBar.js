@@ -114,13 +114,18 @@ const SideBar = () => {
                 Resource Page
               </Dropdown.Toggle>
               <Dropdown.Menu>
+              <Dropdown.Item>
+                  <Link to="/admin/resourceCategory/create" className="sidebar-link" style={styles.sidebarLink}>
+                    Create Resource Category
+                  </Link>
+                </Dropdown.Item>
                 <Dropdown.Item>
-                  <Link to="/admin/weddingList" className="sidebar-link" style={styles.sidebarLink}>
+                  <Link to="/admin/resource/create" className="sidebar-link" style={styles.sidebarLink}>
                     Create Resource
                   </Link>
                 </Dropdown.Item>
                 <Dropdown.Item>
-                  <Link to="/admin/weddingList" className="sidebar-link" style={styles.sidebarLink}>
+                  <Link to="/admin/resourceList" className="sidebar-link" style={styles.sidebarLink}>
                     Resources List
                   </Link>
                 </Dropdown.Item>
@@ -165,11 +170,11 @@ const SideBar = () => {
                     House Blessings
                   </Link>
                 </Dropdown.Item>
-                <Dropdown.Item>
+                {/* <Dropdown.Item>
                   <Link to="/admin/streetMassList" className="sidebar-link" style={styles.sidebarLink}>
                    Street Mass
                   </Link>
-                </Dropdown.Item>
+                </Dropdown.Item> */}
               </Dropdown.Menu>
             </Dropdown>
           </Nav.Item>

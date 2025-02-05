@@ -19,19 +19,19 @@ const UserCalendar = () => {
       const [weddingEvents, baptismEvents, funeralEvents, customEvents] = await Promise.all([
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`),
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`),
-        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmed`),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`),
         axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`),
       ]);
 
       const formattedEvents = [
         ...weddingEvents.data.map((event) => ({
           id: `wedding-${event._id}`,
-          title: `${event.bride} & ${event.groom} Wedding`,
+          title: `${event.brideName} & ${event.groomName} Wedding`,
           start: new Date(event.weddingDate),
           end: new Date(event.weddingDate),
           type: 'Wedding',
-          bride: event.bride,
-          groom: event.groom,
+          bride: event.brideName,
+          groom: event.groomName,
         })),
         ...baptismEvents.data.map((event) => ({
           id: `baptism-${event._id}`,
@@ -76,7 +76,7 @@ const UserCalendar = () => {
   const eventPropGetter = (event) => ({
     style: {
       backgroundColor:
-        event.type === 'Wedding' ? 'blue' :
+        event.type === 'Wedding' ? 'gold' :
         event.type === 'Baptism' ? 'green' :
         event.type === 'Funeral' ? 'red' : 'purple',
       color: 'white',
@@ -86,7 +86,7 @@ const UserCalendar = () => {
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <GuestSideBar style={{ width: '20%', minWidth: '200px' }} /> 
-      <div style={{ flex: 1, padding: '20px' }}>
+      <div style= {{ fontFamily: 'Helvetica, sans-serif', flex: 1, padding: '20px' }}>
         <Metadata title="User Calendar" />
         <h1>Calendar</h1>
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}

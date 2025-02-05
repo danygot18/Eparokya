@@ -89,7 +89,7 @@ const GuestSideBar = () => {
           style={styles.profilePicture}
         />
 
-        <h2 style={styles.welcomeText}>Hello {user?.name || "Guest"}!</h2>
+        <h2 style={styles.welcomeText}>Hello {user && user.name ? user.name : "Guest"}!</h2>
       </div>
 
       {/* Menu */}
@@ -109,13 +109,13 @@ const GuestSideBar = () => {
 
         <li style={styles.menuItem}>
           <Link
-            to="/events"
+            to="/resourcePage"
             style={{
               ...styles.link,
-              ...(location.pathname === '/events' ? styles.activeLink : {}),
+              ...(location.pathname === '/resourcePage' ? styles.activeLink : {}),
             }}
           >
-            <FaCalendarAlt style={styles.icon} /> Events
+            <FaCalendarAlt style={styles.icon} /> Resources
           </Link>
         </li>
 

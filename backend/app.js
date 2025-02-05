@@ -29,11 +29,17 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 // User & Authentication
 app.use("/api/v1", require("./routes/user"));
 
+// Prayer Wall
+app.use("/api/v1", require("./routes/PrayerWall/prayerWall"));
+app.use("/api/v1", require("./routes/PrayerWall/prayerRequest"));
+
+// Ministry & Members
+app.use("/api/v1/ministryCategory", require("./routes/ministryCategory"));
 
 // Sacramental Services
 app.use("/api/v1", require("./routes/wedding"));
 app.use("/api/v1", require("./routes/Binyag"));
-app.use("/api/v1", require("./routes/funeral"));
+app.use("/api/v1", require("./routes/Funeral"));
 app.use("/api/v1", require("./routes/counseling"));
 
 // Announcements & Posts
@@ -45,9 +51,8 @@ app.use("/api/v1", require("./routes/Announcement/AnnouncementComment"));
 app.use("/api/v1", require("./routes/post"));
 
 
-// Prayer Wall
-app.use("/api/v1", require("./routes/PrayerWall/prayerWall"));
-app.use("/api/v1", require("./routes/PrayerWall/prayerRequest"));
+
+
 
 
 // Events & Scheduling
@@ -55,16 +60,22 @@ app.use("/api/v1", require("./routes/adminDate"));
 app.use("/api/v1", require("./routes/customEvent"));
 app.use("/api/v1", require("./routes/PrivateScheduling/houseBlessing"));
 
+// Resources
+app.use("/api/v1", require("./routes/Resources/resourceCategory"));
+app.use("/api/v1", require("./routes/Resources/resource"));
 
-// Ministry & Members
-app.use("/api/v1", require("./routes/ministryCategory"));
+
+
 app.use("/api/v1", require("./routes/Members/memberYearBatchCategory"));
 app.use("/api/v1", require("./routes/Members/members"));
 
 
 // Resources
-app.use("/api/v1", require("./routes/Resource/ResourceCategory"));
-app.use("/api/v1", require("./routes/Resource/postResource"));
+// app.use("/api/v1", require("./routes/Resource/resourceCategory"));
+// app.use("/api/v1", require("./routes/Resource/resource"));
+
+// app.use("/api/v1/resourceCategory", require("./routes/Resources/resourceCategory"));
+// app.use("/api/v1/resource", require("./routes/Resources/resource"));
 
 // Chat Feature
 

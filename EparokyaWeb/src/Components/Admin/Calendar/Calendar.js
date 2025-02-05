@@ -23,7 +23,7 @@ const Calendars = () => {
       const [weddingEvents, baptismEvents, funeralEvents, customEvents] = await Promise.all([
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`, config),
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`, config),
-        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmed`, config),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`, config),
         axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`, config),
       ]);
 

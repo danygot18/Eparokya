@@ -217,22 +217,45 @@ const weddingSchema = mongoose.Schema({
     type: Date,
   },
 
+  adminRescheduled: {
+    date: { type: Date },
+    reason: { type: String },
+  },
+
+  // for Admin to fill out
+  additionalReq: {
+    PreMarriageSeminar: {
+      date: { type: Date },
+      time: { type: String },
+    },
+    CanonicalInterview: {
+      date: { type: Date },
+      time: { type: String },
+    },
+
+    Confession: {
+      date: { type: Date },
+      time: { type: String },
+    },
+    createdAt: { type: Date, default: Date.now },
+
+  },
+
   comments: [
     {
-      priest: String,
-      scheduledDate: Date,
       selectedComment: String,
       additionalComment: String,
-      adminRescheduled: {
-        date: { type: Date },
-        reason: { type: String },
-      },
       createdAt: {
         type: Date,
         default: Date.now,
       },
     },
   ],
+
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  checklistId: { type: mongoose.Schema.Types.ObjectId, ref: 'WeddingChecklist' }, 
+  termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
+  
 }, { timestamps: true });
 
 weddingSchema.virtual('id').get(function () {

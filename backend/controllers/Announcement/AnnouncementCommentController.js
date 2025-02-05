@@ -1,10 +1,15 @@
 const { Announcement, Comment, Reply } = require('../../models/Announcement/announcement');
-const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const leoProfanity = require('leo-profanity');
 
 exports.addComment = async (req, res) => {
     const { announcementId } = req.params;
     const { text } = req.body;
     const userId = req.user?.id; 
+
+    if (leoProfanity.check(text)) {
+        return res.status(400).json({ message: 'Sorry, but your comment contains a profane message.' });
+    }
 
     if (!text || text.trim() === '') {
         return res.status(400).json({ message: 'Comment text cannot be empty.' });
@@ -50,6 +55,10 @@ exports.addReply = async (req, res) => {
     const { text } = req.body;
     const userId = req.user?.id;
 
+    if (leoProfanity.check(text)) {
+        return res.status(400).json({ message: 'Sorry, but your comment contains a profane message.' });
+    }
+    
     try {
         const reply = new Reply({
             user: userId,
@@ -115,10 +124,13 @@ exports.getCommentsWithReplies = async (req, res) => {
 
     try {
         const comments = await Comment.find({ announcement: announcementId })
-            .populate('user', 'name') 
+            .populate('user', 'name avatar') 
             .populate({
                 path: 'replies',
-                populate: { path: 'user', select: 'name' },
+                populate: {
+                    path: 'user', 
+                    select: 'name avatar' 
+                },
             });
 
         res.status(200).json({ data: comments });
@@ -127,6 +139,7 @@ exports.getCommentsWithReplies = async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch comments with replies', error });
     }
 };
+
 
 exports.likeComment = async (req, res) => {
     const { commentId } = req.params;
@@ -141,20 +154,24 @@ exports.likeComment = async (req, res) => {
         if (!comment) {
             return res.status(404).json({ message: 'Comment not found' });
         }
-
         if (comment.likedBy.includes(userId)) {
-            return res.status(400).json({ message: 'You have already liked this comment' });
+            comment.likedBy = comment.likedBy.filter(id => id.toString() !== userId);
+        } else {
+            comment.likedBy.push(userId);
         }
 
-        comment.likedBy.push(userId);
         await comment.save();
 
-        res.status(200).json({ message: 'Comment liked successfully', data: comment });
+        res.status(200).json({
+            message: comment.likedBy.includes(userId) ? 'Comment liked successfully' : 'Comment unliked successfully',
+            data: comment
+        });
     } catch (error) {
-        console.error('Error liking comment:', error);
-        res.status(500).json({ message: 'Failed to like comment', error });
+        console.error('Error toggling like on comment:', error);
+        res.status(500).json({ message: 'Failed to toggle like on comment', error });
     }
 };
+
 
 
 exports.unlikeComment = async (req, res) => {
@@ -181,4 +198,3 @@ exports.unlikeComment = async (req, res) => {
         res.status(500).json({ message: 'Failed to unlike comment', error });
     }
 };
-

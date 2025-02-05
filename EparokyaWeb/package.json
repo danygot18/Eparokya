@@ -4,6 +4,9 @@
   "private": true,
   "dependencies": {
     "@blaumaus/react-alert": "^7.0.5",
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@popperjs/core": "^2.11.8",
     "@react-navigation/native": "^7.0.14",
     "@testing-library/jest-dom": "^5.17.0",
@@ -53,6 +56,7 @@
     "redux-thunk": "^3.1.0",
     "socket.io-client": "^4.8.1",
     "sweetalert2": "^11.9.0",
+    "swiper": "^11.2.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

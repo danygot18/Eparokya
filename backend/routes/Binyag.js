@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const BaptismController = require('../controllers/Baptism/BinyagController');
-const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
+const { isAuthenticatedUser, authorizeAdmin } = require('../middleware/auth');
 // const multer = require('multer');
 // const upload = multer({ dest: 'uploads/' });
 const upload = require('../utils/multer'); 
@@ -18,17 +18,27 @@ router.post(
   isAuthenticatedUser, BaptismController.submitBaptismForm
 );
 
-
 router.get('/mySubmittedForms', isAuthenticatedUser, BaptismController.getMySubmittedForms);
 router.get('/confirmedBaptism', BaptismController.getConfirmedBaptisms);
+router.get('/getBaptismChecklist/:baptismId', BaptismController.getBaptismChecklist);
+
+router.post('/commentBaptism/:baptismId', BaptismController.addBaptismComment);
+router.post('/adminAdditionalNotes/:baptismId', BaptismController.addAdminNotes);
 
 router.get('/stats/baptsimsPerMonth', BaptismController.getBaptismPerMonth);
 router.get('/stats/baptismStatusCount', isAuthenticatedUser, BaptismController.getBaptismStatusCounts);
+router.put('/updateBaptismChecklist/:baptismId', BaptismController.updateBaptismChecklist);
 
-router.post('/decline/:baptismId', BaptismController.declineBaptism);
+router.get('/getAllUserSubmittedBaptism', isAuthenticatedUser, BaptismController.getMySubmittedForms);
+router.get('/getBaptismForm/:formId', isAuthenticatedUser, BaptismController.getBaptismFormById);
+
+
+router.post('/:baptismId/declineBaptism', BaptismController.declineBaptism);
 router.post('/:baptismId/admin/addComment', BaptismController.addBaptismComment);
+router.put('/:baptismId/updateBaptismDate', BaptismController.updateBaptismDate);
+
 
 router.get('/getBaptism/:id', BaptismController.getBaptismById);
-router.post('/:baptismId/confirm', BaptismController.confirmBaptism);
+router.post('/:baptismId/confirmBaptism', BaptismController.confirmBaptism);
 
 module.exports = router;

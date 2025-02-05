@@ -1,4 +1,6 @@
 const ministryCategory  = require('../models/ministryCategory'); 
+const User  = require('../models/user'); 
+
 const mongoose = require('mongoose');
 
 exports.createMinistry = async (req, res) => {
@@ -16,14 +18,19 @@ exports.createMinistry = async (req, res) => {
 };
 
 exports.getAllMinistryCategories = async (req, res) => {
-    try {
-        const categories = await ministryCategory.find();
-        res.status(200).json(categories);
-    } catch (error) {
-        console.error('Error fetching ministry categories:', error);
-        res.status(500).json({ error: 'Error fetching ministry categories', details: error.message });
-    }
+  try {
+      const categories = await ministryCategory.find(); 
+      if (categories) {
+          res.status(200).json({ success: true, categories }); 
+      } else {
+          res.status(404).json({ success: false, message: 'No categories found' });
+      }
+  } catch (error) {
+      console.error('Error fetching categories:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch ministry categories' });
+  }
 };
+
 
 exports.getMinistryId = async (req, res) => {
     try {
@@ -67,5 +74,30 @@ exports.updateMinistryCategory = async (req, res) => {
     } catch (error) {
       console.error("Error updating ministry category:", error);
       res.status(500).json({ message: "Error updating ministry category." });
+    }
+  };
+
+  exports.getUsersByMinistryCategory = async (req, res) => {
+    try {
+      const { ministryCategoryId } = req.params; 
+  
+      const MinistryCategory = await ministryCategory.findById(ministryCategoryId);
+      if (!MinistryCategory) {
+        return res.status(404).json({ message: "Ministry category not found" });
+      }
+  
+      const users = await User.find({ ministryCategory: ministryCategoryId }).populate("ministryCategory");
+  
+      if (!users.length) {
+        return res.status(404).json({ message: "No users found for this ministry category" });
+      }
+  
+      res.status(200).json({
+        MinistryCategory: ministryCategory.name,
+        users: users,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Server error", error });
     }
   };

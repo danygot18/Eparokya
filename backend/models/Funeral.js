@@ -68,20 +68,28 @@ const FuneralSchema = new mongoose.Schema({
 
   comments: [
     {
-      priest: String,
-      scheduledDate: Date,
       selectedComment: String,
       additionalComment: String,
-      adminRescheduled: {
-        date: { type: Date },
-        reason: { type: String },
-      },
       createdAt: {
         type: Date,
         default: Date.now,
       },
     },
   ],
+
+  adminRescheduled: {
+    date: { type: Date },
+    reason: { type: String },
+  },
+
+  Priest: {
+    name: { type: String, required: false },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+
   confirmedAt: {
     type: Date,
   },
@@ -91,6 +99,7 @@ const FuneralSchema = new mongoose.Schema({
     enum: ['Pending', 'Confirmed', 'Cancelled'],
   },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
 },
   { timestamps: true }
 );

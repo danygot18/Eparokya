@@ -3,6 +3,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 import GuestSidebar from '../../../../GuestSideBar';
+import TermsModal from "../../../../TermsModal";
+import termsAndConditionsText from "../../../../TermsAndConditionText";
 
 const FuneralForm = () => {
     const [filePreview, setFilePreview] = useState(null);
@@ -10,6 +12,8 @@ const FuneralForm = () => {
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [error, setError] = useState('');
     const [userId, setUserId] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAgreed, setIsAgreed] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -54,22 +58,14 @@ const FuneralForm = () => {
     //     fetchUser();
     // }, []);
     const config = {
-        
+
         withCredentials: true,
     };
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                // const token = sessionStorage.getItem('token');  
-                // if (!token) {
-                //     console.error('No token found. User is not authenticated.');
-                //     return;
-                // }
-                // const config = {
-                //     headers: { Authorization: `Bearer ${token}` },
-                //     withCredentials: true,
-                // };
+
                 const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config);
                 setUserId(response.data.user._id);
             } catch (error) {
@@ -78,7 +74,7 @@ const FuneralForm = () => {
         };
         fetchUser();
     }, []);
-    
+
     const handleChange = (e, fieldPath) => {
         const keys = fieldPath.split('.');
         setFormData((prev) => {
@@ -102,19 +98,25 @@ const FuneralForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+    
+        if (!isAgreed) {
+            toast.error('You must agree to the Terms and Conditions before submitting.');
+            return;
+        }
+    
         try {
             const formDataObj = new FormData();
             if (formData.deathCertificate[0]) {
                 formDataObj.append('deathCertificate', formData.deathCertificate[0]);
             }
-
+    
             formDataObj.append('address[state]', formData.address.state);
             formDataObj.append('address[zip]', formData.address.zip);
             formDataObj.append('address[country]', formData.address.country);
             formDataObj.append('placingOfPall[by]', formData.placingOfPall.by);
             formDataObj.append('placingOfPall[familyMembers]', JSON.stringify(formData.placingOfPall.familyMembers));
+    
             // Append other fields
-
             formDataObj.append('name', formData.name);
             formDataObj.append('dateOfDeath', formData.dateOfDeath);
             formDataObj.append('personStatus', formData.personStatus);
@@ -132,28 +134,20 @@ const FuneralForm = () => {
             formDataObj.append('funeralMasstime', formData.funeralMasstime);
             formDataObj.append('funeralMass', formData.funeralMass);
             formDataObj.append('userId', userId);
-
+    
             for (let pair of formDataObj.entries()) {
                 console.log(pair[0] + ': ' + pair[1]);
             }
-
-            // const config = {
-            //     headers: {
-            //         'Content-Type': 'multipart/form-data',
-            //         Authorization: `Bearer ${sessionStorage.getItem('token')}`,  
-            //     },
-                
-            // };
-
+    
             const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/funeralCreate`,
                 formDataObj,
                 config
             );
-
+    
             toast.success('Form submitted successfully!');
             console.log('Response:', response.data);
-
+    
             setFormData({
                 name: '',
                 dateOfDeath: '',
@@ -175,11 +169,14 @@ const FuneralForm = () => {
                 funeralMass: '',
                 deathCertificate: [],
             });
+    
+            setIsAgreed(false); // Reset checkbox after submission
         } catch (error) {
             console.error('Error submitting form:', error.response ? error.response.data : error.message);
             toast.error('Failed to submit form. Please try again.');
         }
     };
+    
 
     return (
         <div className="funeral-form-container">
@@ -511,9 +508,33 @@ const FuneralForm = () => {
                             />
                         </Form.Group>
                     </Row>
-                    <Button type="submit" className="mt-3">
+
+                    {/* Terms and Conditions Section */}
+                    <div className="terms-section">
+                        <input
+                            type="checkbox"
+                            checked={isAgreed}
+                            onChange={() => setIsAgreed(!isAgreed)}
+                        />
+                        <label>
+                           Before submitting,click this to open the <span className="terms-link" onClick={() => setIsModalOpen(true)}>Terms and Conditions</span>
+                        </label>
+                    </div>
+
+
+
+                    <Button type="submit" disabled={!isAgreed} className="mt-3">
                         Submit
                     </Button>
+
+                    {/* Terms Modal */}
+                    <TermsModal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        onAccept={() => { setIsAgreed(true); setIsModalOpen(false); }}
+                        termsText={termsAndConditionsText}
+                    />
+                    
                 </Form>
             </div>
         </div>

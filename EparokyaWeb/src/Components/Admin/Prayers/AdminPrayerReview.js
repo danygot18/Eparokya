@@ -17,7 +17,6 @@ const AdminPrayerReview = () => {
         withCredentials: true,
     };
 
-    // Fetch prayers
     useEffect(() => {
         const fetchPrayers = async () => {
             setLoading(true);

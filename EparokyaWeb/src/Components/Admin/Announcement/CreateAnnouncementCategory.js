@@ -177,7 +177,7 @@ const CreateAnnouncementCategory = () => {
     const [editId, setEditId] = useState(null);
 
     const navigate = useNavigate();
-    const API_URL = process.env.REACT_APP_API || 'http://localhost:5000';
+    // const API_URL = process.env.REACT_APP_API || 'http://localhost:5000';
 
     useEffect(() => {
         fetchCategories();
@@ -185,11 +185,22 @@ const CreateAnnouncementCategory = () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get(`${API_URL}/api/v1/getAllannouncementCategory`, {
+            const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllannouncementCategory`, {
                 withCredentials: true,
             });
-            setCategories(response.data || []);
+
+            console.log('Fetched categories:', response.data);
+
+            // Ensure we extract the categories array correctly
+            if (response.data && Array.isArray(response.data.categories)) {
+                setCategories(response.data.categories);
+            } else {
+                console.error('Unexpected data structure:', response.data);
+                setCategories([]); // Set default empty array to avoid errors
+            }
+
         } catch (error) {
+            console.error('Error fetching categories:', error);
             toast.error('Failed to load announcement categories.');
         }
     };
@@ -205,13 +216,13 @@ const CreateAnnouncementCategory = () => {
         try {
             setLoading(true);
             if (editMode) {
-                await axios.put(`${API_URL}/api/v1/update/announcementCategory/${editId}`, formData, {
+                await axios.put(`${process.env.REACT_APP_API}/api/v1/update/announcementCategory/${editId}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                     withCredentials: true,
                 });
                 toast.success('Announcement Category Updated Successfully.');
             } else {
-                await axios.post(`${API_URL}/api/v1/create/announcementCategory`, formData, {
+                await axios.post(`${process.env.REACT_APP_API}/api/v1/create/announcementCategory`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                     withCredentials: true,
                 });
@@ -232,7 +243,7 @@ const CreateAnnouncementCategory = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${API_URL}/api/v1/deleteAnnouncementCategory/${id}`, {
+            await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteAnnouncementCategory/${id}`, {
                 withCredentials: true,
             });
             toast.success('Announcement Category Deleted Successfully.');

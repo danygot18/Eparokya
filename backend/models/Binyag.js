@@ -4,6 +4,7 @@ const BaptismSchema = new mongoose.Schema({
 
   baptismDate: { type: Date, required: false },
   baptismTime: { type: String, required: false, },
+  phone: { type: String, required: false },
 
   child: {
     fullName: { type: String, required: false },
@@ -161,8 +162,6 @@ const BaptismSchema = new mongoose.Schema({
 
   comments: [
     {
-      priest: String,
-      scheduledDate: Date,
       selectedComment: String,
       additionalComment: String,
       createdAt: {
@@ -171,6 +170,30 @@ const BaptismSchema = new mongoose.Schema({
       },
     },
   ],
+
+
+  adminNotes: [
+    {
+      priest: String,
+      recordedBy: String,
+      bookNumber: String,
+      pageNumber: String,
+      lineNumber: String,
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+
+  adminRescheduled: {
+    date: { type: Date },
+    reason: { type: String },
+  },
+  
+  checklistId: { type: mongoose.Schema.Types.ObjectId, ref: 'BaptismChecklist' }, 
+  termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
+
 });
 
 module.exports = mongoose.model('Baptism', BaptismSchema);

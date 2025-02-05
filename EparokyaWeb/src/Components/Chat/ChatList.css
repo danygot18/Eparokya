@@ -14,6 +14,8 @@
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
   }
   
   /* Chat Title */
@@ -23,13 +25,14 @@
     text-align: center;
     color: #333;
     margin-bottom: 20px;
-  }
-  
   /* Chat List */
-  .chat-list {
+  .chat-lists {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    flex: 1;
+    overflow-y: auto;
+  }
     
   }
   
@@ -44,6 +47,8 @@
     flex-direction: column;
     gap: 5px;
     width: 500px;
+    margin-bottom: 15px;
+    margin-left: 20px;
   }
   
   .chat-card:hover {

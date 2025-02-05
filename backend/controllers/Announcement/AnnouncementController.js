@@ -41,7 +41,6 @@ exports.createAnnouncement = async (req, res) => {
             }
         }
 
-        // Prepare the announcement object
         const { name, description, richDescription, tags, announcementCategory } = req.body;
         
         const newAnnouncement = new Announcement({
@@ -50,9 +49,9 @@ exports.createAnnouncement = async (req, res) => {
             richDescription,
             tags,
             announcementCategory,
-            images: imagesLinks, // Store array of images
-            videos: videoLink ? [videoLink] : [], // Store video if present
-            image: imagesLinks.length > 0 ? imagesLinks[0].url : "", // Default to the first image if available
+            images: imagesLinks, 
+            videos: videoLink ? [videoLink] : [], 
+            image: imagesLinks.length > 0 ? imagesLinks[0].url : "", 
         });
 
         const savedAnnouncement = await newAnnouncement.save();
@@ -63,13 +62,11 @@ exports.createAnnouncement = async (req, res) => {
     }
 };
 
-
-
 // Get all announcements
 exports.getAllAnnouncements = async (req, res) => {
     try {
         const announcements = await Announcement.find()
-            .populate('announcementCategory', 'name description') // Populate with category data
+            .populate('announcementCategory', 'name description') 
             .exec();
 
         res.status(200).json({
@@ -86,8 +83,6 @@ exports.getAllAnnouncements = async (req, res) => {
         });
     }
 };
-
-
 
 // Delete announcement
 exports.deleteAnnouncement = async (req, res) => {
@@ -222,25 +217,65 @@ exports.updateAnnouncement = async (req, res) => {
 // Get announcement by ID
 exports.getAnnouncementById = async (req, res) => {
     try {
-        const announcementId = req.params.id;
-        const announcement = await Announcement.findById(announcementId);
+        const announcementId = req.params.announcementId;
+        const announcement = await Announcement.findById(announcementId)
+            .populate('comments')
+            .populate('likedBy', 'name avatar');
+
         if (!announcement) {
-            return res.status(404).json({
-                success: false,
-                message: 'Announcement not found',
-            });
+            return res.status(404).json({ success: false, message: 'Announcement not found' });
         }
 
-        res.status(200).json({
-            success: true,
-            announcement,
-        });
+        res.status(200).json({ success: true, announcement });
     } catch (error) {
         console.error(error);
-        res.status(500).json({
-            success: false,
-            message: 'Server Error',
-        });
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
+exports.likeAnnouncement = async (req, res) => {
+    const { announcementId } = req.params;
+    const userId = req.user.id;  // This should now be available from middleware
+
+    try {
+        const announcement = await Announcement.findById(announcementId);
+        if (!announcement) {
+            return res.status(404).json({ message: 'Announcement not found' });
+        }
+
+        const alreadyLiked = announcement.likedBy.includes(userId);
+
+        if (alreadyLiked) {
+            announcement.likedBy = announcement.likedBy.filter(uid => uid.toString() !== userId);
+        } else {
+            announcement.likedBy.push(userId);
+        }
+
+        await announcement.save();
+        res.status(200).json({ liked: !alreadyLiked });
+    } catch (error) {
+        console.error('Error liking announcement:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.unlikeAnnouncement = async (req, res) => {
+    try {
+        const { announcementId, userId } = req.body;
+        const announcement = await Announcement.findById(announcementId);
+        if (!announcement) {
+            return res.status(404).json({ message: "Announcement not found" });
+        }
+        const index = announcement.likes.indexOf(userId);
+        if (index === -1) {
+            return res.status(400).json({ message: "You have not liked this announcement" });
+        }
+        announcement.likes.splice(index, 1);
+        await announcement.save();
+        return res.json({ likes: announcement.likes.length });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "An error occurred while unliking the announcement" });
     }
 };
 

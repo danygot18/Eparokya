@@ -8,98 +8,49 @@ const WeddingList = () => {
     const [weddingForms, setWeddingForms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filteredStatus, setFilteredStatus] = useState("All");
-    const [searchTerm, setSearchTerm] = useState(""); 
+    const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
 
+    useEffect(() => {
+        fetchWeddingForms();
+    }, []);
+    
     const fetchWeddingForms = async () => {
         setLoading(true);
         try {
             const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllWeddings`, {
                 withCredentials: true,
             });
-
+    
+            console.log("Frontend API Response:", response.data); 
+    
             if (response.data && Array.isArray(response.data)) {
                 setWeddingForms(response.data);
             } else {
                 setWeddingForms([]);
             }
         } catch (error) {
+            console.error("Error fetching wedding forms:", error);
             window.alert("Unable to fetch wedding forms.");
         } finally {
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchWeddingForms();
-    }, []);
+    
 
     const handleCardClick = (weddingId) => {
         navigate(`/admin/weddingDetails/${weddingId}`);
     };
 
-    const filterWeddingForms = (status) => {
-        let filtered = weddingForms;
-
-        if (status !== "All") {
-            filtered = filtered.filter((wedding) => wedding.weddingStatus === status);
-        }
-
-        if (searchTerm) {
-            filtered = filtered.filter(
-                (wedding) =>
-                    wedding.bride.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    wedding.groom.toLowerCase().includes(searchTerm.toLowerCase())
+    const filterWeddingForms = () => {
+        return weddingForms.filter((wedding) => {
+            return (
+                (filteredStatus === "All" || wedding.weddingStatus === filteredStatus) &&
+                (searchTerm === "" ||
+                    wedding.brideName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    wedding.groomName.toLowerCase().includes(searchTerm.toLowerCase()))
             );
-        }
-
-        return filtered;
-    };
-
-    const renderWeddingForm = (item, index) => {
-        const { bride, groom, attendees, flowerGirl, ringBearer, weddingDate, weddingStatus, user } = item;
-
-        const statusColor =
-            weddingStatus === "Confirmed"
-                ? "#4caf50"
-                : weddingStatus === "Declined"
-                ? "#ff5722"
-                : "#ffd700";
-
-        return (
-            <div
-                key={item._id}
-                className={`wedding-card ${weddingStatus?.toLowerCase() || ""}`}
-                onClick={() => handleCardClick(item._id)}
-                style={{ borderLeft: `6px solid ${statusColor}` }}
-            >
-                <div className="status-badge">{weddingStatus || "Unknown"}</div>
-                <h3 className="card-title">
-                    Record # {index + 1}: {bride && groom ? `${bride} & ${groom}` : "Names not available"}
-                </h3>
-                <div className="card-details">
-                    <p>
-                        <strong>Wedding Date:</strong> {weddingDate ? new Date(weddingDate).toLocaleDateString() : "N/A"}
-                    </p>
-                    <p>
-                        <strong>Attendees:</strong> {attendees ?? "N/A"}
-                    </p>
-                    <p>
-                        <strong>Flower Girl:</strong> {flowerGirl || "N/A"} |{" "}
-                        <strong>Ring Bearer:</strong> {ringBearer || "N/A"}
-                    </p>
-                    <p>
-                        <strong>Submitted By:</strong> 
-                    </p>
-                    <p>
-                        <strong>Name:</strong> {item.userId?.name || "Unknown"}
-                    </p>
-                    <p>
-                        <strong>User ID:</strong> {item.userId?._id || "Unknown"}
-                    </p>
-                </div>
-            </div>
-        );
+        });
     };
 
     return (
@@ -109,7 +60,7 @@ const WeddingList = () => {
                 <h1 className="wedding-title">Wedding Records</h1>
 
                 <div className="wedding-filters">
-                    {["All", "Confirmed", "Pending", "Declined"].map((status) => (
+                    {["All", "Confirmed", "Pending", "Cancelled"].map((status) => (
                         <button
                             key={status}
                             className={`wedding-filter-button ${filteredStatus === status ? "active" : ""}`}
@@ -134,7 +85,34 @@ const WeddingList = () => {
                     <p className="loading-text">Loading...</p>
                 ) : (
                     <div className="wedding-list">
-                        {filterWeddingForms(filteredStatus).map(renderWeddingForm)}
+                        {filterWeddingForms().map((item, index) => {
+                            const statusColor =
+                                item.weddingStatus === "Confirmed" ? "#4caf50" :
+                                    item.weddingStatus === "Cancelled" ? "#ff5722" : "#ffd700";
+
+                            return (
+                                <div
+                                    key={item._id}
+                                    className={`wedding-card ${item.weddingStatus?.toLowerCase() || ""}`}
+                                    onClick={() => handleCardClick(item._id)}
+                                    style={{ borderLeft: `6px solid ${statusColor}` }}
+                                >
+                                    <div className="status-badge">{item.weddingStatus ?? "Unknown"}</div>
+                                    <h3 className="card-title">
+    Record # {index + 1}: {item.brideName ?? "Unknown Bride"} & {item.groomName ?? "Unknown Groom"}
+</h3>
+
+
+                                    <div className="card-details">
+                                        <p><strong>Wedding Date:</strong> {item.weddingDate ? new Date(item.weddingDate).toLocaleDateString() : "N/A"}</p>
+                                        <p><strong>Wedding Time:</strong> {item.weddingTime ?? "N/A"}</p>
+                                        <strong>Bride Contact:</strong> {item.bridePhone ?? "N/A"} | <strong>Groom Contact:</strong> {item.groomPhone ?? "N/A"}
+                                        <p><strong>Submitted By:</strong> {item.userId?.name || "Unknown"}</p>
+                                        <p><strong>User ID:</strong> {item.userId?._id || "Unknown"}</p>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
             </div>

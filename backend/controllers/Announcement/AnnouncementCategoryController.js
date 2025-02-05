@@ -8,12 +8,10 @@ exports.createAnnouncementCategory = async (req, res) => {
     try {
         console.log("Incoming Request Data:", { body: req.body, file: req.file });
 
-        // Check if file is provided
         if (!req.file) {
             return res.status(400).json({ success: false, message: 'No image provided.' });
         }
 
-        // Upload the image to Cloudinary
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: 'announcement/category',
             width: 150,

@@ -46,11 +46,11 @@ const membersSchema = new mongoose.Schema({
         ref: 'memberYearBatchCategory',
         required: true,
     },
-    ministryCategory: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ministryCategory',
-        required: true,
-    },
+    // ministryCategory: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'ministryCategory',
+    //     required: true,
+    // },
     image: {
         type: String, 
         default: '',

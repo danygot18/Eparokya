@@ -17,17 +17,18 @@ const PrayerRequestList = () => {
         try {
             setLoading(true);
             const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/admin/getAllPrayerRequest`);
-            const forms = response.data.prayerRequests || []; 
-            setprayerRequestForms(forms);
-            setFilteredForms(forms);
+            console.log("Fetched Prayer Requests:", response.data); // Debugging
+            setprayerRequestForms(response.data.prayerRequests || []);
+            setFilteredForms(response.data.prayerRequests || []);
         } catch (err) {
             setError(err.response?.data?.message || "Error fetching prayer requests forms.");
         } finally {
             setLoading(false);
         }
     };
-    
-    
+
+
+
     const handleCardClick = (prayerId) => {
         navigate(`/admin/prayerRequestDetails/${prayerId}`);
     };
@@ -36,17 +37,20 @@ const PrayerRequestList = () => {
         let filtered = prayerRequestForms;
 
         if (activeFilter !== "All") {
-            filtered = filtered.filter((form) => form.prayerType === activeFilter);
+            filtered = filtered.filter((form) =>
+                form.prayerType.includes(activeFilter)
+            );
         }
 
         if (searchTerm) {
             filtered = filtered.filter((form) =>
-                form.offerorsName?.toLowerCase().includes(searchTerm.toLowerCase())
+                form.offerrorsName?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
         setFilteredForms(filtered);
     };
+
 
     useEffect(() => {
         fetchPrayerRequestForms();
@@ -63,7 +67,7 @@ const PrayerRequestList = () => {
                 <h1 className="prayerRequest-title">Prayer Request Records</h1>
 
                 <div className="prayerRequest-filters">
-                    {["All", "Eternal Repose", "Thanks Giving", "Special Intentions"].map((prayerType) => (
+                    {["All", "Eternal Repose(Patay)", "Thanks Giving(Pasasalamat)", "Special Intentions(Natatanging Kahilingan)"].map((prayerType) => (
                         <button
                             key={prayerType}
                             className={`prayerRequest-filter-button ${activeFilter === prayerType ? "active" : ""}`}
@@ -73,6 +77,7 @@ const PrayerRequestList = () => {
                         </button>
                     ))}
                 </div>
+
 
                 <div className="search-bar">
                     <input
@@ -103,7 +108,7 @@ const PrayerRequestList = () => {
                                 <div className="card-details">
                                     <p>
                                         <strong>Offeror's Full Name:</strong> {item.
-offerrorsName || "N/A"}
+                                            offerrorsName || "N/A"}
                                     </p>
                                     <p>
                                         <strong>Prayer Request Date:</strong>{" "}
@@ -112,18 +117,21 @@ offerrorsName || "N/A"}
                                             : "N/A"}
                                     </p>
                                     <p>
-                                        <strong>Intentions:</strong>
-                                        {item.intentions?.name || "N/A"},
+                                        <strong>Intentions:</strong>{" "}
+                                        {Array.isArray(item.Intentions) && item.Intentions.length > 0
+                                            ? item.Intentions.map((Intentions, i) => (
+                                                <span key={Intentions._id || i}>
+                                                    {Intentions.name || "Unnamed"}
+                                                    {i !== item.Intentions.length - 1 ? ", " : ""}
+                                                </span>
+                                            ))
+                                            : "N/A"}
                                     </p>
-                                    <p>
-                                        <strong>Submitted By:</strong>
-                                    </p>
-                                    <p>
-                                        <strong>Name:</strong> {item.userId?.name || "Unknown"}
-                                    </p>
-                                    <p>
-                                        <strong>User ID:</strong> {item.userId?._id || "Unknown"}
-                                    </p>
+
+                                    <p><strong>Submitted By:</strong></p>
+                                    <p><strong>Name:</strong> {item.userId?.name || "Unknown"}</p>
+                                    <p><strong>User ID:</strong> {item.userId?._id || "Unknown"}</p>
+
                                 </div>
                             </div>
                         ))}

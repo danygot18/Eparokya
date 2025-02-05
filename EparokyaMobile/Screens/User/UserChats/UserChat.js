@@ -55,7 +55,7 @@ const UserChat = ({ route }) => {
     }
     // console.log('API Response:', userId?.email);
 
-
+    
     const sendChat = async (message) => {
         try {
             const data = await axios.post(`${baseURL}/chat/sendMessage`, {
@@ -127,37 +127,64 @@ const UserChat = ({ route }) => {
         );
     };
 
+    // useEffect(() => {
+    //     console.log("Get Chat", getChat())
+    //     getChat();
+
+    //     socket.on("push-message", (data) => {
+    //         console.log("mobile chat data", data)
+    //         const { chat } = data
+    //         setMessages((previousChats) =>
+    //             GiftedChat.append(previousChats, [
+    //                 {
+    //                     _id: chat._id,
+    //                     text: chat.message,
+    //                     createdAt: chat.createdAt,
+    //                     user: {
+    //                         _id: chat.senderId._id,
+    //                         name: chat.sender.name,
+    //                         avatar: chat.sender?.profile?.avatar?.url,
+    
+    //                     }
+    
+    //                 }
+    //             ])
+    //         );
+    //     })
+    //     socket.emit('join', { userId: user._id });
+
+    //     return () => {
+    //         socket.off('push-message')
+    //     }
+
+    // }, []);
     useEffect(() => {
-
         getChat();
-
         socket.on("push-message", (data) => {
-            console.log("mobile chat data", data)
-            const { chat } = data
-            setMessages((previousChats) =>
-                GiftedChat.append(previousChats, [
-                    {
-                        _id: chat._id,
-                        text: chat.message,
-                        createdAt: chat.createdAt,
-                        user: {
-                            _id: chat.sender._id,
-                            name: chat.sender.name,
-                            avatar: chat.sender?.profile?.avatar?.url,
-    
-                        }
-    
-                    }
-                ])
-            );
-        })
+          console.log("mobile chat data", data);
+          const { message } = data;
+          setMessages((previousChats) =>
+            GiftedChat.append(previousChats, [
+              {
+                _id: message._id,
+                text: message.text,
+                createdAt: message.createdAt,
+                user: {
+                  _id: message.user._id,
+                  name: message.user.name,
+                  avatar: message.user.avatar,
+                },
+              },
+            ])
+          );
+        });
+      
         socket.emit('join', { userId: user._id });
-
+      
         return () => {
-            socket.off('push-message')
-        }
-
-    }, []);
+          socket.off('push-message');
+        };
+      }, []);
 
     const renderBubble = (props) => {
         return (

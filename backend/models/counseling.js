@@ -55,7 +55,19 @@ const counselingSchema = new mongoose.Schema({
         },
     ],
 
-    priest: { type: String, required: false },
+    adminRescheduled: {
+        date: { type: Date },
+        reason: { type: String },
+      },
+
+    priest: {
+        name: { type: String, required: false },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },    
+      termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
 });
 
 module.exports = mongoose.model('counseling', counselingSchema);

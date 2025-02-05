@@ -30,14 +30,19 @@ const MinistryCategory = () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllMinistryCategories`, {
+            const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/ministryCategory/getAllMinistryCategories`, {
                 withCredentials: true,
             });
-            setCategories(response.data);
+    
+            console.log("Fetched categories:", response.data);
+    
+            // Ensure we're extracting the array properly
+            setCategories(response.data.categories || []); 
         } catch (error) {
             toast.error('Failed to load ministry categories.');
         }
     };
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -54,14 +59,14 @@ const MinistryCategory = () => {
 
             if (editMode) {
                 await axios.put(
-                    `${process.env.REACT_APP_API}/api/v1/updateMinistryCategory/${editId}`,
+                    `${process.env.REACT_APP_API}/api/v1/ministryCategory/updateMinistryCategory/${editId}`,
                     formData,
                     { withCredentials: true }
                 );
                 toast.success('Ministry category updated successfully.');
             } else {
                 await axios.post(
-                    `${process.env.REACT_APP_API}/api/v1/ministryCategory/create`,
+                    `${process.env.REACT_APP_API}/api/v1/ministryCategory/ministryCategory/create`,
                     formData,
                     { withCredentials: true }
                 );
@@ -90,7 +95,7 @@ const MinistryCategory = () => {
         }
 
         try {
-            await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteMinistryCategory/${ministryId}`, {
+            await axios.delete(`${process.env.REACT_APP_API}/api/v1/ministryCategory/deleteMinistryCategory/${ministryId}`, {
                 withCredentials: true,
             });
             toast.success('Ministry category deleted successfully.');

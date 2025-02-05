@@ -25,7 +25,7 @@ router.post(
     { name: 'PermitFromtheParishOftheBride', maxCount: 1 },
     { name: 'ChildBirthCertificate', maxCount: 1 } 
   ]),
-  WeddingFormController.submitWeddingForm
+  isAuthenticatedUser, WeddingFormController.submitWeddingForm
 );
 
 
@@ -34,18 +34,29 @@ router.post(
 //     '/submitWeddingForm', upload.single('image'),  WeddingFormController.submitWeddingForm
 //   );
 
-router.get('/getAllWeddings', isAuthenticatedUser, isAuthorized("admin"), WeddingFormController.getAllWeddings);
+router.get('/getAllWeddings', WeddingFormController.getAllWeddings);
 router.get('/confirmedWedding',  WeddingFormController.getConfirmedWeddings);
 router.get('/stats/weddingsPerMonth', isAuthenticatedUser, WeddingFormController.getWeddingsPerMonth);
 router.get('/stats/weddingStatusCount', isAuthenticatedUser, WeddingFormController.getWeddingStatusCounts);
 
+router.get('/getWeddingChecklist/:weddingId', WeddingFormController.getWeddingChecklist);
+router.put('/updateWeddingChecklist/:weddingId', WeddingFormController.updateWeddingChecklist);
+
 router.get('/weddingDate',  WeddingFormController.getAvailableDates);
 router.post('/book/date',  WeddingFormController.bookDate);
-router.post('/admin/available-dates', isAuthenticatedUser, isAuthorized, WeddingFormController.addAvailableDate);
+router.put('/updateWeddingDate/:weddingId', WeddingFormController.updateWeddingDate);
+router.post('/:weddingId/commentWedding',  WeddingFormController.addComment);
+router.post('/updateAdditionalReq/:weddingId',  WeddingFormController.updateAdditionalReq);
 
-router.get('/getWeddingById/:weddingId', isAuthenticatedUser, isAuthorized("admin"), WeddingFormController.getWeddingById);
-router.post('/:weddingId/confirm',  WeddingFormController.confirmWedding);
-router.post('/:weddingId/decline', WeddingFormController.declineWedding);
+router.get('/getAllUserSubmittedWedding', isAuthenticatedUser, WeddingFormController.getMySubmittedForms);
+router.get('/getWeddingForm/:formId', isAuthenticatedUser, WeddingFormController.getFuneralFormById);
+
+
+router.post('/admin/available-dates', isAuthenticatedUser, isAuthorized, WeddingFormController.addAvailableDate);
+router.get('/getWeddingById/:weddingId',  WeddingFormController.getWeddingById);
+
+router.post('/:weddingId/confirmWedding',  WeddingFormController.confirmWedding);
+router.post('/:weddingId/cancelWedding',isAuthenticatedUser, WeddingFormController.declineWedding);
 router.delete('/admin/available-dates/:weddingId', isAuthenticatedUser, isAuthorized, WeddingFormController.removeAvailableDate);
 
 //wedding dates

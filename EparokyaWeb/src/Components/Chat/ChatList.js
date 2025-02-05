@@ -42,7 +42,7 @@ const ChatList = () => {
           {loading ? (
             <p className="chat-loading">Loading chats...</p>
           ) : chats.length > 0 ? (
-            <div className="chat-list">
+            <div className="chat-lists">
               {chats.map((chat) => (
                 <div
                   key={chat.id}

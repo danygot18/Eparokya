@@ -21,7 +21,7 @@ router.get('/getAnnouncement/:announcementId', announcementController.getAnnounc
 router.put('/updateAnnouncement/:announcementId', announcementController.updateAnnouncement );
 router.delete('/deleteAnnouncement/:announcementId', announcementController.deleteAnnouncement);
 
-//router.put('/likeAnnouncement/:announcementId', isAuthenticated, announcementController.likeAnnouncement);
-//router.post('/unlikeAnnouncement/announcementId', announcementController.unlikeAnnouncement);
+router.put('/likeAnnouncement/:announcementId', isAuthenticatedUser, announcementController.likeAnnouncement);
+router.put('/unlikeAnnouncement/announcementId', isAuthenticatedUser, announcementController.unlikeAnnouncement);
 
 module.exports = router;
