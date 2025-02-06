@@ -7,7 +7,7 @@ import '../Layout/styles/style.css'; // Custom CSS for exact layout
 
 const Profile = () => {
   const { user, loading } = useSelector((state) => state.auth);
-
+  
   return (
     <Fragment>
       {loading ? (

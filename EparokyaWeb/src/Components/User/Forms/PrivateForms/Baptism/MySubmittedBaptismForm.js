@@ -45,7 +45,10 @@ const MySubmittedBaptismForm = () => {
 
                     if (response.data.baptismDate) {
                         setUpdatedBaptismDate(response.data.baptismDate);
-                        console.log("Updated Baptism Date:", response.data.adminRescheduled);
+                        // console.log("Updated Baptism Date:", response.data.adminRescheduled);
+                    }
+                    if (response.data.adminNotes && response.data.adminNotes.length > 0) {
+                        const latestAdminNote = response.data.adminNotes[response.data.adminNotes.length - 1];
                     }
                 }
             } catch (err) {
@@ -178,56 +181,25 @@ const MySubmittedBaptismForm = () => {
                             </div>
                             <div className="details-box">
                                 <h2>Additional Notes</h2>
-                                {baptismDetails?.adminNotes?.priest ? (
-                                    <div className="admin-comment">
-                                        <p>
-                                            <strong>Priest:</strong> {baptismDetails.adminNotes.priest}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <p>No priest.</p>
-                                )}
+                                {baptismDetails?.adminNotes?.length > 0 ? (
+                                    (() => {
+                                        const latestAdminNote = baptismDetails.adminNotes[baptismDetails.adminNotes.length - 1]; // Get the latest entry
 
-                                {baptismDetails?.adminNotes?.recordedBy ? (
-                                    <div className="admin-comment">
-                                        <p>
-                                            <strong>Recorded By:</strong> {baptismDetails.adminNotes.recordedBy}
-                                        </p>
-                                    </div>
+                                        return (
+                                            <div className="admin-comment">
+                                                <p><strong>Priest:</strong> {latestAdminNote.priest || "No priest"}</p>
+                                                <p><strong>Recorded By:</strong> {latestAdminNote.recordedBy || "No record"}</p>
+                                                <p><strong>Book Number:</strong> {latestAdminNote.bookNumber || "No book number"}</p>
+                                                <p><strong>Page Number:</strong> {latestAdminNote.pageNumber || "No page number"}</p>
+                                                <p><strong>Line Number:</strong> {latestAdminNote.lineNumber || "No line number"}</p>
+                                            </div>
+                                        );
+                                    })()
                                 ) : (
-                                    <p>No record.</p>
-                                )}
-
-                                {baptismDetails?.adminNotes?.bookNumber ? (
-                                    <div className="admin-comment">
-                                        <p>
-                                            <strong>Book Number:</strong> {baptismDetails.adminNotes.bookNumber}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <p>No book number.</p>
-                                )}
-
-                                {baptismDetails?.adminNotes?.pageNumber ? (
-                                    <div className="admin-comment">
-                                        <p>
-                                            <strong>Page Number:</strong> {baptismDetails.adminNotes.pageNumber}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <p>No page number.</p>
-                                )}
-
-                                {baptismDetails?.adminNotes?.lineNumber ? (
-                                    <div className="admin-comment">
-                                        <p>
-                                            <strong>Line Number:</strong> {baptismDetails.adminNotes.lineNumber}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <p>No line number.</p>
+                                    <p>No admin notes available.</p>
                                 )}
                             </div>
+
                             {/* for Rescheduling */}
                             <div className="wedding-date-box">
                                 <h3>Updated Baptism Date</h3>
@@ -244,7 +216,7 @@ const MySubmittedBaptismForm = () => {
                                     </div>
                                 )}
                             </div>
-                            
+
 
                         </div>
                     </div>
