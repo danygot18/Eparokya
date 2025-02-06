@@ -16,16 +16,16 @@ const WeddingForm = () => {
         groomBirthDate: "",
         groomOccupation: "",
         groomReligion: "",
-        GroomFather: "",
-        GroomMother: "",
+        groomFather: "",
+        groomMother: "",
         brideName: "",
         brideAddress: { street: "", zip: "", city: "" },
         bridePhone: "",
         brideBirthDate: "",
         brideOccupation: "",
         brideReligion: "",
-        BrideFather: "",
-        BrideMother: "",
+        brideFather: "",
+        brideMother: "",
         Ninong: [
             { name: "", address: { street: "", zip: "", city: "" } }
         ],
@@ -205,11 +205,15 @@ const WeddingForm = () => {
                 groomAddress: "",
                 brideName: "",
                 brideAddress: "",
+                groomFather: "",
+                groomMother: "",
+                brideFather: "",
+                brideMother: "",
                 Ninong: [],
                 Ninang: [],
                 images: {}
             });
-
+            console.log("Form data after submit:", formData);
         } catch (error) {
             console.error("Error submitting wedding form:", error.response ? error.response.data : error.message);
             toast.error("Failed to submit wedding form. Please try again.");
@@ -340,8 +344,8 @@ const WeddingForm = () => {
                     <Form.Label>Father</Form.Label>
                     <Form.Control
                         type="text"
-                        name="GroomFather"
-                        value={formData.GroomFather}
+                        name="groomFather"
+                        value={formData.groomFather}
                         onChange={handleChange}
                         required
                     />
@@ -351,8 +355,8 @@ const WeddingForm = () => {
                     <Form.Label>Mother</Form.Label>
                     <Form.Control
                         type="text"
-                        name="GroomMother"
-                        value={formData.GroomMother}
+                        name="groomMother"
+                        value={formData.groomMother}
                         onChange={handleChange}
                         required
                     />
@@ -444,8 +448,8 @@ const WeddingForm = () => {
                     <Form.Label>Father</Form.Label>
                     <Form.Control
                         type="text"
-                        name="BrideFather"
-                        value={formData.BrideFather}
+                        name="brideFather"
+                        value={formData.brideFather}
                         onChange={handleChange}
                         required
                     />
@@ -455,8 +459,8 @@ const WeddingForm = () => {
                     <Form.Label>Mother</Form.Label>
                     <Form.Control
                         type="text"
-                        name="BrideMother"
-                        value={formData.BrideMother}
+                        name="brideMother"
+                        value={formData.brideMother}
                         onChange={handleChange}
                         required
                     />

@@ -27,6 +27,7 @@ const BaptismChecklist = ({ baptismId }) => {
           if (res.data.checklist) {
             setChecklist(res.data.checklist);
           }
+          console.log('Checklist:', res.data.checklist);
         })
         .catch((err) => {
           console.error('Error fetching checklist:', err);

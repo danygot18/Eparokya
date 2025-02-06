@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { authMiddleware } = require("../../middleware/auth");
-const { isAuthenticatedUser, authorizeAdmin } = require('../../middleware/auth');
+// const { authMiddleware } = require("../../middleware/auth");
+const { isAuthenticatedUser, isAuthorized } = require('../../middleware/auth');
 const PrayerWallController = require("../../controllers/Prayers/prayerWallController");
 
 router.post("/submitPrayer", isAuthenticatedUser, PrayerWallController.submitPrayerRequest);

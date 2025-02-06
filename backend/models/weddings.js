@@ -24,8 +24,8 @@ const weddingSchema = mongoose.Schema({
   groomBirthDate: { type: Date, required: true },
   groomOccupation: { type: String, required: true },
   groomReligion: { type: String, required: true },
-  GroomFather: { type: String },
-  GroomMother: { type: String },
+  groomFather: { type: String, required: true },
+  groomMother: { type: String, required: true },
 
   brideName: { type: String, required: true },
   brideAddress: {
@@ -37,8 +37,8 @@ const weddingSchema = mongoose.Schema({
   brideBirthDate: { type: Date, required: true },
   brideOccupation: { type: String, required: true },
   brideReligion: { type: String, required: true },
-  BrideFather: { type: String },
-  BrideMother: { type: String },
+  brideFather: { type: String, required: true },
+  brideMother: { type: String, required: true },
 
   Ninong: [
     {

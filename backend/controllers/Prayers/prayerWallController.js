@@ -223,7 +223,10 @@ exports.getMySubmittedPrayers = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const prayers = await PrayerWall.find({ userId: userId, isDeleted: false })
+    const prayers = await PrayerWall.find({
+      userId: userId,
+      // isDeleted: false 
+    })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -262,6 +265,8 @@ exports.getMySubmittedPrayers = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch submitted prayers." });
   }
 };
+
+
 
 // softDelete
 exports.softDeletePrayer = async (req, res) => {

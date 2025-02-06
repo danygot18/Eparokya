@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import GuestSideBar from '../../GuestSideBar';
+import "./SubmittedFormsNavigation.css";
 
 const SubmittedFormsNavigation = () => {
     const formCategories = [
@@ -26,27 +27,23 @@ const SubmittedFormsNavigation = () => {
     ];
 
     return (
-        <div className="flex min-h-screen p-4 gap-6">
+        <div className="forms-container">
             {/* Sidebar */}
-            <div className="w-1/4 min-w-[250px]">
+            <div className="forms-sidebar">
                 <GuestSideBar />
             </div>
 
-            {/* Forms Navigation */}
-            <div className="flex-1">
-                <div className="bg-white p-6 shadow-md rounded-lg border w-full">
-                    <h2 className="text-xl font-bold mb-4">Submitted Forms</h2>
+            {/* Main Content */}
+            <div className="forms-content">
+                <div className="forms-box">
+                    <h2 className="forms-title">Submitted Forms</h2>
                     {formCategories.map((category, index) => (
-                        <div key={index} className="mb-6">
-                            <h3 className="text-lg font-semibold mb-2">{category.title}</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div key={index} className="forms-category">
+                            <h3>{category.title}</h3>
+                            <div className="forms-list">
                                 {category.forms.map((form, formIndex) => (
-                                    <Link 
-                                        key={formIndex} 
-                                        to={form.path} 
-                                        className="block p-4 border rounded-lg shadow-md hover:shadow-lg transition bg-gray-100 hover:bg-gray-200"
-                                    >
-                                        <span className="text-blue-600 font-medium">{form.name}</span>
+                                    <Link key={formIndex} to={form.path} className="form-card">
+                                        {form.name}
                                     </Link>
                                 ))}
                             </div>
@@ -55,6 +52,7 @@ const SubmittedFormsNavigation = () => {
                 </div>
             </div>
         </div>
+
     );
 };
 

@@ -277,12 +277,12 @@ const BaptismDetails = () => {
                         {['birthCertificate', 'marriageCertificate'].map((doc, index) => (
                             <div key={index} className="grid-row">
                                 <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
-                                {baptismDetails?.docs?.[doc]?.url ? (
+                                {baptismDetails?.Docs?.[doc]?.url ? (
                                     <img
-                                        src={baptismDetails.docs[doc].url}
+                                        src={baptismDetails.Docs[doc].url}
                                         alt={doc}
                                         style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
-                                        onClick={() => openModal(baptismDetails.docs[doc].url)}
+                                        onClick={() => openModal(baptismDetails.Docs[doc].url)}
                                     />
                                 ) : (
                                     "N/A"

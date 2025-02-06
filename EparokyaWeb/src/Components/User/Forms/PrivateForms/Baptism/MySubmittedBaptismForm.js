@@ -6,6 +6,7 @@ import "../../../../Layout/styles/style.css";
 import GuestSideBar from "../../../../GuestSideBar";
 import { useParams } from "react-router-dom";
 import UserBaptismChecklist from "./UserBaptismChecklist";
+import "./MySubmittedBaptismForm.css"
 
 Modal.setAppElement('#root');
 
@@ -36,14 +37,15 @@ const MySubmittedBaptismForm = () => {
                     { withCredentials: true }
                 );
                 console.log("API Response:", response.data);
-    
+
                 if (response.data) {
                     setBaptismDetails(response.data);
                     setAdminNotes(response.data.adminNotes);
                     setComments(response.data.comments || []);
-    
+
                     if (response.data.baptismDate) {
                         setUpdatedBaptismDate(response.data.baptismDate);
+                        console.log("Updated Baptism Date:", response.data.adminRescheduled);
                     }
                 }
             } catch (err) {
@@ -53,7 +55,7 @@ const MySubmittedBaptismForm = () => {
                 setLoading(false);
             }
         };
-    
+
         if (formId) fetchBaptismDetails();
     }, [formId]);
 
@@ -104,238 +106,198 @@ const MySubmittedBaptismForm = () => {
     return (
         <div className="baptism-details-page">
             <GuestSideBar />
-            <div className="baptism-details">
+            <div className="baptism-details-container">
                 <h2>My Submitted Baptism Form</h2>
-                <div>
-                    <p>User: {baptismDetails?.userId?.name || "N/A"}</p>
 
-                    <p>
-                        Baptism Date:{" "}
-                        {baptismDetails?.baptismDate
-                            ? new Date(baptismDetails.baptismDate).toLocaleDateString()
-                            : "N/A"}
-                    </p>
-                    <p>Baptism Time: {baptismDetails?.baptismTime || "N/A"}</p>
-                    <p>Contact Number: {baptismDetails?.phone || "N/A"}</p>
+                {/* Two Containers */}
+                <div className="two-container-layout">
+                    {/* Left Container */}
+                    <div className="left-container">
+                        <div className="details-section">
+                            <h3>User Information</h3>
+                            <p><strong>User:</strong> {baptismDetails?.userId?.name || "N/A"}</p>
+                            <p><strong>Contact Number:</strong> {baptismDetails?.phone || "N/A"}</p>
+                        </div>
+                        <div className="details-section">
+                            <h3>Baptism Information</h3>
+                            <p><strong>Baptism Date:</strong> {baptismDetails?.baptismDate ? new Date(baptismDetails.baptismDate).toLocaleDateString() : "N/A"}</p>
+                            <p><strong>Baptism Time:</strong> {baptismDetails?.baptismTime || "N/A"}</p>
+                        </div>
+                        <div className="details-section">
+                            <h3>Child Information</h3>
+                            <p><strong>Child Name:</strong> {baptismDetails?.child?.fullName || "N/A"}</p>
+                            <p><strong>Birthdate:</strong> {baptismDetails?.child?.dateOfBirth ? new Date(baptismDetails.child.dateOfBirth).toLocaleDateString() : "N/A"}</p>
+                            <p><strong>Sex:</strong> {baptismDetails?.child?.gender || "N/A"}</p>
+                        </div>
+                    </div>
 
-                    <p>Child Name: {baptismDetails?.child?.fullName || "N/A"}</p>
-                    <p>
-                        Birthdate:{" "}
-                        {baptismDetails?.child?.dateOfBirth
-                            ? new Date(baptismDetails.child.dateOfBirth).toLocaleDateString()
-                            : "N/A"}
-                    </p>
-                    <p>Sex: {baptismDetails?.child?.gender || "N/A"}</p>
+                    {/* Right Container */}
+                    <div className="right-container">
+                        <div className="details-section">
+                            <h3>Parents Information</h3>
+                            <p><strong>Father:</strong> {baptismDetails?.parents?.fatherFullName || "N/A"}</p>
+                            <p><strong>Father's Place of Birth:</strong> {baptismDetails?.parents?.placeOfFathersBirth || "N/A"}</p>
+                            <p><strong>Mother:</strong> {baptismDetails?.parents?.motherFullName || "N/A"}</p>
+                            <p><strong>Mother's Place of Birth:</strong> {baptismDetails?.parents?.placeOfMothersBirth || "N/A"}</p>
+                            <p><strong>Address:</strong> {baptismDetails?.parents?.address || "N/A"}</p>
+                            <p><strong>Marriage Status:</strong> {baptismDetails?.parents?.marriageStatus || "N/A"}</p>
+                        </div>
+                        <div className="details-section">
+                            <h3>Godparents Information</h3>
+                            <p><strong>Primary Ninong:</strong> {baptismDetails?.ninong?.name || "N/A"}</p>
+                            <p><strong>Primary Ninong Address:</strong> {baptismDetails?.ninong?.address || "N/A"}</p>
+                            <p><strong>Primary Ninong Religion:</strong> {baptismDetails?.ninong?.religion || "N/A"}</p>
+                            <p><strong>Primary Ninang:</strong> {baptismDetails?.ninang?.name || "N/A"}</p>
+                            <p><strong>Primary Ninang Address:</strong> {baptismDetails?.ninang?.address || "N/A"}</p>
+                            <p><strong>Primary Ninang Religion:</strong> {baptismDetails?.ninang?.religion || "N/A"}</p>
+                            <p><strong>Ninong:</strong> {baptismDetails?.NinongGodparents?.map((gp) => gp.name).join(", ") || "N/A"}</p>
+                            <p><strong>Ninang:</strong> {baptismDetails?.NinangGodparents?.map((gp) => gp.name).join(", ") || "N/A"}</p>
+                        </div>
 
-                    <p>Father: {baptismDetails?.parents?.fatherFullName || "N/A"}</p>
-                    <p>Father's Place of Birth: {baptismDetails?.parents?.placeOfFathersBirth || "N/A"}</p>
-
-                    <p>Mother: {baptismDetails?.parents?.motherFullName || "N/A"}</p>
-                    <p>Mother's Place of Birth: {baptismDetails?.parents?.placeOfMothersBirth || "N/A"}</p>
-
-                    <p>Address: {baptismDetails?.parents?.address || "N/A"}</p>
-                    <p>Marriage Status: {baptismDetails?.parents?.marriageStatus || "N/A"}</p>
-
-                    <p>Primary Ninong: {baptismDetails?.ninong?.name || "N/A"}</p>
-                    <p>Primary Ninong Address: {baptismDetails?.ninong?.address || "N/A"}</p>
-                    <p>Primary Ninong Religion: {baptismDetails?.ninong?.religion || "N/A"}</p>
-
-                    <p>Primary Ninang: {baptismDetails?.ninang?.name || "N/A"}</p>
-                    <p>Primary Ninang Address: {baptismDetails?.ninang?.address || "N/A"}</p>
-                    <p>Primary Ninang Religion: {baptismDetails?.ninang?.religion || "N/A"}</p>
-
-                    <p>
-                        Ninong:{" "}
-                        {baptismDetails?.NinongGodparents?.map((gp) => gp.name).join(", ") || "N/A"}
-                    </p>
-                    <p>
-                        Ninang:{" "}
-                        {baptismDetails?.NinangGodparents?.map((gp) => gp.name).join(", ") || "N/A"}
-                    </p>
-
-                    <div className="details-box">
-                        <h3>Baptismal Documents</h3>
-                        {['birthCertificate', 'marriageCertificate'].map((doc, index) => (
-                            <div key={index} className="grid-row">
-                                <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
-                                {baptismDetails?.docs?.[doc]?.url ? (
-                                    <img
-                                        src={baptismDetails.docs[doc].url}
-                                        alt={doc}
-                                        style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
-                                        onClick={() => openModal(baptismDetails.docs[doc].url)}
-                                    />
+                    </div>
+                    <div className="third-container ">
+                        <div className="details-section-container">
+                            {/* Add other sections here */}
+                            <div className="details-box">
+                                <h3>Baptismal Documents</h3>
+                                {['birthCertificate', 'marriageCertificate'].map((doc, index) => (
+                                    <div key={index} className="grid-row">
+                                        <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
+                                        {baptismDetails?.Docs?.[doc]?.url ? (
+                                            <img
+                                                src={baptismDetails.Docs[doc].url}
+                                                alt={doc}
+                                                style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
+                                                onClick={() => openModal(baptismDetails.Docs.url)}
+                                            />
+                                        ) : (
+                                            "N/A"
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="details-box">
+                                <h2>Additional Notes</h2>
+                                {baptismDetails?.adminNotes?.priest ? (
+                                    <div className="admin-comment">
+                                        <p>
+                                            <strong>Priest:</strong> {baptismDetails.adminNotes.priest}
+                                        </p>
+                                    </div>
                                 ) : (
-                                    "N/A"
+                                    <p>No priest.</p>
+                                )}
+
+                                {baptismDetails?.adminNotes?.recordedBy ? (
+                                    <div className="admin-comment">
+                                        <p>
+                                            <strong>Recorded By:</strong> {baptismDetails.adminNotes.recordedBy}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p>No record.</p>
+                                )}
+
+                                {baptismDetails?.adminNotes?.bookNumber ? (
+                                    <div className="admin-comment">
+                                        <p>
+                                            <strong>Book Number:</strong> {baptismDetails.adminNotes.bookNumber}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p>No book number.</p>
+                                )}
+
+                                {baptismDetails?.adminNotes?.pageNumber ? (
+                                    <div className="admin-comment">
+                                        <p>
+                                            <strong>Page Number:</strong> {baptismDetails.adminNotes.pageNumber}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p>No page number.</p>
+                                )}
+
+                                {baptismDetails?.adminNotes?.lineNumber ? (
+                                    <div className="admin-comment">
+                                        <p>
+                                            <strong>Line Number:</strong> {baptismDetails.adminNotes.lineNumber}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p>No line number.</p>
                                 )}
                             </div>
-                        ))}
-                    </div>
+                            {/* for Rescheduling */}
+                            <div className="wedding-date-box">
+                                <h3>Updated Baptism Date</h3>
+                                <p className="date">
+                                    {baptismDetails?.adminRescheduled
+                                        ? new Date(baptismDetails.adminRescheduled.date).toLocaleDateString()
+                                        : "N/A"}
+                                </p>
 
-                    {/* Modal with Zoom and Drag Functionality */}
-                    <Modal
-                        isOpen={isModalOpen}
-                        onRequestClose={closeModal}
-                        contentLabel="Image Modal"
-                        style={{
-                            overlay: {
-                                backgroundColor: "rgba(0, 0, 0, 0.75)",
-                            },
-                            content: {
-                                maxWidth: "500px",
-                                margin: "auto",
-                                padding: "20px",
-                                textAlign: "center",
-                            },
-                        }}
-                    >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <button onClick={closeModal} style={{ cursor: "pointer", padding: "5px 10px" }}>
-                                Close
-                            </button>
-                            <div>
-                                <button
-                                    onClick={() => setZoom((prevZoom) => Math.min(prevZoom + 0.1, 3))}
-                                    style={{ margin: "0 5px", cursor: "pointer", padding: "5px 10px" }}
-                                >
-                                    Zoom In
-                                </button>
-                                <button
-                                    onClick={() => setZoom((prevZoom) => Math.max(prevZoom - 0.1, 1))}
-                                    style={{ margin: "0 5px", cursor: "pointer", padding: "5px 10px" }}
-                                >
-                                    Zoom Out
-                                </button>
+                                {baptismDetails?.adminRescheduled?.reason && (
+                                    <div className="reschedule-reason">
+                                        <h3>Reason for Rescheduling</h3>
+                                        <p>{baptismDetails.adminRescheduled.reason}</p>
+                                    </div>
+                                )}
                             </div>
+                            
+
                         </div>
-                        <div
-                            style={{
-                                overflow: "hidden",
-                                position: "relative",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                width: "100%",
-                                height: "80vh",
-                                cursor: isDragging ? "grabbing" : "grab",
-                            }}
-                            onMouseDown={(e) => handleMouseDown(e)}
-                            onMouseMove={(e) => handleMouseMove(e)}
-                            onMouseUp={handleMouseUp}
-                            onMouseLeave={handleMouseUp}
-                        >
-                            <img
-                                src={selectedImage}
-                                alt="Certificate Preview"
-                                style={{
-                                    transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
-                                    transition: isDragging ? "none" : "transform 0.3s ease",
-                                    maxWidth: "100%",
-                                    maxHeight: "100%",
-                                    objectFit: "contain",
-                                    cursor: isDragging ? "grabbing" : "grab",
-                                }}
-                                draggable={false}
-                            />
-                        </div>
-                    </Modal>
-
-                    <div className="admin-comments-section">
-                        <h3>Admin Comments</h3>
-                        {baptismDetails?.comments && Array.isArray(baptismDetails.comments) && baptismDetails.comments.length > 0 ? ( 
-                            baptismDetails.comments.map((comment, index) => (
-                                <div key={index} className="admin-comment">
-                                    <p className="comment-date">
-                                        {new Date(comment?.createdAt).toLocaleDateString()}
-                                    </p>
-                                    <p><strong>Comment:</strong> {comment?.selectedComment || "N/A"}</p>
-                                    <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No admin comments yet.</p>
-                        )}
-                    </div>
-
-                    
-                    {/* Display of Additional Notes */}
-                    <div className="admin-comments-section">
-                        <h2>Additional Notes</h2>
-                        {baptismDetails?.adminNotes?.priest ? (
-                            <div className="admin-comment">
-                                <p>
-                                    <strong>Priest:</strong> {baptismDetails.adminNotes.priest}
-                                </p>
-                            </div>
-                        ) : (
-                            <p>No priest.</p>
-                        )}
-
-                        {baptismDetails?.adminNotes?.recordedBy ? (
-                            <div className="admin-comment">
-                                <p>
-                                    <strong>Recorded By:</strong> {baptismDetails.adminNotes.recordedBy}
-                                </p>
-                            </div>
-                        ) : (
-                            <p>No record.</p>
-                        )}
-
-                        {baptismDetails?.adminNotes?.bookNumber ? (
-                            <div className="admin-comment">
-                                <p>
-                                    <strong>Book Number:</strong> {baptismDetails.adminNotes.bookNumber}
-                                </p>
-                            </div>
-                        ) : (
-                            <p>No book number.</p>
-                        )}
-
-                        {baptismDetails?.adminNotes?.pageNumber ? (
-                            <div className="admin-comment">
-                                <p>
-                                    <strong>Page Number:</strong> {baptismDetails.adminNotes.pageNumber}
-                                </p>
-                            </div>
-                        ) : (
-                            <p>No page number.</p>
-                        )}
-
-                        {baptismDetails?.adminNotes?.lineNumber ? (
-                            <div className="admin-comment">
-                                <p>
-                                    <strong>Line Number:</strong> {baptismDetails.adminNotes.lineNumber}
-                                </p>
-                            </div>
-                        ) : (
-                            <p>No line number.</p>
-                        )}
-                    </div>
-
-                    {/* for Rescheduling */}
-                    <div className="wedding-date-box">
-                        <h3>Updated Baptism Date</h3>
-                        <p className="date">
-                            {baptismDetails?.updatedBaptismDate
-                                ? new Date(baptismDetails.updatedBaptismDate).toLocaleDateString()
-                                : "N/A"}
-                        </p>
-
-                        {baptismDetails?.adminRescheduled?.reason && (
-                            <div className="reschedule-reason">
-                                <h3>Reason for Rescheduling</h3>
-                                <p>{baptismDetails.adminRescheduled.reason}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="actions">
-                        <button onClick={handleCancel}>Cancel Baptism Request</button>
                     </div>
                 </div>
-            </div>
-            <div className="wedding-checklist-container">
-                <UserBaptismChecklist baptismId={baptismId} />
+
+                <div className="actions">
+                    <button onClick={handleCancel} className="cancel-button">Cancel Baptism Request</button>
+                </div>
+                <div className="baptism-checklist-container">
+                    <UserBaptismChecklist baptismId={baptismId} />
+                </div>
+                <Modal
+                    isOpen={isModalOpen}
+                    onRequestClose={closeModal}
+                    contentLabel="Image Modal"
+                    style={{
+                        overlay: {
+                            backgroundColor: "rgba(0, 0, 0, 0.75)",
+                        },
+                        content: {
+                            maxWidth: "500px",
+                            margin: "auto",
+                            padding: "20px",
+                            textAlign: "center",
+                        },
+                    }}
+                >
+                    <div className="modal-header">
+                        <button onClick={closeModal} className="modal-close-button">Close</button>
+                        <div className="zoom-controls">
+                            <button onClick={() => setZoom((prevZoom) => Math.min(prevZoom + 0.1, 3))} className="zoom-button">Zoom In</button>
+                            <button onClick={() => setZoom((prevZoom) => Math.max(prevZoom - 0.1, 1))} className="zoom-button">Zoom Out</button>
+                        </div>
+                    </div>
+                    <div
+                        className="modal-image-container"
+                        onMouseDown={(e) => handleMouseDown(e)}
+                        onMouseMove={(e) => handleMouseMove(e)}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseUp}
+                    >
+                        <img
+                            src={selectedImage}
+                            alt="Certificate Preview"
+                            className="modal-image"
+                            style={{
+                                transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
+                                transition: isDragging ? "none" : "transform 0.3s ease",
+                            }}
+                            draggable={false}
+                        />
+                    </div>
+                </Modal>
             </div>
         </div>
     );

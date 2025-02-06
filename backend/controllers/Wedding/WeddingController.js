@@ -10,6 +10,97 @@ const uploadToCloudinary = async (file, folder) => {
   return { public_id: result.public_id, url: result.secure_url };
 };
 
+// exports.submitWeddingForm = async (req, res) => {
+//   try {
+//     const {
+//       dateOfApplication,
+//       weddingDate,
+//       weddingTime,
+//       groomName,
+//       groomAddress,
+//       brideName,
+//       brideAddress,
+//       Ninong,
+//       Ninang,
+//       brideReligion,
+//       brideOccupation,
+//       brideBirthDate,
+//       bridePhone,
+//       groomReligion,
+//       groomOccupation,
+//       groomBirthDate,
+//       groomPhone,
+//     } = req.body;
+//     const images = {};
+//     const requiredImageFields = [
+//       "GroomNewBaptismalCertificate",
+//       "GroomNewConfirmationCertificate",
+//       "BrideNewBaptismalCertificate",
+//       "GroomMarriageLicense",
+//       "GroomMarriageBans",
+//       "GroomOrigCeNoMar",
+//       "GroomOrigPSA",
+//       "BrideNewBaptismalCertificate",
+//       "BrideNewConfirmationCertificate",
+//       "BrideMarriageLicense",
+//       "BrideMarriageBans",
+//       "BrideOrigCeNoMar",
+//       "BrideOrigPSA",
+//       "PermitFromtheParishOftheBride",
+//     ];
+//     console.log('Received files:', req.files);
+//     for (const field of requiredImageFields) {
+//       if (req.files[field]) {
+//         const uploadedImage = await uploadToCloudinary(req.files[field][0], "wedding/docs");
+//         images[field] = {
+//           public_id: uploadedImage.public_id, // Save public_id
+//           url: uploadedImage.url, // Save URL
+//         };
+//       } else {
+//         return res.status(400).json({ message: `Missing required image: ${field}` });
+//       }
+//     }
+//     const groomAddressObject = groomAddress ? JSON.parse(groomAddress) : {};
+//     const brideAddressObject = brideAddress ? JSON.parse(brideAddress) : {};
+//     const ninongArray = Ninong ? JSON.parse(Ninong) : [];
+//     const ninangArray = Ninang ? JSON.parse(Ninang) : [];
+
+//     const userId = req.user._id;
+    
+//     const newWeddingForm = new Wedding({
+//       dateOfApplication,
+//       weddingDate,
+//       weddingTime,
+//       groomName,
+//       groomAddress: groomAddressObject,
+//       brideName,
+//       brideAddress: brideAddressObject,
+//       Ninong: ninongArray,
+//       Ninang: ninangArray,
+//       brideReligion,
+//       brideOccupation,
+//       brideBirthDate,
+//       bridePhone,
+//       groomReligion,
+//       groomOccupation,
+//       groomBirthDate,
+//       groomPhone,
+//       ...images,
+//       userId,
+//     });
+
+//     await newWeddingForm.save();
+
+//     res.status(201).json({
+//       message: "Wedding form submitted successfully!",
+//       weddingForm: newWeddingForm,
+//     });
+//   } catch (error) {
+//     console.error("Error submitting wedding form:", error);
+//     res.status(500).json({ message: "An error occurred during submission.", error: error.message });
+//   }
+// };
+
 exports.submitWeddingForm = async (req, res) => {
   try {
     const {
@@ -30,7 +121,13 @@ exports.submitWeddingForm = async (req, res) => {
       groomOccupation,
       groomBirthDate,
       groomPhone,
+      groomFather, 
+      groomMother, 
+      brideFather, 
+      brideMother  
     } = req.body;
+
+    // Process image uploads
     const images = {};
     const requiredImageFields = [
       "GroomNewBaptismalCertificate",
@@ -48,25 +145,30 @@ exports.submitWeddingForm = async (req, res) => {
       "BrideOrigPSA",
       "PermitFromtheParishOftheBride",
     ];
-    console.log('Received files:', req.files);
+
+    console.log("Received files:", req.files);
     for (const field of requiredImageFields) {
       if (req.files[field]) {
         const uploadedImage = await uploadToCloudinary(req.files[field][0], "wedding/docs");
         images[field] = {
-          public_id: uploadedImage.public_id, // Save public_id
-          url: uploadedImage.url, // Save URL
+          public_id: uploadedImage.public_id,
+          url: uploadedImage.url,
         };
       } else {
         return res.status(400).json({ message: `Missing required image: ${field}` });
       }
     }
+
+    // Parse JSON fields
     const groomAddressObject = groomAddress ? JSON.parse(groomAddress) : {};
     const brideAddressObject = brideAddress ? JSON.parse(brideAddress) : {};
     const ninongArray = Ninong ? JSON.parse(Ninong) : [];
     const ninangArray = Ninang ? JSON.parse(Ninang) : [];
 
+    // Get authenticated user ID
     const userId = req.user._id;
-    
+
+    // Create new wedding form
     const newWeddingForm = new Wedding({
       dateOfApplication,
       weddingDate,
@@ -85,6 +187,10 @@ exports.submitWeddingForm = async (req, res) => {
       groomOccupation,
       groomBirthDate,
       groomPhone,
+      groomFather, // Convert camelCase to PascalCase
+      groomMother, // Convert camelCase to PascalCase
+      brideFather, // Convert camelCase to PascalCase
+      brideMother, // Convert camelCase to PascalCase
       ...images,
       userId,
     });
@@ -100,6 +206,7 @@ exports.submitWeddingForm = async (req, res) => {
     res.status(500).json({ message: "An error occurred during submission.", error: error.message });
   }
 };
+
 
 // getting the wedding
 exports.getAllWeddings = async (req, res) => {
@@ -408,7 +515,7 @@ exports.getFuneralFormById = async (req, res) => {
           .populate('userId', 'name email') 
           .lean();
 
-      if (!weddinglForm) {
+      if (!weddingForm) {
           return res.status(404).json({ message: "Wedding form not found." });
       }
 

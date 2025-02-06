@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
 import Modal from 'react-modal';
 import { useParams } from "react-router-dom";
+import "./MySubmittedWeddingForm.css";
 
 Modal.setAppElement('#root');
 
@@ -140,12 +141,12 @@ const MyWeddingSubmittedForm = ({ weddingId }) => {
 
             <h3>Parents</h3>
             <div className="grid-row">
-              <div className="details-item"><strong>Bride Father:</strong> {weddingForms?.BrideFather || "N/A"}</div>
-              <div className="details-item"><strong>Bride Mother:</strong> {weddingForms?.BrideMother || "N/A"}</div>
+              <div className="details-item"><strong>Bride Father:</strong> {weddingForms?.brideFather || "N/A"}</div>
+              <div className="details-item"><strong>Bride Mother:</strong> {weddingForms?.brideMother || "N/A"}</div>
             </div>
             <div className="grid-row">
-              <div className="details-item"><strong>Groom Father:</strong> {weddingForms?.GroomFather || "N/A"}</div>
-              <div className="details-item"><strong>Groom Mother:</strong> {weddingForms?.GroomMother || "N/A"}</div>
+              <div className="details-item"><strong>Groom Father:</strong> {weddingForms?.groomFather || "N/A"}</div>
+              <div className="details-item"><strong>Groom Mother:</strong> {weddingForms?.groomMother || "N/A"}</div>
             </div>
 
             {/* Ninong and Ninang Details */}

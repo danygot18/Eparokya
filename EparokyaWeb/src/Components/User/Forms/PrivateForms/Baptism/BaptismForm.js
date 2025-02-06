@@ -175,9 +175,9 @@ const BaptismForm = () => {
         <div className="container mt-4">
             <div className="row">
                 {/* Sidebar */}
-                <div className="col-md-3 col-lg-3">
+                {/* <div className="col-md-3 col-lg-3">
                     <GuestSidebar />
-                </div>
+                </div> */}
 
                 <div className="col-md-8 col-lg-9">
                     <h2>Baptism Form</h2>
