@@ -64,6 +64,7 @@ const FuneralDetails = () => {
             }
         };
         fetchFuneralDetails();
+        // console.log("Funeral Details:", funeralId);
     }, [funeralId]);
     
 
@@ -75,7 +76,7 @@ const FuneralDetails = () => {
                 { withCredentials: true },
 
             );
-            console.log("Confirmation response:", response.data);
+            // console.log("Confirmation response:", response.data);
             toast.success("Funeral confirmed successfully!", {
                 position: toast.POSITION.TOP_RIGHT,
                 autoClose: 3000,
@@ -103,7 +104,7 @@ const FuneralDetails = () => {
                     },
                 }
             );
-            console.log("Declining response:", response.data);
+            // console.log("Declining response:", response.data);
             toast.success("Funeral declined successfully!", {
                 position: toast.POSITION.TOP_RIGHT,
                 autoClose: 3000,
@@ -273,6 +274,7 @@ const FuneralDetails = () => {
         <div className="wedding-details-page">
             <SideBar />
             <div className="house-details-content">
+                
                 <div className="house-details-grid">
                     {/* Funeral Details Box */}
                     <div className="house-details-box">

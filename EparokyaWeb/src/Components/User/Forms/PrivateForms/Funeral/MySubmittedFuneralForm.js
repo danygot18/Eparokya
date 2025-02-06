@@ -212,7 +212,7 @@ const MySubmittedFuneralForm = () => {
                     <div className="blessing-date-box">
                         <h3>Updated Funeral Date</h3>
                         <p className="date">
-                            {funeralDetails?.updatedFuneralDate ? new Date(funeralDetails.updatedFuneralDate).toLocaleDateString() : "N/A"}
+                            {funeralDetails?.adminRescheduled ? new Date(funeralDetails.adminRescheduled.date).toLocaleDateString() : "N/A"}
                         </p>
                         {funeralDetails?.adminRescheduled?.reason && (
                             <div className="reschedule-reason">

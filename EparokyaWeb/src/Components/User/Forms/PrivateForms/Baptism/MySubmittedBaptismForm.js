@@ -29,6 +29,39 @@ const MySubmittedBaptismForm = () => {
     const [adminNotes, setAdminNotes] = useState([]);
     const { formId } = useParams();
 
+    const [checklist, setChecklist] = useState({
+        PhotocopyOfBirthCertificate: false,
+        PhotocopyOfMarriageCertificate: false,
+        BaptismalPermit: false,
+        CertificateOfNoRecordBaptism: false,
+        PreBaptismSeminar1: false,
+        PreBaptismSeminar2: false,
+    });
+
+    useEffect(() => {
+        const fetchChecklist = async () => {
+            if (baptismId) {
+                try {
+                    const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getBaptismChecklist/${baptismId}`, { withCredentials: true });
+                    console.log("Checklist:", response.data);
+
+                    if (response.data.checklist) {
+                        setChecklist(response.data.checklist);
+                        console.log("Updated Checklist State:", response.data.checklist);
+                    }
+                    console.log("Checklist:", response.data.checklist);
+                } catch (err) {
+                    console.error("Error fetching checklist:", err);
+                }
+            }
+        };
+
+        fetchChecklist();
+        
+    }, [baptismId]);
+    console.log("Baptism ID:", baptismId);
+
+
     useEffect(() => {
         const fetchBaptismDetails = async () => {
             try {

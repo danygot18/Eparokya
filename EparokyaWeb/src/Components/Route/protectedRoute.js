@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children, isAdmin = false }) => {
         position: toast.POSITION.BOTTOM_RIGHT
     });
     
-    console.log(getUser())
+    // console.log(getUser())
     useEffect(() => {
         const fetchedUser = getUser();
         setUser(fetchedUser);
