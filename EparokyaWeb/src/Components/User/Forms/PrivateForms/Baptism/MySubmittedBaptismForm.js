@@ -38,28 +38,28 @@ const MySubmittedBaptismForm = () => {
         PreBaptismSeminar2: false,
     });
 
-    useEffect(() => {
-        const fetchChecklist = async () => {
-            if (baptismId) {
-                try {
-                    const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getBaptismChecklist/${baptismId}`, { withCredentials: true });
-                    console.log("Checklist:", response.data);
+    // useEffect(() => {
+    //     const fetchChecklist = async () => {
+    //         if (baptismId) {
+    //             try {
+    //                 const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getBaptismChecklist/${formId}`, { withCredentials: true });
+    //                 console.log("Checklist:", response.data);
 
-                    if (response.data.checklist) {
-                        setChecklist(response.data.checklist);
-                        console.log("Updated Checklist State:", response.data.checklist);
-                    }
-                    console.log("Checklist:", response.data.checklist);
-                } catch (err) {
-                    console.error("Error fetching checklist:", err);
-                }
-            }
-        };
+    //                 if (response.data.checklist) {
+    //                     setChecklist(response.data.checklist);
+    //                     console.log("Updated Checklist State:", response.data.checklist);
+    //                 }
+    //                 console.log("Checklist:", response.data.checklist);
+    //             } catch (err) {
+    //                 console.error("Error fetching checklist:", err);
+    //             }
+    //         }
+    //     };
 
-        fetchChecklist();
-        
-    }, [baptismId]);
-    console.log("Baptism ID:", baptismId);
+    //     fetchChecklist();
+
+    // }, [baptismId]);
+    // console.log("Baptism ID:", formId);
 
 
     useEffect(() => {
@@ -259,7 +259,7 @@ const MySubmittedBaptismForm = () => {
                     <button onClick={handleCancel} className="cancel-button">Cancel Baptism Request</button>
                 </div>
                 <div className="baptism-checklist-container">
-                    <UserBaptismChecklist baptismId={baptismId} />
+                    <UserBaptismChecklist baptismId={formId} />
                 </div>
                 <Modal
                     isOpen={isModalOpen}
@@ -296,8 +296,14 @@ const MySubmittedBaptismForm = () => {
                             alt="Certificate Preview"
                             className="modal-image"
                             style={{
+                                // transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
+                                // transition: isDragging ? "none" : "transform 0.3s ease",
                                 transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
                                 transition: isDragging ? "none" : "transform 0.3s ease",
+                                maxWidth: "100%",
+                                maxHeight: "100%",
+                                objectFit: "contain",
+                                cursor: isDragging ? "grabbing" : "grab",
                             }}
                             draggable={false}
                         />

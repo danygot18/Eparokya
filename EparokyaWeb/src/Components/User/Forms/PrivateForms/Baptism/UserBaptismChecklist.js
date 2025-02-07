@@ -93,10 +93,10 @@ const UserBaptismChecklist = ({ baptismId }) => {
       <div className="baptism-checklist-item">
         <span>Pre-Baptism Seminar 2</span>
         <button
-          className={checklist?.PreBaptismSeminar2 ? "checked-btn" : "unchecked-btn"}
+          className={checklist?.PreMarriageSeminar2 ? "checked-btn" : "unchecked-btn"}
           disabled
         >
-          {checklist?.PreBaptismSeminar2 ? "Checked" : "Unchecked"}
+          {checklist?.PreMarriageSeminar2 ? "Checked" : "Unchecked"}
         </button>
       </div>
       
