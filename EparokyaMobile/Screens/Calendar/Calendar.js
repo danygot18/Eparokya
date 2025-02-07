@@ -93,7 +93,7 @@ const CalendarComponent = () => {
   const fetchConfirmedFuneralDates = async (calendarId) => {
     try {
       
-      const response = await axios.get(`${baseURL}/confirmed`, {
+      const response = await axios.get(`${baseURL}/confirmedFuneral`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -197,23 +197,23 @@ const CalendarComponent = () => {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>
-              {item.bride ? "Wedding" : "Funeral"}
+              {item.brideName ? "Wedding" : "Funeral"}
             </Text>
-            {item.bride ? (
+            {item.brideName ? (
               <>
                 <Text>
-                  {item.bride} & {item.groom}
+                  {item.brideName} & {item.groomName}
                 </Text>
-                <Text>Attendees: {item.attendees || "N/A"}</Text>
-                <Text>Flower Girl: {item.flowerGirl || "N/A"}</Text>
-                <Text>Ring Bearer: {item.ringBearer || "N/A"}</Text>
+                <Text>Religion - Groom: {item.groomReligion || "N/A"}</Text>
+                <Text>Religion - Bride: {item.brideReligion || "N/A"}</Text>
                 <Text>Status: {item.weddingStatus || "Pending"}</Text>
               </>
             ) : (
               <>
                 <Text>
-                  {item.name.firstName} {item.name.lastName}
+                  {item.name} 
                 </Text>
+                <Text>Age: {item.age || "N/A"}</Text>
                 <Text>Contact Person: {item.contactPerson || "N/A"}</Text>
                 <Text>Status: {item.funeralStatus || "Pending"}</Text>
               </>

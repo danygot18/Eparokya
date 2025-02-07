@@ -10,6 +10,9 @@ const UserForms = () => {
     { route: "WeddingForm", image: require("../../assets/17.png") },
     { route: "BinyagForm", image: require("../../assets/18.png") },
     { route: "FuneralForm", image: require("../../assets/18.png") },
+    { route: "CounselingForm", image: require("../../assets/18.png") },
+    { route: "HouseBlessingForm", image: require("../../assets/18.png") },
+    { route: "PrayerRequestForm", image: require("../../assets/18.png") },
 
   ];
 

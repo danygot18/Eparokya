@@ -17,6 +17,10 @@ import SubmittedForms from '../Screens/User/SubmittedForms';
 
 import BinyagForm from "../Screens/Forms/Baptism/BinyagForm";
 import FuneralForm from "../Screens/Forms/Funeral/FuneralForm";
+import CounselingForm from "../Screens/Forms/Counseling/CounselingForm";
+import HouseBlessingForm from "../Screens/Forms/PrivateScheduling/HouseBlessingForm";
+import PrayerRequestForm from "../Screens/Forms/Prayers/PrayerRequestForm";
+
 import UserForms from '../Screens/User/UserForms';
 
 
@@ -101,6 +105,30 @@ const FormsNavigator = () => {
       <Stack.Screen
         name="BinyagForm"
         component={BinyagForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="CounselingForm"
+        component={CounselingForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="HouseBlessingForm"
+        component={HouseBlessingForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="PrayerRequestForm"
+        component={PrayerRequestForm}
         options={{
           headerShown: false,
         }}

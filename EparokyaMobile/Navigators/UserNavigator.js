@@ -15,11 +15,23 @@ import UpdateProfile from "../Screens/User/Update";
 import SubmittedForms from "../Screens/User/SubmittedForms";
 
 import SubmittedWedding from "../Screens/Forms/Wedding/SubmittedWedding";
-import SubmittedFuneral from "../Screens/Forms/Funeral/SubmittedFuneral";
-import SubmittedBaptism from "../Screens/Forms/Baptism/SubmittedBaptism";
+// import SubmittedWeddingList from "../Screens/Forms/Wedding/SubmittedWeddingList";
+import SubmittedFuneralList from "../Screens/User/Funeral/SubmittedFuneralList";
+import SubmittedBaptismList from "../Screens/User/Baptism/SubmittedBaptismList";
+import SubmittedCounselingList from "../Screens/User/Counseling/SubmittedCounselingList";
+import SubmittedHouseBlessingList from "../Screens/User/PrivateScheduling/SubmittedHouseBlessingList";
+import SubmittedPrayerRequestList from "../Screens/User/Prayers/SubmittedPrayerRequestList";
 
 // import BinyagForm from "../Screens/User/Baptism/BinyagForm";
-// import FuneralForm from "../Screens/User/Funeral/FuneralForm";
+
+// import SubmittedWeddingForm from "../Screens/User/Wedding/MySubmittedWeddingForm";
+import SubmittedFuneralForm from "../Screens/User/Funeral/MySubmittedFuneralForm";
+import SubmittedBaptismForm from "../Screens/User/Baptism/MySubmittedBaptismForm";
+import SubmittedCounselingForm from "../Screens/User/Counseling/MySubmittedCounselingForm";
+// import SubmittedHouseBlessingForm from "../Screens/User/PrivateScheduling/MySubmittedHouseBlessingForm";
+
+// import SubmittedPrayerWall from "../Screens/User/Prayers/MySubmittedPrayerWall";
+
 
 import Calendar from "../Screens/Calendar/Calendar";
 // import Announcement from "../Screens/User/Announcement/AnnouncementPage";
@@ -77,20 +89,71 @@ const UserNavigator = (props) => {
       />
 
       <Stack.Screen
-        name="SubmittedFuneral"
-        component={SubmittedFuneral}
+        name="SubmittedFuneralList"
+        component={SubmittedFuneralList}
         options={{
           headerShown: false,
         }}
       />
 
       <Stack.Screen
-        name="SubmittedBaptism"
-        component={SubmittedBaptism}
+        name="SubmittedBaptismList"
+        component={SubmittedBaptismList}
         options={{
           headerShown: false,
         }}
       />
+
+
+      <Stack.Screen
+        name="SubmittedBaptismForm"
+        component={SubmittedBaptismForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+
+      <Stack.Screen
+        name="SubmittedCounselingForm"
+        component={SubmittedCounselingForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+
+      <Stack.Screen
+        name="SubmittedFuneralForm"
+        component={SubmittedFuneralForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="SubmittedCounselingList"
+        component={SubmittedCounselingList}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedPrayerRequestList"
+        component={SubmittedPrayerRequestList}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedHouseBlessingList"
+        component={SubmittedHouseBlessingList}
+        options={{
+          headerShown: false,
+        }}
+      />
+
 
       {/* <Stack.Screen
         name="WeddingFormContainer"
@@ -140,25 +203,11 @@ const UserNavigator = (props) => {
         }}
       />
 
-      <Stack.Screen
-        name="SubmittedFuneral"
-        component={SubmittedFuneral}
-        options={{
-          headerShown: false,
-        }}
-      />
+     
 
       <Stack.Screen
         name="SubmittedBaptism"
         component={SubmittedBaptism}
-        options={{
-          headerShown: false,
-        }}
-      />
-
-      <Stack.Screen
-        name="BinyagForm"
-        component={BinyagForm}
         options={{
           headerShown: false,
         }}

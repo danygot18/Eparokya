@@ -165,11 +165,14 @@ const AnnouncementPage = ({ navigation }) => {
           >
             <Text style={styles.title}>{item.name || 'No Title Available'}</Text>
             <Text>{item.description || 'No Description Available'}</Text>
-            {item.image && <Image source={{ url: item?.image }} style={styles.media} />}
-
+            {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
+            {item.images && item.images.map((img, index) => (
+              <Image key={index} source={{ uri: img.url }} style={styles.media} />
+            ))}
+            
             {/* Like and Comments Count */}
             <View style={styles.interactionContainer}>
-                <LikedCount handleLike={handleLike} item={item} user={user}/>
+              <LikedCount handleLike={handleLike} item={item} user={user} />
               {/* Comments Count */}
               <TouchableOpacity onPress={() => handleNavigateToDetail(item._id)}>
                 <MaterialIcons name="comment" size={24} color="gray" />
@@ -194,7 +197,7 @@ const LikedCount = ({ handleLike, item, user }) => {
   useEffect(() => {
     setLikeCount(item.likedBy?.length)
     if (item.likedBy?.includes(user?._id)) {
-      setColorLiked('green') 
+      setColorLiked('green')
     } else {
       setColorLiked('gray')
     }

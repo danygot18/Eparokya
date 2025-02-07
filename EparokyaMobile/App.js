@@ -44,8 +44,21 @@ export default function App() {
         {/* <Main /> */}
         {/* <Toast /> */}
       </PersistGate>
-
     </Provider>
+
+
+    // <Provider store={store}>
+    //   <PersistGate loading={null} persistor={persistor}>
+    //     <NativeBaseProvider theme={theme}>
+    //       <ApplicationProvider {...eva} theme={eva.light}>
+    //         {/* <Header /> */}
+    //         {/* <DrawerNavigator /> */}
+    //         <Main />
+    //         {/* <Toast /> */}
+    //       </ApplicationProvider>
+    //     </NativeBaseProvider>
+    //   </PersistGate>
+    // </Provider>
 
   );
 }

@@ -25,14 +25,14 @@ const Register2 = () => {
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [ministryCategory, setMinistryCategories] = useState([]);
-  const [selectedMinistryCategory, setSelectedMinistryCategory] = useState(null);
+  const [selectedMinistryCategories, setSelectedMinistryCategories] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
 
   const { email, name, password } = route.params;
 
-  const defaultImage = "https://rb.gy/hnb4yc";
+  const defaultImage = require('../../assets/EPAROKYA-SYST.png');
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -45,6 +45,29 @@ const Register2 = () => {
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
     }
+  };
+
+  useEffect(() => {
+    axios.get(`${baseURL}/getAllMinistryCategories`)
+      .then((response) => {
+        console.log("Fetched Categories:", response.data);
+        setMinistryCategories(response.data || []);
+      })
+      .catch((error) => {
+        console.error("Fetch Error:", error.response ? error.response.data : error.message);
+        setMinistryCategories([]);
+      });
+  }, []);
+
+
+  const handleMinistryCategoryChange = (categoryId) => {
+    setSelectedMinistryCategories((prevSelected) => {
+      if (prevSelected.includes(categoryId)) {
+        return prevSelected.filter((id) => id !== categoryId); // Deselect if already selected
+      } else {
+        return [...prevSelected, categoryId]; // Add if not selected
+      }
+    });
   };
 
   const handleImagePick = async () => {
@@ -88,7 +111,7 @@ const Register2 = () => {
       zip === "" ||
       city === "" ||
       country === "" ||
-      !selectedMinistryCategory 
+      selectedMinistryCategories.length === 0
     ) {
       setError("Please fill in the form correctly");
       return;
@@ -106,7 +129,7 @@ const Register2 = () => {
     formData.append('city', city);
     formData.append('country', country);
     formData.append('preference', preference);
-    formData.append('ministryCategory', selectedMinistryCategory);
+    formData.append('ministryCategory', selectedMinistryCategories);
 
     if (selectedImage) {
       formData.append('image', {
@@ -147,20 +170,18 @@ const Register2 = () => {
       });
   };
 
-  useEffect(() => {
-    axios
-      .get(`${baseURL}/ministryCategory/`)
-      .then((response) => {
-        console.log("Fetched Categories:", response.data);
-        setMinistryCategories(response.data || []);
-      })
-      .catch((error) => {
-        console.error("Fetch Error:", error);
-        setMinistryCategories([]);
-      });
-  }, []);
-
-
+  // useEffect(() => {
+  //   axios
+  //     .get(`${baseURL}/ministryCategory/`)
+  //     .then((response) => {
+  //       console.log("Fetched Categories:", response.data);
+  //       setMinistryCategories(response.data || []);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Fetch Error:", error);
+  //       setMinistryCategories([]);
+  //     });
+  // }, []);
 
 
   return (
@@ -172,10 +193,11 @@ const Register2 = () => {
       <FormContainer style={styles.container}>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
           <Image
-            source={{ uri: selectedImage || defaultImage }}
+            source={selectedImage ? { uri: selectedImage } : defaultImage}
             style={styles.profileImage}
             alt="Profile Image"
           />
+
         </TouchableOpacity>
 
         <Modal
@@ -247,16 +269,20 @@ const Register2 = () => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Ministry</Text>
-          <RNPickerSelect
-            onValueChange={(value) => setSelectedMinistryCategory(value)} 
-            items={(ministryCategory || []).map((category) => ({
-              label: category.name,
-              value: category._id,
-            }))}
-            placeholder={{ label: "Select Ministry Category if Part of the Ministry", value: null }}
-            style={pickerSelectStyles}
-          />
+          <Text style={styles.label}>Ministry Categories</Text>
+          {ministryCategory.length > 0 && (
+            <View>
+              {ministryCategory.map((category) => (
+                <View key={category._id} style={styles.checkboxContainer}>
+                  <CheckBox
+                    value={selectedMinistryCategories.includes(category._id)}
+                    onValueChange={() => handleMinistryCategoryChange(category._id)}
+                  />
+                  <Text>{category.name}</Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
 
         <Input
@@ -377,6 +403,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
+
+    checkboxContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+
   },
 });
 

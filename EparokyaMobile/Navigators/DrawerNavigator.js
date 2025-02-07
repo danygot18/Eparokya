@@ -14,6 +14,8 @@ import {
   HStack,
   Divider,
   Icon,
+  Avatar,
+  Center,
 } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutAction } from "../Redux/Actions/userActions";
@@ -27,6 +29,8 @@ import CalendarComponent from "../Screens/Calendar/Calendar";
 import Forms from "../Screens/User/UserForms";
 // import Announcement from "../Screens/User/Announcement/AnnouncementPage";
 import Profile from "../Screens/User/Profile";
+import PrayerWall from "../Screens/Prayers/PrayerWall";
+import ResourcePage from "../Screens/Resource/ResourcePage";
 
 const Drawer = createDrawerNavigator();
 
@@ -34,14 +38,19 @@ const getIcon = (screenName) => {
   switch (screenName) {
     case "Home":
       return "home";
+    case "Resource Page":
+      return "calendar";
     case "Calendar":
       return "calendar";
     case "Forms":
       return "file-document";
+    case "Prayer Wall":
+      return "book-open-page-variant";
     case "Admin Dashboard":
       return "monitor-dashboard";
     case "Profile":
       return "account";
+
     default:
       return undefined;
   }
@@ -49,12 +58,28 @@ const getIcon = (screenName) => {
 
 function CustomDrawerContent(props) {
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
 
   return (
     <DrawerContentScrollView {...props} safeArea>
       <VStack space="0" my="0" mx="0" bg="#154314">
         <VStack divider={<Divider />} space="0">
           <VStack space="3">
+
+            <Center my="6">
+              <Avatar
+                size="xl"
+                source={{
+                  uri: user?.avatar?.url ? user.avatar.url : '../../assets/EPAROKYA-SYST.png',
+                }}
+                alt="User Avatar"
+              />
+
+              <Text fontSize="xl" fontWeight="bold" color="white" mt="2">
+                Welcome, {user?.name || "Guest"}!
+              </Text>
+            </Center>
+
             {props.state.routeNames.map((name, index) => (
               <Pressable
                 key={index}
@@ -137,9 +162,12 @@ const DrawerNavigator = () => {
           },
         })}
       >
-        <Drawer.Screen name="HomeTab" component={Main} />
+        <Drawer.Screen name="Home" component={Main} />
+        <Drawer.Screen name="Resource Page" component={ResourcePage} />
         <Drawer.Screen name="Calendar" component={CalendarComponent} />
         <Drawer.Screen name="Forms" component={Forms} />
+        <Drawer.Screen name="Prayer Wall" component={PrayerWall} />
+
         {user?.isAdmin && (
           <Drawer.Screen name="Admin Dashboard" component={AdminNavigator} />
         )}

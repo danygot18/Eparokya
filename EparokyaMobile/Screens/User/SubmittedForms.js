@@ -14,8 +14,12 @@ const SubmittedForms = () => {
 
   const cards = [
     { route: "SubmittedWedding", image: require("../../assets/17.png") },
-    { route: "SubmittedFuneral", image: require("../../assets/18.png") },
-    { route: "SubmittedBaptism", image: require("../../assets/18.png") },
+    { route: "SubmittedFuneralList", image: require("../../assets/18.png") },
+    { route: "SubmittedBaptismList", image: require("../../assets/18.png") },
+    { route: "SubmittedCounselingList", image: require("../../assets/18.png") },
+    { route: "SubmittedHouseBlessingList", image: require("../../assets/18.png") },
+    { route: "SubmittedPrayerRequestList", image: require("../../assets/18.png") },
+
   ];
 
   return (

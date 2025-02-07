@@ -1,12 +1,10 @@
 import React from "react";
 import { View, Text, Animated, TouchableOpacity, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Icon from "react-native-vector-icons/FontAwesome";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import UserNavigator from "./UserNavigator";
 import Home from "./Home";
-import WeddingNavigator from "./WeddingNavigator";
 import FormsNavigator from "./FormsNavigator";
-import UserForms from "../Screens/User/UserForms";
 import ChatNavigator from "./ChatNavigator";
 
 const Tab = createBottomTabNavigator();
@@ -16,35 +14,21 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
     <View style={styles.tabBarContainer}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
-        const label =
-          options.tabBarLabel !== undefined
-            ? options.tabBarLabel
-            : options.title !== undefined
-            ? options.title
-            : route.name;
-
+        const label = options.tabBarLabel ?? options.title ?? route.name;
         const isFocused = state.index === index;
 
         const onPress = () => {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-          });
-
+          const event = navigation.emit({ type: "tabPress", target: route.key });
           if (!isFocused && !event.defaultPrevented) {
             navigation.navigate(route.name);
           }
         };
 
         const onLongPress = () => {
-          navigation.emit({
-            type: "tabLongPress",
-            target: route.key,
-          });
+          navigation.emit({ type: "tabLongPress", target: route.key });
         };
 
-        const scale = new Animated.Value(isFocused ? 1.5 : 1);
-
+        const scale = new Animated.Value(isFocused ? 1.2 : 1);
         React.useEffect(() => {
           Animated.timing(scale, {
             toValue: isFocused ? 1.5 : 1,
@@ -53,31 +37,37 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
           }).start();
         }, [isFocused]);
 
+        const getIconName = (routeName) => {
+          switch (routeName) {
+            case "Home":
+              return "home-heart";
+            case "Forms":
+              return "file-document";
+            case "Profile":
+              return "account";
+            case "Chats":
+              return "chat";
+            default:
+              return "help";
+          }
+        };
+
         return (
           <TouchableOpacity
             key={route.key}
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            testID={options.tabBarTestID}
             onPress={onPress}
             onLongPress={onLongPress}
             style={[
               styles.tabButton,
               isFocused && styles.focusedTabButton,
-              index === 1 && styles.centralTab,
             ]}
           >
-            <Animated.View
-              style={[
-                {
-                  transform: [{ scale }],
-                },
-              ]}
-            >
-              <Icon
-                name={route.name === "HomeTab" ? "home" : route.name === "Forms" ? "leaf" : "user"}
-                size={isFocused ? 20 : 19} 
+            <Animated.View style={{ transform: [{ scale }] }}>
+              <MaterialCommunityIcons
+                name={getIconName(route.name)}
+                size={isFocused ? 26 : 22}
                 color={isFocused ? "#4CAF50" : "gray"}
               />
             </Animated.View>
@@ -91,16 +81,14 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
 const Main = () => (
   <Tab.Navigator
-    initialRouteName="HomeTab"
+    initialRouteName="Home"
     tabBar={(props) => <CustomTabBar {...props} />}
-    screenOptions={{
-      headerShown: false,
-    }}
+    screenOptions={{ headerShown: false }}
   >
     <Tab.Screen name="Home" component={Home} />
     <Tab.Screen name="Forms" component={FormsNavigator} />
     <Tab.Screen name="Profile" component={UserNavigator} />
-    <Tab.Screen name="ChatNavigator" component={ChatNavigator} />
+    <Tab.Screen name="Chats" component={ChatNavigator} />
   </Tab.Navigator>
 );
 
@@ -108,7 +96,7 @@ const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: "row",
     backgroundColor: "#fff",
-    height: 70,
+    height: 65,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     shadowColor: "#000",
@@ -116,32 +104,19 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
     alignItems: "center",
-    justifyContent: "space-around",
-    paddingHorizontal: 10,
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
   },
   tabButton: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 10,
-  },
-  centralTab: {
-    position: "relative",
-    bottom: 20,
-    backgroundColor: "#E8F5E9",
-    borderRadius: 35,
-    width: 70,
-    height: 70,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 5,
+    paddingVertical: 8,
   },
   focusedTabButton: {
     backgroundColor: "#F1F8E9",
     borderRadius: 30,
+    paddingVertical: 6,
   },
   tabLabel: {
     color: "#4CAF50",

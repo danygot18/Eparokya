@@ -1,327 +1,312 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  TextInput,
-  Button,
-  StyleSheet,
-  Text,
-  Alert,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import axios from "axios";
-import SyncStorage from "sync-storage";
-import baseURL from "../../../assets/common/baseUrl";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import baseURL from '../../../assets/common/baseUrl';
 
 const BaptismForm = ({ navigation }) => {
-  const [baptismDate, setBaptismDate] = useState(null);
-  const [birthDate, setBirthDate] = useState(null);
-  const [showBaptismDatePicker, setShowBaptismDatePicker] = useState(false);
-  const [showBirthDatePicker, setShowBirthDatePicker] = useState(false);
+  const [baptismDate, setBaptismDate] = useState(new Date());
+  const [baptismTime, setBaptismTime] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [ninong, setNinong] = useState([]);
+  const [ninang, setNinang] = useState([]);
 
-  const [church, setChurch] = useState("");
-  const [priest, setPriest] = useState("");
-  const [childName, setChildName] = useState("");
-  const [placeOfBirth, setPlaceOfBirth] = useState("");
-  const [gender, setGender] = useState("");
-  const [fatherName, setFatherName] = useState("");
-  const [motherName, setMotherName] = useState("");
-  const [address, setAddress] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [godparents, setGodparents] = useState([]);
-  const [error, setError] = useState("");
+  const [child, setChild] = useState({ fullName: '', dateOfBirth: new Date(), placeOfBirth: '', gender: '' });
+  const [parents, setParents] = useState({ fatherFullName: '', placeOfFathersBirth: '', motherFullName: '', placeOfMothersBirth: '', address: '', marriageStatus: '' });
+  const [NinongGodparents, setNinongGodparents] = useState([]);
+  const [NinangGodparents, setNinangGodparents] = useState([]);
+  const [error, setError] = useState('');
   const [userId, setUserId] = useState(null);
+
+  const [birthCertificate, setBirthCertificate] = useState(null);
+  const [marriageCertificate, setMarriageCertificate] = useState(null);
+  const [baptismPermit, setBaptismPermit] = useState(null);
 
   const { user, token } = useSelector(state => state.auth);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        
-        if (!token) {
-          Alert.alert("Not Login", "Login First.");
-          navigation.navigate("UserProfile");
-          return;
-        }
+  // useEffect(() => {
+  //   if (!token) {
+  //     Alert.alert('Error', 'Token is missing. Please log in again.');
+  //     navigation.navigate('LoginPage');
+  //     return;
+  //   }
+  //   axios.get(`${baseURL}/profile`, { headers: { Authorization: `Bearer ${token}` } })
+  //     .then(({ data }) => setUserId(data.user._id))
+  //     .catch(() => {
+  //       Alert.alert('Error', 'Unable to retrieve user data.');
+  //       navigation.navigate('LoginPage');
+  //     });
+  // }, []);
 
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const { data } = await axios.get(`${baseURL}/users/profile`, config);
-        setUserId(data.user._id);
-      } catch (error) {
-        console.error(
-          "Failed to retrieve user ID:",
-          error.response ? error.response.data : error.message
-        );
-        Alert.alert(
-          "Error",
-          "Unable to retrieve user ID. Please log in again."
-        );
-        navigation.navigate("LoginPage");
-      }
-    };
+  const pickImage = async (setImage) => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
 
-    fetchUserData();
-  }, []);
-
-  const handleAddGodparent = () => {
-    setGodparents([...godparents, { name: "", contactInfo: "" }]);
-  };
-
-  const handleRemoveGodparent = (index) => {
-    setGodparents(godparents.filter((_, i) => i !== index));
-  };
-
-  const handleGodparentChange = (index, field, value) => {
-    const updatedGodparents = [...godparents];
-    updatedGodparents[index][field] = value;
-    setGodparents(updatedGodparents);
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
   };
 
   const handleSubmit = async () => {
-    if (
-      !baptismDate ||
-      !church ||
-      !priest ||
-      !childName ||
-      !birthDate ||
-      !placeOfBirth ||
-      !gender ||
-      !fatherName ||
-      !motherName ||
-      !address ||
-      !contactNumber
-    ) {
-      setError("Please fill in all the fields.");
+    if (!phone || !child.fullName || !child.dateOfBirth || !parents.fatherFullName || !parents.motherFullName || !birthCertificate || !marriageCertificate || !baptismPermit) {
+      setError('Please fill in all the required fields.');
       return;
     }
 
-    const formData = {
-      baptismDate,
-      church,
-      priest,
-      child: {
-        fullName: childName,
-        dateOfBirth: birthDate,
-        placeOfBirth,
-        gender,
-      },
-      parents: {
-        fatherFullName: fatherName,
-        motherFullName: motherName,
-        address,
-        contactInfo: contactNumber,
-      },
-      godparents,
-      userId,
-    };
+    let formData = new FormData();
+    formData.append('baptismDate', baptismDate.toISOString());
+    formData.append('baptismTime', baptismTime.toISOString());
+    formData.append('phone', phone);
+    formData.append('child', JSON.stringify(child));
+    formData.append('parents', JSON.stringify(parents));
+    formData.append('ninong', JSON.stringify(ninong));
+    formData.append('ninang', JSON.stringify(ninang));
+    formData.append('NinongGodparents', JSON.stringify(NinongGodparents));
+    formData.append('NinangGodparents', JSON.stringify(NinangGodparents));
+
+    // Append images if they exist
+    if (birthCertificate) {
+      formData.append('birthCertificate', {
+        uri: birthCertificate,
+        name: 'birth_certificate.jpg',
+        type: 'image/jpeg',
+      });
+    }
+
+    if (marriageCertificate) {
+      formData.append('marriageCertificate', {
+        uri: marriageCertificate,
+        name: 'marriage_certificate.jpg',
+        type: 'image/jpeg',
+      });
+    }
+
+    if (baptismPermit) {
+      formData.append('baptismPermit', {
+        uri: baptismPermit,
+        name: 'baptism_permit.jpg',
+        type: 'image/jpeg',
+      });
+    }
 
     try {
-      
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-
-      const response = await axios.post(
-        `${baseURL}/binyag/create`,
-        formData,
-        config
-      );
+      const response = await axios.post(`${baseURL}/baptismCreate`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       if (response.status === 201) {
-        Alert.alert("Success", "Baptism form submitted successfully.");
-        navigation.navigate("Home");
+        Alert.alert('Success', 'Baptism form submitted successfully.');
+        navigation.navigate('Home');
       } else {
-        setError("Failed to submit form. Please try again.");
+        setError('Failed to submit form. Please try again.');
       }
     } catch (err) {
-      console.error(
-        "Error submitting form:",
-        err.response ? err.response.data : err.message
-      );
-      setError("An error occurred. Please try again later.");
+      console.error('Error submitting form:', err);
+      setError('An error occurred. Please try again later.');
+    }
+  };
+
+  const addGodparent = (type) => {
+    if (type === 'ninong') {
+      setNinongGodparents([...NinongGodparents, { name: '', address: '', religion: '' }]);
+    } else {
+      setNinangGodparents([...NinangGodparents, { name: '', address: '', religion: '' }]);
+    }
+  };
+
+  const removeGodparent = (type, index) => {
+    if (type === 'ninong') {
+      setNinongGodparents(NinongGodparents.filter((_, i) => i !== index));
+    } else {
+      setNinangGodparents(NinangGodparents.filter((_, i) => i !== index));
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Baptism Form</Text>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+    <ScrollView contentContainerStyle={{ padding: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Baptism Form</Text>
+      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
 
-      <Text style={styles.subtitle}>Baptism Info</Text>
-      <View>
-        <Button
-          title="Select Baptism Date"
-          onPress={() => setShowBaptismDatePicker(true)}
+      <Text>Contact Number</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
+
+      <Text>Buong Pangalang ng Bibinyagan</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={child.fullName} onChangeText={(text) => setChild({ ...child, fullName: text })} />
+
+      <Text>Araw ng Binyag</Text>
+      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+        <TextInput editable={false} value={baptismDate.toDateString()} style={{ borderWidth: 1, padding: 10 }} />
+      </TouchableOpacity>
+      {showDatePicker && (
+        <DateTimePicker
+          value={baptismDate}
+          mode="date"
+          display="default"
+          onChange={(event, date) => {
+            setShowDatePicker(false);
+            if (date) setBaptismDate(date);
+          }}
         />
-        {showBaptismDatePicker && (
-          <DateTimePicker
-            value={baptismDate || new Date()}
-            mode="date"
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShowBaptismDatePicker(false);
-              if (selectedDate) setBaptismDate(selectedDate.toISOString());
-            }}
-          />
-        )}
-        <Text>
-          {baptismDate
-            ? new Date(baptismDate).toLocaleDateString()
-            : "No date selected"}
-        </Text>
-      </View>
+      )}
 
-      <TextInput
-        style={styles.input}
-        placeholder="Church"
-        value={church}
-        onChangeText={setChurch}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Priest"
-        value={priest}
-        onChangeText={setPriest}
-      />
-
-      <Text style={styles.subtitle}>Child Info</Text>
-      <View>
-        <Button
-          title="Select Child's Birth Date"
-          onPress={() => setShowBirthDatePicker(true)}
+      <Text>Oras ng Binyag</Text>
+      <TouchableOpacity onPress={() => setShowTimePicker(true)}>
+        <TextInput editable={false} value={baptismTime.toLocaleTimeString()} style={{ borderWidth: 1, padding: 10 }} />
+      </TouchableOpacity>
+      {showTimePicker && (
+        <DateTimePicker
+          value={baptismTime}
+          mode="time"
+          display="default"
+          onChange={(event, time) => {
+            setShowTimePicker(false);
+            if (time) setBaptismTime(time);
+          }}
         />
-        {showBirthDatePicker && (
-          <DateTimePicker
-            value={birthDate || new Date()}
-            mode="date"
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShowBirthDatePicker(false);
-              if (selectedDate) setBirthDate(selectedDate.toISOString());
-            }}
-          />
-        )}
-        <Text>
-          {birthDate
-            ? new Date(birthDate).toLocaleDateString()
-            : "No date selected"}
-        </Text>
-      </View>
+      )}
 
-      <TextInput
-        style={styles.input}
-        placeholder="Child's Full Name"
-        value={childName}
-        onChangeText={setChildName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Place of Birth"
-        value={placeOfBirth}
-        onChangeText={setPlaceOfBirth}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Gender (Male/Female)"
-        value={gender}
-        onChangeText={setGender}
-      />
+      <Text>Araw ng kapanganakan</Text>
+      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+        <TextInput editable={false} value={child.dateOfBirth.toDateString()} style={{ borderWidth: 1, padding: 10 }} />
+      </TouchableOpacity>
+      {showDatePicker && (
+        <DateTimePicker
+          value={child.dateOfBirth}
+          mode="date"
+          display="default"
+          onChange={(event, date) => {
+            setShowDatePicker(false);
+            if (date) setChild({ ...child, dateOfBirth: date });
+          }}
+        />
+      )}
 
-      <Text style={styles.subtitle}>Parents Info</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Father's Full Name"
-        value={fatherName}
-        onChangeText={setFatherName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Mother's Full Name"
-        value={motherName}
-        onChangeText={setMotherName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Address"
-        value={address}
-        onChangeText={setAddress}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Contact Number"
-        keyboardType="phone-pad"
-        value={contactNumber}
-        onChangeText={setContactNumber}
-      />
+      <Text>Lugar kung saan ipinanganak</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={child.placeOfBirth} onChangeText={(text) => setChild({ ...child, placeOfBirth: text })} />
 
-      {/* Godparents Section */}
-      <Text style={styles.subtitle}>Godparents</Text>
-      {godparents.map((godparent, index) => (
-        <View key={index} style={styles.godparentContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Godparent's Name"
-            value={godparent.name}
-            onChangeText={(value) =>
-              handleGodparentChange(index, "name", value)
-            }
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Contact Info"
-            value={godparent.contactInfo}
-            onChangeText={(value) =>
-              handleGodparentChange(index, "contactInfo", value)
-            }
-          />
-          <Button
-            title="Remove"
-            color="red"
-            onPress={() => handleRemoveGodparent(index)}
-          />
+      <Text>Kasarian</Text>
+      <Picker selectedValue={child.gender} onValueChange={(itemValue) => setChild({ ...child, gender: itemValue })}>
+        <Picker.Item label="Pumili ng kasarian" value="" />
+        <Picker.Item label="Male" value="Male" />
+        <Picker.Item label="Female" value="Female" />
+      </Picker>
+
+      <Text>Pangalan ng Ama</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={parents.fatherFullName} onChangeText={(text) => setParents({ ...parents, fatherFullName: text })} />
+
+      <Text>Lugar ng kapanganakan</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={parents.placeOfFathersBirth} onChangeText={(text) => setParents({ ...parents, placeOfFathersBirth: text })} />
+
+      <Text>Pangalan ng Ina (noong dalaga pa)</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={parents.motherFullName} onChangeText={(text) => setParents({ ...parents, motherFullName: text })} />
+
+      <Text>Lugar ng kapanganakan</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={parents.placeOfMothersBirth} onChangeText={(text) => setParents({ ...parents, placeOfMothersBirth: text })} />
+
+      <Text>Tirahan</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={parents.address} onChangeText={(text) => setParents({ ...parents, address: text })} />
+
+      <Text>Saan Kasal</Text>
+      <Picker selectedValue={parents.marriageStatus} onValueChange={(itemValue) => setParents({ ...parents, marriageStatus: itemValue })}>
+        <Picker.Item label="Select Marriage Status" value="" />
+        <Picker.Item label="Simbahan" value="Simbahan" />
+        <Picker.Item label="Civil" value="Civil" />
+        <Picker.Item label="Nat" value="Nat" />
+      </Picker>
+
+      <Text>Ninong Full Name</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninong.name} onChangeText={(text) => setNinong({ ...ninong, name: text })} />
+
+      <Text>Ninong Address</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninong.address} onChangeText={(text) => setNinong({ ...ninong, address: text })} />
+
+      <Text>Ninong Religion</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninong.religion} onChangeText={(text) => setNinong({ ...ninong, religion: text })} />
+
+      <Text>Ninang Full Name</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninang.name} onChangeText={(text) => setNinang({ ...ninang, name: text })} />
+
+      <Text>Ninang Address</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninang.address} onChangeText={(text) => setNinang({ ...ninang, address: text })} />
+
+      <Text>Ninang Religion</Text>
+      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninang.religion} onChangeText={(text) => setNinang({ ...ninang, religion: text })} />
+
+      <Text>Ninong</Text>
+      {NinongGodparents.map((godparent, index) => (
+        <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TextInput style={{ borderWidth: 1, padding: 10, flex: 1 }} value={godparent.name} onChangeText={(text) => {
+            let updated = [...NinongGodparents];
+            updated[index].name = text;
+            setNinongGodparents(updated);
+          }} />
+          <Button title="Remove" onPress={() => removeGodparent('ninong', index)} />
         </View>
       ))}
-      <Button title="Add Godparent" onPress={handleAddGodparent} />
+      <Button title="Add Ninong" onPress={() => addGodparent('ninong')} />
 
-      {/* Submit Button */}
-      <Button title="Submit" onPress={handleSubmit} />
+      <Text>Ninang</Text>
+      {NinangGodparents.map((godparent, index) => (
+        <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TextInput style={{ borderWidth: 1, padding: 10, flex: 1 }} value={godparent.name} onChangeText={(text) => {
+            let updated = [...NinangGodparents];
+            updated[index].name = text;
+            setNinangGodparents(updated);
+          }} />
+          <Button title="Remove" onPress={() => removeGodparent('ninang', index)} />
+        </View>
+      ))}
+      <Button title="Add Ninang" onPress={() => addGodparent('ninang')} />
+
+      {/* Image Pickers */}
+      <Text>Birth Certificate</Text>
+      <TouchableOpacity onPress={() => pickImage(setBirthCertificate)}>
+        <View style={{ borderWidth: 1, padding: 10, alignItems: 'center' }}>
+          {birthCertificate ? <Image source={{ uri: birthCertificate }} style={{ width: 100, height: 100 }} /> : <Text>Pick an image</Text>}
+        </View>
+      </TouchableOpacity>
+
+      <Text>Marriage Certificate</Text>
+      <TouchableOpacity onPress={() => pickImage(setMarriageCertificate)}>
+        <View style={{ borderWidth: 1, padding: 10, alignItems: 'center' }}>
+          {marriageCertificate ? <Image source={{ uri: marriageCertificate }} style={{ width: 100, height: 100 }} /> : <Text>Pick an image</Text>}
+        </View>
+      </TouchableOpacity>
+
+      <Text>Baptism Permit</Text>
+      <TouchableOpacity onPress={() => pickImage(setBaptismPermit)}>
+        <View style={{ borderWidth: 1, padding: 10, alignItems: 'center' }}>
+          {baptismPermit ? <Image source={{ uri: baptismPermit }} style={{ width: 100, height: 100 }} /> : <Text>Pick an image</Text>}
+        </View>
+      </TouchableOpacity>
+
+      <Button title="Submit" onPress={handleSubmit} style={{ marginTop: 20 }} />
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 20,
-    marginBottom: 10,
-  },
+const styles = {
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
+    borderBottomWidth: 1,
+    marginBottom: 10,
     padding: 10,
-    marginBottom: 15,
   },
-  godparentContainer: {
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
     marginBottom: 10,
   },
-  error: {
-    color: "red",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-});
+};
 
 export default BaptismForm;
