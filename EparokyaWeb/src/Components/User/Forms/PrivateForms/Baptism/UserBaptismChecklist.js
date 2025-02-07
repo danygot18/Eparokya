@@ -17,12 +17,19 @@ const UserBaptismChecklist = ({ baptismId }) => {
         .get(`${process.env.REACT_APP_API}/api/v1/getBaptismChecklist/${baptismId}`, { withCredentials: true })
         .then((res) => {
           console.log("API Response:", res.data);
+          
+          // Ensure we update the checklist state correctly
+          if (res.data.checklist) {
+            setChecklist(res.data.checklist);
+            console.log("Checklist:", res.data.checklist);
+          }
         })
         .catch((err) => {
           console.error("Error fetching checklist:", err);
         });
     }
   }, [baptismId]);
+  
   
   return (
     <div className="baptism-checklist-container">
@@ -32,10 +39,10 @@ const UserBaptismChecklist = ({ baptismId }) => {
       <div className="baptism-checklist-item">
         <span>Photocopy of Birth Certificate</span>
         <button
-          className={checklist.PhotocopyOfBirthCertificate ? "checked-btn" : "unchecked-btn"}
+          className={checklist?.PhotocopyOfBirthCertificate ? "checked-btn" : "unchecked-btn"}
           disabled
         >
-          {checklist.PhotocopyOfBirthCertificate ? "Checked" : "Unchecked"}
+          {checklist?.PhotocopyOfBirthCertificate ? "Checked" : "Unchecked"}
         </button>
       </div>
 
@@ -86,10 +93,10 @@ const UserBaptismChecklist = ({ baptismId }) => {
       <div className="baptism-checklist-item">
         <span>Pre-Baptism Seminar 2</span>
         <button
-          className={checklist.PreBaptismSeminar2 ? "checked-btn" : "unchecked-btn"}
+          className={checklist?.PreMarriageSeminar2 ? "checked-btn" : "unchecked-btn"}
           disabled
         >
-          {checklist.PreBaptismSeminar2 ? "Checked" : "Unchecked"}
+          {checklist?.PreMarriageSeminar2 ? "Checked" : "Unchecked"}
         </button>
       </div>
       

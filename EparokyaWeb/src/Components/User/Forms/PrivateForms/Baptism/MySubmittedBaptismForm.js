@@ -29,6 +29,39 @@ const MySubmittedBaptismForm = () => {
     const [adminNotes, setAdminNotes] = useState([]);
     const { formId } = useParams();
 
+    const [checklist, setChecklist] = useState({
+        PhotocopyOfBirthCertificate: false,
+        PhotocopyOfMarriageCertificate: false,
+        BaptismalPermit: false,
+        CertificateOfNoRecordBaptism: false,
+        PreBaptismSeminar1: false,
+        PreBaptismSeminar2: false,
+    });
+
+    // useEffect(() => {
+    //     const fetchChecklist = async () => {
+    //         if (baptismId) {
+    //             try {
+    //                 const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getBaptismChecklist/${formId}`, { withCredentials: true });
+    //                 console.log("Checklist:", response.data);
+
+    //                 if (response.data.checklist) {
+    //                     setChecklist(response.data.checklist);
+    //                     console.log("Updated Checklist State:", response.data.checklist);
+    //                 }
+    //                 console.log("Checklist:", response.data.checklist);
+    //             } catch (err) {
+    //                 console.error("Error fetching checklist:", err);
+    //             }
+    //         }
+    //     };
+
+    //     fetchChecklist();
+
+    // }, [baptismId]);
+    // console.log("Baptism ID:", formId);
+
+
     useEffect(() => {
         const fetchBaptismDetails = async () => {
             try {
@@ -45,7 +78,10 @@ const MySubmittedBaptismForm = () => {
 
                     if (response.data.baptismDate) {
                         setUpdatedBaptismDate(response.data.baptismDate);
-                        console.log("Updated Baptism Date:", response.data.adminRescheduled);
+                        // console.log("Updated Baptism Date:", response.data.adminRescheduled);
+                    }
+                    if (response.data.adminNotes && response.data.adminNotes.length > 0) {
+                        const latestAdminNote = response.data.adminNotes[response.data.adminNotes.length - 1];
                     }
                 }
             } catch (err) {
@@ -178,56 +214,25 @@ const MySubmittedBaptismForm = () => {
                             </div>
                             <div className="details-box">
                                 <h2>Additional Notes</h2>
-                                {baptismDetails?.adminNotes?.priest ? (
-                                    <div className="admin-comment">
-                                        <p>
-                                            <strong>Priest:</strong> {baptismDetails.adminNotes.priest}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <p>No priest.</p>
-                                )}
+                                {baptismDetails?.adminNotes?.length > 0 ? (
+                                    (() => {
+                                        const latestAdminNote = baptismDetails.adminNotes[baptismDetails.adminNotes.length - 1]; // Get the latest entry
 
-                                {baptismDetails?.adminNotes?.recordedBy ? (
-                                    <div className="admin-comment">
-                                        <p>
-                                            <strong>Recorded By:</strong> {baptismDetails.adminNotes.recordedBy}
-                                        </p>
-                                    </div>
+                                        return (
+                                            <div className="admin-comment">
+                                                <p><strong>Priest:</strong> {latestAdminNote.priest || "No priest"}</p>
+                                                <p><strong>Recorded By:</strong> {latestAdminNote.recordedBy || "No record"}</p>
+                                                <p><strong>Book Number:</strong> {latestAdminNote.bookNumber || "No book number"}</p>
+                                                <p><strong>Page Number:</strong> {latestAdminNote.pageNumber || "No page number"}</p>
+                                                <p><strong>Line Number:</strong> {latestAdminNote.lineNumber || "No line number"}</p>
+                                            </div>
+                                        );
+                                    })()
                                 ) : (
-                                    <p>No record.</p>
-                                )}
-
-                                {baptismDetails?.adminNotes?.bookNumber ? (
-                                    <div className="admin-comment">
-                                        <p>
-                                            <strong>Book Number:</strong> {baptismDetails.adminNotes.bookNumber}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <p>No book number.</p>
-                                )}
-
-                                {baptismDetails?.adminNotes?.pageNumber ? (
-                                    <div className="admin-comment">
-                                        <p>
-                                            <strong>Page Number:</strong> {baptismDetails.adminNotes.pageNumber}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <p>No page number.</p>
-                                )}
-
-                                {baptismDetails?.adminNotes?.lineNumber ? (
-                                    <div className="admin-comment">
-                                        <p>
-                                            <strong>Line Number:</strong> {baptismDetails.adminNotes.lineNumber}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <p>No line number.</p>
+                                    <p>No admin notes available.</p>
                                 )}
                             </div>
+
                             {/* for Rescheduling */}
                             <div className="wedding-date-box">
                                 <h3>Updated Baptism Date</h3>
@@ -244,7 +249,7 @@ const MySubmittedBaptismForm = () => {
                                     </div>
                                 )}
                             </div>
-                            
+
 
                         </div>
                     </div>
@@ -254,7 +259,7 @@ const MySubmittedBaptismForm = () => {
                     <button onClick={handleCancel} className="cancel-button">Cancel Baptism Request</button>
                 </div>
                 <div className="baptism-checklist-container">
-                    <UserBaptismChecklist baptismId={baptismId} />
+                    <UserBaptismChecklist baptismId={formId} />
                 </div>
                 <Modal
                     isOpen={isModalOpen}
@@ -291,8 +296,14 @@ const MySubmittedBaptismForm = () => {
                             alt="Certificate Preview"
                             className="modal-image"
                             style={{
+                                // transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
+                                // transition: isDragging ? "none" : "transform 0.3s ease",
                                 transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
                                 transition: isDragging ? "none" : "transform 0.3s ease",
+                                maxWidth: "100%",
+                                maxHeight: "100%",
+                                objectFit: "contain",
+                                cursor: isDragging ? "grabbing" : "grab",
                             }}
                             draggable={false}
                         />

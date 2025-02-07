@@ -176,17 +176,39 @@ exports.deleteFuneral = async (req, res) => {
 
 exports.confirmFuneral = async (req, res) => {
     try {
-        const funeral = await Funeral.findByIdAndUpdate(
-            req.params.id,
-            { funeralStatus: 'Confirmed', confirmedAt: new Date() },
-            { new: true }
-        );
-        if (!funeral) return res.status(404).send('Funeral not found.');
-        res.send(funeral);
+        const { funeralId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(funeralId)) {
+            return res.status(400).json({ message: "Invalid funeral ID format." });
+        }
+        const funeral = await Funeral.findById(funeralId);          
+        if (!funeral) {
+            return res.status(404).json({ message: "Funeral not found." });
+        }
+        funeral.funeralStatus = "Confirmed";
+        funeral.confirmedAt = new Date();
+
+        await funeral.save();
+
+        res.status(200).json({ message: "Funeral confirmed.", funeral });
     } catch (err) {
         res.status(500).send('Server error.');
     }
 };
+
+// exports.confirmFuneral = async (req, res) => {
+//     try {
+//         const funeral = await Funeral.findByIdAndUpdate(
+//             req.params.id,
+//             { funeralStatus: 'Confirmed', confirmedAt: new Date() },
+//             { new: true }
+//         );
+//         if (!funeral) return res.status(404).send('Funeral not found.');
+//         res.send(funeral);
+//     } catch (err) {
+//         res.status(500).send('Server error.');
+//     }
+// };
 
 exports.cancelFuneral = async (req, res) => {
     try {

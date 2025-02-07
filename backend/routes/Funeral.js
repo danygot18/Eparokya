@@ -31,7 +31,7 @@ router.put('/comment/:funeralId/:commentId', funeralController.updateComment);
 router.get('/getFuneral/:funeralId', funeralController.getFuneralById);
 router.put('/updateFuneral/:funeralId', funeralController.updateFuneral);
 router.delete('/deleteFuneral/:funeralId', funeralController.deleteFuneral);
-router.put('/confirmFuneral/:funeralId', funeralController.confirmFuneral);
+router.post('/confirmFuneral/:funeralId', funeralController.confirmFuneral);
 router.put('/declineFuneral/:funeralId', funeralController.cancelFuneral);
 
 module.exports = router;

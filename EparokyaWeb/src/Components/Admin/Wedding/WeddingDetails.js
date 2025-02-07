@@ -297,12 +297,12 @@ const WeddingDetails = () => {
 
           <h3>Parents</h3>
           <div className="grid-row">
-            <div className="details-item"><strong>Bride Father:</strong> {weddingDetails?.BrideFather || "N/A"}</div>
-            <div className="details-item"><strong>Bride Mother:</strong> {weddingDetails?.BrideMother || "N/A"}</div>
+            <div className="details-item"><strong>Bride Father:</strong> {weddingDetails?.brideFather || "N/A"}</div>
+            <div className="details-item"><strong>Bride Mother:</strong> {weddingDetails?.brideMother || "N/A"}</div>
           </div>
           <div className="grid-row">
-            <div className="details-item"><strong>Groom Father:</strong> {weddingDetails?.GroomFather || "N/A"}</div>
-            <div className="details-item"><strong>Groom Mother:</strong> {weddingDetails?.GroomMother || "N/A"}</div>
+            <div className="details-item"><strong>Groom Father:</strong> {weddingDetails?.groomFather || "N/A"}</div>
+            <div className="details-item"><strong>Groom Mother:</strong> {weddingDetails?.groomMother || "N/A"}</div>
           </div>
         </div>
 
