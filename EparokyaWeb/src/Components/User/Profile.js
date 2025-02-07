@@ -7,7 +7,9 @@ import '../Layout/styles/style.css'; // Custom CSS for exact layout
 
 const Profile = () => {
   const { user, loading } = useSelector((state) => state.auth);
-  
+
+  console.log('user', user?.ministryCategory); // Check that "user" exists and is populated
+
   return (
     <Fragment>
       {loading ? (
@@ -28,10 +30,10 @@ const Profile = () => {
               <p className="profile-joined">
                 <strong>Joined</strong>
                 <br />
-                <span>{String(user.createdAt).substring(0, 10)}</span>
+                <span>{String(user?.createdAt).substring(0, 10)}</span>
               </p>
 
-              {/* buttons */}
+              {/* Buttons */}
               <div className="profile-buttons">
                 <Link to="/me/update" className="btn-profile">
                   Edit Profile
@@ -49,48 +51,49 @@ const Profile = () => {
                   Feedback Form
                 </Link>
               </div>
-
             </div>
 
             {/* Right Side */}
             <div className="profile-right">
-              <h2 className="profile-greeting">Hello, {user?.name?.split(' ')[0]}!</h2>
+              <h2 className="profile-greeting">
+                Hello, {user?.name?.split(' ')[0]}!
+              </h2>
 
               <div className="profile-details">
                 <p>
-                  <strong>Name:</strong> {user.name}
+                  <strong>Name:</strong> {user?.name}
                 </p>
                 <p>
-                  <strong>Address:</strong> {user.barangay || 'N/A'}, {user.city || 'N/A'}, {user.country || 'N/A'}
+                  <strong>Address:</strong>{' '}
+                  {user?.barangay || 'N/A'}, {user?.city || 'N/A'},{' '}
+                  {user?.country || 'N/A'}
                 </p>
                 <p>
-                  <strong>Age:</strong> {user.age || 'N/A'}
+                  <strong>Age:</strong> {user?.age || 'N/A'}
                 </p>
                 <p>
-                  <strong>Gender:</strong> {user.preference || 'N/A'}
+                  <strong>Gender:</strong> {user?.preference || 'N/A'}
                 </p>
                 <p>
-                  <strong>Phone:</strong> {user.phone || 'N/A'}
+                  <strong>Phone:</strong> {user?.phone || 'N/A'}
                 </p>
                 <p>
-                  <strong>Email:</strong> {user.email || 'N/A'}
+                  <strong>Email:</strong> {user?.email || 'N/A'}
                 </p>
 
-                {/* ✅ Fix: Display ministry categories correctly */}
+                {/* Display Ministry Categories */}
                 <p>
                   <strong>Ministry:</strong>{' '}
-                  {user.ministryCategory && user.ministryCategory.length > 0 ? (
+                  {user?.ministryCategory && user?.ministryCategory.length > 0 ? (
                     <ul>
                       {user.ministryCategory.map((category) => (
-                        <li key={category._id}>{category.name}</li> // ✅ Ensure "category.name" exists
+                        <li key={category?._id}>{category?.name}</li>
                       ))}
                     </ul>
                   ) : (
                     'N/A'
                   )}
                 </p>
-
-
               </div>
             </div>
           </div>

@@ -31,7 +31,7 @@ const MySubmittedCounselingForm = () => {
 
     const handleCancel = async () => {
         try {
-            await axios.post(`${baseURL}/${formId}/cancelCounseling`, {}, { withCredentials: true });
+            await axios.post(`${baseURL}/${formId}/declineCounseling`,  { withCredentials: true });
             Alert.alert("Success", "Counseling cancelled successfully!");
         } catch (error) {
             Alert.alert("Error", "Failed to cancel the counseling.");

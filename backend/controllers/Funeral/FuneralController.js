@@ -213,7 +213,7 @@ exports.confirmFuneral = async (req, res) => {
 exports.cancelFuneral = async (req, res) => {
     try {
         const funeral = await Funeral.findByIdAndUpdate(
-            req.params.id,
+            req.params.funeralId,
             { funeralStatus: 'Cancelled' },
             { new: true }
         );

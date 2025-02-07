@@ -138,7 +138,7 @@ exports.confirmBaptism = async (req, res) => {
 exports.declineBaptism = async (req, res) => {
   try {
     const baptism = await Baptism.findByIdAndUpdate(
-      req.params.id,
+      req.params.baptismId,
       { binyagStatus: 'Cancelled' },
       { new: true }
     );

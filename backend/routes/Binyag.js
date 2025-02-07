@@ -33,7 +33,7 @@ router.get('/getAllUserSubmittedBaptism', isAuthenticatedUser, BaptismController
 router.get('/getBaptismForm/:formId', isAuthenticatedUser, BaptismController.getBaptismFormById);
 
 
-router.post('/:baptismId/declineBaptism', BaptismController.declineBaptism);
+router.put('/declineBaptism/:baptismId/', BaptismController.declineBaptism);
 router.post('/:baptismId/admin/addComment', BaptismController.addBaptismComment);
 router.put('/:baptismId/updateBaptismDate', BaptismController.updateBaptismDate);
 

@@ -1,0 +1,83 @@
+.wedding-details-page {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+}
+
+.wedding-details-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.Wedding-three-container-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three equal columns */
+    gap: 20px;
+    width: 100%;
+}
+
+.Wedding-left-container,
+.Wedding-right-container,
+.Wedding-third-container,
+.Down-left-container,
+.Down-right-container,
+.Down-third-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Second row layout */
+.Wedding-down-container-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three equal columns */
+    gap: 20px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.wedding-details-section {
+    flex: 1;
+    min-width: 120px;
+}
+
+.wedding-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.wedding-details-box,
+.wedding-details-picture,
+.wedding-checklist-container {
+    flex: 1;
+    min-width: 320px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    gap: 20px;
+}
+
+.wedding-grid-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .Wedding-three-container-layout,
+    .Wedding-down-container-layout {
+        grid-template-columns: 1fr; /* Stack containers vertically on smaller screens */
+    }
+}
