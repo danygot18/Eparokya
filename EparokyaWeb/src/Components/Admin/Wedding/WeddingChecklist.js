@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const WeddingChecklist = ({ weddingId }) => {
-  // Initialize state for all checklist fields
   const [checklist, setChecklist] = useState({
-    // Groom Fields
     GroomNewBaptismalCertificate: false,
     GroomNewConfirmationCertificate: false,
     GroomMarriageLicense: false,
@@ -13,8 +11,6 @@ const WeddingChecklist = ({ weddingId }) => {
     GroomOrigPSA: false,
     GroomOnebyOne: false,
     GroomTwobyTwo: false,
-
-    // Bride Fields
     BrideNewBaptismalCertificate: false,
     BrideNewConfirmationCertificate: false,
     BrideMarriageLicense: false,
@@ -23,12 +19,8 @@ const WeddingChecklist = ({ weddingId }) => {
     BrideOrigPSA: false,
     BrideOnebyOne: false,
     BrideTwobyTwo: false,
-
-    // Other Checklist Fields
     PermitFromtheParishOftheBride: false,
     ChildBirthCertificate: false,
-
-    // Seminar / Additional
     PreMarriageSeminar: false,
     CanonicalInterview: false,
     Confession: false,
@@ -51,16 +43,13 @@ const WeddingChecklist = ({ weddingId }) => {
     }
   }, [weddingId]);
 
-  // Handle checkbox toggle
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
+  const handleCheckboxChange = (name) => {
     setChecklist((prevState) => ({
       ...prevState,
-      [name]: checked,
+      [name]: !prevState[name],
     }));
   };
 
-  // Save updated checklist data
   const handleSave = async () => {
     try {
       await axios.put(
@@ -79,250 +68,230 @@ const WeddingChecklist = ({ weddingId }) => {
     <div className="wedding-checklist">
       <h2>Wedding Checklist</h2>
 
-      {/* Groom Checklist */}
       <h3>Groom Checklist</h3>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="GroomNewBaptismalCertificate"
-            checked={checklist.GroomNewBaptismalCertificate}
-            onChange={handleCheckboxChange}
-          />
-          Groom New Baptismal Certificate
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Groom New Baptismal Certificate</span>
+        <button
+          className={checklist.GroomNewBaptismalCertificate ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('GroomNewBaptismalCertificate')}
+        >
+          {checklist.GroomNewBaptismalCertificate ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="GroomNewConfirmationCertificate"
-            checked={checklist.GroomNewConfirmationCertificate}
-            onChange={handleCheckboxChange}
-          />
-          Groom New Confirmation Certificate
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Groom New Confirmation Certificate</span>
+        <button
+          className={checklist.GroomNewConfirmationCertificate ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('GroomNewConfirmationCertificate')}
+        >
+          {checklist.GroomNewConfirmationCertificate ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="GroomMarriageLicense"
-            checked={checklist.GroomMarriageLicense}
-            onChange={handleCheckboxChange}
-          />
-          Groom Marriage License
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Groom Marriage License</span>
+        <button
+          className={checklist.GroomMarriageLicense ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('GroomMarriageLicense')}
+        >
+          {checklist.GroomMarriageLicense ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="GroomMarriageBans"
-            checked={checklist.GroomMarriageBans}
-            onChange={handleCheckboxChange}
-          />
-          Groom Marriage Bans
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Groom Marriage Bans</span>
+        <button
+          className={checklist.GroomMarriageBans ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('GroomMarriageBans')}
+        >
+          {checklist.GroomMarriageBans ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="GroomOrigCeNoMar"
-            checked={checklist.GroomOrigCeNoMar}
-            onChange={handleCheckboxChange}
-          />
-          Groom Original CENoMar
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Groom Original CENoMar</span>
+        <button
+          className={checklist.GroomOrigCeNoMar ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('GroomOrigCeNoMar')}
+        >
+          {checklist.GroomOrigCeNoMar ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="GroomOrigPSA"
-            checked={checklist.GroomOrigPSA}
-            onChange={handleCheckboxChange}
-          />
-          Groom Original PSA
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Groom Original PSA</span>
+        <button
+          className={checklist.GroomOrigPSA ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('GroomOrigPSA')}
+        >
+          {checklist.GroomOrigPSA ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="GroomOnebyOne"
-            checked={checklist.GroomOnebyOne}
-            onChange={handleCheckboxChange}
-          />
-          Groom One-by-One
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Groom One-by-One</span>
+        <button
+          className={checklist.GroomOnebyOne ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('GroomOnebyOne')}
+        >
+          {checklist.GroomOnebyOne ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="GroomTwobyTwo"
-            checked={checklist.GroomTwobyTwo}
-            onChange={handleCheckboxChange}
-          />
-          Groom Two-by-Two
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Groom Two-by-Two</span>
+        <button
+          className={checklist.GroomTwobyTwo ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('GroomTwobyTwo')}
+        >
+          {checklist.GroomTwobyTwo ? "Checked" : "Unchecked"}
+        </button>
       </div>
 
-      {/* Bride Checklist */}
       <h3>Bride Checklist</h3>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="BrideNewBaptismalCertificate"
-            checked={checklist.BrideNewBaptismalCertificate}
-            onChange={handleCheckboxChange}
-          />
-          Bride New Baptismal Certificate
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Bride New Baptismal Certificate</span>
+        <button
+          className={checklist.BrideNewBaptismalCertificate ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('BrideNewBaptismalCertificate')}
+        >
+          {checklist.BrideNewBaptismalCertificate ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="BrideNewConfirmationCertificate"
-            checked={checklist.BrideNewConfirmationCertificate}
-            onChange={handleCheckboxChange}
-          />
-          Bride New Confirmation Certificate
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Bride New Confirmation Certificate</span>
+        <button
+          className={checklist.BrideNewConfirmationCertificate ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('BrideNewConfirmationCertificate')}
+        >
+          {checklist.BrideNewConfirmationCertificate ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="BrideMarriageLicense"
-            checked={checklist.BrideMarriageLicense}
-            onChange={handleCheckboxChange}
-          />
-          Bride Marriage License
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Bride Marriage License</span>
+        <button
+          className={checklist.BrideMarriageLicense ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('BrideMarriageLicense')}
+        >
+          {checklist.BrideMarriageLicense ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="BrideMarriageBans"
-            checked={checklist.BrideMarriageBans}
-            onChange={handleCheckboxChange}
-          />
-          Bride Marriage Bans
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Bride Marriage Bans</span>
+        <button
+          className={checklist.BrideMarriageBans ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('BrideMarriageBans')}
+        >
+          {checklist.BrideMarriageBans ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="BrideOrigCeNoMar"
-            checked={checklist.BrideOrigCeNoMar}
-            onChange={handleCheckboxChange}
-          />
-          Bride Original CENoMar
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Bride Original CENoMar</span>
+        <button
+          className={checklist.BrideOrigCeNoMar ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('BrideOrigCeNoMar')}
+        >
+          {checklist.BrideOrigCeNoMar ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="BrideOrigPSA"
-            checked={checklist.BrideOrigPSA}
-            onChange={handleCheckboxChange}
-          />
-          Bride Original PSA
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Bride Original PSA</span>
+        <button
+          className={checklist.BrideOrigPSA ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('BrideOrigPSA')}
+        >
+          {checklist.BrideOrigPSA ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="BrideOnebyOne"
-            checked={checklist.BrideOnebyOne}
-            onChange={handleCheckboxChange}
-          />
-          Bride One-by-One
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Bride One-by-One</span>
+        <button
+          className={checklist.BrideOnebyOne ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('BrideOnebyOne')}
+        >
+          {checklist.BrideOnebyOne ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="BrideTwobyTwo"
-            checked={checklist.BrideTwobyTwo}
-            onChange={handleCheckboxChange}
-          />
-          Bride Two-by-Two
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Bride Two-by-Two</span>
+        <button
+          className={checklist.BrideTwobyTwo ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('BrideTwobyTwo')}
+        >
+          {checklist.BrideTwobyTwo ? "Checked" : "Unchecked"}
+        </button>
       </div>
 
-      {/* Other Checklist Fields */}
       <h3>Other Documents</h3>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="PermitFromtheParishOftheBride"
-            checked={checklist.PermitFromtheParishOftheBride}
-            onChange={handleCheckboxChange}
-          />
-          Permit From the Parish Of the Bride
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Permit From the Parish Of the Bride</span>
+        <button
+          className={checklist.PermitFromtheParishOftheBride ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('PermitFromtheParishOftheBride')}
+        >
+          {checklist.PermitFromtheParishOftheBride ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="ChildBirthCertificate"
-            checked={checklist.ChildBirthCertificate}
-            onChange={handleCheckboxChange}
-          />
-          Child Birth Certificate
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Child Birth Certificate</span>
+        <button
+          className={checklist.ChildBirthCertificate ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('ChildBirthCertificate')}
+        >
+          {checklist.ChildBirthCertificate ? "Checked" : "Unchecked"}
+        </button>
       </div>
 
-      {/* Seminar / Additional */}
       <h3>Seminar / Additional</h3>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="PreMarriageSeminar1"
-            checked={checklist.PreMarriageSeminar1}
-            onChange={handleCheckboxChange}
-          />
-          Pre Marriage Seminar 
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Pre Marriage Seminar</span>
+        <button
+          className={checklist.PreMarriageSeminar ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('PreMarriageSeminar')}
+        >
+          {checklist.PreMarriageSeminar ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="CanonicalInterview"
-            checked={checklist.CanonicalInterview}
-            onChange={handleCheckboxChange}
-          />
-          Canonical Interview
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Canonical Interview</span>
+        <button
+          className={checklist.CanonicalInterview ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('CanonicalInterview')}
+        >
+          {checklist.CanonicalInterview ? "Checked" : "Unchecked"}
+        </button>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="Confession"
-            checked={checklist.Confession}
-            onChange={handleCheckboxChange}
-          />
-          Confession
-        </label>
+      <div className="wedding-checklist-item">
+        <span>Confession</span>
+        <button
+          className={checklist.Confession ? "checked-btn" : "unchecked-btn"}
+          onClick={() => handleCheckboxChange('Confession')}
+        >
+          {checklist.Confession ? "Checked" : "Unchecked"}
+        </button>
       </div>
 
       <button onClick={handleSave}>Save Checklist</button>
+      <style>
+        {`
+                    .checked-btn {
+                        background-color: green;
+                        color: white;
+                        padding: 5px 10px;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: not-allowed;
+                    }
+                    .unchecked-btn {
+                        background-color: gray;
+                        color: white;
+                        padding: 5px 10px;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: not-allowed;
+                    }
+                    .wedding-checklist-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 10px;
+                    }
+                `}
+      </style>
     </div>
   );
 };

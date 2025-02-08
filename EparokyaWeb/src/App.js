@@ -128,13 +128,19 @@ import { Prayers } from './Components/Guest/Prayers';
 import { Events } from './Components/Guest/Events';
 import { Sermons } from './Components/Guest/Sermons';
 
+//User Chat
 import ChatList from "./Components/Chat/ChatList";
 import Chat from "./Components/Chat/Chat";
 import ChatSidebar from "./Components/Chat/ChatSideBar";
 
+//Admin Chat
+import AdminChat from './Components/Admin/AdminChat';
+
 import { socket } from "./socket";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
+
+
 
 
 
@@ -272,7 +278,7 @@ function App() {
         <Route path="/prayers" element={<Prayers />} exact="true" />
         <Route path="/sermons" element={<Sermons />} exact="true" />
         <Route path="/Events" element={<Events />} exact="true" />
-        <Route path="/chatlist" element={<ChatList />} exact="true" />
+        {/* <Route path="/chatlist" element={<ChatList />} exact="true" /> */}
 
         {/* Chat */}
         <Route path="/chatlist" element={<ChatList />} exact="true" />
@@ -280,6 +286,10 @@ function App() {
         <Route path="/chat/:chat/:email" element={<Chat />} />
         <Route path="/ChatSidebar" element={<ChatSidebar />} exact="true" />
 
+        {/* Admin Chat */}
+        <Route path="/adminChat/:chat/:email" element={<AdminChat />} exact="true" />
+
+        {/* Terms and Condition */}
         {/* Prayer */}
 
 

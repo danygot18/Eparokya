@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [weddingStatus, setWeddingStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
   const [baptismStatus, setBaptismStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
   const [funeralStatus, setFuneralStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
+  const [ministryCategoryData, setMinistryCategoryData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const config = {
@@ -44,7 +45,6 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-
         const usersCountRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/registeredUsersCount`, config);
         setRegisteredUsersCount(usersCountRes.data.count);
 
@@ -66,6 +66,11 @@ const Dashboard = () => {
         setWeddingStatus(convertToStatusObject(weddingStatusRes.data));
         setBaptismStatus(convertToStatusObject(baptismStatusRes.data));
         setFuneralStatus(convertToStatusObject(funeralStatusRes.data));
+
+        // Ministry category data
+        const ministryCategoryRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/admin/getUsersGroupedByMinistryCategory`, config);
+        setMinistryCategoryData(ministryCategoryRes.data.data);
+
 
         setLoading(false);
       } catch (error) {
@@ -94,6 +99,17 @@ const Dashboard = () => {
         data: [data.pending, data.confirmed, data.cancelled],
         backgroundColor: ["#FFCE56", "#36A2EB", "#FF6384"],
         hoverBackgroundColor: ["#FFCE56", "#36A2EB", "#FF6384"],
+      },
+    ],
+  });
+
+  const generateMinistryCategoryChartData = (data) => ({
+    labels: data.map(item => item.ministryCategory),
+    datasets: [
+      {
+        label: "Users",
+        data: data.map(item => item.userCount),
+        backgroundColor: "rgba(255, 159, 64, 0.6)",
       },
     ],
   });
@@ -137,7 +153,6 @@ const Dashboard = () => {
     margin: "0 auto",
   };
 
-
   return (
     <div style={{ display: "flex" }}>
       <SideBar />
@@ -149,7 +164,6 @@ const Dashboard = () => {
           <p>Loading charts...</p>
         ) : (
           <div style={chartContainerStyle}>
-
             <div style={chartCardStyle}>
               <h5>Total Registered Users</h5>
               <p style={{ fontSize: "24px", fontWeight: "bold" }}>{loading ? "Loading..." : registeredUsersCount}</p>
@@ -169,6 +183,12 @@ const Dashboard = () => {
             <div style={chartCardStyle}>
               <h5>Confirmed Funerals Per Month</h5>
               <Bar data={generateChartData("Funerals", funeralData, "rgba(255, 99, 132, 0.6)")} options={options} />
+            </div>
+
+            {/* Ministry Category Bar */}
+            <div style={chartCardStyle}>
+              <h5>Users Grouped by Ministry Category</h5>
+              <Bar data={generateMinistryCategoryChartData(ministryCategoryData)} options={options} />
             </div>
 
             {/* Pie */}
@@ -198,6 +218,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
 
 export default Dashboard;

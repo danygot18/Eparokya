@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { socket } from '../../../socket';
+import { socket } from '../../../socket/index';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native'
 import baseURL from '../../../assets/common/baseUrl';

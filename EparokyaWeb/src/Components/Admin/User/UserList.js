@@ -21,14 +21,8 @@ const UsersList = () => {
   const navigate = useNavigate();
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
-
-
   const config = {
     withCredentials: true
-    // headers: {
-    //   'Content-Type': 'application/json',
-    //   Authorization: `Bearer ${getToken()}`,
-    // },
   };
 
   const listUsers = async () => {
@@ -46,24 +40,15 @@ const UsersList = () => {
     }
   };
 
-
   const fetchMinistryCategories = async () => {
     try {
-      const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllMinistryCategories`, config);
-
-      console.log("Fetched Ministry Categories:", data.categories); // Log raw API response
+      const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/ministryCategory/getAllMinistryCategories`, config);
       setMinistryCategories(data.categories); // Ensure it's stored as an array
     } catch (error) {
       console.error("Failed to fetch categories:", error);
       setMinistryCategories([]); // Prevent UI from breaking
     }
   };
-
-
-
-
-
-
 
   useEffect(() => {
     listUsers();
@@ -139,7 +124,6 @@ const UsersList = () => {
                     <option disabled>No categories available</option>
                   ) : (
                     ministryCategories.map((category, index) => {
-                      console.log("Rendering category:", category); // Debugging log
                       return (
                         <option key={category._id || index} value={category._id}>
                           {category.name || "Unnamed Category"}
@@ -149,9 +133,6 @@ const UsersList = () => {
                   )}
                 </Form.Control>
               </Form.Group>
-
-
-
             </Form>
 
             {loading ? (
@@ -163,7 +144,7 @@ const UsersList = () => {
                     <th>User ID</th>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Ministry Category</th>
+                    <th>Ministry Categories</th>
                     <th>Joined</th>
                     <th>Actions</th>
                   </tr>
@@ -176,12 +157,11 @@ const UsersList = () => {
                         <td>{user.name}</td>
                         <td>{user.email}</td>
                         <td>
-                          {user.ministryCategory && user.ministryCategory.name
-                            ? user.ministryCategory.name
+                          {Array.isArray(user.ministryCategory) && user.ministryCategory.length > 0
+                            ? user.ministryCategory.map((category) => category.name).join(', ')
                             : "No Category"}
                         </td>
-
-
+                        <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                         <td>
                           <Link to={`/admin/user/${user._id}`} className="btn btn-primary btn-sm">
                             <FaEdit />
@@ -194,12 +174,10 @@ const UsersList = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" className="text-center">No users found</td>
+                      <td colSpan="6" className="text-center">No users found</td>
                     </tr>
                   )}
-
                 </tbody>
-
               </Table>
             )}
           </Fragment>

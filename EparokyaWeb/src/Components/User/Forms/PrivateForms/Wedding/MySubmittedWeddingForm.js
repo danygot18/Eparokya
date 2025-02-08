@@ -7,6 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import Modal from 'react-modal';
 import { useParams } from "react-router-dom";
 import "./MySubmittedWeddingForm.css";
+import UserWeddingChecklist from "./UserWeddingChecklist";
 
 Modal.setAppElement('#root');
 
@@ -111,73 +112,79 @@ const MyWeddingSubmittedForm = ({ weddingId }) => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="wedding-details-page">
+    <div className="user-wedding-details-page">
       <GuestSideBar />
-      <div className="wedding-details-content" style={{ fontFamily: 'Helvetica, sans-serif' }}>
+      <div className="user-wedding-details-content">
         <h1>My Submitted Wedding Forms</h1>
-        {weddingForms && (
-          <div key={weddingForms._id} className="details">
-            <div className="details-grid">
-              <div className="details-item"><strong>Date of Application:</strong> {weddingForms?.dateOfApplication ? new Date(weddingForms.dateOfApplication).toLocaleDateString() : "N/A"}</div>
-              <div className="details-item"><strong>Wed`ding Date:</strong> {weddingForms?.weddingDate ? new Date(weddingForms.weddingDate).toLocaleDateString() : "N/A"}</div>
-              <div className="details-item"><strong>Wedding Time:</strong> {weddingForms?.weddingTime || "N/A"}</div>
+        <div className="user-Wedding-three-container-layout">
+          <div className="user-wedding-left-container">
+            <div className="wedding-details-box">
+              <h1>Wedding Details</h1>
+              <div key={weddingForms._id} className="details">
+                <div className="details-grid">
+                  <div className="details-item"><strong>Date of Application:</strong> {weddingForms?.dateOfApplication ? new Date(weddingForms.dateOfApplication).toLocaleDateString() : "N/A"}</div>
+                  <div className="details-item"><strong>Wed`ding Date:</strong> {weddingForms?.weddingDate ? new Date(weddingForms.weddingDate).toLocaleDateString() : "N/A"}</div>
+                  <div className="details-item"><strong>Wedding Time:</strong> {weddingForms?.weddingTime || "N/A"}</div>
 
-              {/* Bride Details */}
-              <div className="details-item"><strong>Bride Name:</strong> {weddingForms?.brideName || "N/A"}</div>
-              <div className="details-item"><strong>Bride Address:</strong> {`${weddingForms?.brideAddress?.state}, ${weddingForms?.brideAddress?.zip}, ${weddingForms?.brideAddress?.city}`}</div>
-              <div className="details-item"><strong>Bride Birth Date:</strong> {weddingForms?.brideBirthDate ? new Date(weddingForms.brideBirthDate).toLocaleDateString() : "N/A"}</div>
-              <div className="details-item"><strong>Bride Occupation:</strong> {weddingForms?.brideOccupation || "N/A"}</div>
-              <div className="details-item"><strong>Bride Religion:</strong> {weddingForms?.brideReligion || "N/A"}</div>
-              <div className="details-item"><strong>Bride Phone:</strong> {weddingForms?.bridePhone || "N/A"}</div>
+                  {/* Bride Details */}
+                  <div className="details-item"><strong>Bride Name:</strong> {weddingForms?.brideName || "N/A"}</div>
+                  <div className="details-item"><strong>Bride Address:</strong> {`${weddingForms?.brideAddress?.state}, ${weddingForms?.brideAddress?.zip}, ${weddingForms?.brideAddress?.city}`}</div>
+                  <div className="details-item"><strong>Bride Birth Date:</strong> {weddingForms?.brideBirthDate ? new Date(weddingForms.brideBirthDate).toLocaleDateString() : "N/A"}</div>
+                  <div className="details-item"><strong>Bride Occupation:</strong> {weddingForms?.brideOccupation || "N/A"}</div>
+                  <div className="details-item"><strong>Bride Religion:</strong> {weddingForms?.brideReligion || "N/A"}</div>
+                  <div className="details-item"><strong>Bride Phone:</strong> {weddingForms?.bridePhone || "N/A"}</div>
 
-              {/* Groom Details */}
-              <div className="details-item"><strong>Groom Name:</strong> {weddingForms?.groomName || "N/A"}</div>
-              <div className="details-item"><strong>Groom Address:</strong> {`${weddingForms?.groomAddress?.state}, ${weddingForms?.groomAddress?.zip}, ${weddingForms?.groomAddress?.city}`}</div>
-              <div className="details-item"><strong>Groom Phone:</strong> {weddingForms?.groomPhone || "N/A"}</div>
-              <div className="details-item"><strong>Groom Birth Date:</strong> {weddingForms?.groomBirthDate ? new Date(weddingForms.groomBirthDate).toLocaleDateString() : "N/A"}</div>
-              <div className="details-item"><strong>Groom Occupation:</strong> {weddingForms?.groomOccupation || "N/A"}</div>
-              <div className="details-item"><strong>Groom Religion:</strong> {weddingForms?.groomReligion || "N/A"}</div>
+                  {/* Groom Details */}
+                  <div className="details-item"><strong>Groom Name:</strong> {weddingForms?.groomName || "N/A"}</div>
+                  <div className="details-item"><strong>Groom Address:</strong> {`${weddingForms?.groomAddress?.state}, ${weddingForms?.groomAddress?.zip}, ${weddingForms?.groomAddress?.city}`}</div>
+                  <div className="details-item"><strong>Groom Phone:</strong> {weddingForms?.groomPhone || "N/A"}</div>
+                  <div className="details-item"><strong>Groom Birth Date:</strong> {weddingForms?.groomBirthDate ? new Date(weddingForms.groomBirthDate).toLocaleDateString() : "N/A"}</div>
+                  <div className="details-item"><strong>Groom Occupation:</strong> {weddingForms?.groomOccupation || "N/A"}</div>
+                  <div className="details-item"><strong>Groom Religion:</strong> {weddingForms?.groomReligion || "N/A"}</div>
+                </div>
+
+                <h3>Parents</h3>
+                <div className="grid-row">
+                  <div className="details-item"><strong>Bride Father:</strong> {weddingForms?.brideFather || "N/A"}</div>
+                  <div className="details-item"><strong>Bride Mother:</strong> {weddingForms?.brideMother || "N/A"}</div>
+                </div>
+                <div className="grid-row">
+                  <div className="details-item"><strong>Groom Father:</strong> {weddingForms?.groomFather || "N/A"}</div>
+                  <div className="details-item"><strong>Groom Mother:</strong> {weddingForms?.groomMother || "N/A"}</div>
+                </div>
+
+                {/* Ninong and Ninang Details */}
+                <div className="details-box">
+                  <h3>Ninong</h3>
+                  {weddingForms?.Ninong?.length > 0 ? (
+                    weddingForms.Ninong.map((ninong, index) => (
+                      <div key={index} className="grid-row">
+                        <p><strong>Name:</strong> {ninong.name}</p>
+                        <p><strong>Address:</strong> {ninong.address.street}, {ninong.address.city}, {ninong.address.zip}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No Ninong details available.</p>
+                  )}
+                </div>
+
+                <div className="details-box">
+                  <h3>Ninang</h3>
+                  {weddingForms?.Ninang?.length > 0 ? (
+                    weddingForms.Ninang.map((ninang, index) => (
+                      <div key={index} className="grid-row">
+                        <p><strong>Name:</strong> {ninang.name}</p>
+                        <p><strong>Address:</strong> {ninang.address.street}, {ninang.address.city}, {ninang.address.zip}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No Ninang details available.</p>
+                  )}
+                </div>
+              </div>
             </div>
-
-            <h3>Parents</h3>
-            <div className="grid-row">
-              <div className="details-item"><strong>Bride Father:</strong> {weddingForms?.brideFather || "N/A"}</div>
-              <div className="details-item"><strong>Bride Mother:</strong> {weddingForms?.brideMother || "N/A"}</div>
-            </div>
-            <div className="grid-row">
-              <div className="details-item"><strong>Groom Father:</strong> {weddingForms?.groomFather || "N/A"}</div>
-              <div className="details-item"><strong>Groom Mother:</strong> {weddingForms?.groomMother || "N/A"}</div>
-            </div>
-
-            {/* Ninong and Ninang Details */}
-            <div className="details-box">
-              <h3>Ninong</h3>
-              {weddingForms?.Ninong?.length > 0 ? (
-                weddingForms.Ninong.map((ninong, index) => (
-                  <div key={index} className="grid-row">
-                    <p><strong>Name:</strong> {ninong.name}</p>
-                    <p><strong>Address:</strong> {ninong.address.street}, {ninong.address.city}, {ninong.address.zip}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No Ninong details available.</p>
-              )}
-            </div>
-
-            <div className="details-box">
-              <h3>Ninang</h3>
-              {weddingForms?.Ninang?.length > 0 ? (
-                weddingForms.Ninang.map((ninang, index) => (
-                  <div key={index} className="grid-row">
-                    <p><strong>Name:</strong> {ninang.name}</p>
-                    <p><strong>Address:</strong> {ninang.address.street}, {ninang.address.city}, {ninang.address.zip}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No Ninang details available.</p>
-              )}
-            </div>
-
+          </div>
+          <div className="user-Wedding-right-container">
             <div className="details-box">
               <h3>Groom Documents</h3>
               {['GroomNewBaptismalCertificate', 'GroomNewConfirmationCertificate', 'GroomMarriageLicense', 'GroomMarriageBans', 'GroomOrigCeNoMar', 'GroomOrigPSA'].map((doc, index) => (
@@ -215,40 +222,42 @@ const MyWeddingSubmittedForm = ({ weddingId }) => {
                 </div>
               ))}
             </div>
-
-            <div className="admin-comments-section">
-              <h3>Admin Comments</h3>
-              {weddingForms?.comments && Array.isArray(weddingForms.comments) && weddingForms.comments.length > 0 ? ( // Ensure comments is an array
-                weddingForms.comments.map((comment, index) => (
-                  <div key={index} className="admin-comment">
-                    <p className="comment-date">
-                      {new Date(comment?.createdAt).toLocaleDateString()}
-                    </p>
-                    <p><strong>Comment:</strong> {comment?.selectedComment || "N/A"}</p>
-                    <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No admin comments yet.</p>
-              )}
-            </div>
-
-            {/* for Rescheduling */}
-            <div className="wedding-date-box">
-              <h3>Updated Wedding Date</h3>
-              <p className="date">
-                {updatedWeddingDate ? new Date(updatedWeddingDate).toLocaleDateString() : "N/A"}
-              </p>
-
-              {weddingForms?.adminRescheduled?.reason && (
-                <div className="reschedule-reason">
-                  <h3>Reason for Rescheduling</h3>
-                  <p>{weddingForms.adminRescheduled.reason}</p>
+          </div>
+          <div className="admin-comments-section">
+            <h3>Admin Comments</h3>
+            {weddingForms?.comments && Array.isArray(weddingForms.comments) && weddingForms.comments.length > 0 ? ( // Ensure comments is an array
+              weddingForms.comments.map((comment, index) => (
+                <div key={index} className="admin-comment">
+                  <p className="comment-date">
+                    {new Date(comment?.createdAt).toLocaleDateString()}
+                  </p>
+                  <p><strong>Comment:</strong> {comment?.selectedComment || "N/A"}</p>
+                  <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
                 </div>
-              )}
-            </div>
+              ))
+            ) : (
+              <p>No admin comments yet.</p>
+            )}
+            <UserWeddingChecklist weddingId={formId}/>
+          </div>
 
-            {/* For Additional Requirements */}
+          {/* for Rescheduling */}
+          <div className="wedding-date-box">
+            <h3>Updated Wedding Date</h3>
+            <p className="date">
+              {updatedWeddingDate ? new Date(updatedWeddingDate).toLocaleDateString() : "N/A"}
+            </p>
+
+            {weddingForms?.adminRescheduled?.reason && (
+              <div className="reschedule-reason">
+                <h3>Reason for Rescheduling</h3>
+                <p>{weddingForms.adminRescheduled.reason}</p>
+              </div>
+            )}
+          </div>
+
+          {/* For Additional Requirements */}
+          <div className="user-Wedding-third-container">
             <div className="additional-req-comments">
               <h3>Additional Requirements</h3>
               {weddingForms?.additionalReq ? (
@@ -297,13 +306,15 @@ const MyWeddingSubmittedForm = ({ weddingId }) => {
                 <p>No additional requirements have been set yet.</p>
               )}
             </div>
-
-            {/* Cancel Button */}
-            <div className="button-container">
-              <button onClick={() => handleCancel(weddingForms._id)}>Cancel Wedding</button>
-            </div>
           </div>
-        )}
+
+          {/* Cancel Button */}
+          <div className="button-container">
+            <button onClick={() => handleCancel(weddingForms._id)}>Cancel Wedding</button>
+          </div>
+        </div>
+
+
 
         {/* Modal for Image Preview */}
         <Modal

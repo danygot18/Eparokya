@@ -242,17 +242,14 @@ exports.getBaptismChecklist = async (req, res) => {
 
     // Ensure proper population of the checklistId
     const baptism = await Baptism.findById(baptismId)
-      .populate({
-        path: 'checklistId',
-        model: 'BaptismChecklist', // Ensure this matches your model name
-      });
+      // .populate({
+      //   path: 'checklistId',
+      //   model: 'BaptismChecklist', // Ensure this matches your model name
+      // });
+      .populate('checklistId');
 
     if (!baptism) {
       return res.status(404).json({ message: 'Baptism not found' });
-    }
-
-    if (!baptism.checklistId) {
-      return res.status(404).json({ message: 'Checklist not found' });
     }
 
     res.json({ checklist: baptism.checklistId });

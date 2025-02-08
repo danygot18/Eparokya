@@ -3,7 +3,7 @@ import axios from "axios";
 import "../../Layout/styles/style.css";
 import SideBar from "../SideBar";
 import "../../Layout/styles/style.css";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import DateTimePicker from "react-datetime-picker";
 import 'react-datetime-picker/dist/DateTimePicker.css';
@@ -17,6 +17,7 @@ const FuneralDetails = () => {
     const [funeralDetails, setFuneralDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     const [priest, setPriest] = useState("");
     const [selectedComment, setSelectedComment] = useState("");
@@ -54,8 +55,8 @@ const FuneralDetails = () => {
                 setComments(response.data.comments || []);
                 setPriest(response.data.priest);
                 setDeathCertificateImage(response.data.deathCertificate || "");
-                
-                setUpdatedFuneralDate(response.data.funeralDate || ""); 
+
+                setUpdatedFuneralDate(response.data.funeralDate || "");
             } catch (err) {
                 console.error("API Error:", err);
                 setError("Failed to fetch funeral details.");
@@ -66,7 +67,7 @@ const FuneralDetails = () => {
         fetchFuneralDetails();
         // console.log("Funeral Details:", funeralId);
     }, [funeralId]);
-    
+
 
     const handleConfirm = async (funeralId) => {
         try {
@@ -150,20 +151,20 @@ const FuneralDetails = () => {
             alert("Please select a date and provide a reason.");
             return;
         }
-    
+
         try {
             setLoading(true);
             const response = await axios.put(
                 `${process.env.REACT_APP_API}/api/v1/updateFuneralDate/${funeralDetails._id}`,
                 { newDate, reason }
             );
-    
+
             setUpdatedFuneralDate(response.data.funeral.funeralDate);
             setFuneralDetails(prevDetails => ({
                 ...prevDetails,
                 funeralDate: response.data.funeral.funeralDate
             }));
-    
+
             alert("Funeral date updated successfully!");
         } catch (error) {
             console.error("Error updating funeral date:", error);
@@ -172,7 +173,7 @@ const FuneralDetails = () => {
             setLoading(false);
         }
     };
-    
+
     const handleSubmitComment = async () => {
         if (!selectedComment && !additionalComment) {
             alert("Please select or enter a comment.");
@@ -274,7 +275,7 @@ const FuneralDetails = () => {
         <div className="wedding-details-page">
             <SideBar />
             <div className="house-details-content">
-                
+
                 <div className="house-details-grid">
                     {/* Funeral Details Box */}
                     <div className="house-details-box">
@@ -341,7 +342,7 @@ const FuneralDetails = () => {
                             </div>
                         )}
                     </div>
-    
+
                     {/* Death Certificate Section */}
                     <div className="house-details-box">
                         <h3>Death Certificate</h3>
@@ -361,7 +362,7 @@ const FuneralDetails = () => {
                             </div>
                         ))}
                     </div>
-    
+
                     {/* Admin Comments Section */}
                     <div className="house-comments-section">
                         <h2>Admin Comments</h2>
@@ -376,7 +377,7 @@ const FuneralDetails = () => {
                             <p>No admin comments yet.</p>
                         )}
                     </div>
-    
+
                     {/* Updated Funeral Date Section */}
                     <div className="blessing-date-box">
                         <h3>Updated Funeral Date</h3>
@@ -390,7 +391,7 @@ const FuneralDetails = () => {
                             </div>
                         )}
                     </div>
-    
+
                     {/* Priest Section */}
                     <div className="house-comments-section">
                         <h2>Priest</h2>
@@ -402,7 +403,7 @@ const FuneralDetails = () => {
                             <p>No priest.</p>
                         )}
                     </div>
-    
+
                     {/* Admin Section for Updating Funeral Date */}
                     <div className="house-section">
                         <h2>Select Updated Funeral Date:</h2>
@@ -415,7 +416,7 @@ const FuneralDetails = () => {
                             </button>
                         </div>
                     </div>
-    
+
                     {/* Admin Comment Submission */}
                     <div className="house-section">
                         <h2>Submit Admin Comment</h2>
@@ -437,7 +438,7 @@ const FuneralDetails = () => {
                             <button onClick={handleSubmitComment}>Submit Comment</button>
                         </div>
                     </div>
-    
+
                     {/* Adding Priest */}
                     <div className="house-section">
                         <h2>Priest Name</h2>
@@ -450,12 +451,17 @@ const FuneralDetails = () => {
                             <button onClick={handleAddPriest}>Add Priest</button>
                         </div>
                     </div>
-    
+
                     {/* Confirmation and Decline Buttons */}
                     <div className="button-container">
                         <button onClick={() => handleConfirm(funeralId)}>Confirm Funeral</button>
                         <button onClick={() => handleDecline(funeralId)}>Decline</button>
                     </div>
+                </div>
+                <div className="button-container">
+                    <button onClick={() => navigate(`/adminChat/${funeralDetails?.userId?._id}/${funeralDetails?.userId?.email}`)}>
+                        Go to Admin Chat
+                    </button>
                 </div>
             </div>
         </div>

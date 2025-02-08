@@ -693,7 +693,8 @@ exports.UpdateProfile = async (req, res, next) => {
 };
 
 exports.AllUsers = async (req, res, next) => {
-    const users = await User.find();
+    const users = await User.find()
+    .populate("ministryCategory");
     res.status(200).json({
         success: true,
         users
@@ -713,6 +714,41 @@ exports.getUserDetails = async (req, res, next) => {
         user
     })
 }
+
+exports.getUsersGroupedByMinistryCategory = async (req, res) => {
+    try {
+        // Fetch all ministry categories
+        const ministryCategories = await MinistryCategory.find();
+
+        if (!ministryCategories.length) {
+            return res.status(404).json({ message: "No ministry categories found" });
+        }
+
+        // Prepare an array to store category-wise user data
+        const results = await Promise.all(
+            ministryCategories.map(async (category) => {
+                const users = await User.find({ ministryCategory: category._id })
+                    .populate("ministryCategory");
+                
+                return {
+                    ministryCategory: category.name,
+                    userCount: users.length,
+                    users,
+                };
+            })
+        );
+
+        res.status(200).json({
+            success: true,
+            data: results,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error", error });
+    }
+};
+
+
 
 // exports.deleteUser = async (req, res, next) => {
 //     const user = await User.findById(req.params.id);
