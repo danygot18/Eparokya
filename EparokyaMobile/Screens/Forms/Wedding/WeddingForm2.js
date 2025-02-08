@@ -1,95 +1,107 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text } from 'react-native';
+import React, { useState } from "react";
+import { View, TextInput, Button, StyleSheet, Text } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const WeddingForm2 = ({ navigation, route }) => {
-  const { bride, brideAge, brideGender, bridePhone, brideAddress } = route.params;
-  
-  const [groom, setGroom] = useState('');
-  const [groomAge, setGroomAge] = useState('');
-  const [groomGender, setGroomGender] = useState('');
-  const [groomPhone, setGroomPhone] = useState('');
-  
-  // Separate state fields for the address
-  const [groomState, setGroomState] = useState('');
-  const [groomZip, setGroomZip] = useState('');
-  const [groomCountry, setGroomCountry] = useState('');
+  const {
+    bride,
+    brideAge,
+    brideGender,
+    bridePhone,
+    brideAddress,
+    dateOfApplication,
+    weddingDate,
+    weddingTime,
+  } = route.params;
 
-  const [error, setError] = useState('');
+  const [groomName, setGroomName] = useState("");
+  const [groomStreet, setGroomStreet] = useState("");
+  const [groomZip, setGroomZip] = useState("");
+  const [groomCity, setGroomCity] = useState("");
+  const [groomPhone, setGroomPhone] = useState("");
+  const [groomBirthDate, setGroomBirthDate] = useState(new Date());
+  const [groomOccupation, setGroomOccupation] = useState("");
+  const [groomReligion, setGroomReligion] = useState("");
+  const [groomFather, setGroomFather] = useState("");
+  const [groomMother, setGroomMother] = useState("");
+  const [error, setError] = useState("");
+  const [showGroomBirthDatePicker, setShowGroomBirthDatePicker] = useState(false);
+
+  const onGroomBirthDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || groomBirthDate;
+    setShowGroomBirthDatePicker(false);
+    setGroomBirthDate(currentDate);
+  };
 
   const goToNextPage = () => {
-    // Check if all required fields are filled in
-    if (!groom || !groomAge || !groomGender || !groomPhone || !groomState || !groomZip || !groomCountry) {
-      setError('Please fill in all fields.');
+    if (
+      !groomName ||
+      !groomStreet ||
+      !groomZip ||
+      !groomCity ||
+      !groomPhone ||
+      !groomBirthDate ||
+      !groomOccupation ||
+      !groomReligion ||
+      !groomFather ||
+      !groomMother
+    ) {
+      setError("Please fill in all fields.");
       return;
     }
 
-    const formattedGroomAge = Number(groomAge);
     const groomAddress = {
-      state: groomState,
+      street: groomStreet,
       zip: groomZip,
-      country: groomCountry,
+      city: groomCity,
     };
 
-    // Pass all data to the next form page
-    navigation.navigate('WeddingForm3', {
+    navigation.navigate("WeddingForm3", {
       bride,
       brideAge,
       brideGender,
       bridePhone,
       brideAddress,
-      groom,
-      groomAge: formattedGroomAge,
-      groomGender: groomGender.trim(),
+      dateOfApplication,
+      weddingDate,
+      weddingTime,
+      groomName,
+      groomAddress,
       groomPhone,
-      groomAddress, // Pass the structured address object
+      groomBirthDate: groomBirthDate.toISOString(),
+      groomOccupation,
+      groomReligion,
+      groomFather,
+      groomMother,
     });
   };
 
-  // Clear all fields
   const clearFields = () => {
-    setGroom('');
-    setGroomAge('');
-    setGroomGender('');
-    setGroomPhone('');
-    setGroomState('');
-    setGroomZip('');
-    setGroomCountry('');
-    setError('');
+    setGroomName("");
+    setGroomStreet("");
+    setGroomZip("");
+    setGroomCity("");
+    setGroomPhone("");
+    setGroomBirthDate(new Date());
+    setGroomOccupation("");
+    setGroomReligion("");
+    setGroomFather("");
+    setGroomMother("");
+    setError("");
   };
 
   return (
     <View style={styles.container}>
       <TextInput
         placeholder="Groom's Name"
-        value={groom}
-        onChangeText={setGroom}
+        value={groomName}
+        onChangeText={setGroomName}
         style={styles.input}
       />
       <TextInput
-        placeholder="Age"
-        keyboardType="numeric"
-        value={groomAge}
-        onChangeText={setGroomAge}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Gender"
-        value={groomGender}
-        onChangeText={setGroomGender}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Phone"
-        keyboardType="phone-pad"
-        value={groomPhone}
-        onChangeText={setGroomPhone}
-        style={styles.input}
-      />
-      {/* Separate fields for the address */}
-      <TextInput
-        placeholder="State"
-        value={groomState}
-        onChangeText={setGroomState}
+        placeholder="Street"
+        value={groomStreet}
+        onChangeText={setGroomStreet}
         style={styles.input}
       />
       <TextInput
@@ -99,9 +111,55 @@ const WeddingForm2 = ({ navigation, route }) => {
         style={styles.input}
       />
       <TextInput
-        placeholder="Country"
-        value={groomCountry}
-        onChangeText={setGroomCountry}
+        placeholder="City"
+        value={groomCity}
+        onChangeText={setGroomCity}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Phone"
+        keyboardType="phone-pad"
+        value={groomPhone}
+        onChangeText={setGroomPhone}
+        style={styles.input}
+      />
+
+      <Button
+        onPress={() => setShowGroomBirthDatePicker(true)}
+        title="Select Birthday"
+      />
+      {showGroomBirthDatePicker && (
+        <DateTimePicker
+          value={groomBirthDate}
+          mode="date"
+          display="default"
+          onChange={onGroomBirthDateChange}
+        />
+      )}
+      <Text>{groomBirthDate.toDateString()}</Text>
+
+      <TextInput
+        placeholder="Occupation"
+        value={groomOccupation}
+        onChangeText={setGroomOccupation}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Religion"
+        value={groomReligion}
+        onChangeText={setGroomReligion}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Father's Name"
+        value={groomFather}
+        onChangeText={setGroomFather}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Mother's Name"
+        value={groomMother}
+        onChangeText={setGroomMother}
         style={styles.input}
       />
 
@@ -115,8 +173,8 @@ const WeddingForm2 = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: { padding: 20 },
-  input: { marginBottom: 10, padding: 10, borderWidth: 1, borderColor: '#ccc' },
-  error: { color: 'red', marginBottom: 10 },
+  input: { marginBottom: 10, padding: 10, borderWidth: 1, borderColor: "#ccc" },
+  error: { color: "red", marginBottom: 10 },
 });
 
 export default WeddingForm2;

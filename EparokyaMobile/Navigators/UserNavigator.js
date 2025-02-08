@@ -11,7 +11,6 @@ import UpdateProfile from "../Screens/User/Update";
 // import WeddingForm3 from "../Screens/User/Wedding/WeddingForm3";
 // import WeddingFormContainer from "../Screens/User/Wedding/WeddingFormContainer";
 
-
 import SubmittedForms from "../Screens/User/SubmittedForms";
 
 import SubmittedWedding from "../Screens/Forms/Wedding/SubmittedWedding";
@@ -28,10 +27,9 @@ import SubmittedPrayerRequestList from "../Screens/User/Prayers/SubmittedPrayerR
 import SubmittedFuneralForm from "../Screens/User/Funeral/MySubmittedFuneralForm";
 import SubmittedBaptismForm from "../Screens/User/Baptism/MySubmittedBaptismForm";
 import SubmittedCounselingForm from "../Screens/User/Counseling/MySubmittedCounselingForm";
-// import SubmittedHouseBlessingForm from "../Screens/User/PrivateScheduling/MySubmittedHouseBlessingForm";
+import SubmittedHouseBlessingForm from "../Screens/User/PrivateScheduling/MySubmittedHouseBlessingForm";
 
 // import SubmittedPrayerWall from "../Screens/User/Prayers/MySubmittedPrayerWall";
-
 
 import Calendar from "../Screens/Calendar/Calendar";
 // import Announcement from "../Screens/User/Announcement/AnnouncementPage";
@@ -44,12 +42,7 @@ const Stack = createStackNavigator();
 const UserNavigator = (props) => {
   return (
     <Stack.Navigator>
-
-      <Stack.Screen
-        name="Login"
-        component={Login}
-
-      />
+      <Stack.Screen name="Login" component={Login} />
 
       <Stack.Screen
         name="Register"
@@ -104,32 +97,6 @@ const UserNavigator = (props) => {
         }}
       />
 
-
-      <Stack.Screen
-        name="SubmittedBaptismForm"
-        component={SubmittedBaptismForm}
-        options={{
-          headerShown: false,
-        }}
-      />
-
-
-      <Stack.Screen
-        name="SubmittedCounselingForm"
-        component={SubmittedCounselingForm}
-        options={{
-          headerShown: false,
-        }}
-      />
-
-
-      <Stack.Screen
-        name="SubmittedFuneralForm"
-        component={SubmittedFuneralForm}
-        options={{
-          headerShown: false,
-        }}
-      />
       <Stack.Screen
         name="SubmittedCounselingList"
         component={SubmittedCounselingList}
@@ -154,6 +121,37 @@ const UserNavigator = (props) => {
         }}
       />
 
+      <Stack.Screen
+        name="SubmittedBaptismForm"
+        component={SubmittedBaptismForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedCounselingForm"
+        component={SubmittedCounselingForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedFuneralForm"
+        component={SubmittedFuneralForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedHouseBlessingForm"
+        component={SubmittedHouseBlessingForm}
+        options={{
+          headerShown: false,
+        }}
+      />
 
       {/* <Stack.Screen
         name="WeddingFormContainer"
@@ -253,7 +251,6 @@ const UserNavigator = (props) => {
         }}
       />
 
-
       <Stack.Screen
         name="UserChat"
         component={UserChat}
@@ -261,7 +258,6 @@ const UserNavigator = (props) => {
           headerShown: true,
         }}
       />
-
     </Stack.Navigator>
   );
 };

@@ -1,97 +1,94 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const WeddingForm = ({ navigation }) => {
-  const [bride, setBride] = useState('');
-  const [brideAge, setBrideAge] = useState('');
-  const [brideGender, setBrideGender] = useState('');
-  const [bridePhone, setBridePhone] = useState('');
-  
-  const [brideState, setBrideState] = useState('');
-  const [brideZip, setBrideZip] = useState('');
-  const [brideCountry, setBrideCountry] = useState('');
-  
+  const [dateOfApplication, setDateOfApplication] = useState(new Date());
+  const [weddingDate, setWeddingDate] = useState(new Date());
+  const [weddingTime, setWeddingTime] = useState(new Date());
+  const [showDateOfApplicationPicker, setShowDateOfApplicationPicker] = useState(false);
+  const [showWeddingDatePicker, setShowWeddingDatePicker] = useState(false);
+  const [showWeddingTimePicker, setShowWeddingTimePicker] = useState(false);
   const [error, setError] = useState('');
 
+  const onDateOfApplicationChange = (event, selectedDate) => {
+    const currentDate = selectedDate || dateOfApplication;
+    setShowDateOfApplicationPicker(Platform.OS === 'ios');
+    setDateOfApplication(currentDate);
+  };
+
+  const onWeddingDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || weddingDate;
+    setShowWeddingDatePicker(Platform.OS === 'ios');
+    setWeddingDate(currentDate);
+  };
+
+  const onWeddingTimeChange = (event, selectedTime) => {
+    const currentTime = selectedTime || weddingTime;
+    setShowWeddingTimePicker(Platform.OS === 'ios');
+    setWeddingTime(currentTime);
+  };
+
   const goToNextPage = () => {
-    if (!bride || !brideAge || !brideGender || !bridePhone || !brideState || !brideZip || !brideCountry) {
+    if (!dateOfApplication || !weddingDate || !weddingTime) {
       setError('Please fill in all fields.');
       return;
     }
 
-    const formattedBrideAge = Number(brideAge);
-    const brideAddress = {
-      state: brideState,
-      zip: brideZip,
-      country: brideCountry,
-    };
-
     navigation.navigate('WeddingForm2', {
-      bride,
-      brideAge: formattedBrideAge,
-      brideGender: brideGender.trim(),
-      bridePhone,
-      brideAddress, 
+      dateOfApplication: dateOfApplication.toISOString(),
+      weddingDate: weddingDate.toISOString(),
+      weddingTime: weddingTime.toISOString(),
     });
   };
 
   const clearFields = () => {
-    setBride('');
-    setBrideAge('');
-    setBrideGender('');
-    setBridePhone('');
-    setBrideState('');
-    setBrideZip('');
-    setBrideCountry('');
+    setDateOfApplication(new Date());
+    setWeddingDate(new Date());
+    setWeddingTime(new Date());
     setError('');
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        placeholder="Bride's Name"
-        value={bride}
-        onChangeText={setBride}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Age"
-        keyboardType="numeric"
-        value={brideAge}
-        onChangeText={setBrideAge}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Gender"
-        value={brideGender}
-        onChangeText={setBrideGender}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Phone"
-        keyboardType="phone-pad"
-        value={bridePhone}
-        onChangeText={setBridePhone}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="State"
-        value={brideState}
-        onChangeText={setBrideState}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Zip"
-        value={brideZip}
-        onChangeText={setBrideZip}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Country"
-        value={brideCountry}
-        onChangeText={setBrideCountry}
-        style={styles.input}
-      />
+      <View>
+        <Button onPress={() => setShowDateOfApplicationPicker(true)} title="Select Date of Application" />
+        {showDateOfApplicationPicker && (
+          <DateTimePicker
+            value={dateOfApplication}
+            mode="date"
+            display="default"
+            onChange={onDateOfApplicationChange}
+          />
+        )}
+        <Text>{dateOfApplication.toDateString()}</Text>
+      </View>
+
+      <View>
+        <Button onPress={() => setShowWeddingDatePicker(true)} title="Select Wedding Date" />
+        {showWeddingDatePicker && (
+          <DateTimePicker
+            value={weddingDate}
+            mode="date"
+            display="default"
+            onChange={onWeddingDateChange}
+          />
+        )}
+        <Text>{weddingDate.toDateString()}</Text>
+      </View>
+
+      <View>
+        <Button onPress={() => setShowWeddingTimePicker(true)} title="Select Wedding Time" />
+        {showWeddingTimePicker && (
+          <DateTimePicker
+            value={weddingTime}
+            mode="time"
+            display="default"
+            onChange={onWeddingTimeChange}
+          />
+        )}
+        <Text>{weddingTime.toLocaleTimeString()}</Text>
+      </View>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 

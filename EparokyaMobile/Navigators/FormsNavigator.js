@@ -1,15 +1,19 @@
-import React from 'react'
+import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 // import WeddingForm from "../Screens/User/Wedding/WeddingForm";
 // import WeddingForm2 from '../Screens/User/Wedding/WeddingForm2';
 // import WeddingForm3 from "../Screens/User/Wedding/WeddingForm3";
 // import WeddingFormContainer from "../Screens/User/Wedding/WeddingFormContainer";
-import WeddingForm from '../Screens/Forms/Wedding/WeddingForm';
-import WeddingForm2 from '../Screens/Forms/Wedding/WeddingForm2';
-import WeddingForm3 from '../Screens/Forms/Wedding/WeddingForm3';
-import WeddingFormContainer from '../Screens/Forms/Wedding/WeddingFormContainer';
+import WeddingForm from "../Screens/Forms/Wedding/WeddingForm";
+import WeddingForm2 from "../Screens/Forms/Wedding/WeddingForm2";
+import WeddingForm3 from "../Screens/Forms/Wedding/WeddingForm3";
+import WeddingForm4 from "../Screens/Forms/Wedding/WeddingForm4";
+import WeddingForm5 from "../Screens/Forms/Wedding/WeddingForm5";
+import WeddingForm6 from "../Screens/Forms/Wedding/WeddingForm6";
 
-import SubmittedForms from '../Screens/User/SubmittedForms';
+import WeddingFormContainer from "../Screens/Forms/Wedding/WeddingFormContainer";
+
+import SubmittedForms from "../Screens/User/SubmittedForms";
 
 // import SubmittedWedding from "../Screens/User/Wedding/SubmittedWedding";
 // import SubmittedFuneral from "../Screens/User/Funeral/SubmittedFuneral";
@@ -21,9 +25,7 @@ import CounselingForm from "../Screens/Forms/Counseling/CounselingForm";
 import HouseBlessingForm from "../Screens/Forms/PrivateScheduling/HouseBlessingForm";
 import PrayerRequestForm from "../Screens/Forms/Prayers/PrayerRequestForm";
 
-import UserForms from '../Screens/User/UserForms';
-
-
+import UserForms from "../Screens/User/UserForms";
 
 const Stack = createStackNavigator();
 
@@ -45,7 +47,6 @@ const FormsNavigator = () => {
         }}
       />
 
-
       <Stack.Screen
         name="WeddingForm"
         component={WeddingForm}
@@ -65,6 +66,29 @@ const FormsNavigator = () => {
       <Stack.Screen
         name="WeddingForm3"
         component={WeddingForm3}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="WeddingForm4"
+        component={WeddingForm4}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="WeddingForm5"
+        component={WeddingForm5}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="WeddingForm6"
+        component={WeddingForm6}
         options={{
           headerShown: false,
         }}
@@ -142,7 +166,7 @@ const FormsNavigator = () => {
         }}
       />
     </Stack.Navigator>
-  )
-}
+  );
+};
 
 export default FormsNavigator;

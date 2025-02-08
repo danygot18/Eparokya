@@ -67,6 +67,7 @@ exports.getAllAnnouncements = async (req, res) => {
     try {
         const announcements = await Announcement.find()
             .populate('announcementCategory', 'name description') 
+            .populate('likedBy', 'name avatar')
             .exec();
 
         res.status(200).json({

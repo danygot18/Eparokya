@@ -81,7 +81,7 @@ const UserProfile = ({ navigation }) => {
             />
           ) : (
             <Image
-              source={{ uri: userProfile?.image || defaultImage }}
+              source={{ uri: userProfile?.avatar?.url || defaultImage }}
               style={styles.profileImage}
             />
           )}
@@ -92,7 +92,7 @@ const UserProfile = ({ navigation }) => {
             </Text>
           </View>
         </View>
-
+  
         {/* User Info */}
         <View style={styles.infoContainer}>
           <MaterialIcons name="email" size={24} color="#333" />
@@ -117,15 +117,15 @@ const UserProfile = ({ navigation }) => {
             {userProfile?.country}
           </Text>
         </View>
-
+  
         {/* Display Ministry Category */}
         <View style={styles.infoContainer}>
           <MaterialIcons name="group" size={24} color="#333" />
           <Text style={styles.infoText}>
-            {userProfile?.ministryCategory?.name || "No ministry category assigned"}
+            {userProfile?.ministryCategory?.map(category => category.name).join(', ') || "No ministry category assigned"}
           </Text>
         </View>
-
+  
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={() => navigation.navigate("UpdateProfile")}
@@ -133,14 +133,14 @@ const UserProfile = ({ navigation }) => {
           >
             <MaterialIcons name="app-registration" size={24} color="white" />
           </TouchableOpacity>
-
+  
           <TouchableOpacity
             onPress={() => navigation.navigate("SubmittedForms")}
             style={styles.actionButton}
           >
             <MaterialIcons name="app-registration" size={24} color="white" />
           </TouchableOpacity>
-
+  
           <TouchableOpacity
             onPress={handleLogout}
             style={styles.actionButton}

@@ -1,17 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, ScrollView, TouchableOpacity, Alert, Image, StyleSheet } from 'react-native';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { FontAwesome } from '@expo/vector-icons';
-import baseURL from '../../assets/common/baseUrl';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Image,
+  StyleSheet,
+} from "react-native";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { FontAwesome } from "@expo/vector-icons";
+import baseURL from "../../assets/common/baseUrl";
 
 const PrayerWall = ({ navigation }) => {
   const [prayers, setPrayers] = useState([]);
   const [newPrayer, setNewPrayer] = useState({
-    title: '',
-    prayerRequest: '',
-    prayerWallSharing: 'anonymous',
-    contact: '',
+    title: "",
+    prayerRequest: "",
+    prayerWallSharing: "anonymous",
+    contact: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -20,7 +30,7 @@ const PrayerWall = ({ navigation }) => {
   const [totalPrayers, setTotalPrayers] = useState(0);
   const [loadingPrayerId, setLoadingPrayerId] = useState(null);
 
-  const { user, token } = useSelector(state => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
 
   //   useEffect(() => {
   //     const fetchUser = async () => {
@@ -38,13 +48,16 @@ const PrayerWall = ({ navigation }) => {
     const fetchPrayers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${baseURL}/prayer-wall?page=${currentPage}&limit=${prayersPerPage}`, { headers: { Authorization: `Bearer ${token}` } });
+        const response = await axios.get(
+          `${baseURL}/prayer-wall?page=${currentPage}&limit=${prayersPerPage}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         const { prayers, total } = response.data;
         setPrayers(prayers);
         setTotalPrayers(total);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching prayers:', error);
+        console.error("Error fetching prayers:", error);
         setLoading(false);
       }
     };
@@ -53,63 +66,81 @@ const PrayerWall = ({ navigation }) => {
 
   const handleNewPrayerSubmit = async () => {
     if (!user) {
-      Alert.alert('Error', 'You must be logged in to post a prayer.');
+      Alert.alert("Error", "You must be logged in to post a prayer.");
       return;
     }
 
     try {
       const prayerData = { ...newPrayer, userId: user._id };
-      await axios.post(`${baseURL}/submitPrayer`, prayerData, { headers: { Authorization: `Bearer ${token}` } });
-      setNewPrayer({ title: '', prayerRequest: '', prayerWallSharing: 'anonymous', contact: '' });
-      Alert.alert('Success', 'Successful! Please wait for the admin confirmation for your prayer to be posted');
+      await axios.post(`${baseURL}/submitPrayer`, prayerData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNewPrayer({
+        title: "",
+        prayerRequest: "",
+        prayerWallSharing: "anonymous",
+        contact: "",
+      });
+      Alert.alert(
+        "Success",
+        "Successful! Please wait for the admin confirmation for your prayer to be posted"
+      );
       setIsModalOpen(false);
     } catch (error) {
-      console.error('Error posting prayer:', error);
-      Alert.alert('Error', 'Failed to post prayer. Please try again.');
+      console.error("Error posting prayer:", error);
+      Alert.alert("Error", "Failed to post prayer. Please try again.");
     }
   };
 
   const handleLike = async (prayerId) => {
     try {
-      const response = await axios.put(`${baseURL}/toggleLike/${prayerId}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.put(
+        `${baseURL}/toggleLike/${prayerId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setPrayers((prevPrayers) =>
         prevPrayers.map((prayer) =>
           prayer._id === prayerId
             ? {
-              ...prayer,
-              likes: response.data.likes,
-              likedByUser: response.data.likedByUser,
-            }
+                ...prayer,
+                likes: response.data.likes,
+                likedByUser: response.data.likedByUser,
+              }
             : prayer
         )
       );
     } catch (error) {
-      console.error('Error liking prayer:', error);
+      console.error("Error liking prayer:", error);
     }
   };
 
   const handleInclude = async (prayerId) => {
     if (!user) {
-      Alert.alert('Error', 'You must be logged in to include a prayer.');
+      Alert.alert("Error", "You must be logged in to include a prayer.");
       return;
     }
 
     try {
       setLoadingPrayerId(prayerId);
-      const response = await axios.put(`${baseURL}/toggleInclude/${prayerId}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.put(
+        `${baseURL}/toggleInclude/${prayerId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setPrayers((prevPrayers) =>
         prevPrayers.map((prayer) =>
           prayer._id === prayerId
             ? {
-              ...prayer,
-              includeCount: response.data.includeCount,
-              includedByUser: response.data.includedByUser,
-            }
+                ...prayer,
+                includeCount: response.data.includeCount,
+                includedByUser: response.data.includedByUser,
+              }
             : prayer
         )
       );
     } catch (error) {
-      console.error('Error including prayer:', error);
+      console.error("Error including prayer:", error);
     } finally {
       setLoadingPrayerId(null);
     }
@@ -118,7 +149,11 @@ const PrayerWall = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.prayerShare}>
-        <Button title="Click here to Share a Prayer" onPress={() => setIsModalOpen(true)} color="#154314" />
+        <Button
+          title="Click here to Share a Prayer"
+          onPress={() => setIsModalOpen(true)}
+          color="#154314"
+        />
       </View>
 
       {isModalOpen && (
@@ -133,30 +168,64 @@ const PrayerWall = ({ navigation }) => {
           <TextInput
             placeholder="Your prayer request"
             value={newPrayer.prayerRequest}
-            onChangeText={(text) => setNewPrayer({ ...newPrayer, prayerRequest: text })}
+            onChangeText={(text) =>
+              setNewPrayer({ ...newPrayer, prayerRequest: text })
+            }
             style={styles.textArea}
             multiline
           />
           <TextInput
             placeholder="Contact"
             value={newPrayer.contact}
-            onChangeText={(text) => setNewPrayer({ ...newPrayer, contact: text })}
+            onChangeText={(text) =>
+              setNewPrayer({ ...newPrayer, contact: text })
+            }
             style={styles.input}
           />
           <View style={styles.radioGroup}>
-            <TouchableOpacity onPress={() => setNewPrayer({ ...newPrayer, prayerWallSharing: 'anonymous' })}>
+            <TouchableOpacity
+              onPress={() =>
+                setNewPrayer({ ...newPrayer, prayerWallSharing: "anonymous" })
+              }
+            >
               <Text style={styles.radioLabel}>
-                <Text style={newPrayer.prayerWallSharing === 'anonymous' ? styles.radioSelected : styles.radioUnselected}>●</Text> Share anonymously
+                <Text
+                  style={
+                    newPrayer.prayerWallSharing === "anonymous"
+                      ? styles.radioSelected
+                      : styles.radioUnselected
+                  }
+                >
+                  ●
+                </Text>{" "}
+                Share anonymously
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setNewPrayer({ ...newPrayer, prayerWallSharing: 'myName' })}>
+            <TouchableOpacity
+              onPress={() =>
+                setNewPrayer({ ...newPrayer, prayerWallSharing: "myName" })
+              }
+            >
               <Text style={styles.radioLabel}>
-                <Text style={newPrayer.prayerWallSharing === 'myName' ? styles.radioSelected : styles.radioUnselected}>●</Text> Share with my name
+                <Text
+                  style={
+                    newPrayer.prayerWallSharing === "myName"
+                      ? styles.radioSelected
+                      : styles.radioUnselected
+                  }
+                >
+                  ●
+                </Text>{" "}
+                Share with my name
               </Text>
             </TouchableOpacity>
           </View>
           <Button title="Post Prayer" onPress={handleNewPrayerSubmit} />
-          <Button title="Close" onPress={() => setIsModalOpen(false)} color="red" />
+          <Button
+            title="Close"
+            onPress={() => setIsModalOpen(false)}
+            color="red"
+          />
         </View>
       )}
 
@@ -167,21 +236,30 @@ const PrayerWall = ({ navigation }) => {
           <View key={prayer._id} style={styles.prayerBox}>
             <View style={styles.prayerHeader}>
               <Image
-                source={{
-                  uri: prayer.prayerWallSharing === 'anonymous'
-                    ? '../../assets/EPAROKYA-SYST.png'
-                    : prayer.user?.avatar?.url || '../../assets/EPAROKYA-SYST.png',
-                }}
+                source={
+                  prayer.prayerWallSharing === "anonymous"
+                    ? require("../../assets/EPAROKYA-SYST.png")
+                    : {
+                        uri:
+                          prayer.user?.avatar?.url ||
+                          "../../assets/EPAROKYA-SYST.png",
+                      }
+                }
                 style={styles.avatar}
               />
               <Text style={styles.prayerUser}>
-                {prayer.prayerWallSharing === 'anonymous' ? 'Anonymous' : prayer.user?.name || 'Unknown User'}
+                {prayer.prayerWallSharing === "anonymous"
+                  ? "Anonymous"
+                  : prayer.user?.name || "Unknown User"}
               </Text>
             </View>
             <Text style={styles.prayerTitle}>{prayer.title}</Text>
             <Text style={styles.prayerDescription}>{prayer.prayerRequest}</Text>
             <View style={styles.prayerActions}>
-              <TouchableOpacity onPress={() => handleLike(prayer._id)} style={styles.likeButton}>
+              <TouchableOpacity
+                onPress={() => handleLike(prayer._id)}
+                style={styles.likeButton}
+              >
                 {prayer.likedByUser ? (
                   <FontAwesome name="heart" size={24} color="red" />
                 ) : (
@@ -192,29 +270,35 @@ const PrayerWall = ({ navigation }) => {
 
               <TouchableOpacity
                 onPress={() => handleInclude(prayer._id)}
-                disabled={prayer.includedByUser || loadingPrayerId === prayer._id}
+                disabled={
+                  prayer.includedByUser || loadingPrayerId === prayer._id
+                }
                 style={styles.includeButton}
               >
                 <Text style={styles.includeText}>
                   {prayer.includedByUser
-                    ? 'You have included this in your prayer'
+                    ? "You have included this in your prayer"
                     : loadingPrayerId === prayer._id
-                      ? 'Processing...'
-                      : `Include (${prayer.includeCount || 0})`}
+                    ? "Processing..."
+                    : `Include (${prayer.includeCount || 0})`}
                 </Text>
               </TouchableOpacity>
 
               {prayer.includedByUser && (
                 <View style={styles.includedIndicator}>
-                  <Text style={styles.includedText}>
-                    
-                  </Text>
+                  <Text style={styles.includedText}></Text>
                 </View>
               )}
             </View>
             <View style={styles.prayerMeta}>
-              <Text>Created: {new Date(prayer.createdAt).toLocaleDateString()}</Text>
-              {prayer.confirmedAt && <Text>Confirmed: {new Date(prayer.confirmedAt).toLocaleDateString()}</Text>}
+              <Text>
+                Created: {new Date(prayer.createdAt).toLocaleDateString()}
+              </Text>
+              {prayer.confirmedAt && (
+                <Text>
+                  Confirmed: {new Date(prayer.confirmedAt).toLocaleDateString()}
+                </Text>
+              )}
             </View>
           </View>
         ))
@@ -228,15 +312,15 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   prayerShare: {
-    display: 'flex',
-    justifyContent: 'center',
+    display: "flex",
+    justifyContent: "center",
     marginBottom: 20,
   },
   modal: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
@@ -244,7 +328,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   input: {
@@ -259,28 +343,28 @@ const styles = StyleSheet.create({
     height: 100,
   },
   radioGroup: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 10,
   },
   radioLabel: {
     fontSize: 16,
   },
   radioSelected: {
-    color: 'blue',
+    color: "blue",
   },
   radioUnselected: {
-    color: 'gray',
+    color: "gray",
   },
   prayerBox: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
     padding: 20,
     borderRadius: 10,
     marginBottom: 20,
   },
   prayerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   avatar: {
@@ -290,11 +374,11 @@ const styles = StyleSheet.create({
   },
   prayerUser: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   prayerTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 10,
   },
   prayerDescription: {
@@ -302,14 +386,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   prayerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
     marginTop: 10,
   },
   likeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 5,
   },
   icon: {
@@ -319,29 +403,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   includeButton: {
-    backgroundColor: '#6c757d',
-    color: 'white',
+    backgroundColor: "#6c757d",
+    color: "white",
     padding: 10,
     borderRadius: 5,
-    textAlign: 'center',
+    textAlign: "center",
   },
   includeText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   includedIndicator: {
     marginTop: 10,
     padding: 8,
-    backgroundColor: '#d4edda',
+    backgroundColor: "#d4edda",
     borderRadius: 5,
-    textAlign: 'center',
+    textAlign: "center",
   },
   includedText: {
-    color: '#155724',
-    fontWeight: 'bold',
+    color: "#155724",
+    fontWeight: "bold",
   },
   prayerMeta: {
-    flexDirection: 'column',
+    flexDirection: "column",
     gap: 5,
     marginTop: 10,
   },

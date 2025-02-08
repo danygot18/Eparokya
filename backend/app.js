@@ -36,15 +36,17 @@ app.use("/api/v1", require("./routes/PrayerWall/prayerRequest"));
 // Ministry & Members
 app.use("/api/v1/ministryCategory", require("./routes/ministryCategory"));
 
+// Announcements & Posts
+app.use("/api/v1", require("./routes/Announcement/announcement"));
+app.use("/api/v1", require("./routes/Announcement/announcementCategory"));
+
 // Sacramental Services
 app.use("/api/v1", require("./routes/wedding"));
 app.use("/api/v1", require("./routes/Binyag"));
 app.use("/api/v1", require("./routes/Funeral"));
 app.use("/api/v1", require("./routes/counseling"));
 
-// Announcements & Posts
-app.use("/api/v1", require("./routes/Announcement/announcement"));
-app.use("/api/v1", require("./routes/Announcement/announcementCategory"));
+
 
 app.use("/api/v1", require("./routes/Announcement/AnnouncementComment"));
 

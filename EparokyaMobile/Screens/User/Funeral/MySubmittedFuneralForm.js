@@ -23,7 +23,7 @@ const MySubmittedFuneralForm = () => {
   const [error, setError] = useState(null);
   const navigation = useNavigation();
   const route = useRoute();
-  const { formId } = route.params || {}; // Get formId from navigation params
+  const { formId } = route.params || {}; 
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {

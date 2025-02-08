@@ -49,6 +49,10 @@ const SubmittedHouseBlessingList = () => {
         setFilteredForms(filtered);
     }, [activeFilter, searchTerm, houseBlessingForms]);
 
+    const handleCardPress = (formId) => {
+        navigation.navigate("SubmittedHouseBlessingForm", { formId: formId  });
+    };
+
     if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
     if (error) return <Text>Error: {error}</Text>;
 
@@ -81,7 +85,7 @@ const SubmittedHouseBlessingList = () => {
                 <Text style={{ textAlign: "center", marginTop: 20 }}>No house blessings forms submitted by you.</Text>
             ) : (
                 filteredForms.map((item, index) => (
-                    <TouchableOpacity key={item._id} onPress={() => navigation.navigate("MySubmittedHouseBlessingForm", { formId: item._id })}>
+                    <TouchableOpacity key={item._id} onPress={() => navigation.navigate("SubmittedHouseBlessingForm", { formId: item._id })}>
                         <Box p={4} borderWidth={1} borderRadius={8} mb={3}>
                             <Badge colorScheme={item.blessingStatus === "Confirmed" ? "success" : item.blessingStatus === "Cancelled" ? "danger" : "warning"} alignSelf="flex-start">{item.blessingStatus}</Badge>
                             <Text fontSize="lg" fontWeight="bold">Record #{index + 1}</Text>
