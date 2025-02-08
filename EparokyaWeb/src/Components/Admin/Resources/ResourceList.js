@@ -60,7 +60,7 @@ const AdminResourceList = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this resource?')) {
             try {
-                await axios.delete(`${process.env.REACT_APP_API}/api/v1/delete/resource/${id}`);
+                await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteResource/${id}`);
                 setResources(resources.filter((r) => r._id !== id));
             } catch (error) {
                 console.error('Error deleting resource:', error);

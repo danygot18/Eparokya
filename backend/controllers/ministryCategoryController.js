@@ -46,7 +46,9 @@ exports.getMinistryId = async (req, res) => {
 
 exports.deleteMinistry = async (req, res) => {
     try {
-        const ministry = await ministryCategory.findByIdAndRemove(req.params.ministryId);
+        const { ministryId } = req.params;
+
+        const ministry = await ministryCategory.findByIdAndDelete(ministryId);
         if (!ministry) {
             return res.status(404).json({ success: false, message: "Ministry not found!" });
         }

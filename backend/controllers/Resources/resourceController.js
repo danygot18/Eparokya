@@ -157,6 +157,7 @@ exports.updateResource = async (req, res) => {
   
 // Delete a resource
 exports.deleteResource = async (req, res) => {
+  
     try {
       const resource = await Resource.findById(req.params.resourceById);
       if (!resource) return res.status(404).json({ success: false, message: "Resource not found" });

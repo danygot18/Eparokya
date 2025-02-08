@@ -16,6 +16,6 @@ router.put("/confirmPrayer/:prayerId", isAuthenticatedUser, PrayerWallController
 router.put("/toggleInclude/:prayerId", isAuthenticatedUser, PrayerWallController.toggleInclude); 
 router.put("/toggleLike/:prayerId", isAuthenticatedUser, PrayerWallController.toggleLike);
 router.put("/:prayerId/approve", isAuthenticatedUser, PrayerWallController.approvePrayer);
-router.put("/:prayerId/reject", isAuthenticatedUser, PrayerWallController.rejectPrayer);
+router.put("/rejectPrayer/:prayerId", isAuthenticatedUser, PrayerWallController.rejectPrayer);
 
 module.exports = router;

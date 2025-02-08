@@ -30,11 +30,13 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 app.use("/api/v1", require("./routes/user"));
 app.use("/api/v1/chat", require("./routes/chat"));
 // Prayer Wall
+// Ministry & Members
+app.use("/api/v1/ministryCategory", require("./routes/ministryCategory"));
+
 app.use("/api/v1/", require("./routes/PrayerWall/prayerWall"));
 app.use("/api/v1", require("./routes/PrayerWall/prayerRequest"));
 
-// Ministry & Members
-app.use("/api/v1/ministryCategory", require("./routes/ministryCategory"));
+
 
 // Announcements & Posts
 app.use("/api/v1", require("./routes/Announcement/announcement"));

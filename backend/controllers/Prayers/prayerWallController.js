@@ -319,7 +319,7 @@ exports.approvePrayer = async (req, res) => {
 exports.rejectPrayer = async (req, res) => {
   try {
     const prayer = await PrayerWall.findByIdAndUpdate(
-      req.params.id,
+      req.params.prayerId,
       { prayerWallStatus: 'Cancelled' },
       { new: true }
     );

@@ -54,14 +54,14 @@ exports.getAnnouncementCategory = async (req, res) => {
 
 exports.updateAnnouncementCategory = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { announcementCategoryId } = req.params;
         upload.single('image')(req, res, async (err) => {
             if (err) {
                 return res.status(400).json({ error: 'Image upload failed', details: err.message });
             }
             const imageUrl = req.file ? req.file.path : req.body.image;
             const updatedCategory = await announcementCategory.findByIdAndUpdate(
-                id,
+                announcementCategoryId,
                 {
                     name: req.body.name,
                     description: req.body.description,

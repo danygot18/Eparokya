@@ -73,6 +73,7 @@ const AnnouncementDetails = () => {
         try {
             const res = await axios.get(`${process.env.REACT_APP_API}/api/v1/comments/${id}`);
             setComments(res.data.data);
+            console.log("Comments:", res.data.data);
         } catch (error) {
             console.error('Error fetching comments:', error);
         } finally {

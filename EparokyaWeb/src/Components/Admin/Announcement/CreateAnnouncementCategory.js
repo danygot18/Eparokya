@@ -216,14 +216,14 @@ const CreateAnnouncementCategory = () => {
         try {
             setLoading(true);
             if (editMode) {
-                await axios.put(`${process.env.REACT_APP_API}/api/v1/update/announcementCategory/${editId}`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
+                await axios.put(`${process.env.REACT_APP_API}/api/v1/updateAnnouncementCategory/${editId}`, formData, {
+                    // headers: { 'Content-Type': 'multipart/form-data' },
                     withCredentials: true,
                 });
                 toast.success('Announcement Category Updated Successfully.');
             } else {
                 await axios.post(`${process.env.REACT_APP_API}/api/v1/create/announcementCategory`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
+                    //headers: { 'Content-Type': 'multipart/form-data' },
                     withCredentials: true,
                 });
                 toast.success('Announcement Category Created Successfully.');
