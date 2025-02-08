@@ -10,5 +10,6 @@ router.get('/user/:userId', prayerRequestController.getUserPrayerRequests);
 router.get('/admin/getAllPrayerRequest', prayerRequestController.getAllPrayerRequests);
 router.post('/intention/:prayerId', prayerRequestController.addIntentionToPrayerRequest);
 
+// router.get('/stats/prayerRequestsPerMonth', prayerRequestController.getPrayerRequestStatusCounts);
 
 module.exports = router;

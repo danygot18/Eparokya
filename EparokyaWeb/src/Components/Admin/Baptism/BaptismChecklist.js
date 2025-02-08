@@ -50,7 +50,7 @@ const BaptismChecklist = ({ baptismId }) => {
     }
   };
 
-  return (
+  return (                                                                        
     <div className="baptism-checklist-container">
       <h2>Baptism Checklist</h2>
 

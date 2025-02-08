@@ -42,8 +42,8 @@ exports.getUserPrayerRequests = async (req, res) => {
 exports.getAllPrayerRequests = async (req, res) => {
     try {
         const prayerRequests = await PrayerRequest.find()
-        .populate('userId', 'name email')
-        .populate('Intentions');
+            .populate('userId', 'name email')
+            .populate('Intentions');
 
         res.status(200).json({ prayerRequests });
     } catch (error) {
@@ -94,18 +94,29 @@ exports.deleteIntentionFromPrayerRequest = async (req, res) => {
 
 exports.getMySubmittedForms = async (req, res) => {
     try {
-      const userId = req.user.id;
-      console.log("Authenticated User ID:", userId);
-  
-      const forms = await PrayerRequest.find({ userId: userId });
-  
-      if (!forms.length) {
-        return res.status(404).json({ message: "No forms found for this user." });
-      }
-  
-      res.status(200).json({ forms });
+        const userId = req.user.id;
+        console.log("Authenticated User ID:", userId);
+
+        const forms = await PrayerRequest.find({ userId: userId });
+
+        if (!forms.length) {
+            return res.status(404).json({ message: "No forms found for this user." });
+        }
+
+        res.status(200).json({ forms });
     } catch (error) {
-      console.error("Error fetching submitted prayer request forms:", error);
-      res.status(500).json({ message: "Failed to fetch submitted prayer request forms." });
+        console.error("Error fetching submitted prayer request forms:", error);
+        res.status(500).json({ message: "Failed to fetch submitted prayer request forms." });
     }
-  };
+};
+
+// exports.getPrayerRequestStatusCounts = async (req, res) => {
+//     try {
+//         const counts = await PrayerRequest.aggregate([
+//             { $group: { _id: "$prayerRequestStatus", count: { $sum: 1 } } }
+//         ]);
+//         res.status(200).json(counts);
+//     } catch (error) {
+//         res.status(500).json({ message: "Failed to fetch prayer request status counts", error });
+//     }
+// };
