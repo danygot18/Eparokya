@@ -106,28 +106,41 @@ exports.confirmCounseling = async (req, res) => {
     }
   };
   
+  // exports.declineCounseling = async (req, res) => {
+  //   try {
+  //     const { counselingId } = req.params;
+  
+  //     if (!mongoose.Types.ObjectId.isValid(counselingId)) {
+  //       return res.status(400).json({ message: "Invalid counseling ID format." });
+  //     }
+  
+  //     const counseling = await Counseling.findById(counselingId);
+  
+  //     if (!counseling) {
+  //       return res.status(404).json({ message: "Counseling not found." });
+  //     }
+  
+  //     counseling.counselingStatus = "Declined";
+  //     await counseling.save();
+  
+  //     res.status(200).json({ message: "Counseling declined." });
+  //   } catch (error) {
+  //     console.error("Error declining counseling:", error);
+  //     res.status(500).json({ success: false, error: error.message });
+  //   }
+  // };
   exports.declineCounseling = async (req, res) => {
-    try {
-      const { counselingId } = req.params;
-  
-      if (!mongoose.Types.ObjectId.isValid(counselingId)) {
-        return res.status(400).json({ message: "Invalid counseling ID format." });
+      try {
+          const counseling = await Counseling.findByIdAndUpdate(
+              req.params.counselingId,
+              { counselingStatus: 'Cancelled' },
+              { new: true }
+          );
+          if (!counseling) return res.status(404).send('Counseling not found.');
+          res.send(counseling);
+      } catch (err) {
+          res.status(500).send('Server error.');
       }
-  
-      const counseling = await Counseling.findById(counselingId);
-  
-      if (!counseling) {
-        return res.status(404).json({ message: "Counseling not found." });
-      }
-  
-      counseling.counselingStatus = "Declined";
-      await counseling.save();
-  
-      res.status(200).json({ message: "Counseling declined." });
-    } catch (error) {
-      console.error("Error declining counseling:", error);
-      res.status(500).json({ success: false, error: error.message });
-    }
   };
   
   exports.updateCounselingDate = async (req, res) => {

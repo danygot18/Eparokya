@@ -8,7 +8,7 @@ router.get('/getAllcounseling', counselingController.getAllCounselingRequests);
 router.get('/getCounseling/:counselingId', counselingController.getCounselingById);
 
 router.post('/:counselingId/confirmCounseling', counselingController.confirmCounseling);
-router.post('/:counselingId/declineCounseling', counselingController.declineCounseling);
+router.put('/declineCounseling/:counselingId', counselingController.declineCounseling);
 router.post('/:counselingId/commentCounseling', counselingController.addComment);
 router.post('/counselingAddPriest/:counselingId', counselingController.createPriestComment);
 
