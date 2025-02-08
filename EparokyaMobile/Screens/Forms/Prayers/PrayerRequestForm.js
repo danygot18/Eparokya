@@ -131,11 +131,18 @@ const PrayerRequestForm = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             ))}
-            <Button title='Add Intention' onPress={handleAddIntention} />
+            <TouchableOpacity onPress={handleAddIntention} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
+                <Text style={{ color: 'white', fontWeight: 'bold' }}>Add Intention</Text>
+            </TouchableOpacity>
 
             <View style={{ marginTop: 20 }}>
-                <Button title='Clear All Fields' color='gray' onPress={handleClear} />
-                <Button title='Submit' onPress={handleSubmit} />
+                <TouchableOpacity onPress={handleClear} style={{ backgroundColor: '#B3CF99', borderRadius: 8, padding: 10, alignItems: 'center', marginBottom: 10 }}>
+                    <Text style={{ color: 'black', fontWeight: 'bold' }}>Clear All Fields</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={handleSubmit} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
+                    <Text style={{ color: 'white', fontWeight: 'bold' }}>Submit</Text>
+                </TouchableOpacity>
             </View>
         </ScrollView>
     );

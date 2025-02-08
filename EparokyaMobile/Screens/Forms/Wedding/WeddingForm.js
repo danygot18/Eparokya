@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useSelector } from "react-redux";
+import { useSelector } from 'react-redux';
 
 const WeddingForm = ({ navigation }) => {
   const [dateOfApplication, setDateOfApplication] = useState(new Date());
@@ -15,22 +15,9 @@ const WeddingForm = ({ navigation }) => {
 
   const { user, token } = useSelector(state => state.auth);
 
-  const onDateOfApplicationChange = (event, selectedDate) => {
-    const currentDate = selectedDate || dateOfApplication;
-    setShowDateOfApplicationPicker(Platform.OS === 'ios');
-    setDateOfApplication(currentDate);
-  };
-
-  const onWeddingDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || weddingDate;
-    setShowWeddingDatePicker(Platform.OS === 'ios');
-    setWeddingDate(currentDate);
-  };
-
-  const onWeddingTimeChange = (event, selectedTime) => {
-    const currentTime = selectedTime || weddingTime;
-    setShowWeddingTimePicker(Platform.OS === 'ios');
-    setWeddingTime(currentTime);
+  const onDateChange = (setter) => (event, selectedDate) => {
+    const currentDate = selectedDate || new Date();
+    setter(currentDate);
   };
 
   const goToNextPage = () => {
@@ -40,9 +27,9 @@ const WeddingForm = ({ navigation }) => {
     }
 
     navigation.navigate('WeddingForm2', {
-      dateOfApplication: dateOfApplication.toISOString(), // Use ISO string for consistency
-    weddingDate: weddingDate.toISOString(),
-    weddingTime: formattedWeddingTime,
+      dateOfApplication: dateOfApplication.toISOString(),
+      weddingDate: weddingDate.toISOString(),
+      weddingTime: formattedWeddingTime,
     });
   };
 
@@ -55,57 +42,104 @@ const WeddingForm = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View>
-        <Button onPress={() => setShowDateOfApplicationPicker(true)} title="Select Date of Application" />
+      <View style={styles.pickerContainer}>
+        <TouchableOpacity style={styles.selectButton} onPress={() => setShowDateOfApplicationPicker(true)}>
+          <Text style={styles.buttonText}>Select Date of Application</Text>
+        </TouchableOpacity>
         {showDateOfApplicationPicker && (
-          <DateTimePicker
-            value={dateOfApplication}
-            mode="date"
-            display="default"
-            onChange={onDateOfApplicationChange}
-          />
+          <DateTimePicker value={dateOfApplication} mode="date" display="default" onChange={onDateChange(setDateOfApplication)} />
         )}
-        <Text>{dateOfApplication.toDateString()}</Text>
+        <Text style={styles.selectedDate}>{dateOfApplication.toDateString()}</Text>
       </View>
 
-      <View>
-        <Button onPress={() => setShowWeddingDatePicker(true)} title="Select Wedding Date" />
+      <View style={styles.pickerContainer}>
+        <TouchableOpacity style={styles.selectButton} onPress={() => setShowWeddingDatePicker(true)}>
+          <Text style={styles.buttonText}>Select Wedding Date</Text>
+        </TouchableOpacity>
         {showWeddingDatePicker && (
-          <DateTimePicker
-            value={weddingDate}
-            mode="date"
-            display="default"
-            onChange={onWeddingDateChange}
-          />
+          <DateTimePicker value={weddingDate} mode="date" display="default" onChange={onDateChange(setWeddingDate)} />
         )}
-        <Text>{weddingDate.toDateString()}</Text>
+        <Text style={styles.selectedDate}>{weddingDate.toDateString()}</Text>
       </View>
 
-      <View>
-        <Button onPress={() => setShowWeddingTimePicker(true)} title="Select Wedding Time" />
+      <View style={styles.pickerContainer}>
+        <TouchableOpacity style={styles.selectButton} onPress={() => setShowWeddingTimePicker(true)}>
+          <Text style={styles.buttonText}>Select Wedding Time</Text>
+        </TouchableOpacity>
         {showWeddingTimePicker && (
-          <DateTimePicker
-            value={weddingTime}
-            mode="time"
-            display="default"
-            onChange={onWeddingTimeChange}
-          />
+          <DateTimePicker value={weddingTime} mode="time" display="default" onChange={onDateChange(setWeddingTime)} />
         )}
-        <Text>{weddingTime.toLocaleTimeString()}</Text>
+        <Text style={styles.selectedDate}>{formattedWeddingTime}</Text>
       </View>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <Button title="Next" onPress={goToNextPage} />
-      <Button title="Clear Fields" onPress={clearFields} color="red" />
+      <TouchableOpacity style={styles.nextButton} onPress={goToNextPage}>
+        <Text style={styles.nextButtonText}>Next</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.clearButton} onPress={clearFields}>
+        <Text style={styles.clearButtonText}>Clear Fields</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
-  input: { marginBottom: 10, padding: 10, borderWidth: 1, borderColor: '#ccc' },
-  error: { color: 'red', marginBottom: 10 },
+  container: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  pickerContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  selectButton: {
+    backgroundColor: '#E8E8E8',
+    padding: 12,
+    borderRadius: 25,
+    width: 250,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#000',
+    fontSize: 16,
+  },
+  selectedDate: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  error: {
+    color: 'red',
+    marginBottom: 10,
+  },
+  nextButton: {
+    backgroundColor: '#26572E',
+    padding: 15,
+    borderRadius: 25,
+    width: 250,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  nextButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  clearButton: {
+    backgroundColor: '#B3CF99',
+    padding: 15,
+    borderRadius: 25,
+    width: 250,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  clearButtonText: {
+    color: '#000000',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
 });
 
 export default WeddingForm;

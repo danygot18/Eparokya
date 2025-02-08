@@ -168,7 +168,7 @@ const FuneralForm = ({ navigation }) => {
 
         <FormControl mb="4">
           <FormControl.Label>Select Date of Death</FormControl.Label>
-          <Button onPress={() => showDatepicker('dateOfDeath')}>
+          <Button style={{ backgroundColor: '#26572E', borderRadius: 8 }} onPress={() => showDatepicker('dateOfDeath')}>
             {dateOfDeath.toDateString()}
           </Button>
         </FormControl>
@@ -263,7 +263,7 @@ const FuneralForm = ({ navigation }) => {
 
         <FormControl mb="4">
           <FormControl.Label>Select Funeral Date</FormControl.Label>
-          <Button onPress={() => showDatepicker('funeralDate')}>
+          <Button style={{ backgroundColor: '#26572E', borderRadius: 8 }} onPress={() => showDatepicker('funeralDate')}>
             {funeralDate ? funeralDate.toLocaleDateString() : 'Select Date'}
           </Button>
 
@@ -271,7 +271,7 @@ const FuneralForm = ({ navigation }) => {
 
         <FormControl mb="4">
           <FormControl.Label>Select Funeral Time</FormControl.Label>
-          <Button onPress={() => showTimepicker('funeralTime')}>
+          <Button style={{ backgroundColor: '#26572E', borderRadius: 8 }} onPress={() => showTimepicker('funeralTime')}>
             {funeralTime.toLocaleTimeString()}
           </Button>
         </FormControl>
@@ -321,7 +321,7 @@ const FuneralForm = ({ navigation }) => {
                 />
               </FormControl>
             ))}
-            <Button onPress={() => setPlacingOfPall({ ...placingOfPall, familyMembers: [...placingOfPall.familyMembers, ''] })}>
+            <Button style={{ backgroundColor: '#26572E', borderRadius: 8 }} onPress={() => setPlacingOfPall({ ...placingOfPall, familyMembers: [...placingOfPall.familyMembers, ''] })}>
               Add Family Member
             </Button>
           </Box>
@@ -329,14 +329,14 @@ const FuneralForm = ({ navigation }) => {
 
         <FormControl mb="4">
           <FormControl.Label>Select Funeral Mass Date</FormControl.Label>
-          <Button onPress={() => showDatepicker('funeralMassDate')}>
+          <Button style={{ backgroundColor: '#26572E', borderRadius: 8 }} onPress={() => showDatepicker('funeralMassDate')}>
             {funeralMassDate.toDateString()}
           </Button>
         </FormControl>
 
-        <FormControl mb="4">
+        <FormControl mb="4" >
           <FormControl.Label>Select Funeral Mass Time</FormControl.Label>
-          <Button onPress={() => showTimepicker('funeralMassTime')}>
+          <Button style={{ backgroundColor: '#26572E', borderRadius: 8 }} onPress={() => showTimepicker('funeralMassTime')}>
             {funeralMassTime.toLocaleTimeString()}
           </Button>
         </FormControl>
@@ -349,14 +349,15 @@ const FuneralForm = ({ navigation }) => {
           />
         </FormControl>
 
-        <Button onPress={pickImage}>
+        <Button style={{ backgroundColor: '#26572E', borderRadius: 8 }} onPress={pickImage}>
           Upload Death Certificate
         </Button>
         {deathCertificate && <Image source={{ uri: deathCertificate.uri }} style={{ width: 200, height: 200 }} />}
 
-        <Button onPress={handleSubmit} mt="4">
+        <Button onPress={handleSubmit} mt="4" style={{ backgroundColor: '#26572E', borderRadius: 8 }}>
           Submit
         </Button>
+
       </Box>
 
       {showDatePicker && (

@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     header: { fontSize: 18, fontWeight: 'bold', marginTop: 20 },
     input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginVertical: 5, borderRadius: 5 },
     buttonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
-    button: { backgroundColor: '#007BFF', padding: 10, borderRadius: 5, alignItems: 'center' },
+    button: { backgroundColor: '#26572E', padding: 10, borderRadius: 8, alignItems: 'center' },
     buttonText: { color: '#fff', fontWeight: 'bold' },
 });
 

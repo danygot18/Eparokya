@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
+import { View, Text, TextInput, Button, ScrollView, TouchableOpacity, Alert, Image, StyleSheet } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -251,10 +251,15 @@ const BaptismForm = ({ navigation }) => {
             updated[index].name = text;
             setNinongGodparents(updated);
           }} />
-          <Button title="Remove" onPress={() => removeGodparent('ninong', index)} />
+          {/* <Button title="Remove" onPress={() => removeGodparent('ninong', index)} /> */}
+          <TouchableOpacity onPress={() => removeGodparent('ninong')} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
+            <Text style={{ color: 'white', fontWeight: 'bold' }}>Remove</Text>
+          </TouchableOpacity>
         </View>
       ))}
-      <Button title="Add Ninong" onPress={() => addGodparent('ninong')} />
+      <TouchableOpacity onPress={() => addGodparent('ninong')} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>ADD NINONG</Text>
+      </TouchableOpacity>
 
       <Text>Ninang</Text>
       {NinangGodparents.map((godparent, index) => (
@@ -264,10 +269,16 @@ const BaptismForm = ({ navigation }) => {
             updated[index].name = text;
             setNinangGodparents(updated);
           }} />
-          <Button title="Remove" onPress={() => removeGodparent('ninang', index)} />
+          {/* <Button title="Remove" onPress={() => removeGodparent('ninang', index)} /> */}
+          <TouchableOpacity onPress={() => removeGodparent('ninang')} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
+            <Text style={{ color: 'white', fontWeight: 'bold' }}>Remove</Text>
+          </TouchableOpacity>
+
         </View>
       ))}
-      <Button title="Add Ninang" onPress={() => addGodparent('ninang')} />
+      <TouchableOpacity onPress={() => addGodparent('ninang')} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>ADD NINANG</Text>
+      </TouchableOpacity>
 
       {/* Image Pickers */}
       <Text>Birth Certificate</Text>
@@ -291,22 +302,83 @@ const BaptismForm = ({ navigation }) => {
         </View>
       </TouchableOpacity>
 
-      <Button title="Submit" onPress={handleSubmit} style={{ marginTop: 20 }} />
+      <TouchableOpacity onPress={handleSubmit} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>Submit</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
 
-const styles = {
-  input: {
-    borderBottomWidth: 1,
-    marginBottom: 10,
-    padding: 10,
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    alignItems: 'center',
   },
-  label: {
+  pickerContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  selectButton: {
+    backgroundColor: '#E8E8E8',
+    padding: 12,
+    borderRadius: 25,
+    width: 250,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#000',
+    fontSize: 16,
+  },
+  selectedDate: {
+    marginTop: 10,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  error: {
+    color: 'red',
     marginBottom: 10,
   },
-};
+  nextButton: {
+    backgroundColor: '#26572E',
+    padding: 15,
+    borderRadius: 25,
+    width: 250,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  nextButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  clearButton: {
+    backgroundColor: '#B3CF99',
+    padding: 15,
+    borderRadius: 25,
+    width: 250,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  clearButtonText: {
+    color: '#000000',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
+  submitButton: {
+    backgroundColor: '#26572E',
+    padding: 15,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  addButton: {
+    backgroundColor: '#26572E',
+    padding: 12,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginTop: 10,
+  }
+});
 
 export default BaptismForm;

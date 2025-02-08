@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import { View, Button, StyleSheet, Text, Alert, ScrollView, Image } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { useSelector } from 'react-redux';
+import React, { useState } from "react";
+import { View, TextInput, TouchableOpacity, StyleSheet, Text, ScrollView, Image } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { useSelector } from "react-redux";
 
 const WeddingForm5 = ({ navigation, route }) => {
   const { updatedWeddingData, userId } = route.params;
-
   const [certificates, setCertificates] = useState({
     GroomNewBaptismalCertificate: null,
     GroomNewConfirmationCertificate: null,
@@ -14,7 +13,7 @@ const WeddingForm5 = ({ navigation, route }) => {
     GroomOrigCeNoMar: null,
     GroomOrigPSA: null,
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const { user, token } = useSelector(state => state.auth);
 
   const pickDocument = async (field) => {
@@ -40,26 +39,20 @@ const WeddingForm5 = ({ navigation, route }) => {
 
   const goToNextPage = () => {
     if (Object.values(certificates).some(value => !value)) {
-      setError('Please upload all required certificates.');
+      setError("Please upload all required certificates.");
       return;
     }
 
     const formattedCertificates = Object.entries(certificates).reduce((acc, [key, uri]) => {
       acc[key] = {
         uri,
-        type: 'image/jpeg',
+        type: "image/jpeg",
         name: `${key}.jpg`,
       };
       return acc;
     }, {});
 
-    console.log('Navigating to WeddingForm6 with data:', {
-      updatedWeddingData,
-      formattedCertificates,
-      userId,
-    });
-
-    navigation.navigate('WeddingForm6', {
+    navigation.navigate("WeddingForm6", {
       updatedWeddingData,
       certificates: formattedCertificates,
       userId,
@@ -75,44 +68,45 @@ const WeddingForm5 = ({ navigation, route }) => {
       GroomOrigCeNoMar: null,
       GroomOrigPSA: null,
     });
-    setError('');
+    setError("");
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <ScrollView contentContainerStyle={styles.container}>
       {error && <Text style={styles.error}>{error}</Text>}
-
       {Object.keys(certificates).map((key) => (
         <View key={key} style={styles.uploadContainer}>
-          <Button title={`Upload ${key.replace(/([A-Z])/g, ' $1').trim()}`} onPress={() => pickDocument(key)} />
+          <TouchableOpacity onPress={() => pickDocument(key)} style={styles.uploadButton}>
+            <Text style={styles.uploadButtonText}>{`Upload ${key.replace(/([A-Z])/g, ' $1').trim()}`}</Text>
+          </TouchableOpacity>
           {certificates[key] && <Image source={{ uri: certificates[key] }} style={styles.imagePreview} />}
         </View>
       ))}
-
-      <Button title="Next" onPress={goToNextPage} />
-      <Button title="Clear Form" onPress={clearForm} />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={goToNextPage} style={[styles.button, styles.nextButton]}>
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={clearForm} style={[styles.button, styles.clearButton]}>
+          <Text style={styles.clearButtonText}>Clear Fields</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    padding: 20,
-  },
-  uploadContainer: {
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  error: {
-    color: 'red',
-    marginBottom: 10,
-  },
-  imagePreview: {
-    width: 200,
-    height: 200,
-    marginTop: 10,
-    borderRadius: 10,
-  },
+  container: { padding: 20, alignItems: "center" },
+  uploadContainer: { marginBottom: 20, alignItems: "center" },
+  error: { color: "red", marginBottom: 10 },
+  uploadButton: { backgroundColor: "#26572E", padding: 10, borderRadius: 5, alignItems: "center" },
+  uploadButtonText: { color: "white", fontWeight: "bold" },
+  imagePreview: { width: 200, height: 200, marginTop: 10, borderRadius: 10 },
+  buttonContainer: { flexDirection: "row", justifyContent: "center", width: "100%" },
+  button: { borderRadius: 20, paddingVertical: 10, paddingHorizontal: 20, marginHorizontal: 5, alignItems: "center" },
+  nextButton: { backgroundColor: "#26572E" },
+  clearButton: { backgroundColor: "#B3CF99" },
+  buttonText: { color: "white", fontWeight: "bold" },
+  clearButtonText: { color: "black", fontWeight: "bold" },
 });
 
 export default WeddingForm5;

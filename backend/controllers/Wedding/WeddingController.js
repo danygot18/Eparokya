@@ -101,6 +101,115 @@ const uploadToCloudinary = async (file, folder) => {
 //   }
 // };
 
+// exports.submitWeddingForm = async (req, res) => {
+//   try {
+//     const {
+//       dateOfApplication,
+//       weddingDate,
+//       weddingTime,
+//       groomName,
+//       groomAddress,
+//       brideName,
+//       brideAddress,
+//       Ninong,
+//       Ninang,
+//       brideReligion,
+//       brideOccupation,
+//       brideBirthDate,
+//       bridePhone,
+//       groomReligion,
+//       groomOccupation,
+//       groomBirthDate,
+//       groomPhone,
+//       groomFather, 
+//       groomMother, 
+//       brideFather, 
+//       brideMother  
+//     } = req.body;
+
+//     // Process image uploads
+//     const images = {};
+//     const requiredImageFields = [
+//       "GroomNewBaptismalCertificate",
+//       "GroomNewConfirmationCertificate",
+//       "BrideNewBaptismalCertificate",
+//       "GroomMarriageLicense",
+//       "GroomMarriageBans",
+//       "GroomOrigCeNoMar",
+//       "GroomOrigPSA",
+//       "BrideNewBaptismalCertificate",
+//       "BrideNewConfirmationCertificate",
+//       "BrideMarriageLicense",
+//       "BrideMarriageBans",
+//       "BrideOrigCeNoMar",
+//       "BrideOrigPSA",
+//       "PermitFromtheParishOftheBride",
+//     ];
+
+//     console.log("Received files:", req.files);
+//     for (const field of requiredImageFields) {
+//       if (req.files[field]) {
+//         const uploadedImage = await uploadToCloudinary(req.files[field][0], "wedding/docs");
+//         images[field] = {
+//           public_id: uploadedImage.public_id,
+//           url: uploadedImage.url,
+//         };
+//       } else {
+//         return res.status(400).json({ message: `Missing required image: ${field}` });
+//       }
+//     }
+
+//     // Parse JSON fields
+//     const groomAddressObject = groomAddress ? JSON.parse(groomAddress) : {};
+//     const brideAddressObject = brideAddress ? JSON.parse(brideAddress) : {};
+//     const ninongArray = Ninong ? JSON.parse(Ninong) : [];
+//     const ninangArray = Ninang ? JSON.parse(Ninang) : [];
+
+//     // Get authenticated user ID
+//     const userId = req.user._id;
+
+//     // Create new wedding form
+//     const newWeddingForm = new Wedding({
+//       dateOfApplication,
+//       weddingDate,
+//       weddingTime,
+//       groomName,
+//       groomAddress: groomAddressObject,
+//       brideName,
+//       brideAddress: brideAddressObject,
+//       Ninong: ninongArray,
+//       Ninang: ninangArray,
+//       brideReligion,
+//       brideOccupation,
+//       brideBirthDate,
+//       bridePhone,
+//       groomReligion,
+//       groomOccupation,
+//       groomBirthDate,
+//       groomPhone,
+//       groomFather, // Convert camelCase to PascalCase
+//       groomMother, // Convert camelCase to PascalCase
+//       brideFather, // Convert camelCase to PascalCase
+//       brideMother, // Convert camelCase to PascalCase
+//       ...images,
+//       userId,
+//     });
+
+//     await newWeddingForm.save();
+
+//     res.status(201).json({
+//       message: "Wedding form submitted successfully!",
+//       weddingForm: newWeddingForm,
+//     });
+//   } catch (error) {
+//     console.error("Error submitting wedding form:", error);
+//     res.status(500).json({ message: "An error occurred during submission.", error: error.message });
+//   }
+// };
+
+
+// getting the wedding
+
 exports.submitWeddingForm = async (req, res) => {
   try {
     const {
@@ -126,6 +235,22 @@ exports.submitWeddingForm = async (req, res) => {
       brideFather, 
       brideMother  
     } = req.body;
+
+    // Log the received body to debug missing fields
+
+    // Validate required fields
+    const requiredFields = [
+      'dateOfApplication', 'weddingDate', 'weddingTime', 'groomName', 'groomAddress',
+      'brideName', 'brideAddress', 'brideReligion', 'brideOccupation', 'brideBirthDate',
+      'bridePhone', 'groomReligion', 'groomOccupation', 'groomBirthDate', 'groomPhone',
+      'groomFather', 'groomMother', 'brideFather', 'brideMother'
+    ];
+
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({ message: `Missing required field: ${field}` });
+      }
+    }
 
     // Process image uploads
     const images = {};
@@ -195,6 +320,8 @@ exports.submitWeddingForm = async (req, res) => {
       userId,
     });
 
+    console.log("Received body:", req.body);
+
     await newWeddingForm.save();
 
     res.status(201).json({
@@ -208,7 +335,6 @@ exports.submitWeddingForm = async (req, res) => {
 };
 
 
-// getting the wedding
 exports.getAllWeddings = async (req, res) => {
   try {
     const weddingList = await Wedding.find({}, 'brideName groomName bridePhone groomPhone weddingDate weddingTime weddingStatus userId')

@@ -13,12 +13,12 @@ const SubmittedForms = () => {
   const navigation = useNavigation();
 
   const cards = [
-    { route: "SubmittedWedding", image: require("../../assets/17.png") },
-    { route: "SubmittedFuneralList", image: require("../../assets/18.png") },
-    { route: "SubmittedBaptismList", image: require("../../assets/18.png") },
-    { route: "SubmittedCounselingList", image: require("../../assets/18.png") },
-    { route: "SubmittedHouseBlessingList", image: require("../../assets/18.png") },
-    { route: "SubmittedPrayerRequestList", image: require("../../assets/18.png") },
+    { route: "SubmittedWeddingList", image: require("../../assets/submittedWeddingList.png") },
+    { route: "SubmittedFuneralList", image: require("../../assets/submittedFuneralList.png") },
+    { route: "SubmittedBaptismList", image: require("../../assets/submittedBaptismalList.png") },
+    { route: "SubmittedCounselingList", image: require("../../assets/submittedCounselingList.png") },
+    { route: "SubmittedHouseBlessingList", image: require("../../assets/submittedHouseBlessingList.png") },
+    { route: "SubmittedPrayerRequestList", image: require("../../assets/submittedPrayerRequests.png") },
 
   ];
 

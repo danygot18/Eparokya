@@ -13,8 +13,8 @@ import UpdateProfile from "../Screens/User/Update";
 
 import SubmittedForms from "../Screens/User/SubmittedForms";
 
-import SubmittedWedding from "../Screens/Forms/Wedding/SubmittedWedding";
-// import SubmittedWeddingList from "../Screens/Forms/Wedding/SubmittedWeddingList";
+// import SubmittedWedding from "../Screens/Forms/Wedding/SubmittedWedding";
+import SubmittedWeddingList from "../Screens/User/Wedding/SubmittedWeddingList";
 import SubmittedFuneralList from "../Screens/User/Funeral/SubmittedFuneralList";
 import SubmittedBaptismList from "../Screens/User/Baptism/SubmittedBaptismList";
 import SubmittedCounselingList from "../Screens/User/Counseling/SubmittedCounselingList";
@@ -23,7 +23,7 @@ import SubmittedPrayerRequestList from "../Screens/User/Prayers/SubmittedPrayerR
 
 // import BinyagForm from "../Screens/User/Baptism/BinyagForm";
 
-// import SubmittedWeddingForm from "../Screens/User/Wedding/MySubmittedWeddingForm";
+import SubmittedWeddingForm from "../Screens/User/Wedding/MySubmittedWeddingForm";
 import SubmittedFuneralForm from "../Screens/User/Funeral/MySubmittedFuneralForm";
 import SubmittedBaptismForm from "../Screens/User/Baptism/MySubmittedBaptismForm";
 import SubmittedCounselingForm from "../Screens/User/Counseling/MySubmittedCounselingForm";
@@ -74,8 +74,8 @@ const UserNavigator = (props) => {
         }}
       />
       <Stack.Screen
-        name="SubmittedWedding"
-        component={SubmittedWedding}
+        name="SubmittedWeddingList"
+        component={SubmittedWeddingList}
         options={{
           headerShown: false,
         }}
@@ -116,6 +116,14 @@ const UserNavigator = (props) => {
       <Stack.Screen
         name="SubmittedHouseBlessingList"
         component={SubmittedHouseBlessingList}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedWeddingForm"
+        component={SubmittedWeddingForm}
         options={{
           headerShown: false,
         }}

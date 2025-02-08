@@ -146,10 +146,10 @@ const HouseBlessingForm = () => {
                         )}
 
                         <VStack space={2} mt={4}>
-                            <Button colorScheme="danger" onPress={handleClear}>
+                            <Button style={{ backgroundColor: '#B3CF99', borderRadius: 8 }} onPress={handleClear}>
                                 Clear All Fields
                             </Button>
-                            <Button colorScheme="success" onPress={handleSubmit}>
+                            <Button style={{ backgroundColor: '#26572E', borderRadius: 8 }} onPress={handleSubmit}>
                                 Submit
                             </Button>
                         </VStack>

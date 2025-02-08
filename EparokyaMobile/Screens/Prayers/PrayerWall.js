@@ -103,10 +103,10 @@ const PrayerWall = ({ navigation }) => {
         prevPrayers.map((prayer) =>
           prayer._id === prayerId
             ? {
-                ...prayer,
-                likes: response.data.likes,
-                likedByUser: response.data.likedByUser,
-              }
+              ...prayer,
+              likes: response.data.likes,
+              likedByUser: response.data.likedByUser,
+            }
             : prayer
         )
       );
@@ -132,10 +132,10 @@ const PrayerWall = ({ navigation }) => {
         prevPrayers.map((prayer) =>
           prayer._id === prayerId
             ? {
-                ...prayer,
-                includeCount: response.data.includeCount,
-                includedByUser: response.data.includedByUser,
-              }
+              ...prayer,
+              includeCount: response.data.includeCount,
+              includedByUser: response.data.includedByUser,
+            }
             : prayer
         )
       );
@@ -240,10 +240,10 @@ const PrayerWall = ({ navigation }) => {
                   prayer.prayerWallSharing === "anonymous"
                     ? require("../../assets/EPAROKYA-SYST.png")
                     : {
-                        uri:
-                          prayer.user?.avatar?.url ||
-                          "../../assets/EPAROKYA-SYST.png",
-                      }
+                      uri:
+                        prayer.user?.avatar?.url ||
+                        "../../assets/EPAROKYA-SYST.png",
+                    }
                 }
                 style={styles.avatar}
               />
@@ -273,14 +273,14 @@ const PrayerWall = ({ navigation }) => {
                 disabled={
                   prayer.includedByUser || loadingPrayerId === prayer._id
                 }
-                style={styles.includeButton}
+                style={[styles.includeButton, { backgroundColor: "#26572E" }]}
               >
-                <Text style={styles.includeText}>
+                <Text style={[styles.includeText, { color: "#FFFFFF" }]}>
                   {prayer.includedByUser
                     ? "You have included this in your prayer"
                     : loadingPrayerId === prayer._id
-                    ? "Processing..."
-                    : `Include (${prayer.includeCount || 0})`}
+                      ? "Processing..."
+                      : `Include (${prayer.includeCount || 0})`}
                 </Text>
               </TouchableOpacity>
 

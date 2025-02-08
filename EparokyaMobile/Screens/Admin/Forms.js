@@ -7,9 +7,9 @@ const Forms = () => {
   const navigation = useNavigation();
 
   const cards = [
-    { route: "AdminWedding", image: require("../../assets/15.png") },
-    { route: "BaptismList", image: require("../../assets/16.png") },
-    { route: "FuneralList", image: require("../../assets/19.png") },
+    { route: "AdminWedding", image: require("../../assets/submittedWeddingList.png") },
+    { route: "BaptismList", image: require("../../assets/submittedBaptismalList.png") },
+    { route: "FuneralList", image: require("../../assets/submittedFuneralList.png") },
     
     { route: "ConfirmedWedding", image: require("../../assets/2.png") },
     { route: "ConfirmedFuneral", image: require("../../assets/20.png") },

@@ -64,10 +64,12 @@ const AnnouncementDetails = () => {
 
   const toggleLike = async () => {
     try {
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+
       await axios.put(
         `${baseURL}/likeAnnouncement/${announcementId}`,
-        { userId: user._id },
-        { withCredentials: true }
+        {},
+        config
       );
       setLiked(!liked);
       setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
@@ -95,25 +97,47 @@ const AnnouncementDetails = () => {
     }
   };
 
+  // const toggleLikeComment = async (commentId) => {
+  //   try {
+  //     const res = await axios.put(
+  //       `${baseURL}/anouncementCommentLike/${commentId}`,
+  //       {},
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+
+  //     setComments((prevComments) =>
+  //       prevComments.map((comment) =>
+  //         comment._id === commentId
+  //           ? { ...comment, likedBy: res.data.data.likedBy }
+  //           : comment
+  //       )
+  //     );
+  //   } catch (error) {
+  //     console.error("Error toggling like on comment:", error);
+  //   }
+  // };
+
   const toggleLikeComment = async (commentId) => {
     try {
-      const res = await axios.put(
-        `${baseURL}/anouncementCommentLike/${commentId}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      setComments((prevComments) =>
-        prevComments.map((comment) =>
-          comment._id === commentId
-            ? { ...comment, likedBy: res.data.data.likedBy }
-            : comment
-        )
-      );
+        const res = await axios.put(
+            `${baseURL}/anouncementCommentLike/${commentId}`,
+            {},
+            config
+        );
+
+        setComments(prevComments =>
+            prevComments.map(comment =>
+                comment._id === commentId
+                    ? { ...comment, likedBy: res.data.data.likedBy }
+                    : comment
+            )
+        );
     } catch (error) {
-      console.error("Error toggling like on comment:", error);
+        console.error('Error toggling like on comment:', error);
     }
-  };
+};
 
   const toggleReplies = (commentId) => {
     setExpandedReplies((prev) => ({ ...prev, [commentId]: !prev[commentId] }));
@@ -158,14 +182,14 @@ const AnnouncementDetails = () => {
                 Saint Joseph Parish - Taguig
               </Text>
               <Text fontSize="sm" color="gray.500">
-                {announcement.createdAt
+              {announcement.createdAt
                   ? format(new Date(announcement.createdAt), "PPP")
                   : "Date not available"}
               </Text>
             </VStack>
           </HStack>
 
-          <Text fontSize="xl" fontWeight="bold">
+          <Text fontSize="xl" fontWeight="bold" color="#26572E">
             {announcement.name}
           </Text>
           <Text>{announcement.description}</Text>
@@ -222,7 +246,7 @@ const AnnouncementDetails = () => {
                 borderRadius: 5,
               }}
             />
-            <Button onPress={addComment}>Post Comment</Button>
+            <Button backgroundColor="#26572E" onPress={addComment}>Post Comment</Button>
 
             {comments.map((comment) => (
               <Box
@@ -237,7 +261,7 @@ const AnnouncementDetails = () => {
                     source={{ uri: comment.user.avatar?.url }}
                   />
                   <VStack>
-                    <Text fontWeight="bold">{comment.user.name}</Text>
+                    <Text fontWeight="bold"color="#26572E" >{comment.user.name}</Text>
                     <Text>{comment.text}</Text>
                   </VStack>
                 </HStack>
@@ -283,7 +307,7 @@ const AnnouncementDetails = () => {
                           flex: 1,
                         }}
                       />
-                      <Button onPress={() => handleReply(comment._id)}>Reply</Button>
+                      <Button backgroundColor="#26572E" onPress={() => handleReply(comment._id)}>Reply</Button>
                     </HStack>
                   </VStack>
                 )}

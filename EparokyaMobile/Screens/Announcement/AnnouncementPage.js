@@ -138,6 +138,10 @@ const AnnouncementPage = ({ navigation }) => {
     }
   };
 
+
+
+
+
   const handleCardPress = (item) => {
     navigation.navigate("AnnouncementDetail", { announcementId: item._id });
   };

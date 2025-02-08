@@ -138,7 +138,7 @@ const UserProfile = ({ navigation }) => {
             onPress={() => navigation.navigate("SubmittedForms")}
             style={styles.actionButton}
           >
-            <MaterialIcons name="app-registration" size={24} color="white" />
+           <MaterialIcons name="summarize" size={24} color="white" />
           </TouchableOpacity>
   
           <TouchableOpacity

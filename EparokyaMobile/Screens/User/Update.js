@@ -35,6 +35,8 @@ const UpdateProfile = () => {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isUpdated, setIsUpdated] = useState(false);
+  const [ministryCategory, setMinistryCategory] = useState([]);
+  const [selectedMinistry, setSelectedMinistry] = useState(null);
   const navigation = useNavigation();
 
   const { user, token } = useSelector(state => state.auth);
@@ -69,6 +71,7 @@ const UpdateProfile = () => {
       setZip(data.user.zip);
       setCountry(data.user.country);
       setAvatarPreview(data.user.image);
+      setSelectedMinistry(data.user.ministryCategory || []);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching profile:", error.response?.data || error.message);
@@ -122,6 +125,8 @@ const UpdateProfile = () => {
     formData.append("city", city);
     formData.append("zip", zip);
     formData.append("country", country);
+    formData.append("ministryCategory", selectedMinistry);
+
 
     if (avatar) {
       formData.append("image", {
@@ -172,13 +177,17 @@ const UpdateProfile = () => {
         <TextInput style={styles.input} placeholder="Phone" value={phone} onChangeText={setPhone} />
         <TextInput style={styles.input} placeholder="Age" value={age?.toString()} editable={false} />
 
+        <Text>Ministry Category</Text>
+        <RNPickerSelect onValueChange={setSelectedMinistry} items={ministryCategory.map((cat) => ({ label: cat.name, value: cat._id }))} />
+
+
         <TextInput style={styles.input} placeholder="Barangay" value={barangay} onChangeText={setBarangay} />
         <TextInput style={styles.input} placeholder="City" value={city} onChangeText={setCity} />
         <TextInput style={styles.input} placeholder="Zip Code" value={zip} onChangeText={setZip} />
         <TextInput style={styles.input} placeholder="Country" value={country} onChangeText={setCountry} />
 
         <TouchableOpacity onPress={handleUpdateProfile} style={styles.updateButton}>
-          <MaterialIcons name="done-all" size={40} color="white" />
+          <MaterialIcons name="done-all" size={40} color="#26572e" />
         </TouchableOpacity>
 
         {isUpdated && <Text>Profile updated successfully!</Text>}
@@ -193,7 +202,7 @@ const styles = StyleSheet.create({
   heading: { fontSize: 24, fontWeight: "bold" },
   avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 20 },
   input: { width: "80%", borderWidth: 1, borderColor: "#ccc", borderRadius: 5, padding: 10, marginBottom: 20 },
-  updateButton: { backgroundColor: "black", padding: 10, borderRadius: 5 },
+  updateButton: {  padding: 10, borderRadius: 5 },
 });
 
 export default UpdateProfile;
