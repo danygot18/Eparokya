@@ -511,6 +511,12 @@ const BaptismDetails = () => {
             </div>
             <div className="wedding-checklist-container">
                 <BaptismChecklist baptismId={baptismId} />
+
+            </div>
+            <div className="button-container">
+                <button onClick={() => navigate(`/adminChat/${baptismDetails?.userId?._id}/${baptismDetails?.userId?.email}`)}>
+                    Go to Admin Chat
+                </button>
             </div>
         </div>
     );

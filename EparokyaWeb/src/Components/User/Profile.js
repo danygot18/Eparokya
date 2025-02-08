@@ -94,6 +94,7 @@ const Profile = () => {
                     'N/A'
                   )}
                 </p>
+                <p><strong>Ministry:</strong> {JSON.stringify(user?.ministryCategory)}</p>
               </div>
             </div>
           </div>

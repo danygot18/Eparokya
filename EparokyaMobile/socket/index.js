@@ -5,7 +5,7 @@ const config = {
     autoConnect: false,
 };
 
-export const socket = io(`http://192.168.1.7:4001`, {
+export const socket = io(`http://192.168.1.3:4001`, {
     autoConnect: false,
     reconnection: true, // enables auto reconnection
     reconnectionAttempts: 10, // maximum attempts

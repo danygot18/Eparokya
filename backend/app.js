@@ -28,7 +28,7 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 // === ROUTES ===
 // User & Authentication
 app.use("/api/v1", require("./routes/user"));
-
+app.use("/api/v1/chat", require("./routes/chat"));
 // Prayer Wall
 app.use("/api/v1/", require("./routes/PrayerWall/prayerWall"));
 app.use("/api/v1", require("./routes/PrayerWall/prayerRequest"));
@@ -75,7 +75,7 @@ app.use("/api/v1", require("./routes/Members/members"));
 
 // Chat Feature
 
-app.use("/api/v1/chat", require("./routes/chat"));
+
 
 
 

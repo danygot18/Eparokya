@@ -1,0 +1,101 @@
+.user-wedding-details-page {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+}
+
+.user-wedding-details-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.user-Wedding-three-container-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* Three equal columns */
+    gap: 20px;
+    width: 100%;
+}
+
+.user-Wedding-left-container,
+.user-Wedding-right-container,
+.user-Wedding-third-container,
+.user-Down-left-container,
+.user-Down-right-container,
+.user-Down-third-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.wedding-details-box {
+    flex: 1;
+    min-width: 320px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    gap: 20px;
+}
+
+.user-details {
+    /* Add your styles here */
+    display: block;
+}
+
+.user-details-grid {
+    /* Add your styles here */
+}
+
+.user-details-item {
+    /* Add your styles here */
+}
+
+.user-grid-row {
+    /* Add your styles here */
+}
+
+.user-details-box {
+    /* Add your styles here */
+}
+
+.user-admin-comments-section {
+    /* Add your styles here */
+}
+
+.user-admin-comment {
+    /* Add your styles here */
+}
+
+.user-wedding-date-box {
+    /* Add your styles here */
+}
+
+.user-additional-req-comments {
+    /* Add your styles here */
+}
+
+.user-req-details {
+    /* Add your styles here */
+}
+
+.user-req-detail {
+    /* Add your styles here */
+}
+
+.user-req-updated {
+    /* Add your styles here */
+}
+
+.user-button-container {
+    /* Add your styles here */
+}

@@ -45,7 +45,7 @@ const WeddingDetails = () => {
   const [selectedImage, setSelectedImage] = useState("");
 
   const [comments, setComments] = useState([]);
-
+  
 
   useEffect(() => {
     const fetchWeddingDetails = async () => {
@@ -342,40 +342,40 @@ const WeddingDetails = () => {
           <div className="Wedding-right-container">
             <div className="wedding-details-box">
 
-                <h3>Groom Documents</h3>
-                {['GroomNewBaptismalCertificate', 'GroomNewConfirmationCertificate', 'GroomMarriageLicense', 'GroomMarriageBans', 'GroomOrigCeNoMar', 'GroomOrigPSA'].map((doc, index) => (
-                  <div key={index} className="wedding-grid-row">
-                    <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
-                    {weddingDetails?.[doc]?.url ? (
-                      <img
-                        src={weddingDetails[doc].url}
-                        alt={doc}
-                        style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
-                        onClick={() => openModal(weddingDetails[doc].url)}
-                      />
-                    ) : (
-                      "N/A"
-                    )}
-                  </div>
-                ))}
+              <h3>Groom Documents</h3>
+              {['GroomNewBaptismalCertificate', 'GroomNewConfirmationCertificate', 'GroomMarriageLicense', 'GroomMarriageBans', 'GroomOrigCeNoMar', 'GroomOrigPSA'].map((doc, index) => (
+                <div key={index} className="wedding-grid-row">
+                  <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
+                  {weddingDetails?.[doc]?.url ? (
+                    <img
+                      src={weddingDetails[doc].url}
+                      alt={doc}
+                      style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
+                      onClick={() => openModal(weddingDetails[doc].url)}
+                    />
+                  ) : (
+                    "N/A"
+                  )}
+                </div>
+              ))}
 
-                <h3>Bride Documents</h3>
-                {['BrideNewBaptismalCertificate', 'BrideNewConfirmationCertificate', 'BrideMarriageLicense', 'BrideMarriageBans', 'BrideOrigCeNoMar', 'BrideOrigPSA', 'PermitFromtheParishOftheBride', 'ChildBirthCertificate'].map((doc, index) => (
-                  <div key={index} className="grid-row">
-                    <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
-                    {weddingDetails?.[doc]?.url ? (
-                      <img
-                        src={weddingDetails[doc].url}
-                        alt={doc}
-                        style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
-                        onClick={() => openModal(weddingDetails[doc].url)}
-                      />
-                    ) : (
-                      "N/A"
-                    )}
-                  </div>
-                ))}
-              
+              <h3>Bride Documents</h3>
+              {['BrideNewBaptismalCertificate', 'BrideNewConfirmationCertificate', 'BrideMarriageLicense', 'BrideMarriageBans', 'BrideOrigCeNoMar', 'BrideOrigPSA', 'PermitFromtheParishOftheBride', 'ChildBirthCertificate'].map((doc, index) => (
+                <div key={index} className="grid-row">
+                  <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
+                  {weddingDetails?.[doc]?.url ? (
+                    <img
+                      src={weddingDetails[doc].url}
+                      alt={doc}
+                      style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
+                      onClick={() => openModal(weddingDetails[doc].url)}
+                    />
+                  ) : (
+                    "N/A"
+                  )}
+                </div>
+              ))}
+
             </div>
           </div>
 
@@ -448,6 +448,80 @@ const WeddingDetails = () => {
             </div>
           </Modal>
           <div className="Wedding-third-container">
+
+            <WeddingChecklist weddingId={weddingId} />
+          </div>
+        </div>
+        <div className="Wedding-down-container-layout">
+          {/* Additional Admin Comment */}
+          <div className="Down-left-container">
+            <div className="wedding-details-box">
+              <h2>Additional Requirements</h2>
+
+              <div className="requirement-section">
+                <h3>Pre Marriage Seminar </h3>
+                <div className="input-row">
+                  <label>Date:</label>
+                  <input
+                    type="date"
+                    value={preMarriageSeminarDate}
+                    onChange={(e) => setPreMarriageSeminarDate(e.target.value)}
+                  />
+                  <label>Time:</label>
+                  <input
+                    type="time"
+                    value={preMarriageSeminarTime}
+                    onChange={(e) => setPreMarriageSeminarTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="requirement-section">
+                <h3>Canonical Interview</h3>
+                <div className="input-row">
+                  <label>Date:</label>
+                  <input
+                    type="date"
+                    value={canonicalInterviewDate}
+                    onChange={(e) => setCanonicalInterviewDate(e.target.value)}
+                  />
+                  <label>Time:</label>
+                  <input
+                    type="time"
+                    value={canonicalInterviewTime}
+                    onChange={(e) => setCanonicalInterviewTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="requirement-section">
+                <h3>Confession</h3>
+                <div className="input-row">
+                  <label>Date:</label>
+                  <input
+                    type="date"
+                    value={confessionDate}
+                    onChange={(e) => setConfessionDate(e.target.value)}
+                  />
+                  <label>Time:</label>
+                  <input
+                    type="time"
+                    value={confessionTime}
+                    onChange={(e) => setConfessionTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <button onClick={updateAdditionalReq}>Submit Additional Requirements</button>
+            </div>
+          </div>
+
+
+
+
+
+          <div className="Down-right-container">
+
             {/* Comments of the Admin Display */}
             <div className="admin-comments-section">
               <h3>Admin Comments</h3>
@@ -565,81 +639,8 @@ const WeddingDetails = () => {
                 {loading ? "Updating..." : "Update Wedding Date"}
               </button>
             </div>
-
           </div>
-        </div>
-        <div className="Wedding-down-container-layout">
-          {/* Additional Admin Comment */}
-          <div className="Down-left-container">
-            <div className="wedding-details-box">
-              <h2>Additional Requirements</h2>
-
-              <div className="requirement-section">
-                <h3>Pre Marriage Seminar </h3>
-                <div className="input-row">
-                  <label>Date:</label>
-                  <input
-                    type="date"
-                    value={preMarriageSeminarDate}
-                    onChange={(e) => setPreMarriageSeminarDate(e.target.value)}
-                  />
-                  <label>Time:</label>
-                  <input
-                    type="time"
-                    value={preMarriageSeminarTime}
-                    onChange={(e) => setPreMarriageSeminarTime(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="requirement-section">
-                <h3>Canonical Interview</h3>
-                <div className="input-row">
-                  <label>Date:</label>
-                  <input
-                    type="date"
-                    value={canonicalInterviewDate}
-                    onChange={(e) => setCanonicalInterviewDate(e.target.value)}
-                  />
-                  <label>Time:</label>
-                  <input
-                    type="time"
-                    value={canonicalInterviewTime}
-                    onChange={(e) => setCanonicalInterviewTime(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="requirement-section">
-                <h3>Confession</h3>
-                <div className="input-row">
-                  <label>Date:</label>
-                  <input
-                    type="date"
-                    value={confessionDate}
-                    onChange={(e) => setConfessionDate(e.target.value)}
-                  />
-                  <label>Time:</label>
-                  <input
-                    type="time"
-                    value={confessionTime}
-                    onChange={(e) => setConfessionTime(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <button onClick={updateAdditionalReq}>Submit Additional Requirements</button>
-            </div>
-          </div>
-
-
-
-
-
-          <div className="Down-right-container">
-            <WeddingChecklist weddingId={weddingId} />
-          </div>
-          <div style={{ justifyContent: "center", marginTop: "20px", borderRadius: "10px" }}> 
+          <div style={{ justifyContent: "center", marginTop: "20px", borderRadius: "10px" }}>
             <button onClick={() => handleConfirm(weddingId)}>Confirm Wedding</button>
             <button onClick={() => handleDecline(weddingId)}>Decline</button>
             <button onClick={handleUpdate} disabled={loading}>
