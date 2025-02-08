@@ -1,22 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Alert, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Button, StyleSheet, Text, Alert, ScrollView, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSelector } from 'react-redux';
 
 const WeddingForm5 = ({ navigation, route }) => {
   const { updatedWeddingData, userId } = route.params;
 
-  const [groomNewBaptismalCertificate, setGroomNewBaptismalCertificate] = useState(null);
-  const [groomNewConfirmationCertificate, setGroomNewConfirmationCertificate] = useState(null);
-  const [groomMarriageLicense, setGroomMarriageLicense] = useState(null);
-  const [groomMarriageBans, setGroomMarriageBans] = useState(null);
-  const [groomOrigCeNoMar, setGroomOrigCeNoMar] = useState(null);
-  const [groomOrigPSA, setGroomOrigPSA] = useState(null);
+  const [certificates, setCertificates] = useState({
+    GroomNewBaptismalCertificate: null,
+    GroomNewConfirmationCertificate: null,
+    GroomMarriageLicense: null,
+    GroomMarriageBans: null,
+    GroomOrigCeNoMar: null,
+    GroomOrigPSA: null,
+  });
   const [error, setError] = useState('');
-
   const { user, token } = useSelector(state => state.auth);
 
-  const pickDocument = async (setFile) => {
+  const pickDocument = async (field) => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
       Alert.alert("Permission required", "Camera roll permissions are needed to select images.");
@@ -30,69 +31,50 @@ const WeddingForm5 = ({ navigation, route }) => {
     });
 
     if (!result.canceled) {
-      setFile(result.assets[0].uri);
+      setCertificates(prev => ({
+        ...prev,
+        [field]: result.assets[0].uri,
+      }));
     }
   };
 
   const goToNextPage = () => {
-    if (!groomNewBaptismalCertificate || !groomNewConfirmationCertificate || !groomMarriageLicense || !groomMarriageBans || !groomOrigCeNoMar || !groomOrigPSA) {
+    if (Object.values(certificates).some(value => !value)) {
       setError('Please upload all required certificates.');
       return;
     }
 
-    const certificates = {
-      GroomNewBaptismalCertificate: {
-        uri: groomNewBaptismalCertificate,
+    const formattedCertificates = Object.entries(certificates).reduce((acc, [key, uri]) => {
+      acc[key] = {
+        uri,
         type: 'image/jpeg',
-        name: 'groomNewBaptismalCertificate.jpg',
-      },
-      GroomNewConfirmationCertificate: {
-        uri: groomNewConfirmationCertificate,
-        type: 'image/jpeg',
-        name: 'groomNewConfirmationCertificate.jpg',
-      },
-      GroomMarriageLicense: {
-        uri: groomMarriageLicense,
-        type: 'image/jpeg',
-        name: 'groomMarriageLicense.jpg',
-      },
-      GroomMarriageBans: {
-        uri: groomMarriageBans,
-        type: 'image/jpeg',
-        name: 'groomMarriageBans.jpg',
-      },
-      GroomOrigCeNoMar: {
-        uri: groomOrigCeNoMar,
-        type: 'image/jpeg',
-        name: 'groomOrigCeNoMar.jpg',
-      },
-      GroomOrigPSA: {
-        uri: groomOrigPSA,
-        type: 'image/jpeg',
-        name: 'groomOrigPSA.jpg',
-      },
-    };
+        name: `${key}.jpg`,
+      };
+      return acc;
+    }, {});
 
     console.log('Navigating to WeddingForm6 with data:', {
       updatedWeddingData,
-      certificates,
+      formattedCertificates,
       userId,
     });
 
     navigation.navigate('WeddingForm6', {
       updatedWeddingData,
-      certificates,
+      certificates: formattedCertificates,
       userId,
     });
   };
 
   const clearForm = () => {
-    setGroomNewBaptismalCertificate(null);
-    setGroomNewConfirmationCertificate(null);
-    setGroomMarriageLicense(null);
-    setGroomMarriageBans(null);
-    setGroomOrigCeNoMar(null);
-    setGroomOrigPSA(null);
+    setCertificates({
+      GroomNewBaptismalCertificate: null,
+      GroomNewConfirmationCertificate: null,
+      GroomMarriageLicense: null,
+      GroomMarriageBans: null,
+      GroomOrigCeNoMar: null,
+      GroomOrigPSA: null,
+    });
     setError('');
   };
 
@@ -100,23 +82,12 @@ const WeddingForm5 = ({ navigation, route }) => {
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       {error && <Text style={styles.error}>{error}</Text>}
 
-      <Button title="Upload Groom New Baptismal Certificate" onPress={() => pickDocument(setGroomNewBaptismalCertificate)} />
-      {groomNewBaptismalCertificate && <Text>Uploaded: {groomNewBaptismalCertificate.split('/').pop()}</Text>}
-
-      <Button title="Upload Groom New Confirmation Certificate" onPress={() => pickDocument(setGroomNewConfirmationCertificate)} />
-      {groomNewConfirmationCertificate && <Text>Uploaded: {groomNewConfirmationCertificate.split('/').pop()}</Text>}
-
-      <Button title="Upload Groom Marriage License" onPress={() => pickDocument(setGroomMarriageLicense)} />
-      {groomMarriageLicense && <Text>Uploaded: {groomMarriageLicense.split('/').pop()}</Text>}
-
-      <Button title="Upload Groom Marriage Bans" onPress={() => pickDocument(setGroomMarriageBans)} />
-      {groomMarriageBans && <Text>Uploaded: {groomMarriageBans.split('/').pop()}</Text>}
-
-      <Button title="Upload Groom Original Certificate of No Marriage" onPress={() => pickDocument(setGroomOrigCeNoMar)} />
-      {groomOrigCeNoMar && <Text>Uploaded: {groomOrigCeNoMar.split('/').pop()}</Text>}
-
-      <Button title="Upload Groom Original PSA" onPress={() => pickDocument(setGroomOrigPSA)} />
-      {groomOrigPSA && <Text>Uploaded: {groomOrigPSA.split('/').pop()}</Text>}
+      {Object.keys(certificates).map((key) => (
+        <View key={key} style={styles.uploadContainer}>
+          <Button title={`Upload ${key.replace(/([A-Z])/g, ' $1').trim()}`} onPress={() => pickDocument(key)} />
+          {certificates[key] && <Image source={{ uri: certificates[key] }} style={styles.imagePreview} />}
+        </View>
+      ))}
 
       <Button title="Next" onPress={goToNextPage} />
       <Button title="Clear Form" onPress={clearForm} />
@@ -128,16 +99,19 @@ const styles = StyleSheet.create({
   scrollContainer: {
     padding: 20,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: 'gray',
-    marginBottom: 10,
-    padding: 8,
-    borderRadius: 5,
+  uploadContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
   },
   error: {
     color: 'red',
     marginBottom: 10,
+  },
+  imagePreview: {
+    width: 200,
+    height: 200,
+    marginTop: 10,
+    borderRadius: 10,
   },
 });
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Button, StyleSheet, Text, Alert, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSelector } from 'react-redux';
@@ -6,7 +6,11 @@ import axios from 'axios';
 import baseURL from "../../../assets/common/baseUrl";
 
 const WeddingForm6 = ({ navigation, route }) => {
-  const { updatedWeddingData, certificates, userId } = route.params;
+  const { updatedWeddingData, certificates, userId, dateOfApplication, weddingDate, weddingTime, groomName, groomAddress, groomPhone, groomBirthDate, groomOccupation, groomReligion, groomFather, groomMother, brideName, brideAddress, bridePhone, brideBirthDate, brideOccupation, brideReligion, brideFather, brideMother, Ninong, Ninang } = route.params;
+
+  useEffect(() => {
+    console.log('Route params:', route.params);
+  }, [route.params]);
 
   const [brideNewBaptismalCertificate, setBrideNewBaptismalCertificate] = useState(null);
   const [brideNewConfirmationCertificate, setBrideNewConfirmationCertificate] = useState(null);
@@ -45,15 +49,70 @@ const WeddingForm6 = ({ navigation, route }) => {
     }
 
     const formData = new FormData();
-    formData.append('userId', userId);
-    formData.append('weddingData', JSON.stringify(updatedWeddingData));
 
-    formData.append('GroomNewBaptismalCertificate', certificates.GroomNewBaptismalCertificate);
-    formData.append('GroomNewConfirmationCertificate', certificates.GroomNewConfirmationCertificate);
-    formData.append('GroomMarriageLicense', certificates.GroomMarriageLicense);
-    formData.append('GroomMarriageBans', certificates.GroomMarriageBans);
-    formData.append('GroomOrigCeNoMar', certificates.GroomOrigCeNoMar);
-    formData.append('GroomOrigPSA', certificates.GroomOrigPSA);
+    formData.append("userId", userId || "");
+    formData.append("dateOfApplication", new Date(updatedWeddingData.dateOfApplication).toISOString());
+    formData.append("weddingDate", new Date(updatedWeddingData.weddingDate).toISOString());
+    formData.append("weddingTime", updatedWeddingData.weddingTime || "");
+    formData.append("groomName", updatedWeddingData.groomName || "");
+    formData.append("groomAddress", JSON.stringify({
+      street: updatedWeddingData.groomAddress?.street || "",
+      zip: updatedWeddingData.groomAddress?.zip || "",
+      city: updatedWeddingData.groomAddress?.city || "",
+    }));
+    formData.append("groomPhone", updatedWeddingData.groomPhone || "");
+    formData.append("groomBirthDate", new Date(updatedWeddingData.groomBirthDate).toISOString());
+    formData.append("groomOccupation", updatedWeddingData.groomOccupation || "");
+    formData.append("groomReligion", updatedWeddingData.groomReligion || "");
+    formData.append("groomFather", updatedWeddingData.groomFather || "");
+    formData.append("groomMother", updatedWeddingData.groomMother || "");
+    formData.append("brideName", updatedWeddingData.brideName || "");
+    formData.append("brideAddress", JSON.stringify({
+      street: updatedWeddingData.brideAddress?.street || "",
+      zip: updatedWeddingData.brideAddress?.zip || "",
+      city: updatedWeddingData.brideAddress?.city || "",
+    }));
+    formData.append("bridePhone", updatedWeddingData.bridePhone || "");
+    formData.append("brideBirthDate", new Date(updatedWeddingData.brideBirthDate).toISOString());
+    formData.append("brideOccupation", updatedWeddingData.brideOccupation || "");
+    formData.append("brideReligion", updatedWeddingData.brideReligion || "");
+    formData.append("brideFather", updatedWeddingData.brideFather || "");
+    formData.append("brideMother", updatedWeddingData.brideMother || "");
+    formData.append("Ninong", JSON.stringify(updatedWeddingData.Ninong || []));
+    formData.append("Ninang", JSON.stringify(updatedWeddingData.Ninang || []));
+
+
+
+    formData.append('GroomNewBaptismalCertificate', {
+      uri: certificates.GroomNewBaptismalCertificate.uri,
+      type: certificates.GroomNewBaptismalCertificate.type,
+      name: certificates.GroomNewBaptismalCertificate.name,
+    });
+    formData.append('GroomNewConfirmationCertificate', {
+      uri: certificates.GroomNewConfirmationCertificate.uri,
+      type: certificates.GroomNewConfirmationCertificate.type,
+      name: certificates.GroomNewConfirmationCertificate.name,
+    });
+    formData.append('GroomMarriageLicense', {
+      uri: certificates.GroomMarriageLicense.uri,
+      type: certificates.GroomMarriageLicense.type,
+      name: certificates.GroomMarriageLicense.name,
+    });
+    formData.append('GroomMarriageBans', {
+      uri: certificates.GroomMarriageBans.uri,
+      type: certificates.GroomMarriageBans.type,
+      name: certificates.GroomMarriageBans.name,
+    });
+    formData.append('GroomOrigCeNoMar', {
+      uri: certificates.GroomOrigCeNoMar.uri,
+      type: certificates.GroomOrigCeNoMar.type,
+      name: certificates.GroomOrigCeNoMar.name,
+    });
+    formData.append('GroomOrigPSA', {
+      uri: certificates.GroomOrigPSA.uri,
+      type: certificates.GroomOrigPSA.type,
+      name: certificates.GroomOrigPSA.name,
+    });
 
     formData.append('BrideNewBaptismalCertificate', {
       uri: brideNewBaptismalCertificate,
@@ -97,22 +156,6 @@ const WeddingForm6 = ({ navigation, route }) => {
         name: 'childBirthCertificate.jpg',
       });
     }
-    
-    console.log("Final wedding data before submission:", JSON.stringify(updatedWeddingData, null, 2));
-
-    console.log('Submitting form with data:', {
-      userId,
-      updatedWeddingData,
-      certificates,
-      brideNewBaptismalCertificate,
-      brideNewConfirmationCertificate,
-      brideMarriageLicense,
-      brideMarriageBans,
-      brideOrigCeNoMar,
-      brideOrigPSA,
-      permitFromtheParishOftheBride,
-      childBirthCertificate,
-    });
 
     try {
       const config = {
@@ -126,8 +169,18 @@ const WeddingForm6 = ({ navigation, route }) => {
       Alert.alert("Success", "Wedding form submitted successfully!");
       navigation.navigate('Profile');
     } catch (error) {
-      console.error('Error submitting wedding form:', error.response.data);
-      setError(`An error occurred while submitting your wedding details. Please try again. Error: ${error.response.data.message}`);
+      console.error('Error submitting wedding form:', error);
+
+      if (error.response) {
+        console.error('Response Data:', error.response.data);
+        setError(`Error: ${error.response.data.message}`);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        setError('No response from server. Please check your internet connection or server status.');
+      } else {
+        console.error('Error setting up request:', error.message);
+        setError(`Request setup error: ${error.message}`);
+      }
     }
   };
 
@@ -148,28 +201,28 @@ const WeddingForm6 = ({ navigation, route }) => {
       {error && <Text style={styles.error}>{error}</Text>}
 
       <Button title="Upload Bride New Baptismal Certificate" onPress={() => pickDocument(setBrideNewBaptismalCertificate)} />
-      {brideNewBaptismalCertificate && <Text>Uploaded: {brideNewBaptismalCertificate.split('/').pop()}</Text>}
+      {brideNewBaptismalCertificate && <Text>Uploaded: {brideNewBaptismalCertificate ? brideNewBaptismalCertificate.split('/').pop() : ''}</Text>}
 
       <Button title="Upload Bride New Confirmation Certificate" onPress={() => pickDocument(setBrideNewConfirmationCertificate)} />
-      {brideNewConfirmationCertificate && <Text>Uploaded: {brideNewConfirmationCertificate.split('/').pop()}</Text>}
+      {brideNewConfirmationCertificate && <Text>Uploaded: {brideNewConfirmationCertificate ? brideNewConfirmationCertificate.split('/').pop() : ''}</Text>}
 
       <Button title="Upload Bride Marriage License" onPress={() => pickDocument(setBrideMarriageLicense)} />
-      {brideMarriageLicense && <Text>Uploaded: {brideMarriageLicense.split('/').pop()}</Text>}
+      {brideMarriageLicense && <Text>Uploaded: {brideMarriageLicense ? brideMarriageLicense.split('/').pop() : ''}</Text>}
 
       <Button title="Upload Bride Marriage Bans" onPress={() => pickDocument(setBrideMarriageBans)} />
-      {brideMarriageBans && <Text>Uploaded: {brideMarriageBans.split('/').pop()}</Text>}
+      {brideMarriageBans && <Text>Uploaded: {brideMarriageBans ? brideMarriageBans.split('/').pop() : ''}</Text>}
 
       <Button title="Upload Bride Original Certificate of No Marriage" onPress={() => pickDocument(setBrideOrigCeNoMar)} />
-      {brideOrigCeNoMar && <Text>Uploaded: {brideOrigCeNoMar.split('/').pop()}</Text>}
+      {brideOrigCeNoMar && <Text>Uploaded: {brideOrigCeNoMar ? brideOrigCeNoMar.split('/').pop() : ''}</Text>}
 
       <Button title="Upload Bride Original PSA" onPress={() => pickDocument(setBrideOrigPSA)} />
-      {brideOrigPSA && <Text>Uploaded: {brideOrigPSA.split('/').pop()}</Text>}
+      {brideOrigPSA && <Text>Uploaded: {brideOrigPSA ? brideOrigPSA.split('/').pop() : ''}</Text>}
 
       <Button title="Upload Permit From the Parish Of the Bride" onPress={() => pickDocument(setPermitFromtheParishOftheBride)} />
-      {permitFromtheParishOftheBride && <Text>Uploaded: {permitFromtheParishOftheBride.split('/').pop()}</Text>}
+      {permitFromtheParishOftheBride && <Text>Uploaded: {permitFromtheParishOftheBride ? permitFromtheParishOftheBride.split('/').pop() : ''}</Text>}
 
       <Button title="Upload Child Birth Certificate (if applicable)" onPress={() => pickDocument(setChildBirthCertificate)} />
-      {childBirthCertificate && <Text>Uploaded: {childBirthCertificate.split('/').pop()}</Text>}
+      {childBirthCertificate && <Text>Uploaded: {childBirthCertificate ? childBirthCertificate.split('/').pop() : ''}</Text>}
 
       <Button title="Submit" onPress={handleSubmit} />
       <Button title="Clear Form" onPress={clearForm} />

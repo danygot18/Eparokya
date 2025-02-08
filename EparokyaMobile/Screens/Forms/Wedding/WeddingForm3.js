@@ -1,73 +1,113 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Alert, ScrollView } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useSelector } from 'react-redux';
-import axios from 'axios';
-import baseURL from "../../../assets/common/baseUrl";
+import React, { useState, useEffect } from "react";
+import { View, TextInput, Button, StyleSheet, Text, ScrollView } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useSelector } from "react-redux";
 
 const WeddingForm3 = ({ navigation, route }) => {
-  const { bride, brideAge, brideGender = '', bridePhone, brideAddress,
-    groom, groomAge, groomGender = '', groomPhone, groomAddress } = route.params;
-
-  const [brideBirthDate, setBrideBirthDate] = useState(new Date());
-  const [brideOccupation, setBrideOccupation] = useState('');
-  const [brideReligion, setBrideReligion] = useState('');
-  const [brideFather, setBrideFather] = useState('');
-  const [brideMother, setBrideMother] = useState('');
-  const [error, setError] = useState('');
+  const params = route.params || {};
+  const [brideName, setBrideName] = useState(params.brideName || "");
+  const [brideAddress, setBrideAddress] = useState({
+    street: params.brideAddress?.street || "",
+    city: params.brideAddress?.city || "",
+    zip: params.brideAddress?.zip || "",
+  });
+  const [brideBirthDate, setBrideBirthDate] = useState(new Date(params.brideBirthDate || new Date()));
+  const [brideOccupation, setBrideOccupation] = useState(params.brideOccupation || "");
+  const [bridePhone, setBridePhone] = useState(params.bridePhone || "");
+  const [brideReligion, setBrideReligion] = useState(params.brideReligion || "");
+  const [brideFather, setBrideFather] = useState(params.brideFather || "");
+  const [brideMother, setBrideMother] = useState(params.brideMother || "");
+  const [error, setError] = useState("");
   const [userId, setUserId] = useState(null);
   const [showBrideBirthDatePicker, setShowBrideBirthDatePicker] = useState(false);
 
-  const { user, token } = useSelector(state => state.auth);
+  const { user } = useSelector((state) => state.auth);
 
+  useEffect(() => {
+    if (user) {
+      setUserId(user._id);
+    }
+  }, [user]);
+
+  const handleAddressChange = (key, value) => {
+    setBrideAddress((prevAddress) => ({
+      ...prevAddress,
+      [key]: value,
+    }));
+  };
 
   const goToNextPage = () => {
     if (!brideOccupation || !brideReligion || !brideFather || !brideMother) {
-      setError('Please fill in all fields and ensure you are logged in.');
+      setError("Please fill in all fields.");
       return;
     }
-
+  
+    if (!brideAddress.street || !brideAddress.city || !brideAddress.zip) {
+      setError("Bride's address is incomplete.");
+      return;
+    }
+  
     const weddingData = {
-      bride,
-      brideAge: Number(brideAge),
-      brideGender: brideGender.trim(),
-      bridePhone,
+      ...route.params, // Include previous form data
+      brideName,
       brideAddress,
+      bridePhone,
       brideBirthDate: brideBirthDate.toISOString(),
       brideOccupation,
       brideReligion,
       brideFather,
       brideMother,
-      groom,
-      groomAge: Number(groomAge),
-      groomGender: groomGender.trim(),
-      groomPhone,
-      groomAddress,
     };
-
-    navigation.navigate('WeddingForm4', {
+  
+    navigation.navigate("WeddingForm4", {
       weddingData,
       userId,
     });
   };
 
   const clearForm = () => {
-    setBrideOccupation('');
-    setBrideReligion('');
-    setBrideFather('');
-    setBrideMother('');
+    setBrideOccupation("");
+    setBrideReligion("");
+    setBridePhone("");
+    setBrideFather("");
+    setBrideMother("");
     setBrideBirthDate(new Date());
-    setError('');
+    setBrideAddress({ street: "", city: "", zip: "" });
+    setError("");
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <TextInput placeholder="Bride's Occupation" value={brideOccupation} onChangeText={setBrideOccupation} style={styles.input} />
-      <TextInput placeholder="Bride's Religion" value={brideReligion} onChangeText={setBrideReligion} style={styles.input} />
-      <TextInput placeholder="Bride's Father" value={brideFather} onChangeText={setBrideFather} style={styles.input} />
-      <TextInput placeholder="Bride's Mother" value={brideMother} onChangeText={setBrideMother} style={styles.input} />
+      <TextInput
+        placeholder="Name of the Bride"
+        value={brideName}
+        onChangeText={(text) => setBrideName(text)}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Street Address"
+        value={brideAddress.street}
+        onChangeText={(text) => handleAddressChange("street", text)}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="City"
+        value={brideAddress.city}
+        onChangeText={(text) => handleAddressChange("city", text)}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="ZIP Code"
+        value={brideAddress.zip}
+        onChangeText={(text) => handleAddressChange("zip", text)}
+        keyboardType="numeric"
+        style={styles.input}
+      />
 
       <Button title="Pick Bride's Birth Date" onPress={() => setShowBrideBirthDatePicker(true)} />
       {showBrideBirthDatePicker && (
@@ -80,10 +120,46 @@ const WeddingForm3 = ({ navigation, route }) => {
           mode="date"
         />
       )}
-      <Text>{brideBirthDate.toDateString()}</Text>
+      <Text>Selected Birth Date: {brideBirthDate.toDateString()}</Text>
+
+      <TextInput
+        placeholder="Phone"
+        keyboardType="phone-pad"
+        value={bridePhone}
+        onChangeText={setBridePhone}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Bride's Occupation"
+        value={brideOccupation}
+        onChangeText={setBrideOccupation}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Bride's Religion"
+        value={brideReligion}
+        onChangeText={setBrideReligion}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Bride's Father"
+        value={brideFather}
+        onChangeText={setBrideFather}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Bride's Mother"
+        value={brideMother}
+        onChangeText={setBrideMother}
+        style={styles.input}
+      />
 
       <Button title="Next" onPress={goToNextPage} />
-      <Button title="Clear Form" onPress={clearForm} />
+      <Button title="Clear Form" onPress={clearForm} color="red" />
     </ScrollView>
   );
 };
@@ -94,13 +170,13 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: 'gray',
+    borderColor: "gray",
     marginBottom: 10,
     padding: 8,
     borderRadius: 5,
   },
   error: {
-    color: 'red',
+    color: "red",
     marginBottom: 10,
   },
 });

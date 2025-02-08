@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useSelector } from "react-redux";
 
 const WeddingForm = ({ navigation }) => {
   const [dateOfApplication, setDateOfApplication] = useState(new Date());
@@ -9,7 +10,10 @@ const WeddingForm = ({ navigation }) => {
   const [showDateOfApplicationPicker, setShowDateOfApplicationPicker] = useState(false);
   const [showWeddingDatePicker, setShowWeddingDatePicker] = useState(false);
   const [showWeddingTimePicker, setShowWeddingTimePicker] = useState(false);
+  const formattedWeddingTime = weddingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const [error, setError] = useState('');
+
+  const { user, token } = useSelector(state => state.auth);
 
   const onDateOfApplicationChange = (event, selectedDate) => {
     const currentDate = selectedDate || dateOfApplication;
@@ -36,9 +40,9 @@ const WeddingForm = ({ navigation }) => {
     }
 
     navigation.navigate('WeddingForm2', {
-      dateOfApplication: dateOfApplication.toISOString(),
-      weddingDate: weddingDate.toISOString(),
-      weddingTime: weddingTime.toISOString(),
+      dateOfApplication: dateOfApplication.toISOString(), // Use ISO string for consistency
+    weddingDate: weddingDate.toISOString(),
+    weddingTime: formattedWeddingTime,
     });
   };
 

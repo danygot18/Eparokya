@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, StyleSheet, Text } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useSelector } from "react-redux";
 
 const WeddingForm2 = ({ navigation, route }) => {
   const {
@@ -26,11 +27,27 @@ const WeddingForm2 = ({ navigation, route }) => {
   const [groomMother, setGroomMother] = useState("");
   const [error, setError] = useState("");
   const [showGroomBirthDatePicker, setShowGroomBirthDatePicker] = useState(false);
+  const { user, token } = useSelector((state) => state.auth);
 
   const onGroomBirthDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || groomBirthDate;
+    if (selectedDate) {
+      setGroomBirthDate(selectedDate);
+    }
     setShowGroomBirthDatePicker(false);
-    setGroomBirthDate(currentDate);
+  };
+
+  const clearFields = () => {
+    setGroomName("");
+    setGroomStreet("");
+    setGroomZip("");
+    setGroomCity("");
+    setGroomPhone("");
+    setGroomBirthDate(new Date());
+    setGroomOccupation("");
+    setGroomReligion("");
+    setGroomFather("");
+    setGroomMother("");
+    setError("");
   };
 
   const goToNextPage = () => {
@@ -49,22 +66,15 @@ const WeddingForm2 = ({ navigation, route }) => {
       setError("Please fill in all fields.");
       return;
     }
-
+  
     const groomAddress = {
       street: groomStreet,
       zip: groomZip,
       city: groomCity,
     };
-
+  
     navigation.navigate("WeddingForm3", {
-      bride,
-      brideAge,
-      brideGender,
-      bridePhone,
-      brideAddress,
-      dateOfApplication,
-      weddingDate,
-      weddingTime,
+      ...route.params, // Include previous form data
       groomName,
       groomAddress,
       groomPhone,
@@ -74,20 +84,6 @@ const WeddingForm2 = ({ navigation, route }) => {
       groomFather,
       groomMother,
     });
-  };
-
-  const clearFields = () => {
-    setGroomName("");
-    setGroomStreet("");
-    setGroomZip("");
-    setGroomCity("");
-    setGroomPhone("");
-    setGroomBirthDate(new Date());
-    setGroomOccupation("");
-    setGroomReligion("");
-    setGroomFather("");
-    setGroomMother("");
-    setError("");
   };
 
   return (
@@ -136,7 +132,7 @@ const WeddingForm2 = ({ navigation, route }) => {
           onChange={onGroomBirthDateChange}
         />
       )}
-      <Text>{groomBirthDate.toDateString()}</Text>
+      <Text>Selected Birthday: {groomBirthDate.toDateString()}</Text>
 
       <TextInput
         placeholder="Occupation"
