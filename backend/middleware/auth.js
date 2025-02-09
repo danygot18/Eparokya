@@ -229,15 +229,28 @@ exports.isAuthenticatedUser = async (req, res, next) => {
 };
 
 // Role-based authorization
-exports.isAuthorized = (...roles) => {
+// exports.isAuthorized = (...roles) => {
 
+//     return (req, res, next) => {
+//         if (!req.user.isAdmin) {
+//             return res.status(403).json({ message: `You are not allowed to acccess or do something on this resource` })
+//         }
+//         next()
+//     }
+// }
+exports.isAuthorized = (...roles) => {
     return (req, res, next) => {
-        if (!req.user.isAdmin) {
-            return res.status(403).json({ message: `You are not allowed to acccess or do something on this resource` })
+        if (!req.user) {
+            return res.status(401).json({ message: "User not authenticated" });
         }
-        next()
-    }
-}
+
+        if (!roles.includes("admin") || !req.user.isAdmin) {
+            return res.status(403).json({ message: "You are not allowed to access this resource" });
+        }
+
+        next();
+    };
+};
 
 exports.isAuthenticatedMobile = (req, res, next) => {
     const authHeader = req.headers.authorization;

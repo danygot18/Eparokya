@@ -36,7 +36,7 @@ router.post(
 
 router.get('/getAllWeddings', WeddingFormController.getAllWeddings);
 router.get('/confirmedWedding',  WeddingFormController.getConfirmedWeddings);
-router.get('/stats/weddingsPerMonth', isAuthorized("admin"),isAuthenticatedUser, WeddingFormController.getWeddingsPerMonth);
+router.get('/stats/weddingsPerMonth',isAuthenticatedUser, isAuthorized("admin"), WeddingFormController.getWeddingsPerMonth);
 router.get('/stats/weddingStatusCount', isAuthenticatedUser, WeddingFormController.getWeddingStatusCounts);
 
 router.get('/getWeddingChecklist/:weddingId', WeddingFormController.getWeddingChecklist);
