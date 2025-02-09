@@ -4,7 +4,7 @@ const config = {
     autoConnect: false,
 };
 
-export const socket = io(`http://localhost:4001`, {
+export const socket = io(`https://eparokya.onrender.com`, {
     autoConnect: false,
     reconnection: true, // enables auto reconnection
     reconnectionAttempts: 10, // maximum attempts
