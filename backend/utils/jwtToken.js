@@ -2,7 +2,7 @@ const sendToken = (user, statusCode, res) => {
     console.log(user)
     // Create Jwt token
     const token = user.getJwtToken();
-    req.user.token = token;
+    user.token = token;
     // Options for cookie
     // const options = {
     //     expires: new Date(
