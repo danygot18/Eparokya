@@ -26,11 +26,13 @@ require("dotenv/config");
 // Enable CORS for both Web & Mobile
 app.use(
   cors({
-    origin: ["*", "https://eparokya.vercel.app", null],
+    origin: ["*", "https://eparokya.vercel.app", null, "http://localhost:3000"],
+    // origin: "*",
     credentials: true,
   })
 );
-// app.options("*", cors());
+// app.use(cors());
+app.options("*", cors());
 
 // app.use(cors());
 // app.options("*", cors());

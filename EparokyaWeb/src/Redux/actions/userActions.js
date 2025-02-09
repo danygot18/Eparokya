@@ -90,7 +90,10 @@ export const login = (email, password) => async (dispatch) => {
         
         dispatch({
             type: LOGIN_SUCCESS,
-            payload: data.user
+            payload: {
+                user: data.user,
+                token: data.token
+            }
         })
     } catch (error) {
         console.log(error.response.data.message)

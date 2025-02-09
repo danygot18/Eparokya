@@ -58,7 +58,8 @@ export const authReducer = (state = { user: {} }, action) => {
                 ...state,
                 loading: false,
                 isAuthenticated: true,
-                user: action.payload
+                user: action.payload.user,
+                token: action.payload.token
             }
         case REGISTER_USER_FAIL:
         case LOGIN_FAIL:

@@ -24,30 +24,30 @@ const server = app.listen(port, () => {
 });
 
 // Initialize Socket.IO for real-time communication (Mobile)
-// const io = new Server(server, {
-//     cors: {
-//         origin: "*", // Adjust this to only allow your frontend domains
-//         // methods: ["GET", "POST"]
-//     }
-// });
-const allowedOrigins = [
-    "https://eparokya.vercel.app",  // Web frontend (Production)
-    "http://localhost:3000",  // Web (Development)
-    null,  // Mobile app (since built apps may send requests with null origin)
-  ];
-  
-  const io = new Server(server, {
+const io = new Server(server, {
     cors: {
-      origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error("Not allowed by CORS"));
-        }
-      },
-      credentials: true,
-    },
-  });
+        origin: "*", // Adjust this to only allow your frontend domains
+        // methods: ["GET", "POST"]
+    }
+});
+// const allowedOrigins = [
+//     "https://eparokya.vercel.app",  // Web frontend (Production)
+//     "http://localhost:3000",  // Web (Development)
+//     null,  // Mobile app (since built apps may send requests with null origin)
+//   ];
+  
+//   const io = new Server(server, {
+//     cors: {
+//       origin: function (origin, callback) {
+//         if (!origin || allowedOrigins.includes(origin)) {
+//           callback(null, true);
+//         } else {
+//           callback(new Error("Not allowed by CORS"));
+//         }
+//       },
+//       credentials: true,
+//     },
+//   });
 
 // Store connected users
 const USERS = new Map();

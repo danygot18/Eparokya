@@ -29,11 +29,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const config = {
-    headers: {
-      withCredentials: true,
-    },
+    withCredentials: true,
 
   };
+
 
   const convertToStatusObject = (data) => {
     const statusObj = { pending: 0, confirmed: 0, cancelled: 0 };

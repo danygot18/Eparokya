@@ -14,6 +14,8 @@ const Header = () => {
   const [isHovered, setIsHovered] = React.useState(false);
   const navigate = useNavigate();
 
+  console.log("ADMIN BA SI USEER?",user)
+
   
 
 

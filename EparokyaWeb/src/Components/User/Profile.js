@@ -15,7 +15,9 @@ const Profile = () => {
   const fetchUserProfile = async () => {
     try {
       const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, {
+        
         withCredentials: true,
+       
       });
       return data;
     } catch (error) {
