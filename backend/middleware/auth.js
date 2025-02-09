@@ -239,6 +239,7 @@ exports.isAuthenticatedUser = async (req, res, next) => {
 //     }
 // }
 exports.isAuthorized = (...roles) => {
+    console.log(req.user);
     return (req, res, next) => {
         if (!req.user) {
             return res.status(401).json({ message: "User not authenticated" });
