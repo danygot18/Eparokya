@@ -43,7 +43,7 @@ const sendToken = (user, statusCode, res) => {
         httpOnly: true,  // Secure against XSS
         secure: process.env.NODE_ENV === "production", // Use HTTPS only in production
         sameSite: "None", // Required for cross-origin cookies
-        maxAge: 5 * 60 * 1000, // 5 minutes
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 5 minutes
     };
 
     res
