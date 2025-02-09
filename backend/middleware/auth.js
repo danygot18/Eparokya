@@ -183,9 +183,9 @@ const User = require("../models/user");
 
 exports.isAuthenticatedUser = async (req, res, next) => {
     try {
-        console.log(req.cookies.token)
+        console.log(req.cookie.token)
         console.log(req.headers.authorization)
-        console.log(req.cookies)
+        console.log(req.cookie)
         let token = "";
 
         // Extract token from cookies (Web)
