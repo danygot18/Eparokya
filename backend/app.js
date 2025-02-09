@@ -9,13 +9,15 @@ const errorHandler = require("./helpers/error-handler");
 require("dotenv/config");
 
 // Enable CORS for both Web & Mobile
-app.use(
-  cors({  
-    origin: ["http://localhost:3000"],
-    credentials: true,
-  })
-);
-app.options("*", cors());
+// app.use(
+//   cors({  
+//     origin: ["http://localhost:3000"],
+//     credentials: true,
+//   })
+// );
+// app.options("*", cors());
+
+app.use(cors());
 
 // Middleware
 app.use(express.json({ limit: "50mb" }));
