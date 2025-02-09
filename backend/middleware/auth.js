@@ -239,18 +239,25 @@ exports.isAuthenticatedUser = async (req, res, next) => {
 //     }
 // }
 exports.isAuthorized = (...roles) => {
-    console.log(req.user);
-    return (req, res, next) => {
-        if (!req.user) {
-            return res.status(401).json({ message: "User not authenticated" });
-        }
-
-        if (!roles.includes("admin") || !req.user.isAdmin) {
-            return res.status(403).json({ message: "You are not allowed to access this resource" });
-        }
-
-        next();
-    };
+    
+    try {
+        
+        return (req, res, next) => {
+            console.log(req.user);
+            if (!req.user) {
+                return res.status(401).json({ message: "User not authenticated" });
+            }
+    
+            if (!roles.includes("admin") || !req.user.isAdmin) {
+                return res.status(403).json({ message: "You are not allowed to access this resource" });
+            }
+    
+            next();
+        };
+    } catch (error) {     
+        console.error("Authorization Error:", error);
+        return res.status(403).json({ message: "Unauthorized: Invalid role" });
+    }
 };
 
 exports.isAuthenticatedMobile = (req, res, next) => {
