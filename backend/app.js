@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser");
 const errorHandler = require("./helpers/error-handler");
 
 
-const allowedOrigins = ["https://eparokya.vercel.app", null];
+const allowedOrigins = ["https://eparokya.vercel.app","*", null];
 
 // Load environment variables
 require("dotenv/config");
