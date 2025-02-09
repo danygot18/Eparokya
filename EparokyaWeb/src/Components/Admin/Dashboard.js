@@ -29,7 +29,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const config = {
-    withCredentials: true,
+    headers: {
+      withCredentials: true,
+    },
+
   };
 
   const convertToStatusObject = (data) => {
