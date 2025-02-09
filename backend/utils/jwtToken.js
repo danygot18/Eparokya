@@ -1,21 +1,30 @@
 const sendToken = (user, statusCode, res) => {
     console.log(user)
-        // Create Jwt token
-        const token = user.getJwtToken();
-    
-        // Options for cookie
-        const options = {
-            expires: new Date(
-                Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
-            ),
-            httpOnly: false
-        }
-        res.status(statusCode).cookie('token', token, options).json({
+    // Create Jwt token
+    const token = user.getJwtToken();
+
+    // Options for cookie
+    // const options = {
+    //     expires: new Date(
+    //         Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
+    //     ),
+    //     httpOnly: false,
+        
+    // }
+    const options = {
+        expires: false,
+        httpOnly: false,
+        maxAge: 5 * 60 * 1000,
+      };
+    res
+        .status(statusCode)
+        .cookie('token', token, options)
+        .json({
             success: true,
             token,
             user
         })
-    
-    }
-    
-    module.exports = sendToken;
+
+}
+
+module.exports = sendToken;

@@ -27,7 +27,7 @@ const server = app.listen(port, () => {
 const io = new Server(server, {
     cors: {
         origin: "*", // Adjust this to only allow your frontend domains
-        methods: ["GET", "POST"]
+        // methods: ["GET", "POST"]
     }
 });
 
