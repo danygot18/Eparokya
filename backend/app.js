@@ -24,19 +24,29 @@ require("dotenv/config");
 //   })
 // );
 // Enable CORS for both Web & Mobile
-app.use(
-  cors({
-    origin: ["*", "https://eparokya.vercel.app", null, "http://localhost:3000"],
-    // origin: "*",
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: ["*", "https://eparokya.vercel.app", null, "http://localhost:3000"],
+//     // origin: "*",
+//     credentials: true,
+//   })
+// );
 // app.use(cors());
-app.options("*", cors());
+// app.options("*", cors());
 
 // app.use(cors());
 // app.options("*", cors());
 app.use(express.json());
+
+//new
+app.use(
+  cors({
+    origin: ["https://eparokya.vercel.app", "http://localhost:3000"], // Allowed domains
+    credentials: true, // Allow sending cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // Middleware
 // app.use(express.json({ limit: "50mb" }));
