@@ -10,9 +10,12 @@ import { toast } from 'react-toastify';
 
 const Header = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector(state => state.auth);
+  const { user, isAuthenticated } = useSelector(state => state.auth);
   const [isHovered, setIsHovered] = React.useState(false);
   const navigate = useNavigate();
+
+  
+
 
   const logoutHandler = () => {
     dispatch(logout());
@@ -45,7 +48,7 @@ const Header = () => {
 
         {/* User Navigation Section */}
         <Nav className="d-flex align-items-center">
-          {user ? (
+          {isAuthenticated ? (
             <NavDropdown
               title={<span style={styles.navDropdownTitle}>{user.name}</span>}
               id="user-nav-dropdown"
