@@ -562,15 +562,23 @@ exports.LoginUser = async (req, res, next) => {
 }
 
 exports.Logout = async (req, res, next) => {
-    res.cookie('token', null, {
-        expires: new Date(Date.now()),
-        httpOnly: true
-    })
+    try {
+        res.cookie('token', null, {
+            expires: new Date(Date.now()),
+            httpOnly: true
+        });
 
-    res.status(200).json({
-        success: true,
-        message: 'Logged out'
-    })
+        res.status(200).json({
+            success: true,
+            message: 'Logged out'
+        });
+    } catch (error) {
+        console.error('Error logging out:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
 }
 
 exports.ForgotPassword = async (req, res, next) => {
