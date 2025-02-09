@@ -5,20 +5,35 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const errorHandler = require("./helpers/error-handler");
 
+
+const allowedOrigins = ["https://eparokya.vercel.app", null];
+
 // Load environment variables
 require("dotenv/config");
 
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 // Enable CORS for both Web & Mobile
 // app.use(
 //   cors({  
-//     origin: ["http://localhost:3000"],
+//     origin: ["*", "https://eparokya.vercel.app"],
 //     credentials: true,
 //   })
 // );
-// app.options("*", cors());
-
-app.use(cors());
 app.options("*", cors());
+
+// app.use(cors());
+// app.options("*", cors());
 app.use(express.json());
 
 // Middleware
