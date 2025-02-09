@@ -22,7 +22,7 @@ const SubmittedWeddingList = () => {
                 { withCredentials: true }
             );
 
-            console.log("Frontend API Response:", response.data);
+            // console.log("Frontend API Response:", response.data);
 
             if (response.data && Array.isArray(response.data.forms)) {
                 setWeddingForms(response.data.forms);
@@ -39,6 +39,7 @@ const SubmittedWeddingList = () => {
 
     const handleCardClick = (weddingId) => {
         navigation.navigate("SubmittedWeddingForm", { weddingId });
+        console.log("Wedding ID:", weddingId);
     };
 
     if (loading) {

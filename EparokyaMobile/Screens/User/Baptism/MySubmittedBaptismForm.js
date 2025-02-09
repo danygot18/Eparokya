@@ -23,6 +23,7 @@ const MySubmittedBaptismForm = () => {
             try {
                 const response = await axios.get(`${baseURL}/getBaptismForm/${formId}`);
                 setBaptismDetails(response.data);
+                console.log('Baptism details:', response.data);
             } catch (err) {
                 setError("Failed to fetch baptism details.");
             } finally {
@@ -131,22 +132,31 @@ const MySubmittedBaptismForm = () => {
 
                 <Box p={4} borderWidth={1} borderRadius={8}>
                     <Heading size="md">Additional Comment</Heading>
-                    <Text><Text bold>Priest:</Text> {baptismDetails?.adminNotes?.priest || "No priest."}</Text>
-                    <Text><Text bold>Recorded By:</Text> {baptismDetails?.adminNotes?.recordedBy || "No record."}</Text>
-                    <Text><Text bold>Book Number:</Text> {baptismDetails?.adminNotes?.bookNumber || "No book number."}</Text>
-                    <Text><Text bold>Page Number:</Text> {baptismDetails?.adminNotes?.pageNumber || "No page number."}</Text>
-                    <Text><Text bold>Line Number:</Text> {baptismDetails?.adminNotes?.lineNumber || "No line number."}</Text>
+                    {baptismDetails?.adminNotes?.length > 0 ? (
+                        baptismDetails.adminNotes.map((note, index) => (
+                            <Box key={index} mb={2}>
+                                <Text><Text bold>Priest:</Text> {note.priest || "No priest."}</Text>
+                                <Text><Text bold>Recorded By:</Text> {note.recordedBy || "No record."}</Text>
+                                <Text><Text bold>Book Number:</Text> {note.bookNumber || "No book number."}</Text>
+                                <Text><Text bold>Page Number:</Text> {note.pageNumber || "No page number."}</Text>
+                                <Text><Text bold>Line Number:</Text> {note.lineNumber || "No line number."}</Text>
+                            </Box>
+                        ))
+                    ) : (
+                        <Text>No admin notes available.</Text>
+                    )}
                 </Box>
 
 
-                <Box p={4} borderWidth={1} borderRadius={8}>
+                {/* <Box p={4} borderWidth={1} borderRadius={8}>
                     <Heading size="md">Additional Notes</Heading>
                     <Text><Text bold>Priest:</Text> {baptismDetails?.adminNotes?.priest || "No priest."}</Text>
                     <Text><Text bold>Recorded By:</Text> {baptismDetails?.adminNotes?.recordedBy || "No record."}</Text>
                     <Text><Text bold>Book Number:</Text> {baptismDetails?.adminNotes?.bookNumber || "No book number."}</Text>
                     <Text><Text bold>Page Number:</Text> {baptismDetails?.adminNotes?.pageNumber || "No page number."}</Text>
                     <Text><Text bold>Line Number:</Text> {baptismDetails?.adminNotes?.lineNumber || "No line number."}</Text>
-                </Box>
+                </Box> */}
+
                 <Box p={4} borderWidth={1} borderRadius={8}>
                     <Heading size="md">Updated Baptism Date</Heading>
                     <Text>{baptismDetails?.adminRescheduled ? new Date(baptismDetails.adminRescheduled.date).toLocaleDateString() : "N/A"}</Text>
@@ -160,10 +170,10 @@ const MySubmittedBaptismForm = () => {
 
                 <Box p={4} borderWidth={1} borderRadius={8}>
                     <Heading size="md">Admin Comments</Heading>
-                    {comments && Array.isArray(comments) && comments.length > 0 ? (
-                        comments.map((comment, index) => (
+                    {baptismDetails?.comments?.length > 0 ? (
+                        baptismDetails.comments.map((comment, index) => (
                             <Box key={index} p={3} borderBottomWidth={1} borderColor="gray.300">
-                                <Text bold>Comment Date: </Text>
+                                <Text bold>Comment Date:</Text>
                                 <Text>{new Date(comment?.createdAt).toLocaleDateString()}</Text>
                                 <Text bold>Comment:</Text>
                                 <Text>{comment?.selectedComment || "N/A"}</Text>

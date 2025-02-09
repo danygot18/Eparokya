@@ -26,7 +26,7 @@ const Chat = ({ route }) => {
                     "Authorization": `Bearer ${token}`
                 }
             })
-            
+
             const messages = data.messages.map((chat, i) => (
                 {
                     _id: chat._id,
@@ -41,11 +41,11 @@ const Chat = ({ route }) => {
 
                 }
             ))
-            
 
-            setMessages(messages)  
+
+            setMessages(messages)
             console.log(messages)
-            
+
         } catch (err) {
             console.log("getchat error", err)
         }
@@ -123,21 +123,48 @@ const Chat = ({ route }) => {
         );
     };
 
+    // useEffect(() => {
+
+    //     getChat();
+
+    //     socket.on("push-chat", (data) => {
+    //         console.log(data)
+    //         setMessages((previousChats) =>
+    //             GiftedChat.append(previousChats, [data.chat])
+    //         );
+    //     })
+
+    //     return () => {
+    //         socket.off('push-chat')
+    //     }
+
+    // }, []);
     useEffect(() => {
-
         getChat();
-
-        socket.on("push-chat", (data) => {
-            console.log(data)
+        socket.on("push-message", (data) => {
+            console.log("mobile chat data", data);
+            const { message } = data;
             setMessages((previousChats) =>
-                GiftedChat.append(previousChats, [data.chat])
+                GiftedChat.append(previousChats, [
+                    {
+                        _id: message._id,
+                        text: message.text,
+                        createdAt: message.createdAt,
+                        user: {
+                            _id: message.user._id,
+                            name: message.user.name,
+                            avatar: message.user.avatar,
+                        },
+                    },
+                ])
             );
-        })
+        });
+
+        socket.emit('join', { userId: user._id });
 
         return () => {
-            socket.off('push-chat')
-        }
-
+            socket.off('push-message');
+        };
     }, []);
 
     const renderBubble = (props) => {

@@ -8,18 +8,26 @@ import { useSelector } from "react-redux";
 
 
 const MySubmittedWeddingForm = ({ route }) => {
-  const { formId } = route.params;
+  const { weddingId } = route.params;
   const navigation = useNavigation();
   const [formDetails, setFormDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const { token } = useSelector((state) => state.auth);
 
+  // console.log('Form ID:', weddingId);
   useEffect(() => {
     const fetchFormDetails = async () => {
       try {
-        const response = await axios.get(`${baseURL}/getWeddingForm/${formId}`);
+        const response = await axios.get(`${baseURL}/getWeddingForm/${weddingId}`);
         setFormDetails(response.data);
+        console.log('Form details:', response.data);
+        // if (response.data && Array.isArray(response.data)) {
+        //   setFormDetails(response.data.forms);
+        //   console.log('Form details:', response.data);
+        // } else {
+        //   setFormDetails([]);
+        // }
       } catch (error) {
         console.error('Error fetching form details:', error);
         Alert.alert('Error', 'Failed to load form details.');
@@ -50,21 +58,26 @@ const MySubmittedWeddingForm = ({ route }) => {
       <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>Wedding Form Details</Text>
       <View style={{ marginBottom: 20 }}>
         <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Bride:</Text>
-        <Text>{formDetails.brideName}</Text>
+        <Text>{formDetails?.brideName ?? "Unknown Bride"}</Text>
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 10 }}>Groom:</Text>
-        <Text>{formDetails.groomName}</Text>
+        <Text>{formDetails?.groomName ?? "Unknown Bride"}</Text>
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 10 }}>Wedding Date:</Text>
-        <Text>{formDetails.weddingDate}</Text>
+        <Text>{formDetails?.weddingDate ?? "Unknown Bride"}</Text>
       </View>
 
-      {formDetails.images?.map((image, index) => (
+      {formDetails?.images?.map((image, index) => (
         <Image key={index} source={{ uri: image }} style={{ width: '100%', height: 200, marginBottom: 10 }} />
       ))}
 
-      {formDetails.adminComment && (
+      {formDetails?.comments?.length > 0 && (
         <View style={{ backgroundColor: '#f8d7da', padding: 10, borderRadius: 5, marginBottom: 20 }}>
-          <Text style={{ fontWeight: 'bold', color: '#721c24' }}>Admin Comment:</Text>
-          <Text>{formDetails.adminComment}</Text>
+          <Text style={{ fontWeight: 'bold', color: '#721c24' }}>Admin Comments:</Text>
+          {formDetails.comments.map((comment, index) => (
+            <View key={index}>
+              <Text style={{ fontWeight: 'bold' }}>Status: {comment.selectedComment}</Text>
+              <Text>Note: {comment.additionalComment}</Text>
+            </View>
+          ))}
         </View>
       )}
 
@@ -72,7 +85,7 @@ const MySubmittedWeddingForm = ({ route }) => {
         onPress={() => setModalVisible(true)}
         style={{ backgroundColor: 'red', padding: 10, borderRadius: 5, alignItems: 'center' }}>
         <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel Application</Text>
-      </TouchableOpacity>
+      </TouchableOpacity>   
 
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>

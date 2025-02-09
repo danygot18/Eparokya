@@ -59,7 +59,7 @@ const UserChat = ({ route }) => {
     const sendChat = async (message) => {
         try {
             const data = await axios.post(`${baseURL}/chat/sendMessage`, {
-                userId: userId,
+                userId: userId._id,
                 senderId: user?._id,
                 message: message,
             }, {

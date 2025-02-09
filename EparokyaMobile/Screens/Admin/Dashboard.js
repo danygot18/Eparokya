@@ -24,7 +24,7 @@ const Dashboard = () => {
 
   const fetchWeddingForms = async () => {
     try {
-      const response = await axios.get(`${baseURL}/wedding/`);
+      const response = await axios.get(`${baseURL}/stats/weddingsPerMonth`);
       const monthlyData = new Array(12).fill(0);
       response.data.forEach((wedding) => {
         const month = new Date(wedding.weddingDate).getMonth();
@@ -38,7 +38,7 @@ const Dashboard = () => {
 
   const fetchConfirmedWeddings = async () => {
     try {
-      const response = await axios.get(`${baseURL}/wedding/confirmed`);
+      const response = await axios.get(`${baseURL}/confirmedWedding`);
       const monthlyData = new Array(12).fill(0);
       response.data.forEach((wedding) => {
         const month = new Date(wedding.weddingDate).getMonth();
@@ -52,7 +52,7 @@ const Dashboard = () => {
 
   const fetchMemberCountByBatch = async () => {
     try {
-      const response = await axios.get(`${baseURL}/member/count-by-batch`);
+      const response = await axios.get(`${baseURL}/stats/registeredUsersCount`);
       setBatchData(response.data);
     } catch (error) {
       console.error("Error fetching member count by batch:", error.message);

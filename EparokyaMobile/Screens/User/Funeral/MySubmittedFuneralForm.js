@@ -34,6 +34,7 @@ const MySubmittedFuneralForm = () => {
           { withCredentials: true }
         );
         setFuneralDetails(response.data);
+        console.log('Funeral details:', response.data);
       } catch (err) {
         setError("Failed to fetch funeral details.");
       } finally {
@@ -130,7 +131,8 @@ const MySubmittedFuneralForm = () => {
         <Box bg="gray.100" p={4} borderRadius="lg">
           <Heading size="md" mb={2}>Updated Funeral Date</Heading>
           <Divider />
-          <Text><Text bold>Date:</Text> {funeralDetails?.updatedFuneralDate ? new Date(funeralDetails.updatedFuneralDate).toLocaleDateString() : "N/A"}</Text>
+          <Text><Text bold>Date:</Text> {funeralDetails?.adminRescheduled?.date 
+      ? new Date(funeralDetails.adminRescheduled.date).toLocaleDateString() : "N/A"}</Text>
           {funeralDetails?.adminRescheduled?.reason && (
             <Box mt={2} p={2} bg="white" borderRadius="md">
               <Heading size="sm">Reason for Rescheduling</Heading>
