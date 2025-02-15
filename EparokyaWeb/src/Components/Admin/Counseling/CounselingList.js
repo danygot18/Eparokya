@@ -97,8 +97,8 @@ const CounselingList = () => {
                                 className={`counseling-card ${item.counselingStatus?.toLowerCase() || ""}`}
                                 onClick={() => handleCardClick(item._id)}
                             >
-                                <div className="status-badge">{item.counselingStatus}</div>
-                                <h3 className="card-title">Record #{index + 1}</h3>
+                                <div className="status-badge">{item.purpose}</div>
+                                <h3 className="card-title">Counseling #{index + 1}</h3>
                                 <div className="card-details">
                                     <p>
                                         <strong>Full Name:</strong> {item.person?.fullName || "N/A"}
@@ -118,14 +118,14 @@ const CounselingList = () => {
                                     <p>
                                         <strong>Counseling Time:</strong> {item.counselingTime || "N/A"}
                                     </p>
-                                    <p>
+                                    {/* <p>
                                         <strong>Address:</strong>
                                         {item.address?.block || "N/A"},
                                         {item.address?.lot || "N/A"},
                                         {item.address?.street || "N/A"},
                                         {item.address?.phase || "N/A"},
                                         {item.address?.baranggay || "N/A"}
-                                    </p>
+                                    </p> */}
 
                                     <p>
                                         <strong>Contact Person:</strong> {item.contactPerson?.fullName || "N/A"}
@@ -134,18 +134,18 @@ const CounselingList = () => {
                                         <strong>Contact Person Contact Number:</strong> {item.contactPerson?.contactNumber || "N/A"}
                                     </p>
 
-                                    <p>
+                                    {/* <p>
                                         <strong>Relationship:</strong> {item.contactPerson?.relationship || "N/A"}
-                                    </p>
+                                    </p> */}
                                     <p>
                                         <strong>Submitted By:</strong>
                                     </p>
                                     <p>
                                         <strong>Name:</strong> {item.userId?.name || "Unknown"}
                                     </p>
-                                    <p>
+                                    {/* <p>
                                         <strong>User ID:</strong> {item.userId?._id || "Unknown"}
-                                    </p>
+                                    </p> */}
                                 </div>
                             </div>
                         ))}

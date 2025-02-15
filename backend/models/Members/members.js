@@ -8,7 +8,7 @@ const membersSchema = new mongoose.Schema({
     },
     middleName: {
         type: String,
-        trim: true,
+        trim: false,
     },
     lastName: {
         type: String,
@@ -17,27 +17,28 @@ const membersSchema = new mongoose.Schema({
     },
     age: {
         type: Number,
-        required: true,
+        required: false,
     },
     birthday: {
         type: Date,
-        required: true,
+        required: false,
     },
     address: {
         baranggay: String,
         zip: String,
         city: String,
-        country: String,
     },
     position: {
-        type: String,
+        type: String, 
+        enum: ['Coordinator', 'Assistant Coordinator'],
+        default: 'Member',
         required: true,
+        others: {type: String, required: false},
     },
     contributions: [
         {
-            title: {type: String, default: ''},
-            description: {type: String, default: ''},
-            image: {type: String, default: ''}, 
+            title: {type: String, default: '', required: false},
+            description: {type: String, default: '', required: false},
             
         },
     ],
@@ -52,8 +53,14 @@ const membersSchema = new mongoose.Schema({
     //     required: true,
     // },
     image: {
-        type: String, 
-        default: '',
+        public_id: {
+            type: String,
+            required: false,
+        },
+        url: {
+            type: String,
+            required: false,
+        },
     },
     createdAt: {
         type: Date,

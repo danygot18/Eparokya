@@ -48,7 +48,7 @@ const houseBlessingSchema = new mongoose.Schema({
         },
     ],
 
-    priest: { type: String, required: false },
+    priest: { type: mongoose.Schema.Types.ObjectId, ref: 'priest' },
     termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
 });
 

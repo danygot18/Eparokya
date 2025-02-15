@@ -16,7 +16,9 @@ const CounselingDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [priest, setPriest] = useState("");
+    const [priestsList, setPriestsList] = useState([]);
+    const [selectedPriestId, setSelectedPriestId] = useState("");
+
     const [selectedComment, setSelectedComment] = useState("");
     const [rescheduledDate, setRescheduledDate] = useState("");
     const [rescheduledReason, setRescheduledReason] = useState("");
@@ -41,25 +43,43 @@ const CounselingDetails = () => {
                     `${process.env.REACT_APP_API}/api/v1/getCounseling/${counselingId}`,
                     { withCredentials: true }
                 );
-    
+
                 console.log("Fetched Counseling Details:", response.data);
-    
+
                 setCounselingDetails(response.data.counseling);
                 setComments(response.data.counseling.comments || []);
-                setPriest(response.data.counseling.priest);
-    
-                setUpdatedCounselingDate(response.data.counseling?.counselingDate || ""); 
-    
+                setSelectedPriestId(response.data.counseling?.priest?._id || "");
+
+                setUpdatedCounselingDate(response.data.counseling?.counselingDate || "");
+
             } catch (err) {
                 setError("Failed to fetch counseling details.");
             } finally {
                 setLoading(false);
             }
         };
-    
+
+        const fetchPriests = async () => {
+            try {
+                const response = await axios.get(
+                    `${process.env.REACT_APP_API}/api/v1/getAvailablePriest`,
+                    { withCredentials: true }
+                );
+                const fetchedPriests = response.data.priests;
+                const formattedPriests = Array.isArray(fetchedPriests) ? fetchedPriests : [fetchedPriests];
+                setPriestsList(formattedPriests);
+                if (formattedPriests.length > 0) {
+                    setSelectedPriestId(formattedPriests[0]._id);
+                }
+            } catch (err) {
+                console.error("Failed to fetch priests:", err);
+                setPriestsList([]);
+            }
+        };
         fetchCounselingDetails();
-    }, [counselingId, updatedCounselingDate]); 
-    
+        fetchPriests();
+    }, [ ]);
+
 
     const handleConfirm = async (counselingId) => {
         try {
@@ -110,18 +130,18 @@ const CounselingDetails = () => {
             alert("Please select a date and provide a reason.");
             return;
         }
-    
+
         try {
             setLoading(true);
             const response = await axios.put(
                 `${process.env.REACT_APP_API}/api/v1/updateCounselingDate/${counselingId}`,
                 { newDate, reason }
             );
-    
+
             console.log("Updated Counseling Response:", response.data); // Debugging
-    
+
             setUpdatedCounselingDate(response.data.counseling?.counselingDate || newDate); // Ensure proper update
-    
+
             alert("Counseling date updated successfully!");
         } catch (error) {
             console.error("Error updating counseling date:", error);
@@ -130,7 +150,7 @@ const CounselingDetails = () => {
             setLoading(false);
         }
     };
-    
+
 
     const handleSubmitComment = async () => {
         if (!selectedComment && !additionalComment) {
@@ -164,40 +184,30 @@ const CounselingDetails = () => {
     };
 
     const handleAddPriest = async () => {
-        if (!priest) {
-            alert("Please enter priest name.");
+        if (!selectedPriestId) {
+            alert("Please select a priest.");
             return;
         }
-    
-        const commentData = {
-            name: priest || "",
-        };
-    
         try {
-            const response = await fetch(
+            const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/counselingAddPriest/${counselingId}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(commentData),
-                }
+                { priestId: selectedPriestId },
+                { withCredentials: true }
             );
-    
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to submit priest.");
-            }
-    
-            alert("Priest submitted successfully!");
-            setPriest(""); 
+            toast.success("Priest assigned successfully!", {
+                position: toast.POSITION.TOP_RIGHT,
+                autoClose: 3000,
+            });
+            setCounselingDetails(prev => ({
+                ...prev,
+                priest: priestsList.find(priest => priest._id === selectedPriestId) || null
+            }));
         } catch (error) {
-            console.error("Error submitting priest:", error);
-            alert("Failed to submit priest comment.");
+            console.error("Error assigning priest:", error);
+            toast.error("Failed to assign priest.");
         }
     };
-    
+
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
@@ -248,7 +258,7 @@ const CounselingDetails = () => {
                             <p><strong>Confirmed At:</strong> {counselingDetails?.confirmedAt ? new Date(counselingDetails.confirmedAt).toLocaleDateString() : "N/A"}</p>
                         </div>
                     </div>
-    
+
                     {/* Admin Comments Section */}
                     <div className="house-comments-section">
                         <h2>Admin Comments</h2>
@@ -263,7 +273,7 @@ const CounselingDetails = () => {
                             <p>No admin comments yet.</p>
                         )}
                     </div>
-    
+
                     {/* Updated Counseling Date Section */}
                     <div className="blessing-date-box">
                         <h3>Updated Counseling Date</h3>
@@ -277,19 +287,17 @@ const CounselingDetails = () => {
                             </div>
                         )}
                     </div>
-    
+
                     {/* Priest Section */}
                     <div className="house-comments-section">
-                        <h2>Priest</h2>
-                        {counselingDetails?.priest?.name ? (
-                            <div className="admin-comment">
-                                <p><strong>Priest:</strong> {counselingDetails.priest.name}</p>
-                            </div>
+                        <h2>Assigned Priest</h2>
+                        {counselingDetails?.priest ? (
+                            <p><strong>{counselingDetails.priest.title} {counselingDetails.priest.fullName}</strong></p>
                         ) : (
-                            <p>No priest.</p>
+                            <p>No priest assigned.</p>
                         )}
                     </div>
-    
+
                     {/* Admin Section for Updating Counseling Date */}
                     <div className="house-section">
                         <h2>Select Updated Counseling Date:</h2>
@@ -302,7 +310,7 @@ const CounselingDetails = () => {
                             </button>
                         </div>
                     </div>
-    
+
                     {/* Admin Comment Submission */}
                     <div className="house-section">
                         <h2>Submit Admin Comment</h2>
@@ -324,20 +332,33 @@ const CounselingDetails = () => {
                             <button onClick={handleSubmitComment}>Submit Comment</button>
                         </div>
                     </div>
-    
+
                     {/* Adding Priest */}
                     <div className="house-section">
-                        <h2>Priest Name</h2>
-                        <textarea
-                            placeholder="Priest Name"
-                            value={priest.name}
-                            onChange={(e) => setPriest(e.target.value)}
-                        />
+                        <h2>Assign Priest</h2>
+                        <select
+                            value={selectedPriestId}
+                            onChange={(e) => setSelectedPriestId(e.target.value)}
+                        >
+                            {priestsList.length > 0 ? (
+                                priestsList.map((priest) => (
+                                    <option key={priest._id} value={priest._id}>
+                                        {priest.title} {priest.fullName}
+                                    </option>
+                                ))
+                            ) : (
+                                <option value="" disabled>No Priests Available</option>
+                            )}
+                        </select>
+
+
+
+
                         <div className="button-container">
-                            <button onClick={handleAddPriest}>Add Priest</button>
+                            <button onClick={handleAddPriest}>Assign Priest</button>
                         </div>
                     </div>
-    
+
                     {/* Confirmation and Decline Buttons */}
                     <div className="button-container">
                         <button onClick={() => handleConfirm(counselingId)}>Confirm Counseling</button>

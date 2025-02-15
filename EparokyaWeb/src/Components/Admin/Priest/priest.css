@@ -1,0 +1,48 @@
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    flex-shrink: 0;
+}
+
+.form-container {
+    flex: 2;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.priest-list-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-left: 1px solid #ccc;
+    overflow-y: auto;
+}
+
+.priest-list {
+    flex: 1;
+}
+
+.priest-list h2 {
+    margin-bottom: 10px;
+}
+
+.priest-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.priest-item p {
+    margin: 0;
+}
+
+.active-status {
+    font-size: 12px;
+    color: gray;
+}

@@ -170,9 +170,10 @@ const AdminPrayerReview = () => {
                                     <p>
                                         <strong>Submitted By:</strong>{" "}
                                         {prayer.prayerWallSharing === "myName"
-                                            ? `${prayer.userId?.name} (${prayer.userId?._id})`
-                                            : `Parishioner (${prayer.userId?._id})`}
+                                            ? `${prayer.userId?.name}`
+                                            : `Parishioner `}
                                     </p>
+                                    {/* (${prayer.userId?._id}) */}
                                 </div>
                                 <div className="card-actions">
                                     {prayer.prayerWallStatus === "Pending" && (

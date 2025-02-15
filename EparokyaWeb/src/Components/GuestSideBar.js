@@ -158,28 +158,40 @@ const GuestSideBar = () => {
 
         <li style={styles.menuItem}>
           <Link
+            to="/user/weddingWall"
+            style={{
+              ...styles.link,
+              ...(location.pathname === "/user/weddingWall" ? styles.activeLink : {}),
+            }}
+          >
+            <FaPray style={styles.icon} /> Wedding
+          </Link>
+        </li>
+
+        <li style={styles.menuItem}>
+          <Link
             to="/user/NavigationForms"
             style={{
               ...styles.link,
               ...(location.pathname === "/user/NavigationForms" ? styles.activeLink : {}),
             }}
           >
-            <FaWpforms style={styles.icon} /> Forms
+            <FaWpforms style={styles.icon} />Forms
           </Link>
         </li>
 
 
-        {/* <li style={styles.menuItem}>
+        <li style={styles.menuItem}>
           <Link
-            to="/resources"
+            to="/user/FormGuides"
             style={{
               ...styles.link,
-              ...(location.pathname === "/resources" ? styles.activeLink : {}),
+              ...(location.pathname === "/user/FormGuides" ? styles.activeLink : {}),
             }}
           >
-            <FaRegFileAlt style={styles.icon} /> Resources
+            <FaRegFileAlt style={styles.icon} /> Form Guide
           </Link>
-        </li> */}
+        </li>
 
       </ul>
 

@@ -104,7 +104,7 @@ const PrayerRequestList = () => {
                                 onClick={() => handleCardClick(item._id)}
                             >
                                 <div className="status-badge">{item.prayerType}</div>
-                                <h3 className="card-title">Record #{index + 1}</h3>
+                                <h3 className="card-title">Prayer #{index + 1}</h3>
                                 <div className="card-details">
                                     <p>
                                         <strong>Offeror's Full Name:</strong> {item.
@@ -116,6 +116,15 @@ const PrayerRequestList = () => {
                                             ? new Date(item.prayerRequestDate).toLocaleDateString()
                                             : "N/A"}
                                     </p>
+
+                                    {/* <p>
+                                        <strong>Prayer Request Time:</strong>{" "}
+                                        {item.prayerRequestDate
+                                            ? new Date(item.prayerRequestDate).toLocaleDateString()
+                                            : "N/A"}
+                                    </p> */}
+
+
                                     <p>
                                         <strong>Intentions:</strong>{" "}
                                         {Array.isArray(item.Intentions) && item.Intentions.length > 0
@@ -128,9 +137,9 @@ const PrayerRequestList = () => {
                                             : "N/A"}
                                     </p>
 
-                                    <p><strong>Submitted By:</strong></p>
-                                    <p><strong>Name:</strong> {item.userId?.name || "Unknown"}</p>
-                                    <p><strong>User ID:</strong> {item.userId?._id || "Unknown"}</p>
+                                    <p><strong>Submitted By:</strong> {item.userId?.name || "Unknown"} </p>
+                                    {/* <p><strong>Name:</strong> {item.userId?.name || "Unknown"}</p> */}
+                                    {/* <p><strong>User ID:</strong> {item.userId?._id || "Unknown"}</p> */}
 
                                 </div>
                             </div>

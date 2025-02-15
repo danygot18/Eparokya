@@ -10,7 +10,9 @@ router.get('/getCounseling/:counselingId', counselingController.getCounselingByI
 router.post('/:counselingId/confirmCounseling', counselingController.confirmCounseling);
 router.put('/declineCounseling/:counselingId', counselingController.declineCounseling);
 router.post('/:counselingId/commentCounseling', counselingController.addComment);
+
 router.post('/counselingAddPriest/:counselingId', counselingController.createPriestComment);
+router.get('/getCounselingPriest/:counselingId', counselingController.getCounselingWithPriest);
 
 router.get('/getAllUserSubmittedCounseling', isAuthenticatedUser, counselingController.getMySubmittedForms);
 router.get('/getCounselingForm/:formId', isAuthenticatedUser, counselingController.getCounselingFormById);

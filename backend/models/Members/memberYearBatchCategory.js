@@ -18,7 +18,6 @@ const memberYearBatchCategorySchema = new mongoose.Schema({
             min: [1900, 'End year must be greater than 1900'],
             validate: {
                 validator: function (value) {
-                    // Use a safe fallback for startYear
                     const startYear = this.yearRange?.startYear || 0;
                     return value > startYear;
                 },

@@ -61,17 +61,19 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 app.use("/api/v1", require("./routes/user"));
 app.use("/api/v1/chat", require("./routes/chat"));
 // Prayer Wall
+
 // Ministry & Members
 app.use("/api/v1/ministryCategory", require("./routes/ministryCategory"));
 
 app.use("/api/v1/", require("./routes/PrayerWall/prayerWall"));
 app.use("/api/v1", require("./routes/PrayerWall/prayerRequest"));
 
-
-
 // Announcements & Posts
 app.use("/api/v1", require("./routes/Announcement/announcement"));
 app.use("/api/v1", require("./routes/Announcement/announcementCategory"));
+
+// Priest
+app.use("/api/v1", require("./routes/Priest/priest"));
 
 // Sacramental Services
 app.use("/api/v1", require("./routes/wedding"));
@@ -79,12 +81,8 @@ app.use("/api/v1", require("./routes/Binyag"));
 app.use("/api/v1", require("./routes/Funeral"));
 app.use("/api/v1", require("./routes/counseling"));
 
-
-
 app.use("/api/v1", require("./routes/Announcement/AnnouncementComment"));
-
 app.use("/api/v1", require("./routes/post"));
-
 
 // Events & Scheduling
 app.use("/api/v1", require("./routes/adminDate"));
@@ -109,12 +107,6 @@ app.use("/api/v1", require("./routes/Members/members"));
 // app.use("/api/v1/resource", require("./routes/Resources/resource"));
 
 // Chat Feature
-
-
-
-
-
-
 
 
 module.exports = app;

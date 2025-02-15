@@ -104,21 +104,21 @@ const FuneralList = () => {
                                 onClick={() => handleCardClick(item._id)}
                             >
                                 <div className="status-badge">{item.funeralStatus || "Unknown"}</div>
-                                <h3 className="card-title">Record #{index + 1}</h3>
+                                <h3 className="card-title">Funeral #{index + 1}</h3>
                                 <div className="card-details">
                                     <p><strong>Name:</strong> {item.name ?? "N/A"}</p>
-                                    <p><strong>Place of Death:</strong> {item.placeOfDeath || "N/A"}</p>
+                                    {/* <p><strong>Place of Death:</strong> {item.placeOfDeath || "N/A"}</p> */}
                                     <p><strong>Reason of Death:</strong> {item.reasonOfDeath || "N/A"}</p>
-                                    <p><strong>Funeral Date:</strong> {item.funeralDate ? new Date(item.funeralDate).toLocaleDateString() : "N/A"}</p>
-                                    <p><strong>Funeral Time:</strong> {item.funeraltime || "N/A"}</p>
+                                    {/* <p><strong>Funeral Date:</strong> {item.funeralDate ? new Date(item.funeralDate).toLocaleDateString() : "N/A"}</p>
+                                    <p><strong>Funeral Time:</strong> {item.funeraltime || "N/A"}</p> */}
                                     <p><strong>Funeral Mass Date:</strong> {item.funeralMassDate ? new Date(item.funeralMassDate).toLocaleDateString() : "N/A"}</p>
                                     <p><strong>Funeral Mass Time:</strong> {item.funeralMasstime || "N/A"}</p>
-                                    <p><strong>Service Type:</strong> {item.serviceType || "N/A"}</p>
+                                    {/* <p><strong>Service Type:</strong> {item.serviceType || "N/A"}</p> */}
                                     <p><strong>Contact Person:</strong> {item.contactPerson || "N/A"}</p>
                                     <p><strong>Phone:</strong> {item.phone || "N/A"}</p>
-                                    <p><strong>Submitted By:</strong></p>
-                                    <p><strong>Name:</strong> {item.userId?.name || "Unknown"}</p>
-                                    <p><strong>User ID:</strong> {item.userId?._id || "Unknown"}</p>
+                                    <p><strong>Submitted By:</strong> {item.userId?.name || "Unknown"} </p>
+                                    {/* <p><strong>Name:</strong> {item.userId?.name || "Unknown"}</p> */}
+                                    {/* <p><strong>User ID:</strong> {item.userId?._id || "Unknown"}</p> */}
                                 </div>
                             </div>
                         ))}

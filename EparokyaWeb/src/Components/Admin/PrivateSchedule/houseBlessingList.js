@@ -112,7 +112,7 @@ const HouseBlessingList = () => {
                                     <p>
                                         <strong>House Blessing Time:</strong> {item.blessingTime || "N/A"}
                                     </p>
-                                    <p>
+                                    {/* <p>
                                         <strong>Address:</strong>
                                         {item.address?.houseDetails || "N/A"},
                                         {item.address?.block || "N/A"},
@@ -122,16 +122,16 @@ const HouseBlessingList = () => {
                                         {item.address?.baranggay || "N/A"},
                                         {item.address?.district || "N/A"},
                                         {item.address?.city || "N/A"},
-                                    </p>
+                                    </p> */}
                                     <p>
-                                        <strong>Submitted By:</strong>
+                                        <strong>Submitted By:</strong> {item.userId?.name || "Unknown"}
                                     </p>
-                                    <p>
+                                    {/* <p>
                                         <strong>Name:</strong> {item.userId?.name || "Unknown"}
-                                    </p>
-                                    <p>
+                                    </p> */}
+                                    {/* <p>
                                         <strong>User ID:</strong> {item.userId?._id || "Unknown"}
-                                    </p>
+                                    </p> */}
                                 </div>
                             </div>
                         ))}

@@ -83,7 +83,7 @@ const FuneralSchema = new mongoose.Schema({
   },
 
   Priest: {
-    name: { type: String, required: false },
+    name: { type: mongoose.Schema.Types.ObjectId, ref: 'priest' },
     createdAt: {
       type: Date,
       default: Date.now,
@@ -98,6 +98,12 @@ const FuneralSchema = new mongoose.Schema({
     default: 'Pending',
     enum: ['Pending', 'Confirmed', 'Cancelled'],
   },
+
+  cancellingReason: {
+    user: { type: String, enum: ['Admin, User'] },
+    reason: { type: String },
+  },
+
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
 },

@@ -25,7 +25,8 @@ const WeddingChecklist = ({ weddingId }) => {
     CanonicalInterview: false,
     Confession: false,
   });
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   useEffect(() => {
     if (weddingId) {
       axios
@@ -50,7 +51,25 @@ const WeddingChecklist = ({ weddingId }) => {
     }));
   };
 
+  // const handleSave = async () => {
+  //   try {
+  //     await axios.put(
+  //       `${process.env.REACT_APP_API}/api/v1/updateWeddingChecklist/${weddingId}`,
+  //       checklist,
+  //       { withCredentials: true }
+  //     );
+  //     alert('Checklist updated successfully!');
+  //   } catch (err) {
+  //     console.error('Error updating checklist:', err);
+  //     alert('Failed to update checklist.');
+  //   }
+  // };
+
   const handleSave = async () => {
+    setIsModalOpen(true);
+  };
+
+  const confirmSave = async () => {
     try {
       await axios.put(
         `${process.env.REACT_APP_API}/api/v1/updateWeddingChecklist/${weddingId}`,
@@ -58,11 +77,16 @@ const WeddingChecklist = ({ weddingId }) => {
         { withCredentials: true }
       );
       alert('Checklist updated successfully!');
+      setIsModalOpen(false);
     } catch (err) {
       console.error('Error updating checklist:', err);
       alert('Failed to update checklist.');
     }
   };
+
+
+  const verifiedItems = Object.keys(checklist).filter(key => checklist[key]);
+  const unverifiedItems = Object.keys(checklist).filter(key => !checklist[key]);
 
   return (
     <div className="wedding-checklist">
@@ -75,7 +99,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.GroomNewBaptismalCertificate ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('GroomNewBaptismalCertificate')}
         >
-          {checklist.GroomNewBaptismalCertificate ? "Checked" : "Unchecked"}
+          {checklist.GroomNewBaptismalCertificate ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -84,7 +108,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.GroomNewConfirmationCertificate ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('GroomNewConfirmationCertificate')}
         >
-          {checklist.GroomNewConfirmationCertificate ? "Checked" : "Unchecked"}
+          {checklist.GroomNewConfirmationCertificate ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -93,7 +117,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.GroomMarriageLicense ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('GroomMarriageLicense')}
         >
-          {checklist.GroomMarriageLicense ? "Checked" : "Unchecked"}
+          {checklist.GroomMarriageLicense ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -102,7 +126,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.GroomMarriageBans ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('GroomMarriageBans')}
         >
-          {checklist.GroomMarriageBans ? "Checked" : "Unchecked"}
+          {checklist.GroomMarriageBans ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -111,7 +135,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.GroomOrigCeNoMar ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('GroomOrigCeNoMar')}
         >
-          {checklist.GroomOrigCeNoMar ? "Checked" : "Unchecked"}
+          {checklist.GroomOrigCeNoMar ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -120,7 +144,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.GroomOrigPSA ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('GroomOrigPSA')}
         >
-          {checklist.GroomOrigPSA ? "Checked" : "Unchecked"}
+          {checklist.GroomOrigPSA ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -129,7 +153,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.GroomOnebyOne ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('GroomOnebyOne')}
         >
-          {checklist.GroomOnebyOne ? "Checked" : "Unchecked"}
+          {checklist.GroomOnebyOne ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -138,7 +162,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.GroomTwobyTwo ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('GroomTwobyTwo')}
         >
-          {checklist.GroomTwobyTwo ? "Checked" : "Unchecked"}
+          {checklist.GroomTwobyTwo ? "Verified" : "Unverified"}
         </button>
       </div>
 
@@ -149,7 +173,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.BrideNewBaptismalCertificate ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('BrideNewBaptismalCertificate')}
         >
-          {checklist.BrideNewBaptismalCertificate ? "Checked" : "Unchecked"}
+          {checklist.BrideNewBaptismalCertificate ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -158,7 +182,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.BrideNewConfirmationCertificate ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('BrideNewConfirmationCertificate')}
         >
-          {checklist.BrideNewConfirmationCertificate ? "Checked" : "Unchecked"}
+          {checklist.BrideNewConfirmationCertificate ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -167,7 +191,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.BrideMarriageLicense ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('BrideMarriageLicense')}
         >
-          {checklist.BrideMarriageLicense ? "Checked" : "Unchecked"}
+          {checklist.BrideMarriageLicense ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -176,7 +200,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.BrideMarriageBans ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('BrideMarriageBans')}
         >
-          {checklist.BrideMarriageBans ? "Checked" : "Unchecked"}
+          {checklist.BrideMarriageBans ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -185,7 +209,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.BrideOrigCeNoMar ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('BrideOrigCeNoMar')}
         >
-          {checklist.BrideOrigCeNoMar ? "Checked" : "Unchecked"}
+          {checklist.BrideOrigCeNoMar ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -194,7 +218,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.BrideOrigPSA ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('BrideOrigPSA')}
         >
-          {checklist.BrideOrigPSA ? "Checked" : "Unchecked"}
+          {checklist.BrideOrigPSA ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -203,7 +227,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.BrideOnebyOne ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('BrideOnebyOne')}
         >
-          {checklist.BrideOnebyOne ? "Checked" : "Unchecked"}
+          {checklist.BrideOnebyOne ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -212,7 +236,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.BrideTwobyTwo ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('BrideTwobyTwo')}
         >
-          {checklist.BrideTwobyTwo ? "Checked" : "Unchecked"}
+          {checklist.BrideTwobyTwo ? "Verified" : "Unverified"}
         </button>
       </div>
 
@@ -223,7 +247,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.PermitFromtheParishOftheBride ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('PermitFromtheParishOftheBride')}
         >
-          {checklist.PermitFromtheParishOftheBride ? "Checked" : "Unchecked"}
+          {checklist.PermitFromtheParishOftheBride ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -232,7 +256,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.ChildBirthCertificate ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('ChildBirthCertificate')}
         >
-          {checklist.ChildBirthCertificate ? "Checked" : "Unchecked"}
+          {checklist.ChildBirthCertificate ? "Verified" : "Unverified"}
         </button>
       </div>
 
@@ -243,7 +267,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.PreMarriageSeminar ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('PreMarriageSeminar')}
         >
-          {checklist.PreMarriageSeminar ? "Checked" : "Unchecked"}
+          {checklist.PreMarriageSeminar ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -252,7 +276,7 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.CanonicalInterview ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('CanonicalInterview')}
         >
-          {checklist.CanonicalInterview ? "Checked" : "Unchecked"}
+          {checklist.CanonicalInterview ? "Verified" : "Unverified"}
         </button>
       </div>
       <div className="wedding-checklist-item">
@@ -261,11 +285,34 @@ const WeddingChecklist = ({ weddingId }) => {
           className={checklist.Confession ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('Confession')}
         >
-          {checklist.Confession ? "Checked" : "Unchecked"}
+          {checklist.Confession ? "Verified" : "Unverified"}
         </button>
       </div>
 
       <button onClick={handleSave}>Save Checklist</button>
+
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Are you sure you have verified these forms?</h3>
+            <h4>Verified Forms:</h4>
+            <ul>
+              {verifiedItems.map((item) => (
+                <li key={item}>{item.replace(/([A-Z])/g, ' $1').trim()}</li>
+              ))}
+            </ul>
+            <h4>Unverified Forms:</h4>
+            <ul>
+              {unverifiedItems.map((item) => (
+                <li key={item}>{item.replace(/([A-Z])/g, ' $1').trim()}</li>
+              ))}
+            </ul>
+            <button onClick={confirmSave}>Save</button>
+            <button onClick={() => setIsModalOpen(false)}>Back</button>
+          </div>
+        </div>
+      )}
+
       <style>
         {`
                     .checked-btn {
@@ -289,6 +336,23 @@ const WeddingChecklist = ({ weddingId }) => {
                         justify-content: space-between;
                         align-items: center;
                         margin-bottom: 10px;
+                    }
+                    .modal {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                   }
+                    .modal-content {
+                        background: white;
+                        padding: 20px;
+                        border-radius: 10px;
+                        text-align: center;
                     }
                 `}
       </style>

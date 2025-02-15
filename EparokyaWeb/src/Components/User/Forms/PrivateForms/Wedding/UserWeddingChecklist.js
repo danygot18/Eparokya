@@ -59,7 +59,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.GroomNewBaptismalCertificate ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.GroomNewBaptismalCertificate ? "Checked" : "Unchecked"}
+                    {checklist.GroomNewBaptismalCertificate ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -69,7 +69,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.GroomNewConfirmationCertificate ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.GroomNewConfirmationCertificate ? "Checked" : "Unchecked"}
+                    {checklist.GroomNewConfirmationCertificate ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -79,7 +79,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.GroomMarriageLicense ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.GroomMarriageLicense ? "Checked" : "Unchecked"}
+                    {checklist.GroomMarriageLicense ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -89,7 +89,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.GroomMarriageBans ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.GroomMarriageBans ? "Checked" : "Unchecked"}
+                    {checklist.GroomMarriageBans ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -99,7 +99,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.GroomOrigCeNoMar ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.GroomOrigCeNoMar ? "Checked" : "Unchecked"}
+                    {checklist.GroomOrigCeNoMar ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -109,7 +109,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.GroomOrigPSA ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.GroomOrigPSA ? "Checked" : "Unchecked"}
+                    {checklist.GroomOrigPSA ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -119,7 +119,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.GroomOnebyOne ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.GroomOnebyOne ? "Checked" : "Unchecked"}
+                    {checklist.GroomOnebyOne ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -129,7 +129,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.GroomTwobyTwo ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.GroomTwobyTwo ? "Checked" : "Unchecked"}
+                    {checklist.GroomTwobyTwo ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -140,7 +140,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.BrideNewBaptismalCertificate ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.BrideNewBaptismalCertificate ? "Checked" : "Unchecked"}
+                    {checklist.BrideNewBaptismalCertificate ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -150,7 +150,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.BrideNewConfirmationCertificate ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.BrideNewConfirmationCertificate ? "Checked" : "Unchecked"}
+                    {checklist.BrideNewConfirmationCertificate ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -160,7 +160,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.BrideMarriageLicense ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.BrideMarriageLicense ? "Checked" : "Unchecked"}
+                    {checklist.BrideMarriageLicense ? "Checked" : "Unverified"}
                 </button>
             </div>
 
@@ -170,7 +170,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.BrideMarriageBans ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.BrideMarriageBans ? "Checked" : "Unchecked"}
+                    {checklist.BrideMarriageBans ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -180,7 +180,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.BrideOrigCeNoMar ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.BrideOrigCeNoMar ? "Checked" : "Unchecked"}
+                    {checklist.BrideOrigCeNoMar ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -190,7 +190,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.BrideOrigPSA ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.BrideOrigPSA ? "Checked" : "Unchecked"}
+                    {checklist.BrideOrigPSA ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -200,7 +200,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.BrideOnebyOne ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.BrideOnebyOne ? "Checked" : "Unchecked"}
+                    {checklist.BrideOnebyOne ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -210,7 +210,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.BrideTwobyTwo ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.BrideTwobyTwo ? "Checked" : "Unchecked"}
+                    {checklist.BrideTwobyTwo ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -220,7 +220,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.PermitFromtheParishOftheBride ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.PermitFromtheParishOftheBride ? "Checked" : "Unchecked"}
+                    {checklist.PermitFromtheParishOftheBride ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -230,7 +230,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.ChildBirthCertificate ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.ChildBirthCertificate ? "Checked" : "Unchecked"}
+                    {checklist.ChildBirthCertificate ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -242,7 +242,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.PreMarriageSeminar1 ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.PreMarriageSeminar1 ? "Checked" : "Unchecked"}
+                    {checklist.PreMarriageSeminar1 ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -252,7 +252,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.PreMarriageSeminar2 ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.PreMarriageSeminar2 ? "Checked" : "Unchecked"}
+                    {checklist.PreMarriageSeminar2 ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -262,7 +262,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.PreMarriageSeminar3 ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.PreMarriageSeminar3 ? "Checked" : "Unchecked"}
+                    {checklist.PreMarriageSeminar3 ? "Checked" : "Unverified"}
                 </button>
             </div>
 
@@ -272,7 +272,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.CanonicalInterview ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.CanonicalInterview ? "Checked" : "Unchecked"}
+                    {checklist.CanonicalInterview ? "Verified" : "Unverified"}
                 </button>
             </div>
 
@@ -282,7 +282,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                     className={checklist.Confession ? "checked-btn" : "unchecked-btn"}
                     disabled
                 >
-                    {checklist.Confession ? "Checked" : "Unchecked"}
+                    {checklist.Confession ? "Verified" : "Unverified"}
                 </button>
             </div>
 

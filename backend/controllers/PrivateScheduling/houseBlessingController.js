@@ -1,5 +1,6 @@
 const HouseBlessing = require('../../models/PrivateScheduling/houseBlessing'); 
 const mongoose = require('mongoose');
+const Priest = require('../../models/Priest/priest'); 
 
 // Create House Blessing Request
 exports.createHouseBlessing = async (req, res) => {

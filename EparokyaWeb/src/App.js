@@ -23,6 +23,7 @@ import NavigationForms from './Components/User/NavigationForms';
 import ResourcePage from './Components/ResourcePage';
 
 import SubmittedForms from './Components/User/Forms/SubmittedFormsNavigation';
+import UserFormGuides from './Components/User/UserFormGuides';
 
 import BaptismForm from './Components/User/Forms/PrivateForms/Baptism/BaptismForm';
 import FuneralForm from './Components/User/Forms/PrivateForms/Funeral/FuneralForm';
@@ -93,6 +94,10 @@ import AnnouncementList from './Components/Admin/Announcement/AnnouncementList';
 // resource
 import Resource from './Components/Admin/Resources/Resource';
 import ResourceList from './Components/Admin/Resources/ResourceList';
+
+// Priest
+import CreatePriest from './Components/Admin/Priest/CreatePriest';
+import PriestList from './Components/Admin/Priest/PriestList';
 
 // Prayer
 import AdminPrayerReview from './Components/Admin/Prayers/AdminPrayerReview';
@@ -174,7 +179,7 @@ function App() {
         <Route path="/user/NavigationForms" element={<NavigationForms />} exact="true" />
 
         <Route path="/user/SubmittedFormsNavigation" element={<SubmittedForms />} exact="true" />
-
+        <Route path="/user/FormGuides" element={<UserFormGuides />} exact="true" />
 
         <Route path="/user/baptismForm" element={<BaptismForm />} exact="true" />
         <Route path="/user/funeralForm" element={<FuneralForm />} exact="true" />
@@ -194,7 +199,6 @@ function App() {
         <Route path="/user/mySubmittedCounselingForm/:formId" element={<MySubmittedCounselingForm />} exact="true" />
         <Route path="/user/mySubmittedPrayerRequestForm/:formId" element={<MySubmittedPrayerRequestForm />} exact="true" />
         <Route path="/user/mySubmittedPrayerWallForm/:formId" element={<MySubmittedPrayerWallForm />} exact="true" /> */}
-
 
         <Route path="/user/SubmittedWeddingList" element={<SubmittedWeddingList />} exact="true" />
         <Route path="/user/SubmittedBaptismList" element={<SubmittedBaptismList />} exact="true" />
@@ -237,6 +241,9 @@ function App() {
         <Route path="/admin/resource/create" element={<ProtectedRoute isAdmin={true}><Resource /></ProtectedRoute>} />
         <Route path="/admin/resourceList" element={<ProtectedRoute isAdmin={true}><ResourceList /></ProtectedRoute>} />
 
+        {/* Priest */}
+        <Route path="/admin/create/priest" element={<ProtectedRoute isAdmin={true}><CreatePriest /></ProtectedRoute>} />
+        <Route path="/admin/priestList" element={<ProtectedRoute isAdmin={true}><PriestList /></ProtectedRoute>} />
 
         {/* counseling */}
         <Route path="/admin/counselingList" element={<ProtectedRoute isAdmin={true}><CounselingList /></ProtectedRoute>} />

@@ -60,7 +60,7 @@ const BaptismChecklist = ({ baptismId }) => {
           className={checklist.PhotocopyOfBirthCertificate ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('PhotocopyOfBirthCertificate')}
         >
-          {checklist.PhotocopyOfBirthCertificate ? "Checked" : "Unchecked"}
+          {checklist.PhotocopyOfBirthCertificate ? "Verified" : "Unverified"}
         </button>
       </div>
 
@@ -70,7 +70,7 @@ const BaptismChecklist = ({ baptismId }) => {
           className={checklist.PhotocopyOfMarriageCertificate ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('PhotocopyOfMarriageCertificate')}
         >
-          {checklist.PhotocopyOfMarriageCertificate ? "Checked" : "Unchecked"}
+          {checklist.PhotocopyOfMarriageCertificate ? "Verified" : "Unverified"}
         </button>
       </div>
 
@@ -81,7 +81,7 @@ const BaptismChecklist = ({ baptismId }) => {
           className={checklist.BaptismalPermit ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('BaptismalPermit')}
         >
-          {checklist.BaptismalPermit ? "Checked" : "Unchecked"}
+          {checklist.BaptismalPermit ? "Verified" : "Unverified"}
         </button>
       </div>
 
@@ -91,7 +91,7 @@ const BaptismChecklist = ({ baptismId }) => {
           className={checklist.CertificateOfNoRecordBaptism ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('CertificateOfNoRecordBaptism')}
         >
-          {checklist.CertificateOfNoRecordBaptism ? "Checked" : "Unchecked"}
+          {checklist.CertificateOfNoRecordBaptism ? "Verified" : "Unverified"}
         </button>
       </div>
 
@@ -102,7 +102,7 @@ const BaptismChecklist = ({ baptismId }) => {
           className={checklist.PreBaptismSeminar1 ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('PreBaptismSeminar1')}
         >
-          {checklist.PreBaptismSeminar1 ? "Checked" : "Unchecked"}
+          {checklist.PreBaptismSeminar1 ? "Verified" : "Unverified"}
         </button>
       </div>
 
@@ -112,7 +112,7 @@ const BaptismChecklist = ({ baptismId }) => {
           className={checklist.PreBaptismSeminar2 ? "checked-btn" : "unchecked-btn"}
           onClick={() => handleCheckboxChange('PreBaptismSeminar2')}
         >
-          {checklist.PreBaptismSeminar2 ? "Checked" : "Unchecked"}
+          {checklist.PreBaptismSeminar2 ? "Verified" : "Unverified"}
         </button>
       </div>
 

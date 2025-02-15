@@ -60,8 +60,13 @@ const counselingSchema = new mongoose.Schema({
         reason: { type: String },
       },
 
+      cancellingReason: {
+        user: { type: String, enum: ['Admin, User'] },
+        reason: { type: String },
+      },
+
     priest: {
-        name: { type: String, required: false },
+        name: { type: mongoose.Schema.Types.ObjectId, ref: 'priest' },
         createdAt: {
           type: Date,
           default: Date.now,

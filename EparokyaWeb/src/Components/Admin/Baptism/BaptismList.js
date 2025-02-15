@@ -98,38 +98,41 @@ const BaptismList = () => {
                 onClick={() => handleCardClick(item._id)}
               >
                 <div className="status-badge">{item.binyagStatus}</div>
-                <h3 className="card-title">Record #{index + 1}</h3>
+                <h3 className="card-title">Baptism #{index + 1}</h3>
                 <div className="card-details">
                   <p>
-                    <strong>Bibinyagan:</strong> {item.child?.fullName || "N/A"}
+                    <strong>Name of the Child:</strong> {item.child?.fullName || "N/A"}
                   </p>
                   <p>
-                    <strong>Pangalan ng Ama:</strong> {item.parents?.fatherFullName || "N/A"}
+                    <strong>Father:</strong> {item.parents?.fatherFullName || "N/A"}
                   </p>
                   <p>
-                    <strong>Panagalan ng Ina:</strong> {item.parents?.motherFullName || "N/A"}
+                    <strong>Mother:</strong> {item.parents?.motherFullName || "N/A"}
                   </p>
-                  <p>
+                  {/* <p>
                     <strong>Tirahan:</strong> {item.parents?.address || "N/A"}
+                  </p> */}
+                  <p>
+                    <strong>Contact Info:</strong> {item.phone || "N/A"}
                   </p>
                   <p>
-                    <strong>Contact Info:</strong> {item.parents?.contactInfo || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Araw ng Binyag:</strong>{" "}
+                    <strong>Baptism Date:</strong>{" "}
                     {item.baptismDate
                       ? new Date(item.baptismDate).toLocaleDateString()
                       : "N/A"}
                   </p>
                   <p>
-                    <strong>Submitted By:</strong>
+                    <strong>Baptism Time:</strong> {item.baptismTime || "Unknown"}
                   </p>
                   <p>
+                    <strong>Submitted By:</strong> {item.userId?.name || "Unknown"}
+                  </p>
+                  {/* <p>
                     <strong>Name:</strong> {item.userId?.name || "Unknown"}
-                  </p>
-                  <p>
+                  </p> */}
+                  {/* <p>
                     <strong>User ID:</strong> {item.userId?._id || "Unknown"}
-                  </p>
+                  </p> */}
                 </div>
               </div>
             ))}

@@ -222,6 +222,11 @@ const weddingSchema = mongoose.Schema({
     reason: { type: String },
   },
 
+  cancellingReason: {
+    user: { type: String, enum: ['Admin, User'] },
+    reason: { type: String },
+  },
+
   // for Admin to fill out
   additionalReq: {
     PreMarriageSeminar: {

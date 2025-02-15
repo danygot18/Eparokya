@@ -21,6 +21,11 @@ const SideBar = () => {
             <Link to="/admin/users" className="sidebar-link" style={styles.sidebarLink}>
               Users
             </Link>
+            <Nav.Item>
+            <Link to="/admin/create/priest" className="sidebar-link" style={styles.sidebarLink}>
+              Parish Priests
+            </Link>
+          </Nav.Item>
           </Nav.Item>
           <Nav.Item>
             <Link to="/admin/ministryCategory/create" className="sidebar-link" style={styles.sidebarLink}>

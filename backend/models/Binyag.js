@@ -171,10 +171,9 @@ const BaptismSchema = new mongoose.Schema({
     },
   ],
 
-
   adminNotes: [
     {
-      priest: String,
+      priest: {type: mongoose.Schema.Types.ObjectId, ref: 'priest'},
       recordedBy: String,
       bookNumber: String,
       pageNumber: String,
@@ -188,6 +187,11 @@ const BaptismSchema = new mongoose.Schema({
 
   adminRescheduled: {
     date: { type: Date },
+    reason: { type: String },
+  },
+
+  cancellingReason: {
+    user: { type: String, enum: ['Admin, User'] },
     reason: { type: String },
   },
   

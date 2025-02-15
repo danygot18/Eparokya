@@ -14,16 +14,16 @@ const WeddingList = () => {
     useEffect(() => {
         fetchWeddingForms();
     }, []);
-    
+
     const fetchWeddingForms = async () => {
         setLoading(true);
         try {
             const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllWeddings`, {
                 withCredentials: true,
             });
-    
-            console.log("Frontend API Response:", response.data); 
-    
+
+            console.log("Frontend API Response:", response.data);
+
             if (response.data && Array.isArray(response.data)) {
                 setWeddingForms(response.data);
             } else {
@@ -36,7 +36,7 @@ const WeddingList = () => {
             setLoading(false);
         }
     };
-    
+
 
     const handleCardClick = (weddingId) => {
         navigate(`/admin/weddingDetails/${weddingId}`);
@@ -99,16 +99,17 @@ const WeddingList = () => {
                                 >
                                     <div className="status-badge">{item.weddingStatus ?? "Unknown"}</div>
                                     <h3 className="card-title">
-    Record # {index + 1}: {item.brideName ?? "Unknown Bride"} & {item.groomName ?? "Unknown Groom"}
-</h3>
+                                        Wedding #  {index + 1}: {item.brideName ?? "Unknown Bride"} & {item.groomName ?? "Unknown Groom"}
+                                    </h3>
 
 
                                     <div className="card-details">
                                         <p><strong>Wedding Date:</strong> {item.weddingDate ? new Date(item.weddingDate).toLocaleDateString() : "N/A"}</p>
                                         <p><strong>Wedding Time:</strong> {item.weddingTime ?? "N/A"}</p>
-                                        <strong>Bride Contact:</strong> {item.bridePhone ?? "N/A"} | <strong>Groom Contact:</strong> {item.groomPhone ?? "N/A"}
+                                        <p><strong>Bride Contact:</strong> {item.bridePhone ?? "N/A"} </p>
+                                        <p><strong>Groom Contact:</strong> {item.groomPhone ?? "N/A"}</p>
                                         <p><strong>Submitted By:</strong> {item.userId?.name || "Unknown"}</p>
-                                        <p><strong>User ID:</strong> {item.userId?._id || "Unknown"}</p>
+                                        {/* <p><strong>User ID:</strong> {item.userId?._id || "Unknown"}</p> */}
                                     </div>
                                 </div>
                             );
