@@ -414,8 +414,6 @@ const mongoose = require('mongoose');
 
 // }
 
-
-
 exports.registerUser = async (req, res, next) => {
     try {
         console.log('Received ministryCategory:', req.body.ministryCategory);
@@ -490,10 +488,6 @@ exports.registerUser = async (req, res, next) => {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 };
-
-
-
-
 
 exports.Profile = async (req, res, next) => {
     try {
@@ -639,6 +633,7 @@ exports.ResetPassword = async (req, res, next) => {
     await user.save();
     sendToken(user, 200, res);
 }
+
 exports.updatePassword = async (req, res, next) => {
     const user = await User.findById(req.user.id).select('password');
     // Check previous user password
@@ -661,7 +656,6 @@ exports.updatePassword = async (req, res, next) => {
 //         user
 //     })
 // }
-
 
 exports.UpdateProfile = async (req, res, next) => {
     console.log(req.body)
@@ -725,34 +719,20 @@ exports.getUserDetails = async (req, res, next) => {
 
 exports.getUsersGroupedByMinistryCategory = async (req, res) => {
     try {
-        // Fetch all ministry categories
-        const ministryCategories = await MinistryCategory.find();
+        const { ministryId } = req.params;
 
-        if (!ministryCategories.length) {
-            return res.status(404).json({ message: "No ministry categories found" });
+        // Check if ministry exists
+        const ministry = await MinistryCategory.findById(ministryId);
+        if (!ministry) {
+            return res.status(404).json({ message: 'Ministry not found' });
         }
 
-        // Prepare an array to store category-wise user data
-        const results = await Promise.all(
-            ministryCategories.map(async (category) => {
-                const users = await User.find({ ministryCategory: category._id })
-                    .populate("ministryCategory");
-                
-                return {
-                    ministryCategory: category.name,
-                    userCount: users.length,
-                    users,
-                };
-            })
-        );
+        // Find users belonging to this ministry
+        const users = await User.find({ ministryCategory: ministryId }).select('-password'); // Exclude password for security
 
-        res.status(200).json({
-            success: true,
-            data: results,
-        });
+        res.status(200).json(users);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Server error", error });
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 

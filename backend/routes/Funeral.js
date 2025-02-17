@@ -19,7 +19,8 @@ router.get('/stats/funeralsPerMonth', isAuthenticatedUser, funeralController.get
 router.get('/stats/funeralStatusCount', isAuthenticatedUser, funeralController.getFuneralStatusCounts);
 
 router.post('/commentFuneral/:funeralId', funeralController.createComment);
-router.post('/addPriest/:funeralId', funeralController.createPriestComment);
+// router.post('/addPriest/:funeralId', funeralController.createPriestComment);
+router.post('/funeralAddPriest/:funeralId', funeralController.createPriestComment);
 router.put('/updateFuneralDate/:funeralId', funeralController.updateFuneralDate);
 
 router.get('/getAllUserSubmittedFuneral', isAuthenticatedUser, funeralController.getMySubmittedForms);
@@ -31,7 +32,8 @@ router.put('/comment/:funeralId/:commentId', funeralController.updateComment);
 router.get('/getFuneral/:funeralId', funeralController.getFuneralById);
 router.put('/updateFuneral/:funeralId', funeralController.updateFuneral);
 router.delete('/deleteFuneral/:funeralId', funeralController.deleteFuneral);
+
 router.post('/confirmFuneral/:funeralId', funeralController.confirmFuneral);
-router.put('/declineFuneral/:funeralId', funeralController.cancelFuneral);
+router.post('/declineFuneral/:funeralId', isAuthenticatedUser, funeralController.declineFuneral);
 
 module.exports = router;

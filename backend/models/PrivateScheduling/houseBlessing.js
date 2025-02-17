@@ -48,6 +48,11 @@ const houseBlessingSchema = new mongoose.Schema({
         },
     ],
 
+    cancellingReason: {
+        user: { type: String, enum: ['Admin, User'] },
+        reason: { type: String },
+      },
+
     priest: { type: mongoose.Schema.Types.ObjectId, ref: 'priest' },
     termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
 });

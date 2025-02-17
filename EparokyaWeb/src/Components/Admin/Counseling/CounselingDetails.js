@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../../Layout/styles/style.css";
+import "./counseling.css";
+
 import SideBar from "../SideBar";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import DateTimePicker from "react-datetime-picker";
 import 'react-datetime-picker/dist/DateTimePicker.css';
@@ -24,6 +26,10 @@ const CounselingDetails = () => {
     const [rescheduledReason, setRescheduledReason] = useState("");
     const [additionalComment, setAdditionalComment] = useState("");
     const [comments, setComments] = useState([]);
+
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelReason, setCancelReason] = useState("");
+    const navigate = useNavigate();
 
     const [newDate, setNewDate] = useState("");
     const [reason, setReason] = useState("");
@@ -78,7 +84,7 @@ const CounselingDetails = () => {
         };
         fetchCounselingDetails();
         fetchPriests();
-    }, [ ]);
+    }, []);
 
 
     const handleConfirm = async (counselingId) => {
@@ -102,26 +108,24 @@ const CounselingDetails = () => {
         }
     };
 
-    const handleDecline = async (counselingId) => {
+    const handleCancel = async () => {
+        if (!cancelReason.trim()) {
+            toast.error("Please provide a cancellation reason.", { position: toast.POSITION.TOP_RIGHT });
+            return;
+        }
         try {
             const response = await axios.post(
-                `${process.env.REACT_APP_API}/api/v1/${counselingId}/declineCounseling`,
+                `${process.env.REACT_APP_API}/api/v1/declineCounseling/${counselingId}`,
+                { reason: cancelReason },
                 { withCredentials: true }
             );
-            console.log("Declining response:", response.data);
-            toast.success("Counseling declined successfully!", {
-                position: toast.POSITION.TOP_RIGHT,
-                autoClose: 3000,
-            });
+
+            toast.success("Counseling cancelled successfully!", { position: toast.POSITION.TOP_RIGHT });
+            setShowCancelModal(false);
         } catch (error) {
-            console.error("Error declining counseling:", error.response || error.message);
-            toast.error(
-                error.response?.data?.message || "Failed to decline the counseling.",
-                {
-                    position: toast.POSITION.TOP_RIGHT,
-                    autoClose: 3000,
-                }
-            );
+            toast.error(error.response?.data?.message || "Failed to cancel the counseling.", {
+                position: toast.POSITION.TOP_RIGHT,
+            });
         }
     };
 
@@ -150,7 +154,6 @@ const CounselingDetails = () => {
             setLoading(false);
         }
     };
-
 
     const handleSubmitComment = async () => {
         if (!selectedComment && !additionalComment) {
@@ -359,11 +362,53 @@ const CounselingDetails = () => {
                         </div>
                     </div>
 
+                    {/* Cancelling Reason Section */}
+                    {counselingDetails?.counselingStatus === "Cancelled" && counselingDetails?.cancellingReason ? (
+                        <div className="house-comments-section">
+                            <h2>Cancellation Details</h2>
+                            <div className="admin-comment">
+                                <p><strong>Cancelled By:</strong> {counselingDetails.cancellingReason.user === "Admin" ? "Admin" : counselingDetails.cancellingReason.user}</p>
+                                <p><strong>Reason:</strong> {counselingDetails.cancellingReason.reason || "No reason provided."}</p>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    {/* Cancel Button */}
+                    <div className="button-container">
+                        <button onClick={() => setShowCancelModal(true)}>Cancel Counseling</button>
+                    </div>
+
+                    {/* Cancellation Modal */}
+                    {showCancelModal && (
+                        <div className="modal-overlay">
+                            <div className="modal">
+                                <h3>Cancel Counseling</h3>
+                                <p>Please provide a reason for cancellation:</p>
+                                <textarea
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    placeholder="Enter reason..."
+                                    className="modal-textarea"
+                                />
+                                <div className="modal-buttons">
+                                    <button onClick={handleCancel}>Confirm Cancel</button>
+                                    <button onClick={() => setShowCancelModal(false)}>Back</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Confirmation and Decline Buttons */}
                     <div className="button-container">
                         <button onClick={() => handleConfirm(counselingId)}>Confirm Counseling</button>
-                        <button onClick={() => handleDecline(counselingId)}>Decline</button>
                     </div>
+
+                    <div className="button-container">
+                        <button onClick={() => navigate(`/adminChat/${counselingDetails?.userId?._id}/${counselingDetails?.userId?.email}`)}>
+                            Go to Admin Chat
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </div>

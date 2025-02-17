@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../../Layout/styles/style.css";
+import "./houseBlessing.css";
 import SideBar from "../SideBar";
 import { useParams } from "react-router-dom";
 import Modal from "react-modal";
@@ -17,6 +18,10 @@ const HouseBlessingsDetails = () => {
     const [error, setError] = useState(null);
 
     const [priest, setPriest] = useState("");
+
+    const [priestsList, setPriestsList] = useState([]);
+    const [selectedPriestId, setSelectedPriestId] = useState("");
+
     const [selectedComment, setSelectedComment] = useState("");
     const [rescheduledDate, setRescheduledDate] = useState("");
     const [rescheduledReason, setRescheduledReason] = useState("");
@@ -26,6 +31,9 @@ const HouseBlessingsDetails = () => {
     const [newDate, setNewDate] = useState("");
     const [reason, setReason] = useState("");
     const [updatedBlessingDate, setUpdatedBlessingDate] = useState(blessingDetails?.blessingDate || "");
+
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelReason, setCancelReason] = useState("");
 
     const predefinedComments = [
         "Confirmed",
@@ -44,6 +52,8 @@ const HouseBlessingsDetails = () => {
                 setBlessingDetails(response.data.houseBlessing);
                 setComments(response.data.houseBlessing.comments || []);
                 setUpdatedBlessingDate(response.data.blessingDate);
+                setSelectedPriestId(response.data.counseling?.priest?._id || "");
+
             } catch (err) {
                 setError("Failed to fetch house blessing details.");
             } finally {
@@ -51,7 +61,26 @@ const HouseBlessingsDetails = () => {
             }
         };
 
+        const fetchPriests = async () => {
+            try {
+                const response = await axios.get(
+                    `${process.env.REACT_APP_API}/api/v1/getAvailablePriest`,
+                    { withCredentials: true }
+                );
+                const fetchedPriests = response.data.priests;
+                const formattedPriests = Array.isArray(fetchedPriests) ? fetchedPriests : [fetchedPriests];
+                setPriestsList(formattedPriests);
+                if (formattedPriests.length > 0) {
+                    setSelectedPriestId(formattedPriests[0]._id);
+                }
+            } catch (err) {
+                console.error("Failed to fetch priests:", err);
+                setPriestsList([]);
+            }
+        };
+
         fetchBlessingDetails();
+        fetchPriests();
     }, [blessingId]);
 
     const handleConfirm = async (blessingId) => {
@@ -75,24 +104,24 @@ const HouseBlessingsDetails = () => {
         }
     };
 
-    const handleDecline = async (blessingId) => {
+    const handleCancel = async () => {
+        if (!cancelReason.trim()) {
+            toast.error("Please provide a cancellation reason.", { position: toast.POSITION.TOP_RIGHT });
+            return;
+        }
         try {
             const response = await axios.post(
-                `${process.env.REACT_APP_API}/api/v1/${blessingId}/declineBlessing`,
+                `${process.env.REACT_APP_API}/api/v1/declineBlessing/${blessingId}`,
+                { reason: cancelReason },
                 { withCredentials: true }
             );
-            toast.success("House blessing declined successfully!", {
-                position: toast.POSITION.TOP_RIGHT,
-                autoClose: 3000,
-            });
+
+            toast.success("House Blessing cancelled successfully!", { position: toast.POSITION.TOP_RIGHT });
+            setShowCancelModal(false);
         } catch (error) {
-            toast.error(
-                error.response?.data?.message || "Failed to decline the house blessing.",
-                {
-                    position: toast.POSITION.TOP_RIGHT,
-                    autoClose: 3000,
-                }
-            );
+            toast.error(error.response?.data?.message || "Failed to cancel the house blessing.", {
+                position: toast.POSITION.TOP_RIGHT,
+            });
         }
     };
 
@@ -151,34 +180,27 @@ const HouseBlessingsDetails = () => {
     };
 
     const handleAddPriest = async () => {
-        if (!priest) {
-            alert("Please enter priest name.");
+        if (!selectedPriestId) {
+            alert("Please select a priest.");
             return;
         }
-        const commentData = {
-            name: priest,
-        };
         try {
-            const response = await fetch(
+            const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/addPriestBlessing/${blessingId}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(commentData),
-                }
+                { priestId: selectedPriestId },
+                { withCredentials: true }
             );
-
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to submit priest.");
-            }
-            alert("Priest submitted successfully!");
-            setPriest(""); 
+            toast.success("Priest assigned successfully!", {
+                position: toast.POSITION.TOP_RIGHT,
+                autoClose: 3000,
+            });
+            setBlessingDetails(prev => ({
+                ...prev,
+                priest: priestsList.find(priest => priest._id === selectedPriestId) || null
+            }));
         } catch (error) {
-            console.error("Error submitting priest:", error);
-            alert("Failed to submit priest comment.");
+            console.error("Error assigning priest:", error);
+            toast.error("Failed to assign priest.");
         }
     };
 
@@ -299,9 +321,44 @@ const HouseBlessingsDetails = () => {
                         <button onClick={handleAddPriest}>Add Priest</button>
                     </div>
 
+                    {/* Cancelling Reason Section */}
+                    {blessingDetails?.blessingStatus === "Cancelled" && blessingDetails?.cancellingReason ? (
+                        <div className="house-comments-section">
+                            <h2>Cancellation Details</h2>
+                            <div className="admin-comment">
+                                <p><strong>Cancelled By:</strong> {blessingDetails.cancellingReason.user === "Admin" ? "Admin" : blessingDetails.cancellingReason.user}</p>
+                                <p><strong>Reason:</strong> {blessingDetails.cancellingReason.reason || "No reason provided."}</p>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    {/* Cancel Button */}
+                    <div className="button-container">
+                        <button onClick={() => setShowCancelModal(true)}>Cancel House Blessing</button>
+                    </div>
+
+                     {/* Cancellation Modal */}
+                     {showCancelModal && (
+                        <div className="modal-overlay">
+                            <div className="modal">
+                                <h3>Cancel House Blessing</h3>
+                                <p>Please provide a reason for cancellation:</p>
+                                <textarea
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    placeholder="Enter reason..."
+                                    className="modal-textarea"
+                                />
+                                <div className="modal-buttons">
+                                    <button onClick={handleCancel}>Confirm Cancel</button>
+                                    <button onClick={() => setShowCancelModal(false)}>Back</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="button-container">
                         <button onClick={() => handleConfirm(blessingId)}>Confirm Blessing</button>
-                        <button onClick={() => handleDecline(blessingId)}>Decline</button>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 const { WeddingChecklist } = require('../../models/weddingChecklist'); 
 const { Wedding } = require('../../models/weddings');
-
+const User = require('../../models/user');
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
 
@@ -412,25 +412,31 @@ exports.confirmWedding = async (req, res) => {
 
 exports.declineWedding = async (req, res) => {
   try {
-    const { weddingId } = req.params;
+      const { reason } = req.body; 
+      const userId = req.user._id; 
+      const user = await User.findById(userId);
 
-    if (!mongoose.Types.ObjectId.isValid(weddingId)) {
-      return res.status(400).json({ message: "Invalid wedding ID format." });
-    }
+      if (!user) {
+          return res.status(404).json({ message: "User not found." });
+      }
+      const cancellingUser = user.isAdmin ? "Admin" : user.name;
 
-    const wedding = await Wedding.findById(weddingId);
+      const wedding = await Wedding.findByIdAndUpdate(
+          req.params.weddingId,
+          {
+              weddingStatus: "Cancelled",
+              cancellingReason: { user: cancellingUser, reason }, 
+          },
+          { new: true }
+      );
+      if (!wedding) {
+          return res.status(404).json({ message: "Wedding not found." });
+      }
 
-    if (!wedding) {
-      return res.status(404).json({ message: "Wedding not found." });
-    }
-
-    wedding.weddingStatus = "Cancelled";
-    await wedding.save();
-
-    res.status(200).json({ message: "Wedding declined." });
-  } catch (error) {
-    console.error("Error declining wedding:", error);
-    res.status(500).json({ success: false, error: error.message });
+      res.json({ message: "Wedding cancelled successfully", wedding });
+  } catch (err) {
+      console.error("Error cancelling wedding:", err);
+      res.status(500).json({ message: "Server error." });
   }
 };
 

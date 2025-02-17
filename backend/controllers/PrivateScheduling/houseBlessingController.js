@@ -1,6 +1,7 @@
 const HouseBlessing = require('../../models/PrivateScheduling/houseBlessing'); 
 const mongoose = require('mongoose');
 const Priest = require('../../models/Priest/priest'); 
+const User = require('../../models/user');
 
 // Create House Blessing Request
 exports.createHouseBlessing = async (req, res) => {
@@ -143,29 +144,61 @@ exports.confirmBlessing = async (req, res) => {
 };
 
 // Decline Blessing
+// exports.declineBlessing = async (req, res) => {
+//     try {
+//         const { blessingId } = req.params;
+
+//         if (!mongoose.Types.ObjectId.isValid(blessingId)) {
+//             return res.status(400).json({ message: "Invalid wedding ID format." });
+//         }
+
+//         const houseBlessing = await HouseBlessing.findById(blessingId);
+
+//         if (!houseBlessing) {
+//             return res.status(404).json({ message: "House Blessing not found." });
+//         }
+
+//         houseBlessing.blessingStatus = "Declined";
+//         await houseBlessing.save();
+
+//         res.status(200).json({ message: "Blessing declined." });
+//     } catch (error) {
+//         console.error("Error declining blessing:", error);
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// };
+
+
+// Decline Counseling w/Reason
 exports.declineBlessing = async (req, res) => {
     try {
-        const { blessingId } = req.params;
-
-        if (!mongoose.Types.ObjectId.isValid(blessingId)) {
-            return res.status(400).json({ message: "Invalid wedding ID format." });
+        const { reason } = req.body; 
+        const userId = req.user._id; 
+        const user = await User.findById(userId);
+  
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
         }
-
-        const houseBlessing = await HouseBlessing.findById(blessingId);
-
+        const cancellingUser = user.isAdmin ? "Admin" : user.name;
+  
+        const houseBlessing = await HouseBlessing.findByIdAndUpdate(
+            req.params.blessingId,
+            {
+                blessingStatus: "Cancelled",
+                cancellingReason: { user: cancellingUser, reason }, 
+            },
+            { new: true }
+        );
         if (!houseBlessing) {
             return res.status(404).json({ message: "House Blessing not found." });
         }
-
-        houseBlessing.blessingStatus = "Declined";
-        await houseBlessing.save();
-
-        res.status(200).json({ message: "Blessing declined." });
-    } catch (error) {
-        console.error("Error declining blessing:", error);
-        res.status(500).json({ success: false, error: error.message });
+  
+        res.json({ message: "House Blessing cancelled successfully", houseBlessing });
+    } catch (err) {
+        console.error("Error cancelling house blessing:", err);
+        res.status(500).json({ message: "Server error." });
     }
-};
+  };
 
 // Update Blessing Date
 exports.updateBlessingDate = async (req, res) => {

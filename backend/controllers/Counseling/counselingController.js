@@ -1,6 +1,7 @@
 const Counseling = require('../../models/counseling');
 const mongoose = require('mongoose');
 const Priest = require('../../models/Priest/priest');
+const User = require('../../models/user');
 
 
 exports.createCounseling = async (req, res) => {
@@ -131,19 +132,53 @@ exports.confirmCounseling = async (req, res) => {
 //     res.status(500).json({ success: false, error: error.message });
 //   }
 // };
+// exports.declineCounseling = async (req, res) => {
+//   try {
+//     const counseling = await Counseling.findByIdAndUpdate(
+//       req.params.counselingId,
+//       { counselingStatus: 'Cancelled' },
+//       { new: true }
+//     );
+//     if (!counseling) return res.status(404).send('Counseling not found.');
+//     res.send(counseling);
+//   } catch (err) {
+//     res.status(500).send('Server error.');
+//   }
+// };
+
+
+
+// decline counseling with reason
 exports.declineCounseling = async (req, res) => {
   try {
-    const counseling = await Counseling.findByIdAndUpdate(
-      req.params.counselingId,
-      { counselingStatus: 'Cancelled' },
-      { new: true }
-    );
-    if (!counseling) return res.status(404).send('Counseling not found.');
-    res.send(counseling);
+      const { reason } = req.body; 
+      const userId = req.user._id; 
+      const user = await User.findById(userId);
+
+      if (!user) {
+          return res.status(404).json({ message: "User not found." });
+      }
+      const cancellingUser = user.isAdmin ? "Admin" : user.name;
+
+      const counseling = await Counseling.findByIdAndUpdate(
+          req.params.counselingId,
+          {
+              counselingStatus: "Cancelled",
+              cancellingReason: { user: cancellingUser, reason }, 
+          },
+          { new: true }
+      );
+      if (!counseling) {
+          return res.status(404).json({ message: "Counseling not found." });
+      }
+
+      res.json({ message: "Counseling cancelled successfully", counseling });
   } catch (err) {
-    res.status(500).send('Server error.');
+      console.error("Error cancelling counseling:", err);
+      res.status(500).json({ message: "Server error." });
   }
 };
+
 
 exports.updateCounselingDate = async (req, res) => {
   try {

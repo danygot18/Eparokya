@@ -3,6 +3,8 @@ import axios from "axios";
 import "../../Layout/styles/style.css";
 import SideBar from "../SideBar";
 import "../../Layout/styles/style.css";
+import "./funeral.css";
+
 import { useParams, useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import DateTimePicker from "react-datetime-picker";
@@ -20,6 +22,10 @@ const FuneralDetails = () => {
     const navigate = useNavigate();
 
     const [priest, setPriest] = useState("");
+
+    const [priestsList, setPriestsList] = useState([]);
+    const [selectedPriestId, setSelectedPriestId] = useState("");
+
     const [selectedComment, setSelectedComment] = useState("");
     const [additionalComment, setAdditionalComment] = useState("");
     const [comments, setComments] = useState([]);
@@ -35,6 +41,9 @@ const FuneralDetails = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState("");
     const [deathCertificateImage, setDeathCertificateImage] = useState("");
+
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelReason, setCancelReason] = useState("");
 
 
     const predefinedComments = [
@@ -53,7 +62,7 @@ const FuneralDetails = () => {
                 );
                 setFuneralDetails(response.data);
                 setComments(response.data.comments || []);
-                setPriest(response.data.priest);
+                setSelectedPriestId(response.data.counseling?.priest?._id || "");
                 setDeathCertificateImage(response.data.deathCertificate || "");
 
                 setUpdatedFuneralDate(response.data.funeralDate || "");
@@ -64,7 +73,27 @@ const FuneralDetails = () => {
                 setLoading(false);
             }
         };
+
+         const fetchPriests = async () => {
+            try {
+                const response = await axios.get(
+                    `${process.env.REACT_APP_API}/api/v1/getAvailablePriest`,
+                    { withCredentials: true }
+                );
+                const fetchedPriests = response.data.priests;
+                const formattedPriests = Array.isArray(fetchedPriests) ? fetchedPriests : [fetchedPriests];
+                setPriestsList(formattedPriests);
+                if (formattedPriests.length > 0) {
+                    setSelectedPriestId(formattedPriests[0]._id);
+                }
+            } catch (err) {
+                console.error("Failed to fetch priests:", err);
+                setPriestsList([]);
+            }
+        };
+
         fetchFuneralDetails();
+        fetchPriests();
         // console.log("Funeral Details:", funeralId);
     }, [funeralId]);
 
@@ -94,31 +123,24 @@ const FuneralDetails = () => {
         }
     };
 
-    const handleDecline = async (funeralId, token) => {
+    const handleCancel = async () => {
+        if (!cancelReason.trim()) {
+            toast.error("Please provide a cancellation reason.", { position: toast.POSITION.TOP_RIGHT });
+            return;
+        }
         try {
             const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/declineFuneral/${funeralId}`,
-                { withCredentials: true },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
+                { reason: cancelReason },
+                { withCredentials: true }
             );
-            // console.log("Declining response:", response.data);
-            toast.success("Funeral declined successfully!", {
-                position: toast.POSITION.TOP_RIGHT,
-                autoClose: 3000,
-            });
+
+            toast.success("Funeral cancelled successfully!", { position: toast.POSITION.TOP_RIGHT });
+            setShowCancelModal(false);
         } catch (error) {
-            console.error("Error decline funeral:", error.response || error.message);
-            toast.error(
-                error.response?.data?.message || "Failed to decline the funeral.",
-                {
-                    position: toast.POSITION.TOP_RIGHT,
-                    autoClose: 3000,
-                }
-            );
+            toast.error(error.response?.data?.message || "Failed to cancel the funeral.", {
+                position: toast.POSITION.TOP_RIGHT,
+            });
         }
     };
 
@@ -208,36 +230,27 @@ const FuneralDetails = () => {
     };
 
     const handleAddPriest = async () => {
-        if (!priest) {
-            alert("Please enter priest name.");
+        if (!selectedPriestId) {
+            alert("Please select a priest.");
             return;
         }
-        const commentData = {
-            name: priest || "",
-
-        };
-        // console.log("Sending comment:", commentData); 
         try {
-            const response = await fetch(
-                `${process.env.REACT_APP_API}/api/v1/addPriest/${funeralId}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(commentData),
-                }
+            const response = await axios.post(
+                `${process.env.REACT_APP_API}/api/v1/funeralAddPriest/${funeralId}`,
+                { priestId: selectedPriestId },
+                { withCredentials: true }
             );
-
-            const data = await response.json();
-            // console.log("Response from server:", data); 
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to submit priest.");
-            }
-            alert("Priest submitted successfully!");
+            toast.success("Priest assigned successfully!", {
+                position: toast.POSITION.TOP_RIGHT,
+                autoClose: 3000,
+            });
+            setFuneralDetails(prev => ({
+                ...prev,
+                priest: priestsList.find(priest => priest._id === selectedPriestId) || null
+            }));
         } catch (error) {
-            console.error("Error submitting priest:", error);
-            alert("Failed to submit priest comment.");
+            console.error("Error assigning priest:", error);
+            toast.error("Failed to assign priest.");
         }
     };
 
@@ -395,12 +408,12 @@ const FuneralDetails = () => {
                     {/* Priest Section */}
                     <div className="house-comments-section">
                         <h2>Priest</h2>
-                        {funeralDetails?.Priest?.name ? (
+                        {funeralDetails?.priest?.name ? (
                             <div className="admin-comment">
-                                <p><strong>Priest:</strong> {funeralDetails.Priest.name}</p>
+                                <p><strong>Priest:</strong> {funeralDetails.priest.title} {funeralDetails.priest.fullName}</p>
                             </div>
                         ) : (
-                            <p>No priest.</p>
+                            <p>No priest Assigned.</p>
                         )}
                     </div>
 
@@ -441,21 +454,69 @@ const FuneralDetails = () => {
 
                     {/* Adding Priest */}
                     <div className="house-section">
-                        <h2>Priest Name</h2>
-                        <textarea
-                            placeholder="Priest Name"
-                            value={priest}
-                            onChange={(e) => setPriest(e.target.value)}
-                        />
+                        <h2>Assign Priest</h2>
+                        <select
+                            value={selectedPriestId}
+                            onChange={(e) => setSelectedPriestId(e.target.value)}
+                        >
+                            {priestsList.length > 0 ? (
+                                priestsList.map((priest) => (
+                                    <option key={priest._id} value={priest._id}>
+                                        {priest.title} {priest.fullName}
+                                    </option>
+                                ))
+                            ) : (
+                                <option value="" disabled>No Priests Available</option>
+                            )}
+                        </select>
+
+
+
+
                         <div className="button-container">
-                            <button onClick={handleAddPriest}>Add Priest</button>
+                            <button onClick={handleAddPriest}>Assign Priest</button>
                         </div>
                     </div>
+
+                    {/* Cancelling Reason Section */}
+                    {funeralDetails?.funeralStatus === "Cancelled" && funeralDetails?.cancellingReason ? (
+                        <div className="house-comments-section">
+                            <h2>Cancellation Details</h2>
+                            <div className="admin-comment">
+                                <p><strong>Cancelled By:</strong> {funeralDetails.cancellingReason.user === "Admin" ? "Admin" : funeralDetails.cancellingReason.user}</p>
+                                <p><strong>Reason:</strong> {funeralDetails.cancellingReason.reason || "No reason provided."}</p>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    {/* Cancel Button */}
+                    <div className="button-container">
+                        <button onClick={() => setShowCancelModal(true)}>Cancel Funeral</button>
+                    </div>
+
+                     {/* Cancellation Modal */}
+                     {showCancelModal && (
+                        <div className="modal-overlay">
+                            <div className="modal">
+                                <h3>Cancel Funeral</h3>
+                                <p>Please provide a reason for cancellation:</p>
+                                <textarea
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    placeholder="Enter reason..."
+                                    className="modal-textarea"
+                                />
+                                <div className="modal-buttons">
+                                    <button onClick={handleCancel}>Confirm Cancel</button>
+                                    <button onClick={() => setShowCancelModal(false)}>Back</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Confirmation and Decline Buttons */}
                     <div className="button-container">
                         <button onClick={() => handleConfirm(funeralId)}>Confirm Funeral</button>
-                        <button onClick={() => handleDecline(funeralId)}>Decline</button>
                     </div>
                 </div>
                 <div className="button-container">

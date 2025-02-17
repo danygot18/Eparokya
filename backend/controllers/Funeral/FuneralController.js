@@ -1,7 +1,8 @@
 const Funeral = require('../../models/Funeral');
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
-
+const User = require('../../models/user');
+const Priest = require('../../models/Priest/priest');
 
 // const validatePlacingOfPall = (placingOfPall) => {
 //     if (placingOfPall && placingOfPall.by === "Family Member" && (!placingOfPall.familyMembers || placingOfPall.familyMembers.length === 0)) {
@@ -210,17 +211,34 @@ exports.confirmFuneral = async (req, res) => {
 //     }
 // };
 
-exports.cancelFuneral = async (req, res) => {
+// decline funeral with comment
+exports.declineFuneral = async (req, res) => {
     try {
+        const { reason } = req.body; 
+        const userId = req.user._id; 
+        const user = await User.findById(userId);
+  
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        const cancellingUser = user.isAdmin ? "Admin" : user.name;
+  
         const funeral = await Funeral.findByIdAndUpdate(
             req.params.funeralId,
-            { funeralStatus: 'Cancelled' },
+            {
+                funeralStatus: "Cancelled",
+                cancellingReason: { user: cancellingUser, reason }, 
+            },
             { new: true }
         );
-        if (!funeral) return res.status(404).send('Funeral not found.');
-        res.send(funeral);
+        if (!funeral) {
+            return res.status(404).json({ message: "Funeral not found." });
+        }
+  
+        res.json({ message: "Funeral cancelled successfully", funeral });
     } catch (err) {
-        res.status(500).send('Server error.');
+        console.error("Error cancelling funeral:", err);
+        res.status(500).json({ message: "Server error." });
     }
 };
 
@@ -291,38 +309,38 @@ exports.createComment = async (req, res) => {
     }
 };
 
-exports.createPriestComment = async (req, res) => {
-    try {
-        const { funeralId } = req.params;
-        const { name } = req.body; 
+// exports.createPriestComment = async (req, res) => {
+//     try {
+//         const { funeralId } = req.params;
+//         const { name } = req.body; 
 
-        if (!name) {
-            return res.status(400).json({ message: "Priest name is required." });
-        }
+//         if (!name) {
+//             return res.status(400).json({ message: "Priest name is required." });
+//         }
 
-        if (!mongoose.Types.ObjectId.isValid(funeralId)) {
-            return res.status(400).json({ message: "Invalid funeral ID format." });
-        }
+//         if (!mongoose.Types.ObjectId.isValid(funeralId)) {
+//             return res.status(400).json({ message: "Invalid funeral ID format." });
+//         }
 
-        const funeral = await Funeral.findById(funeralId);
-        if (!funeral) {
-            return res.status(404).json({ message: "Funeral not found." });
-        }
+//         const funeral = await Funeral.findById(funeralId);
+//         if (!funeral) {
+//             return res.status(404).json({ message: "Funeral not found." });
+//         }
 
-        // Set the priest subdocument
-        funeral.Priest = {
-            name,
-            createdAt: new Date()
-        };
+//         // Set the priest subdocument
+//         funeral.Priest = {
+//             name,
+//             createdAt: new Date()
+//         };
 
-        await funeral.save();
+//         await funeral.save();
 
-        res.status(200).json({ message: "Priest comment added.", priest: funeral.Priest });
-    } catch (error) {
-        console.error("Error adding priest comment:", error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-};
+//         res.status(200).json({ message: "Priest comment added.", priest: funeral.Priest });
+//     } catch (error) {
+//         console.error("Error adding priest comment:", error);
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// };
 
 
 // exports.addPriest = async (req, res) => {
@@ -359,6 +377,35 @@ exports.createPriestComment = async (req, res) => {
 // };
 
 //  reschedule 
+
+exports.createPriestComment = async (req, res) => {
+    try {
+      const { funeralId } = req.params;
+      const { priestId } = req.body; 
+  
+      if (!priestId) {
+        return res.status(400).json({ message: "Priest ID is required." });
+      }
+      if (!mongoose.Types.ObjectId.isValid(funeralId) || !mongoose.Types.ObjectId.isValid(priestId)) {
+        return res.status(400).json({ message: "Invalid ID format." });
+      }
+      const funeral = await Funeral.findById(funeralId);
+      if (!funeral) {
+        return res.status(404).json({ message: "Funeral not found." });
+      }
+      const priest = await Priest.findById(priestId);
+      if (!priest) {
+        return res.status(404).json({ message: "Priest not found." });
+      }
+      funeral.priest = priest._id;
+      await funeral.save();
+  
+      res.status(200).json({ message: "Priest assigned successfully.", priest });
+    } catch (error) {
+      console.error("Error assigning priest:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  };
 exports.updateFuneralDate = async (req, res) => {
     try {
         const { funeralId } = req.params;

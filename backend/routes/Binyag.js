@@ -25,6 +25,8 @@ router.get('/getBaptismChecklist/:baptismId', BaptismController.getBaptismCheckl
 router.post('/commentBaptism/:baptismId', BaptismController.addBaptismComment);
 router.post('/adminAdditionalNotes/:baptismId', BaptismController.addAdminNotes);
 
+// router.post('/baptismAddPriest/:baptismId', BaptismController.createPriestComment);
+
 router.get('/stats/baptsimsPerMonth', BaptismController.getBaptismPerMonth);
 router.get('/stats/baptismStatusCount', isAuthenticatedUser, BaptismController.getBaptismStatusCounts);
 router.put('/updateBaptismChecklist/:baptismId', BaptismController.updateBaptismChecklist);
@@ -33,7 +35,7 @@ router.get('/getAllUserSubmittedBaptism', isAuthenticatedUser, BaptismController
 router.get('/getBaptismForm/:formId', isAuthenticatedUser, BaptismController.getBaptismFormById);
 
 
-router.put('/declineBaptism/:baptismId/', BaptismController.declineBaptism);
+router.put('/declineBaptism/:baptismId/', isAuthenticatedUser, BaptismController.declineBaptism);
 router.post('/:baptismId/admin/addComment', BaptismController.addBaptismComment);
 router.put('/:baptismId/updateBaptismDate', BaptismController.updateBaptismDate);
 

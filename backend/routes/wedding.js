@@ -56,7 +56,8 @@ router.post('/admin/available-dates', isAuthenticatedUser, isAuthorized, Wedding
 router.get('/getWeddingById/:weddingId',  WeddingFormController.getWeddingById);
 
 router.post('/:weddingId/confirmWedding',  WeddingFormController.confirmWedding);
-router.post('/:weddingId/cancelWedding',isAuthenticatedUser, WeddingFormController.declineWedding);
+router.post('/declineWedding/:weddingId', isAuthenticatedUser, WeddingFormController.declineWedding);
+
 router.delete('/admin/available-dates/:weddingId', isAuthenticatedUser, isAuthorized, WeddingFormController.removeAvailableDate);
 
 //wedding dates

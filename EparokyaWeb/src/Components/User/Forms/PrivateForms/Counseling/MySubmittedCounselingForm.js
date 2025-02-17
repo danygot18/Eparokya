@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../../../../Layout/styles/style.css";
+import "./counseling.css";
 import GuestSideBar from "../../../../GuestSideBar";
 import { useParams } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
@@ -13,6 +14,10 @@ const MySubmittedCounselingForms = () => {
     const [comments, setComments] = useState([]);
     const [priest, setPriest] = useState("");
     const [updatedCounselingDate, setUpdatedCounselingDate] = useState("");
+
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelReason, setCancelReason] = useState("");
+
 
     useEffect(() => {
         const fetchCounselingDetails = async () => {
@@ -38,25 +43,26 @@ const MySubmittedCounselingForms = () => {
     }, [formId]);
 
     const handleCancel = async () => {
+        if (!cancelReason.trim()) {
+            toast.error("Please provide a cancellation reason.", { position: toast.POSITION.TOP_RIGHT });
+            return;
+        }
         try {
             const response = await axios.post(
-                `${process.env.REACT_APP_API}/api/v1/${formId}/cancelCounseling`,
+                `${process.env.REACT_APP_API}/api/v1/declineCounseling/${formId}`,
+                { reason: cancelReason },
                 { withCredentials: true }
             );
-            toast.success("Counseling cancelled successfully!", {
-                position: toast.POSITION.TOP_RIGHT,
-                autoClose: 3000,
-            });
+
+            toast.success("Counseling cancelled successfully!", { position: toast.POSITION.TOP_RIGHT });
+            setShowCancelModal(false);
         } catch (error) {
-            toast.error(
-                error.response?.data?.message || "Failed to cancel the counseling.",
-                {
-                    position: toast.POSITION.TOP_RIGHT,
-                    autoClose: 3000,
-                }
-            );
+            toast.error(error.response?.data?.message || "Failed to cancel the counseling.", {
+                position: toast.POSITION.TOP_RIGHT,
+            });
         }
     };
+
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
@@ -149,10 +155,42 @@ const MySubmittedCounselingForms = () => {
                         )}
                     </div>
 
+                    {/* Cancelling Reason Section */}
+                    {counselingDetails?.counselingStatus === "Cancelled" && counselingDetails?.cancellingReason ? (
+                        <div className="house-comments-section">
+                            <h2>Cancellation Details</h2>
+                            <div className="admin-comment">
+                                <p><strong>Cancelled By:</strong> {counselingDetails.cancellingReason.user === "Admin" ? "Admin" : counselingDetails.cancellingReason.user}</p>
+                                <p><strong>Reason:</strong> {counselingDetails.cancellingReason.reason || "No reason provided."}</p>
+                            </div>
+                        </div>
+                    ) : null}
+
                     {/* Cancel Button */}
                     <div className="button-container">
-                        <button onClick={handleCancel}>Cancel Counseling</button>
+                        <button onClick={() => setShowCancelModal(true)}>Cancel Counseling</button>
                     </div>
+
+                    {/* Cancellation Modal */}
+                    {showCancelModal && (
+                        <div className="modal-overlay">
+                            <div className="modal">
+                                <h3>Cancel Counseling</h3>
+                                <p>Please provide a reason for cancellation:</p>
+                                <textarea
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    placeholder="Enter reason..."
+                                    className="modal-textarea"
+                                />
+                                <div className="modal-buttons">
+                                    <button onClick={handleCancel}>Confirm Cancel</button>
+                                    <button onClick={() => setShowCancelModal(false)}>Back</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </div>
             <ToastContainer />

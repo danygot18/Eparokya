@@ -4,7 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import SideBar from "../SideBar";
 import Modal from 'react-modal';
 import BaptismChecklist from "./BaptismChecklist";
-
+import { toast, ToastContainer } from 'react-toastify';
+import "./baptism.css";
 
 Modal.setAppElement('#root');
 
@@ -22,6 +23,10 @@ const BaptismDetails = () => {
     const [comments, setComments] = useState([]);
     const [adminNotes, setAdminNotes] = useState([]);
     const [priest, setPriest] = useState("");
+
+    const [priestsList, setPriestsList] = useState([]);
+    const [selectedPriestId, setSelectedPriestId] = useState("");
+
     const [recordedBy, setrecordedBy] = useState("");
     const [bookNumber, setbookNumber] = useState("");
     const [pageNumber, setpageNumber] = useState("");
@@ -41,6 +46,9 @@ const BaptismDetails = () => {
     const [marriageCertificateImage, setmarriageCertificateImage] = useState("");
     const [baptismPermitImage, setbaptismPermitImage] = useState("");
 
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelReason, setCancelReason] = useState("");
+
     const predefinedComments = [
         "Confirmed and on schedule",
         "Rescheduled - awaiting response",
@@ -59,6 +67,7 @@ const BaptismDetails = () => {
                 setBaptismDetails(response.data);
                 setSelectedDate(response.data.baptismDate || "");
                 setComments(response.data.comments || []);
+                // setSelectedPriestId(response.data.counseling?.priest?._id || "");
 
                 setUpdatedBaptismDate(response.data.baptismDate || " ");
                 setbirthCertificateImage(response.data.birthCertificate || "");
@@ -72,7 +81,28 @@ const BaptismDetails = () => {
                 setLoading(false);
             }
         };
+
+        // const fetchPriests = async () => {
+        //     try {
+        //         const response = await axios.get(
+        //             `${process.env.REACT_APP_API}/api/v1/getAvailablePriest`,
+        //             { withCredentials: true }
+        //         );
+        //         const fetchedPriests = response.data.priests;
+        //         const formattedPriests = Array.isArray(fetchedPriests) ? fetchedPriests : [fetchedPriests];
+        //         setPriestsList(formattedPriests);
+        //         if (formattedPriests.length > 0) {
+        //             setSelectedPriestId(formattedPriests[0]._id);
+        //         }
+        //     } catch (err) {
+        //         console.error("Failed to fetch priests:", err);
+        //         setPriestsList([]);
+        //     }
+        // };
+
         fetchBaptismDetails();
+        // fetchPriests();
+
     }, []);
 
 
@@ -180,16 +210,24 @@ const BaptismDetails = () => {
         }
     };
 
-    const handleDecline = async () => {
-        const token = localStorage.getItem("jwt");
+    const handleCancel = async () => {
+        if (!cancelReason.trim()) {
+            toast.error("Please provide a cancellation reason.", { position: toast.POSITION.TOP_RIGHT });
+            return;
+        }
         try {
-            await axios.post(`${process.env.REACT_APP_API}/api/v1/${baptismId}/declineBaptism`, null, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            alert("Baptism declined.");
-            navigate("/admin/baptismList");
+            const response = await axios.post(
+                `${process.env.REACT_APP_API}/api/v1/declineBaptism/${baptismId}`,
+                { reason: cancelReason },
+                { withCredentials: true }
+            );
+
+            toast.success("Baptism cancelled successfully!", { position: toast.POSITION.TOP_RIGHT });
+            setShowCancelModal(false);
         } catch (error) {
-            alert("Failed to decline the baptism.");
+            toast.error(error.response?.data?.message || "Failed to cancel the baptism.", {
+                position: toast.POSITION.TOP_RIGHT,
+            });
         }
     };
 
@@ -358,9 +396,6 @@ const BaptismDetails = () => {
                             />
                         </div>
                     </Modal>
-
-
-
                 </div>
 
                 {/* Display Updated Date  */}
@@ -503,9 +538,44 @@ const BaptismDetails = () => {
                     </div>
                 </div>
 
+                 {/* Cancelling Reason Section */}
+                 {baptismDetails?.binyagStatus === "Cancelled" && baptismDetails?.cancellingReason ? (
+                        <div className="house-comments-section">
+                            <h2>Cancellation Details</h2>
+                            <div className="admin-comment">
+                                <p><strong>Cancelled By:</strong> {baptismDetails.cancellingReason.user === "Admin" ? "Admin" : baptismDetails.cancellingReason.user}</p>
+                                <p><strong>Reason:</strong> {baptismDetails.cancellingReason.reason || "No reason provided."}</p>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    {/* Cancel Button */}
+                    <div className="button-container">
+                        <button onClick={() => setShowCancelModal(true)}>Cancel Baptism</button>
+                    </div>
+
+                     {/* Cancellation Modal */}
+                     {showCancelModal && (
+                        <div className="modal-overlay">
+                            <div className="modal">
+                                <h3>Cancel Baptism</h3>
+                                <p>Please provide a reason for cancellation:</p>
+                                <textarea
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    placeholder="Enter reason..."
+                                    className="modal-textarea"
+                                />
+                                <div className="modal-buttons">
+                                    <button onClick={handleCancel}>Confirm Cancel</button>
+                                    <button onClick={() => setShowCancelModal(false)}>Back</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                 <div className="button-container">
                     <button onClick={handleConfirm}>Confirm</button>
-                    <button onClick={handleDecline}>Decline</button>
                 </div>
 
             </div>

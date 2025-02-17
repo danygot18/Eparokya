@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./WeddinDetails.css";
+import "./wedding.css";
+
 import SideBar from "../SideBar";
 import WeddingChecklist from "./WeddingChecklist";
 
@@ -45,7 +47,10 @@ const WeddingDetails = () => {
   const [selectedImage, setSelectedImage] = useState("");
 
   const [comments, setComments] = useState([]);
-  
+
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   useEffect(() => {
     const fetchWeddingDetails = async () => {
@@ -210,31 +215,24 @@ const WeddingDetails = () => {
     }
   };
 
-  const handleDecline = async (weddingId, token) => {
+  const handleCancel = async () => {
+    if (!cancelReason.trim()) {
+      toast.error("Please provide a cancellation reason.", { position: toast.POSITION.TOP_RIGHT });
+      return;
+    }
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/${weddingId}/cancelWedding`,
-        { withCredentials: true },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `${process.env.REACT_APP_API}/api/v1/declineWedding/${weddingId}`,
+        { reason: cancelReason },
+        { withCredentials: true }
       );
-      console.log("Declining response:", response.data);
-      toast.success("Wedding declined successfully!", {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 3000,
-      });
+
+      toast.success("Wedding cancelled successfully!", { position: toast.POSITION.TOP_RIGHT });
+      setShowCancelModal(false);
     } catch (error) {
-      console.error("Error decline wedding:", error.response || error.message);
-      toast.error(
-        error.response?.data?.message || "Failed to decline the wedding.",
-        {
-          position: toast.POSITION.TOP_RIGHT,
-          autoClose: 3000,
-        }
-      );
+      toast.error(error.response?.data?.message || "Failed to cancel the wedding.", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     }
   };
 
@@ -639,14 +637,57 @@ const WeddingDetails = () => {
                 {loading ? "Updating..." : "Update Wedding Date"}
               </button>
             </div>
+
+            {/* Cancelling Reason Section */}
+            {weddingDetails?.weddingStatus === "Cancelled" && weddingDetails?.cancellingReason ? (
+              <div className="house-comments-section">
+                <h2>Cancellation Details</h2>
+                <div className="admin-comment">
+                  <p><strong>Cancelled By:</strong> {weddingDetails.cancellingReason.user === "Admin" ? "Admin" : weddingDetails.cancellingReason.user}</p>
+                  <p><strong>Reason:</strong> {weddingDetails.cancellingReason.reason || "No reason provided."}</p>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Cancel Button */}
+            <div className="button-container">
+              <button onClick={() => setShowCancelModal(true)}>Cancel Wedding</button>
+            </div>
+
+            {/* Cancellation Modal */}
+            {showCancelModal && (
+              <div className="modal-overlay">
+                <div className="modal">
+                  <h3>Cancel Wedding</h3>
+                  <p>Please provide a reason for cancellation:</p>
+                  <textarea
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    placeholder="Enter reason..."
+                    className="modal-textarea"
+                  />
+                  <div className="modal-buttons">
+                    <button onClick={handleCancel}>Confirm Cancel</button>
+                    <button onClick={() => setShowCancelModal(false)}>Back</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
           <div style={{ justifyContent: "center", marginTop: "20px", borderRadius: "10px" }}>
             <button onClick={() => handleConfirm(weddingId)}>Confirm Wedding</button>
-            <button onClick={() => handleDecline(weddingId)}>Decline</button>
             <button onClick={handleUpdate} disabled={loading}>
               {loading ? "Updating..." : "Update Wedding Date"}
             </button>
           </div>
+
+          <div className="button-container">
+                <button onClick={() => navigate(`/adminChat/${weddingDetails?.userId?._id}/${weddingDetails?.userId?.email}`)}>
+                    Go to Admin Chat
+                </button>
+            </div>
+
         </div>
 
       </div>

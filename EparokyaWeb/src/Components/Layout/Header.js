@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../Redux/actions/userActions';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import logo from '../../assets/images/EparokyaHomeLogo.png';
 
 
 const Header = () => {
@@ -14,9 +15,9 @@ const Header = () => {
   const [isHovered, setIsHovered] = React.useState(false);
   const navigate = useNavigate();
 
-  console.log("ADMIN BA SI USEER?",user)
+  console.log("ADMIN BA SI USEER?", user)
 
-  
+
 
 
   const logoutHandler = () => {
@@ -33,6 +34,15 @@ const Header = () => {
       <Link to="/" style={styles.logo}>
         Eparokya
       </Link>
+
+      {/* <header style={{ height: "80px", display: "flex", alignItems: "center" }}>
+        <Link to="/">
+          <img src={logo} alt="Eparokya Logo" style={{ maxHeight: "50px", width: "auto" }} />
+        </Link>
+      </header> */}
+
+
+
 
       {/* Right: Navigation Links (Including Home Button & User Menu) */}
       <div style={styles.navContainer}>

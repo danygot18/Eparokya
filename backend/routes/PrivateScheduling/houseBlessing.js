@@ -14,7 +14,7 @@ router.post('/:blessingId/commentBlessing',  houseBlessingController.addComment)
 router.post('/addPriestBlessing/:blessingId', houseBlessingController.createPriestComment);
 
 router.post('/:blessingId/confirmBlessing',  houseBlessingController.confirmBlessing);
-router.post('/:blessingId/declinelessing',  houseBlessingController.declineBlessing);
+router.post('/declineBlessing/:blessingId', isAuthenticatedUser, houseBlessingController.declineBlessing);
 
 router.get('/getAllUserSubmittedHouseBlessing', isAuthenticatedUser, houseBlessingController.getMySubmittedForms);
 router.get('/getHouseBlessingForm/:formId', isAuthenticatedUser, houseBlessingController.getHouseBlessingFormById);
