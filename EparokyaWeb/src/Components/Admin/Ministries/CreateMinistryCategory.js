@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import SideBar from '../SideBar';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-
 const MinistryCategory = () => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -113,7 +112,9 @@ const MinistryCategory = () => {
         setEditId(category._id);
     };
 
-
+    const handleCardClick = (ministryId) => {
+        navigate(`/admin/ministryCategoryDetails/${ministryId}`);
+    };
 
     const filteredCategories = categories.filter((category) =>
         category.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -133,12 +134,10 @@ const MinistryCategory = () => {
         }
     };
 
-
     return (
         <div style={styles.wrapper}>
             <SideBar />
             <div style={styles.content}>
-
                 <div style={styles.leftPane}>
                     <h2 style={styles.title}>Create Ministry</h2>
                     <form onSubmit={handleSubmit} style={styles.form}>
@@ -187,20 +186,26 @@ const MinistryCategory = () => {
                     <ul style={styles.list}>
                         {currentItems.length > 0 ? (
                             currentItems.map((category) => (
-                                <li key={category._id} style={styles.listItem}>
+                                <li key={category._id} style={styles.listItem} onClick={() => handleCardClick(category._id)}>
                                     <span style={styles.categoryText}>
                                         <strong>{category.name}</strong>: {category.description}
                                     </span>
                                     <div style={styles.buttonContainer}>
                                         <button
                                             style={styles.editButton}
-                                            onClick={() => handleEdit(category)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleEdit(category);
+                                            }}
                                         >
                                             <i className="fas fa-edit"></i>
                                         </button>
                                         <button
                                             style={styles.deleteButton}
-                                            onClick={() => handleDelete(category._id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(category._id);
+                                            }}
                                         >
                                             <i className="fas fa-trash-alt"></i> 
                                         </button>
@@ -211,8 +216,6 @@ const MinistryCategory = () => {
                             <p style={styles.noData}>No ministry categories found.</p>
                         )}
                     </ul>
-
-
 
                     {/* pagination  */}
                     <div style={styles.pagination}>
@@ -380,22 +383,22 @@ const styles = {
         backgroundColor: '#e6f4e9',
         marginBottom: '10px',
         fontSize: '16px',
-      },
-      
-      categoryText: {
+    },
+    
+    categoryText: {
         flex: 1,
         marginRight: '15px',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
-      },
-      
-      buttonContainer: {
+    },
+    
+    buttonContainer: {
         display: 'flex',
         gap: '10px',
-      },
-      
-      editButton: {
+    },
+    
+    editButton: {
         padding: '6px',
         borderRadius: '6px',
         border: 'none',
@@ -403,9 +406,9 @@ const styles = {
         color: '#fff',
         cursor: 'pointer',
         fontSize: '14px',
-      },
-      
-      deleteButton: {
+    },
+    
+    deleteButton: {
         padding: '6px',
         borderRadius: '6px',
         border: 'none',
@@ -413,9 +416,7 @@ const styles = {
         color: '#fff',
         cursor: 'pointer',
         fontSize: '14px',
-      },
-      
-
-
+    },
 };
+
 export default MinistryCategory;

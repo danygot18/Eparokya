@@ -125,6 +125,8 @@ import HouseBlessingDetails from './Components/Admin/PrivateSchedule/HouseBlessi
 
 //Admin
 import MinistryCategory from './Components/Admin/Ministries/CreateMinistryCategory';
+import MinistryCategoryDetails from './Components/Admin/Ministries/MinistryCategoryDetails';
+
 import ResourceCategory from './Components/Admin/Resources/ResourceCategory';
 
 
@@ -228,6 +230,8 @@ function App() {
         <Route path="/admin/calendar" element={<ProtectedRoute isAdmin={true}><Calendar /></ProtectedRoute>} />
         {/* ministry */}
         <Route path="/admin/ministryCategory/create" element={<ProtectedRoute isAdmin={true}><MinistryCategory /></ProtectedRoute>} />
+        <Route path="/admin/ministryCategoryDetails/:id" element={<ProtectedRoute isAdmin={true}><MinistryCategoryDetails /></ProtectedRoute>} />
+
         <Route path="/admin/prayerReview" element={<ProtectedRoute isAdmin={true}><AdminPrayerReview /></ProtectedRoute>} />
 
 

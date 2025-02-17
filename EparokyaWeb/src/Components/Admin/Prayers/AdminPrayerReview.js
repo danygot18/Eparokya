@@ -69,7 +69,7 @@ const AdminPrayerReview = () => {
                     prayer._id === prayerId
                         ? { ...prayer, prayerWallStatus: "Confirmed" }
                         : prayer
-                )
+                ), config
             );
         } catch (error) {
             console.error(

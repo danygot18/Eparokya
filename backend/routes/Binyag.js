@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const BaptismController = require('../controllers/Baptism/BinyagController');
-const { isAuthenticatedUser, authorizeAdmin } = require('../middleware/auth');
+const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
 // const multer = require('multer');
 // const upload = multer({ dest: 'uploads/' });
 const upload = require('../utils/multer'); 
@@ -27,8 +27,8 @@ router.post('/adminAdditionalNotes/:baptismId', BaptismController.addAdminNotes)
 
 // router.post('/baptismAddPriest/:baptismId', BaptismController.createPriestComment);
 
-router.get('/stats/baptsimsPerMonth', BaptismController.getBaptismPerMonth);
-router.get('/stats/baptismStatusCount', isAuthenticatedUser, BaptismController.getBaptismStatusCounts);
+router.get('/stats/baptsimsPerMonth', isAuthenticatedUser, isAuthorized("admin"), BaptismController.getBaptismPerMonth);
+router.get('/stats/baptismStatusCount', isAuthenticatedUser, isAuthorized("admin"),  BaptismController.getBaptismStatusCounts);
 router.put('/updateBaptismChecklist/:baptismId', BaptismController.updateBaptismChecklist);
 
 router.get('/getAllUserSubmittedBaptism', isAuthenticatedUser, BaptismController.getMySubmittedForms);

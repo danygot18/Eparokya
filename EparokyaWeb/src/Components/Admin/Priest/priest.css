@@ -1,36 +1,98 @@
 .container {
     display: flex;
     height: 100vh;
+    position: relative; 
 }
 
 .sidebar {
-    width: 250px;
-    flex-shrink: 0;
-}
-
-.form-container {
-    flex: 2;
+    width: 250px; 
+    position: fixed; 
+    top: 0;
+    left: 0;
+    height: 100vh; 
+    background-color: #f8f9fa;
     padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.priest-list-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    border-left: 1px solid #ccc;
     overflow-y: auto;
 }
 
-.priest-list {
-    flex: 1;
+.priest-main-content {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center; 
+    padding: 20px;
+    width: 500px;
 }
 
-.priest-list h2 {
-    margin-bottom: 10px;
+.form-container {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
+}
+
+.priest-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center; 
+    width: 500%;
+    max-width: 700px;
+}
+
+.priest-form input,
+.priest-form button {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.priest-form label {
+    font-weight: bold;
+}
+
+/* Toggle Buttons */
+.toggle-button {
+    width: 100%;
+    cursor: pointer;
+    color: white;
+    border: none;
+    transition: 0.3s;
+}
+
+.toggle-button.active {
+    background: #2d6a4f;
+}
+
+.toggle-button.retired {
+    background: #d90429;
+}
+
+/* Submit Button */
+.submit-button {
+    background: #2d6a4f;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.priest-list-container {
+    width: 280px;
+    background-color: white;
+    border-left: 1px solid #ccc;
+    padding: 20px;
+    top: 0;
+    right: 0;
+    height: 70%;
+    min-height: 100vh; 
+    overflow-y: auto;
+}
+
+/* Priest List - Create Priest */
+.priest-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .priest-item {
@@ -38,11 +100,125 @@
     border-bottom: 1px solid #ddd;
 }
 
-.priest-item p {
-    margin: 0;
+/* Priest Name */
+.priest-name {
+    font-weight: bold;
 }
 
+/* Active/Inactive Status */
 .active-status {
     font-size: 12px;
     color: gray;
+}
+
+.active-status.active {
+    color: green;
+}
+
+.active-status.inactive {
+    color: red;
+}
+
+/* PriestList */
+.priestList-page {
+    display: flex;
+    height: 100vh;
+    position: relative;
+}
+
+.priestList-container {
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    flex-grow: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: center;
+}
+
+.priestList-item {
+    width: 40%; 
+    height: 900px; 
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: sans-serif;
+}
+
+.priestList-image-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.priestList-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 0%;
+    object-fit: cover;
+}
+
+.priestList-details {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-align: left;
+}
+
+.priestList-details h2 {
+    font-family: sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.priestList-year-range {
+    font-size: 12px;
+    color: gray;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.priestList-field {
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.priestList-field-value {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 5px;
+    font-size: 14px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .priestList-container {
+        grid-template-columns: 1fr;  
+    }
 }

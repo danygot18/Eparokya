@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const funeralController = require('../controllers/Funeral/FuneralController');
-const { isAuthenticatedUser, authorizeAdmin } = require('../middleware/auth');
+const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
 // const multer = require('multer');
 // const upload = multer({ dest: 'uploads/' });
 const upload = require('../utils/multer'); 
@@ -15,8 +15,8 @@ router.post(
 
 router.get('/confirmedFuneral', funeralController.getConfirmedFunerals);
 router.get('/mySubmittedForms', isAuthenticatedUser, funeralController.getMySubmittedForms);
-router.get('/stats/funeralsPerMonth', isAuthenticatedUser, funeralController.getFuneralsPerMonth);
-router.get('/stats/funeralStatusCount', isAuthenticatedUser, funeralController.getFuneralStatusCounts);
+router.get('/stats/funeralsPerMonth',  isAuthenticatedUser, isAuthorized("admin"), funeralController.getFuneralsPerMonth);
+router.get('/stats/funeralStatusCount', isAuthenticatedUser, isAuthorized("admin"),  funeralController.getFuneralStatusCounts);
 
 router.post('/commentFuneral/:funeralId', funeralController.createComment);
 // router.post('/addPriest/:funeralId', funeralController.createPriestComment);

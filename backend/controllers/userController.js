@@ -717,24 +717,24 @@ exports.getUserDetails = async (req, res, next) => {
     })
 }
 
-exports.getUsersGroupedByMinistryCategory = async (req, res) => {
-    try {
-        const { ministryId } = req.params;
+// exports.getUsersGroupedByMinistryCategory = async (req, res) => {
+//     try {
+//         const { ministryId } = req.params;
 
-        // Check if ministry exists
-        const ministry = await MinistryCategory.findById(ministryId);
-        if (!ministry) {
-            return res.status(404).json({ message: 'Ministry not found' });
-        }
+//         // Check if ministry exists
+//         const ministry = await MinistryCategory.findById(ministryId);
+//         if (!ministry) {
+//             return res.status(404).json({ message: 'Ministry not found' });
+//         }
 
-        // Find users belonging to this ministry
-        const users = await User.find({ ministryCategory: ministryId }).select('-password'); // Exclude password for security
+//         // Find users belonging to this ministry
+//         const users = await User.find({ ministryCategory: ministryId }).select('-password'); // Exclude password for security
 
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
+//         res.status(200).json(users);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Server error', error: error.message });
+//     }
+// };
 
 
 
@@ -754,6 +754,59 @@ exports.getUsersGroupedByMinistryCategory = async (req, res) => {
 //         success: true,
 //     })
 // }
+
+exports.getUsersByMinistryCategory = async (req, res) => {
+    try {
+        const { ministryCategoryId } = req.params;
+        console.log("Received ministryId:", ministryCategoryId); // Log the received ID
+
+        const ministry = await MinistryCategory.findById(ministryCategoryId);
+        console.log("Ministry found:", ministry); // Log the found ministry
+
+        if (!ministry) {
+            return res.status(404).json({ message: 'Ministry category not found' });
+        }
+
+        const users = await User.find({ ministryCategory: ministryCategoryId }).select('-password');
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+
+exports.getUsersGroupedByMinistryCategory = async (req, res) => {
+    try {
+        // Fetch all ministry categories
+        const ministryCategories = await MinistryCategory.find();
+
+        if (!ministryCategories.length) {
+            return res.status(404).json({ message: "No ministry categories found" });
+        }
+
+        // Prepare an array to store category-wise user data
+        const results = await Promise.all(
+            ministryCategories.map(async (category) => {
+                const users = await User.find({ ministryCategory: category._id })
+                    .populate("ministryCategory");
+
+                return {
+                    ministryCategory: category.name,
+                    userCount: users.length,
+                    users,
+                };
+            })
+        );
+
+        res.status(200).json({
+            success: true,
+            data: results,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error", error });
+    }
+};
 exports.deleteUser = async (req, res, next) => {
     try {
         const user = await User.findById(req.params.id);

@@ -36,8 +36,9 @@ router.post(
 
 router.get('/getAllWeddings', WeddingFormController.getAllWeddings);
 router.get('/confirmedWedding',  WeddingFormController.getConfirmedWeddings);
-router.get('/stats/weddingsPerMonth',isAuthenticatedUser, isAuthorized("admin"), WeddingFormController.getWeddingsPerMonth);
-router.get('/stats/weddingStatusCount', isAuthenticatedUser, WeddingFormController.getWeddingStatusCounts);
+
+router.get('/stats/weddingsPerMonth', isAuthenticatedUser, isAuthorized("admin"), WeddingFormController.getWeddingsPerMonth);
+router.get('/stats/weddingStatusCount', isAuthenticatedUser, isAuthorized("admin"),  WeddingFormController.getWeddingStatusCounts);
 
 router.get('/getWeddingChecklist/:weddingId', WeddingFormController.getWeddingChecklist);
 router.put('/updateWeddingChecklist/:weddingId', WeddingFormController.updateWeddingChecklist);

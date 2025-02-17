@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import SideBar from '../SideBar'; // Adjust the import path as necessary
+import SideBar from '../SideBar'; 
 import axios from "axios";
+import "./priest.css";
+
 
 const PriestList = () => {
     const [priests, setPriests] = useState([]);
@@ -44,47 +46,68 @@ const PriestList = () => {
     }
 
     return (
-        <div className="priest-list-page">
+        <div className="priestList-page">
             <SideBar />
-            <div className="priest-list-container">
+            <div className="priestList-container">
                 {priests.map(priest => (
-                    <div key={priest._id} className="priest-item">
-                        <div className="priest-image-container">
-                            <img src={priest.image.url} alt={priest.fullName} className="priest-image" />
+                    <div key={priest._id} className="priestList-item">
+                        <div className="priestList-image-container">
+                            <img src={priest.image.url} alt={priest.fullName} className="priestList-image" />
                         </div>
-                        <div className="priest-details">
+                        <div className="priestList-details">
                             <h2>{priest.fullName}</h2>
-                            <p>{priest.parishDurationYear}</p>
-                            <p>Title: {priest.title}</p>
-                            <p>Position: {priest.position}</p>
-                            <p>Nickname: {priest.nickName}</p>
-                            <p>Birth Date: {new Date(priest.birthDate).toLocaleDateString()}</p>
-                            <p>Seminary: {priest.Seminary}</p>
-                            <p>Ordination Date: {new Date(priest.ordinationDate).toLocaleDateString()}</p>
-                            <p>
+                            <p className="priestList-year-range">{priest.parishDurationYear}</p>
+                            
+                            <div className="priestList-field">
+                                Title:
+                                <input className="priestList-field-value" value={priest.title} readOnly />
+                            </div>
+                            <div className="priestList-field">
+                                Position:
+                                <input className="priestList-field-value" value={priest.position} readOnly />
+                            </div>
+                            <div className="priestList-field">
+                                Nickname:
+                                <input className="priestList-field-value" value={priest.nickName} readOnly />
+                            </div>
+                            <div className="priestList-field">
+                                Birth Date:
+                                <input className="priestList-field-value" value={new Date(priest.birthDate).toLocaleDateString()} readOnly />
+                            </div>
+                            <div className="priestList-field">
+                                Seminary:
+                                <input className="priestList-field-value" value={priest.Seminary} readOnly />
+                            </div>
+                            <div className="priestList-field">
+                                Ordination Date:
+                                <input className="priestList-field-value" value={new Date(priest.ordinationDate).toLocaleDateString()} readOnly />
+                            </div>
+                            <div>
                                 Active: 
                                 <button onClick={() => toggleStatus(priest._id, 'isActive')}>
                                     {priest.isActive ? 'Yes' : 'No'}
                                 </button>
-                            </p>
-                            <p>
+                            </div>
+                            <div>
                                 Available: 
                                 <button onClick={() => toggleStatus(priest._id, 'isAvailable')}>
                                     {priest.isAvailable ? 'Yes' : 'No'}
                                 </button>
-                            </p>
-                            <p>
+                            </div>
+                            <div>
                                 Retired: 
                                 <button onClick={() => toggleStatus(priest._id, 'isRetired')}>
                                     {priest.isRetired ? 'Yes' : 'No'}
                                 </button>
-                            </p>
+                            </div>
                         </div>
                     </div>
                 ))}
             </div>
         </div>
     );
+    
+    
 };
 
 export default PriestList;

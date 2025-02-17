@@ -56,6 +56,7 @@ app.use(morgan("tiny"));
 app.use(errorHandler);
 app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 
+
 // === ROUTES ===
 // User & Authentication
 app.use("/api/v1", require("./routes/user"));

@@ -40,7 +40,7 @@ const CounselingList = () => {
 
         if (searchTerm) {
             filtered = filtered.filter((form) =>
-                form.person?.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
+                form.purpose?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -97,15 +97,14 @@ const CounselingList = () => {
                                 className={`counseling-card ${item.counselingStatus?.toLowerCase() || ""}`}
                                 onClick={() => handleCardClick(item._id)}
                             >
-                                <div className="status-badge">{item.purpose}</div>
-                                <h3 className="card-title">Counseling #{index + 1}</h3>
+                                <div className="status-badge">{item.counselingStatus}</div>
+                                {/* <h3 className="card-title">Counseling #{index + 1}</h3> */}
+                                <h3 className="card-title">{item.purpose} </h3>
                                 <div className="card-details">
                                     <p>
                                         <strong>Full Name:</strong> {item.person?.fullName || "N/A"}
                                     </p>
-                                    <p>
-                                        <strong>Purpose:</strong> {item.purpose || "N/A"}
-                                    </p>
+                                   
                                     <p>
                                         <strong>Contact Number:</strong> {item.contactNumber || "N/A"}
                                     </p>
@@ -131,18 +130,18 @@ const CounselingList = () => {
                                         <strong>Contact Person:</strong> {item.contactPerson?.fullName || "N/A"}
                                     </p>
                                     <p>
-                                        <strong>Contact Person Contact Number:</strong> {item.contactPerson?.contactNumber || "N/A"}
+                                        <strong>Contact Person Number:</strong> {item.contactPerson?.contactNumber || "N/A"}
                                     </p>
 
                                     {/* <p>
                                         <strong>Relationship:</strong> {item.contactPerson?.relationship || "N/A"}
                                     </p> */}
                                     <p>
-                                        <strong>Submitted By:</strong>
+                                        <strong>Submitted By:</strong> {item.userId?.name || "Unknown"}
                                     </p>
-                                    <p>
+                                    {/* <p>
                                         <strong>Name:</strong> {item.userId?.name || "Unknown"}
-                                    </p>
+                                    </p> */}
                                     {/* <p>
                                         <strong>User ID:</strong> {item.userId?._id || "Unknown"}
                                     </p> */}
