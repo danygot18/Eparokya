@@ -221,14 +221,28 @@ const HouseBlessingsDetails = () => {
                         <div className="house-details-item">
                             <p><strong>Contact Number:</strong> {blessingDetails?.contactNumber || "N/A"}</p>
                         </div>
-                        <div className="house-details-item">
-                            <p><strong>Address:</strong> {blessingDetails?.address?.houseDetails || "N/A"},
+                        {/* <div className="house-details-item">
+                            <p><strong>Address:</strong>
+                                {blessingDetails?.address?.houseDetails || "N/A"},
                                 {blessingDetails?.address?.phase || "N/A"},
                                 {blessingDetails?.address?.street || "N/A"},
-                                {blessingDetails?.address?.baranggay || "N/A"},
+                                {blessingDetails?.address?.baranggay === 'Others' ? blessingDetails?.address?.customBarangay || "N/A" : blessingDetails?.address?.baranggay || "N/A"},
                                 {blessingDetails?.address?.district || "N/A"},
-                                {blessingDetails?.address?.city || "N/A"}</p>
+                                {blessingDetails?.address?.city === 'Others' ? blessingDetails?.address?.customCity || "N/A" : blessingDetails?.address?.city || "N/A"}
+                            </p>
+                        </div> */}
+
+                        <div className="house-details-item">
+                            <p><strong>House Details:</strong> {blessingDetails?.address?.houseDetails || "N/A"}</p>
+                            <p><strong>Block:</strong> {blessingDetails?.address?.block || "N/A"}</p>
+                            <p><strong>Phase:</strong> {blessingDetails?.address?.phase || "N/A"}</p>
+                            <p><strong>Street:</strong> {blessingDetails?.address?.street || "N/A"}</p>
+                            <p><strong>Barangay:</strong> {blessingDetails?.address?.baranggay === 'Others' ? blessingDetails?.address?.customBarangay || "N/A" : blessingDetails?.address?.baranggay || "N/A"}</p>
+                            <p><strong>District:</strong> {blessingDetails?.address?.district || "N/A"}</p>
+                            <p><strong>City:</strong> {blessingDetails?.address?.city === 'Others' ? blessingDetails?.address?.customCity || "N/A" : blessingDetails?.address?.city || "N/A"}</p>
                         </div>
+
+
                         <div className="house-details-item">
                             <p><strong>Blessing Date:</strong> {blessingDetails?.blessingDate ? new Date(blessingDetails.blessingDate).toLocaleDateString() : "N/A"}</p>
                         </div>
@@ -337,8 +351,8 @@ const HouseBlessingsDetails = () => {
                         <button onClick={() => setShowCancelModal(true)}>Cancel House Blessing</button>
                     </div>
 
-                     {/* Cancellation Modal */}
-                     {showCancelModal && (
+                    {/* Cancellation Modal */}
+                    {showCancelModal && (
                         <div className="modal-overlay">
                             <div className="modal">
                                 <h3>Cancel House Blessing</h3>

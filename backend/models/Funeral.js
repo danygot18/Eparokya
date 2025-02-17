@@ -16,6 +16,40 @@ const FuneralSchema = new mongoose.Schema({
     state: { type: String, required: true },
     zip: { type: String, required: true },
     country: { type: String, required: true },
+
+     //BldgNameTower: { type: String, required: true },
+        // LotBlockPhaseHouseNo: { type: String, required: false },
+        // SubdivisionVillageZone: { type: String, required: false },
+        // Street: { type: String, required: true },
+        // District: { type: String, required: true },
+      //   baranggay: {
+      //     type: String,
+      //     enum: [
+      //         'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+      //         'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
+      //         'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
+      //         'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
+      //         'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
+      //         'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
+      //         'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan', 
+      //         'Others'
+      //     ],
+      //     required: true
+      // },
+      // customBarangay: {
+      //     type: String,
+      //     required: function() {
+      //         return this.address.baranggay === 'Others'; 
+      //     }
+      // },
+      // city: { type: String, enum:['Taguig', 'Others'],  required: true },
+      // customCity: {
+      //     type: String,
+      //     required: function() {
+      //         return this.address.city === 'Others'; 
+      //     }
+      // },
+      
   },
 
   priestVisit: { type: String, enum: ['Oo/Yes', 'Hindi/No'], required: true },

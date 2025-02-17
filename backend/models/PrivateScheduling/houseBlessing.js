@@ -9,10 +9,43 @@ const houseBlessingSchema = new mongoose.Schema({
         lot: { type: String, required: false },
         phase: { type: String, required: true },
         street: { type: String, required: true },
-        baranggay: { type: String, required: true },
+
+         //BldgNameTower: { type: String, required: true },
+        // LotBlockPhaseHouseNo: { type: String, required: false },
+        // SubdivisionVillageZone: { type: String, required: false },
+        // Street: { type: String, required: true },
+        // District: { type: String, required: true },
+        
+        baranggay: {
+            type: String,
+            enum: [
+                'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+                'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
+                'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
+                'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
+                'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
+                'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
+                'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan', 
+                'Others'
+            ],
+            required: true
+        },
+        customBarangay: {
+            type: String,
+            required: function() {
+                return this.address.baranggay === 'Others'; 
+            }
+        },
         district: { type: String, required: true },
-        city: { type: String, required: true },
+        city: { type: String, enum:['Taguig', 'Others'],  required: true },
+        customCity: {
+            type: String,
+            required: function() {
+                return this.address.city === 'Others'; 
+            }
+        },
     },
+    
     blessingDate: { type: Date, required: true },
     blessingTime: { type: String, required: true, },
 
@@ -35,7 +68,7 @@ const houseBlessingSchema = new mongoose.Schema({
     adminRescheduled: {
         date: { type: Date },
         reason: { type: String },
-      },
+    },
 
     comments: [
         {
@@ -51,7 +84,7 @@ const houseBlessingSchema = new mongoose.Schema({
     cancellingReason: {
         user: { type: String, enum: ['Admin, User'] },
         reason: { type: String },
-      },
+    },
 
     priest: { type: mongoose.Schema.Types.ObjectId, ref: 'priest' },
     termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }

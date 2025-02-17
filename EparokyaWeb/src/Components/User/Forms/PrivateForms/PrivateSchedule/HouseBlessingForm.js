@@ -3,6 +3,8 @@ import { Form, Button, Row, Col } from 'react-bootstrap';
 import GuestSidebar from '../../../../GuestSideBar';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+// import phLocations from 'philippines';
+// import { municipalities, searchBaranggay } from 'ph-geo-admin-divisions';
 
 const HouseBlessingForm = () => {
     const [formData, setFormData] = useState({
@@ -23,6 +25,47 @@ const HouseBlessingForm = () => {
     });
 
     const [user, setUser] = useState(null);
+    const [cities] = useState(['Taguig City', 'Others']);
+    const [barangays] = useState([
+        'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+        'Central Signal Village',
+        'Comembo',
+        'East Rembo',
+        'Fort Bonifacio',
+        'Hagonoy',
+        'Ibayo-Tipas',
+        'Katuparan',
+        'Ligid-Tipas',
+        'Lower Bicutan',
+        'Maharlika Village',
+        'Napindan',
+        'New Lower Bicutan',
+        'North Daang Hari',
+        'North Signal Village',
+        'Palingon',
+        'Pembo',
+        'Pinagsama',
+        'Pitogo',
+        'Post Proper Northside',
+        'Post Proper Southside',
+        'Rizal',
+        'San Miguel',
+        'Santa Ana',
+        'South Cembo',
+        'South Daang Hari',
+        'South Signal Village',
+        'Tanyag',
+        'Tuktukan',
+        'Upper Bicutan',
+        'Ususan',
+        'Wawa',
+        'West Rembo',
+        'Western Bicutan',
+        'Others'
+    ]);
+    const [customCity, setCustomCity] = useState('');
+    const [customBarangay, setCustomBarangay] = useState('');
+
     const config = {
         withCredentials: true,
     };
@@ -86,7 +129,15 @@ const HouseBlessingForm = () => {
         console.log('Submission Data:', formData);
 
         try {
-            const submissionData = { ...formData, userId: user?._id };
+            const submissionData = {
+                ...formData,
+                address: {
+                  ...formData.address,
+                  customCity: formData.address.city === 'Others' ? customCity : undefined,
+                  customBarangay: formData.address.baranggay === 'Others' ? customBarangay : undefined,
+                },
+                userId: user?._id,
+              };
             const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/houseBlessingSubmit`,
                 submissionData,
@@ -104,6 +155,32 @@ const HouseBlessingForm = () => {
             toast.error(error.response?.data?.error || 'Submission failed.');
         }
     };
+
+    const handleCityChange = (e) => {
+        const selectedCity = e.target.value;
+        setFormData((prev) => ({
+            ...prev,
+            address: { ...prev.address, city: selectedCity, baranggay: '' },
+        }));
+
+        if (selectedCity === 'Others') {
+            setCustomCity('');
+        }
+    };
+
+    const handleBarangayChange = (e) => {
+        const selectedBarangay = e.target.value;
+        setFormData((prev) => ({
+            ...prev,
+            address: { ...prev.address, baranggay: selectedBarangay },
+        }));
+
+        if (selectedBarangay === 'Others') {
+            setCustomBarangay('');
+        }
+    };
+
+
 
 
     return (
@@ -148,20 +225,71 @@ const HouseBlessingForm = () => {
                         />
                     </Form.Group>
 
+
+                    {/* Address */}
                     <h4 className="mt-4">Address</h4>
-                    {/** Address Fields */}
-                    {['houseDetails', 'block', 'lot', 'phase', 'street', 'baranggay', 'district', 'city'].map(
-                        (field) => (
-                            <Form.Group key={field}>
-                                <Form.Label>{field.charAt(0).toUpperCase() + field.slice(1)}</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.address[field] || ''}
-                                    onChange={(e) => handleChange(e, `address.${field}`)}
-                                />
-                            </Form.Group>
-                        )
+
+                    {['houseDetails', 'block', 'lot', 'phase', 'street', 'district'].map((field) => (
+                        <Form.Group key={field}>
+                            <Form.Label>{field.charAt(0).toUpperCase() + field.slice(1)}</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.address[field] || ''}
+                                onChange={(e) => handleChange(e, `address.${field}`)}
+                            />
+                        </Form.Group>
+                    ))}
+
+                    <Form.Group>
+                        <Form.Label>City</Form.Label>
+                        <Form.Select value={formData.address.city} onChange={handleCityChange}>
+                            <option value="">Select a city</option>
+                            {cities.map((city, index) => (
+                                <option key={index} value={city}>
+                                    {city}
+                                </option>
+                            ))}
+                        </Form.Select>
+                    </Form.Group>
+
+                     {/* Custom City Input */}
+                     {formData.address.city === 'Others' && (
+                        <Form.Group>
+                            <Form.Label>Add City</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={customCity}
+                                onChange={(e) => setCustomCity(e.target.value)}
+                            />
+                        </Form.Group>
                     )}
+
+
+                    {/* Barangay Dropdown */}
+                    <Form.Group>
+                        <Form.Label>Barangay</Form.Label>
+                        <Form.Select value={formData.address.baranggay} onChange={handleBarangayChange}>
+                            <option value="">Select a barangay</option>
+                            {barangays.map((barangay, index) => (
+                                <option key={index} value={barangay}>
+                                    {barangay}
+                                </option>
+                            ))}
+                        </Form.Select>
+                    </Form.Group>
+
+                    {/* Custom Barangay Input */}
+                    {formData.address.baranggay === 'Others' && (
+                        <Form.Group>
+                            <Form.Label>Add Barangay</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={customBarangay}
+                                onChange={(e) => setCustomBarangay(e.target.value)}
+                            />
+                        </Form.Group>
+                    )}
+
 
                     <div className="d-flex justify-content-end mt-4">
                         <Button variant="secondary" className="me-2" onClick={handleClear}>
