@@ -242,11 +242,14 @@ const CounselingDetails = () => {
                             <p><strong>Relationship:</strong> {counselingDetails?.contactPerson?.relationship || "N/A"}</p>
                         </div>
                         <div className="house-details-item">
-                            <p><strong>Address:</strong> {counselingDetails?.address?.block || "N/A"},
-                                {counselingDetails?.address?.lot || "N/A"},
-                                {counselingDetails?.address?.street || "N/A"},
-                                {counselingDetails?.address?.phase || "N/A"},
-                                {counselingDetails?.address?.baranggay || "N/A"}</p>
+                        <p>
+                            <strong>Bldg Name/Tower:</strong> {counselingDetails?.address?.BldgNameTower || "N/A"}</p>
+                            <p><strong>Lot/Block/Phase/House No.:</strong> {counselingDetails?.address?.LotBlockPhaseHouseNo || "N/A"}</p>
+                            <p><strong>Subdivision/Village/Zone:</strong> {counselingDetails?.address?.SubdivisionVillageZone || "N/A"}</p>
+                            <p><strong>Street:</strong> {counselingDetails?.address?.Street || "N/A"}</p>
+                            <p><strong>Barangay:</strong> {counselingDetails?.address?.barangay === 'Others' ? counselingDetails?.address?.customBarangay || "N/A" : counselingDetails?.address?.barangay || "N/A"}</p>
+                            <p><strong>District:</strong> {counselingDetails?.address?.District || "N/A"}</p>
+                            <p><strong>City:</strong> {counselingDetails?.address?.city === 'Others' ? counselingDetails?.address?.customCity || "N/A" : counselingDetails?.address?.city || "N/A"}</p>
                         </div>
                         <div className="house-details-item">
                             <p><strong>Counseling Date:</strong> {counselingDetails?.counselingDate ? new Date(counselingDetails.counselingDate).toLocaleDateString() : "N/A"}</p>

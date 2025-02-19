@@ -39,16 +39,26 @@ exports.submitBaptismForm = async (req, res) => {
         throw new Error('Marriage Certificate is required.');
       }
 
-      if (req.files && req.files.baptismPermit) {
-        Docs.baptismPermit = await uploadToCloudinary(req.files.baptismPermit[0], 'eparokya/baptism/docs');
-      } else {
-        throw new Error('Baptism Permit is required.');
+    //  Addiitonal Requirements
+      if (req.files?.baptismPermit) {
+        additionalDocs.push({
+          baptismPermit: await Promise.all(
+            req.files.baptismPermit.map(file => uploadToCloudinary(file, 'eparokya/baptism/additionalDocs'))
+          ),
+        });
+      }
+
+      if (req.files?.certificateOfNoRecordBaptism) {
+        additionalDocs.push({
+          certificateOfNoRecordBaptism: await Promise.all(
+            req.files.certificateOfNoRecordBaptism.map(file => uploadToCloudinary(file, 'eparokya/baptism/additionalDocs'))
+          ),
+        });
       }
     } catch (error) {
       return res.status(400).json({ success: false, message: error.message });
     }
 
-    // Extract userId from req (assumes authentication middleware adds user info to req)
     const userId = req.user._id;
 
     const baptism = new Baptism({
@@ -62,6 +72,7 @@ exports.submitBaptismForm = async (req, res) => {
       NinongGodparents: NinongGodparents ? JSON.parse(NinongGodparents) : [],
       NinangGodparents: NinangGodparents ? JSON.parse(NinangGodparents) : [],
       Docs,
+      additionalDocs: additionalDocs.length > 0 ? additionalDocs : undefined,
       userId, // Associate the baptism record with the user
     });
 

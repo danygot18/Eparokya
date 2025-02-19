@@ -11,7 +11,15 @@ const WeddingForm = () => {
         weddingDate: "",
         weddingTime: "",
         groomName: "",
-        groomAddress: { street: "", zip: "", city: "" },
+        groomAddress: {
+            BldgNameTower: '',
+            LotBlockPhaseHouseNo: '',
+            SubdivisionVillageZone: '',
+            Street: '',
+            District: '',
+            barangay: '',
+            city: '',
+        },
         groomPhone: "",
         groomBirthDate: "",
         groomOccupation: "",
@@ -19,7 +27,15 @@ const WeddingForm = () => {
         groomFather: "",
         groomMother: "",
         brideName: "",
-        brideAddress: { street: "", zip: "", city: "" },
+        brideAddress: {
+            BldgNameTower: '',
+            LotBlockPhaseHouseNo: '',
+            SubdivisionVillageZone: '',
+            Street: '',
+            District: '',
+            barangay: '',
+            city: '',
+        },
         bridePhone: "",
         brideBirthDate: "",
         brideOccupation: "",
@@ -38,16 +54,79 @@ const WeddingForm = () => {
         GroomMarriageBans: "",
         GroomOrigCeNoMar: "",
         GroomOrigPSA: "",
+        GroomPermitFromtheParishOftheBride: "",
+        GroomChildBirthCertificate: "",
+        GroomOneByOne: "",
         BrideNewBaptismalCertificate: "",
         BrideNewConfirmationCertificate: "",
         BrideMarriageLicense: "",
         BrideMarriageBans: "",
         BrideOrigCeNoMar: "",
         BrideOrigPSA: "",
-        PermitFromtheParishOftheBride: "",
-        ChildBirthCertificate: "",
+        BridePermitFromtheParishOftheBride: "",
+        BrideChildBirthCertificate: "",
+        BrideOneByOne: "",
     });
     const [user, setUser] = useState(null);
+    const config = {
+        withCredentials: true,
+    };
+    const [cities] = useState(['Taguig City', 'Others']);
+    const [barangays] = useState([
+        'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+        'Central Signal Village',
+        'Comembo',
+        'East Rembo',
+        'Fort Bonifacio',
+        'Hagonoy',
+        'Ibayo-Tipas',
+        'Katuparan',
+        'Ligid-Tipas',
+        'Lower Bicutan',
+        'Maharlika Village',
+        'Napindan',
+        'New Lower Bicutan',
+        'North Daang Hari',
+        'North Signal Village',
+        'Palingon',
+        'Pembo',
+        'Pinagsama',
+        'Pitogo',
+        'Post Proper Northside',
+        'Post Proper Southside',
+        'Rizal',
+        'San Miguel',
+        'Santa Ana',
+        'South Cembo',
+        'South Daang Hari',
+        'South Signal Village',
+        'Tanyag',
+        'Tuktukan',
+        'Upper Bicutan',
+        'Ususan',
+        'Wawa',
+        'West Rembo',
+        'Western Bicutan',
+        'Others'
+    ]);
+    const [customCity, setCustomCity] = useState('');
+    const [customBarangay, setCustomBarangay] = useState('');
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAgreed, setIsAgreed] = useState(false);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config);
+                setUser(response.data.user);
+            } catch (error) {
+                console.error('Error fetching user:', error.response ? error.response.data : error.message);
+            }
+        };
+        fetchUser();
+    }, []);
+
     const addNinong = () => {
         setFormData((prev) => ({
             ...prev,
@@ -60,9 +139,6 @@ const WeddingForm = () => {
             Ninang: [...prev.Ninang, { name: "", address: { street: "", zip: "", city: "" } }],
         }));
     };
-
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isAgreed, setIsAgreed] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -104,28 +180,13 @@ const WeddingForm = () => {
 
     const handleFileChange = (e) => {
         const { name, files } = e.target;
-        console.log(`File selected: ${name}`, files[0]); 
+        console.log(`File selected: ${name}`, files[0]);
         const file = e.target.files[0];
         setFormData((prev) => ({
             ...prev,
             images: { ...prev.images, [name]: file },
         }));
     };
-  
-    const config = {
-        withCredentials: true,
-    };
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config);
-                setUser(response.data.user);
-            } catch (error) {
-                console.error('Error fetching user:', error.response ? error.response.data : error.message);
-            }
-        };
-        fetchUser();
-    }, []);
 
     const handleClearFields = () => {
         setFormData({
@@ -142,7 +203,30 @@ const WeddingForm = () => {
         });
     };
 
+    const handleCityChange = (e) => {
+        const selectedCity = e.target.value;
+        setFormData((prev) => ({
+            ...prev,
+            address: { ...prev.address, city: selectedCity, baranggay: '' },
+        }));
 
+        if (selectedCity === 'Others') {
+            setCustomCity('');
+        }
+    };
+
+    const handleBarangayChange = (e) => {
+        const selectedBarangay = e.target.value;
+        setFormData((prev) => ({
+            ...prev,
+            address: { ...prev.address, baranggay: selectedBarangay },
+        }));
+
+        if (selectedBarangay === 'Others') {
+            setCustomBarangay('');
+        }
+    };
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -155,14 +239,18 @@ const WeddingForm = () => {
                 "GroomMarriageBans",
                 "GroomOrigCeNoMar",
                 "GroomOrigPSA",
+                "GroomPermitFromtheParishOftheBride",
+                "GroomChildBirthCertificate",
+                "GroomOneByOne",
                 "BrideNewBaptismalCertificate",
                 "BrideNewConfirmationCertificate",
                 "BrideMarriageLicense",
                 "BrideMarriageBans",
                 "BrideOrigCeNoMar",
                 "BrideOrigPSA",
-                "PermitFromtheParishOftheBride",
-                "ChildBirthCertificate",
+                "BridePermitFromtheParishOftheBride",
+                "BrideChildBirthCertificate",
+                "BrideOneByOne",
             ];
 
             console.log("Form data before submit:", formData);
@@ -175,7 +263,7 @@ const WeddingForm = () => {
                     console.warn(`⚠️ No file found for ${field}`);
                 }
             });
-            
+
             Object.entries(formData).forEach(([key, value]) => {
                 if (key !== 'images' && !imageFields.includes(key)) {
                     if (Array.isArray(value)) {
@@ -235,7 +323,6 @@ const WeddingForm = () => {
                     required
                 />
             </Form.Group>
-
             <Form.Group>
                 <Form.Label>Wedding Date</Form.Label>
                 <Form.Control
@@ -246,8 +333,6 @@ const WeddingForm = () => {
                     required
                 />
             </Form.Group>
-
-
             <Form.Group>
                 <Form.Label>Wedding Time</Form.Label>
                 <Form.Control
@@ -276,25 +361,90 @@ const WeddingForm = () => {
 
                 <Form.Group>
                     <Form.Label>Address</Form.Label>
+
+                    <Form.Label>Building Name/Tower</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Building Name/Tower"
+                        value={formData.groomAddress.BldgNameTower}
+                        onChange={(e) => handleNestedChange(e, "groomAddress", null, "BldgNameTower")}
+                    />
+
+                    <Form.Label>Lot/Block/Phase/House No.</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Lot/Block/Phase/House No."
+                        value={formData.groomAddress.LotBlockPhaseHouseNo}
+                        onChange={(e) => handleNestedChange(e, "groomAddress", null, "LotBlockPhaseHouseNo")}
+                    />
+
+                    <Form.Label>Subdivision/Village/Zone</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Subdivision/Village/Zone"
+                        value={formData.groomAddress.SubdivisionVillageZone}
+                        onChange={(e) => handleNestedChange(e, "groomAddress", null, "SubdivisionVillageZone")}
+                    />
+
+                    <Form.Label>Street</Form.Label>
                     <Form.Control
                         type="text"
                         placeholder="Street"
-                        value={formData.groomAddress.street}
-                        onChange={(e) => handleNestedChange(e, "groomAddress", null, "street")}
+                        value={formData.groomAddress.Street}
+                        onChange={(e) => handleNestedChange(e, "groomAddress", null, "Street")}
                     />
+                    <Form.Label>Barangay</Form.Label>
+                    <Form.Select value={formData.groomAddress.barangay} onChange={handleBarangayChange}>
+                        <option value="">Select Barangay</option>
+                        {barangays.map((barangay) => (
+                            <option key={barangay} value={barangay}>
+                                {barangay}
+                            </option>
+                        ))}
+                    </Form.Select>
+
+                    {formData.groomAddress.barangay === "Others" && (
+                        <>
+                            <Form.Label>Add Barangay</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter your barangay"
+                                value={customBarangay}
+                                onChange={(e) => setCustomBarangay(e.target.value)}
+                            />
+                        </>
+                    )}
+                    <Form.Label>District</Form.Label>
                     <Form.Control
                         type="text"
-                        placeholder="Zip"
-                        value={formData.groomAddress.zip}
-                        onChange={(e) => handleNestedChange(e, "groomAddress", null, "zip")}
+                        placeholder="District"
+                        value={formData.groomAddress.District}
+                        onChange={(e) => handleNestedChange(e, "groomAddress", null, "District")}
                     />
-                    <Form.Control
-                        type="text"
-                        placeholder="City"
-                        value={formData.groomAddress.city}
-                        onChange={(e) => handleNestedChange(e, "groomAddress", null, "city")}
-                    />
+
+                    <Form.Label>City</Form.Label>
+                    <Form.Select value={formData.groomAddress.city} onChange={handleCityChange}>
+                        <option value="">Select City</option>
+                        {cities.map((city) => (
+                            <option key={city} value={city}>
+                                {city}
+                            </option>
+                        ))}
+                    </Form.Select>
+
+                    {formData.groomAddress.city === "Others" && (
+                        <>
+                            <Form.Label>Add City</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter your city"
+                                value={customCity}
+                                onChange={(e) => setCustomCity(e.target.value)}
+                            />
+                        </>
+                    )}
                 </Form.Group>
+
 
                 <Form.Group>
                     <Form.Label>Phone Number</Form.Label>
@@ -380,24 +530,88 @@ const WeddingForm = () => {
 
                 <Form.Group>
                     <Form.Label>Address</Form.Label>
+
+                    <Form.Label>Building Name/Tower</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Building Name/Tower"
+                        value={formData.brideAddress.BldgNameTower}
+                        onChange={(e) => handleNestedChange(e, "brideAddress", null, "BldgNameTower")}
+                    />
+
+                    <Form.Label>Lot/Block/Phase/House No.</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Lot/Block/Phase/House No."
+                        value={formData.brideAddress.LotBlockPhaseHouseNo}
+                        onChange={(e) => handleNestedChange(e, "brideAddress", null, "LotBlockPhaseHouseNo")}
+                    />
+
+                    <Form.Label>Subdivision/Village/Zone</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Subdivision/Village/Zone"
+                        value={formData.brideAddress.SubdivisionVillageZone}
+                        onChange={(e) => handleNestedChange(e, "brideAddress", null, "SubdivisionVillageZone")}
+                    />
+
+                    <Form.Label>Street</Form.Label>
                     <Form.Control
                         type="text"
                         placeholder="Street"
-                        value={formData.brideAddress.street}
-                        onChange={(e) => handleNestedChange(e, "brideAddress", null, "street")}
+                        value={formData.brideAddress.Street}
+                        onChange={(e) => handleNestedChange(e, "brideAddress", null, "Street")}
                     />
+                    <Form.Label>Barangay</Form.Label>
+                    <Form.Select value={formData.brideAddress.barangay} onChange={handleBarangayChange}>
+                        <option value="">Select Barangay</option>
+                        {barangays.map((barangay) => (
+                            <option key={barangay} value={barangay}>
+                                {barangay}
+                            </option>
+                        ))}
+                    </Form.Select>
+
+                    {formData.brideAddress.barangay === "Others" && (
+                        <>
+                            <Form.Label>Add Barangay</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter your barangay"
+                                value={customBarangay}
+                                onChange={(e) => setCustomBarangay(e.target.value)}
+                            />
+                        </>
+                    )}
+                    <Form.Label>District</Form.Label>
                     <Form.Control
                         type="text"
-                        placeholder="Zip"
-                        value={formData.brideAddress.zip}
-                        onChange={(e) => handleNestedChange(e, "brideAddress", null, "zip")}
+                        placeholder="District"
+                        value={formData.brideAddress.District}
+                        onChange={(e) => handleNestedChange(e, "brideAddress", null, "District")}
                     />
-                    <Form.Control
-                        type="text"
-                        placeholder="City"
-                        value={formData.brideAddress.city}
-                        onChange={(e) => handleNestedChange(e, "brideAddress", null, "city")}
-                    />
+
+                    <Form.Label>City</Form.Label>
+                    <Form.Select value={formData.brideAddress.city} onChange={handleCityChange}>
+                        <option value="">Select City</option>
+                        {cities.map((city) => (
+                            <option key={city} value={city}>
+                                {city}
+                            </option>
+                        ))}
+                    </Form.Select>
+
+                    {formData.brideAddress.city === "Others" && (
+                        <>
+                            <Form.Label>Add City</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter your city"
+                                value={customCity}
+                                onChange={(e) => setCustomCity(e.target.value)}
+                            />
+                        </>
+                    )}
                 </Form.Group>
 
                 <Form.Group>
@@ -582,7 +796,6 @@ const WeddingForm = () => {
                         onChange={handleFileChange}
                     />
                 </Form.Group>
-
                 <Form.Group>
                     <Form.Label>Groom's Marriage Bans</Form.Label>
                     <Form.Control
@@ -591,7 +804,6 @@ const WeddingForm = () => {
                         onChange={handleFileChange}
                     />
                 </Form.Group>
-
                 <Form.Group>
                     <Form.Label>Groom's Original CeNoMar</Form.Label>
                     <Form.Control
@@ -600,7 +812,6 @@ const WeddingForm = () => {
                         onChange={handleFileChange}
                     />
                 </Form.Group>
-
                 <Form.Group>
                     <Form.Label>Groom's Original PSA</Form.Label>
                     <Form.Control
@@ -609,7 +820,30 @@ const WeddingForm = () => {
                         onChange={handleFileChange}
                     />
                 </Form.Group>
-
+                <Form.Group>
+                    <Form.Label>Groom's Permit from the Parish of the Bride</Form.Label>
+                    <Form.Control
+                        type="file"
+                        name="GroomPermitFromtheParishOftheBride"
+                        onChange={handleFileChange}
+                    />
+                </Form.Group>
+                <Form.Group>
+                    <Form.Label>Groom's Child Birth Certificate</Form.Label>
+                    <Form.Control
+                        type="file"
+                        name="GroomChildBirthCertificate"
+                        onChange={handleFileChange}
+                    />
+                </Form.Group>
+                <Form.Group>
+                    <Form.Label>Groom's One By One Picture</Form.Label>
+                    <Form.Control
+                        type="file"
+                        name="GroomOneByOne"
+                        onChange={handleFileChange}
+                    />
+                </Form.Group>
 
 
                 <Form.Group>
@@ -636,7 +870,6 @@ const WeddingForm = () => {
                         onChange={handleFileChange}
                     />
                 </Form.Group>
-
                 <Form.Group>
                     <Form.Label>Bride's Marriage Bans</Form.Label>
                     <Form.Control
@@ -645,7 +878,6 @@ const WeddingForm = () => {
                         onChange={handleFileChange}
                     />
                 </Form.Group>
-
                 <Form.Group>
                     <Form.Label>Bride's Original CeNoMar</Form.Label>
                     <Form.Control
@@ -654,7 +886,6 @@ const WeddingForm = () => {
                         onChange={handleFileChange}
                     />
                 </Form.Group>
-
                 <Form.Group>
                     <Form.Label>Bride's Original PSA</Form.Label>
                     <Form.Control
@@ -663,21 +894,27 @@ const WeddingForm = () => {
                         onChange={handleFileChange}
                     />
                 </Form.Group>
-
                 <Form.Group>
-                    <Form.Label>Permit From the Parish Of the Bride</Form.Label>
+                    <Form.Label>Bride's Permit From the Parish Of the Bride</Form.Label>
                     <Form.Control
                         type="file"
-                        name="PermitFromtheParishOftheBride"
+                        name="BridePermitFromtheParishOftheBride"
                         onChange={handleFileChange}
                     />
                 </Form.Group>
-
                 <Form.Group>
-                    <Form.Label>Child's Birth Certificate</Form.Label>
+                    <Form.Label>Bride's Child Birth Certificate</Form.Label>
                     <Form.Control
                         type="file"
-                        name="ChildBirthCertificate"
+                        name="BrideChildBirthCertificate"
+                        onChange={handleFileChange}
+                    />
+                </Form.Group>
+                <Form.Group>
+                    <Form.Label>Bride's One By One Picture</Form.Label>
+                    <Form.Control
+                        type="file"
+                        name="BrideOneByOne"
                         onChange={handleFileChange}
                     />
                 </Form.Group>

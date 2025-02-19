@@ -25,7 +25,11 @@ exports.createCounseling = async (req, res) => {
       purpose,
       contactPerson,
       contactNumber,
-      address,
+      address: {
+        ...address,
+        customBarangay: address.baranggay === 'Others' ? address.customBarangay : undefined,
+        customCity: address.city === 'Others' ? address.customCity : undefined,
+    },
       counselingDate,
       counselingTime,
       userId,

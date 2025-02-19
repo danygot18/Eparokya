@@ -23,7 +23,15 @@ const FuneralForm = () => {
         contactPerson: '',
         relationship: '',
         phone: '',
-        address: { state: '', zip: '', country: '' },
+        address: {
+            BldgNameTower: '',
+            LotBlockPhaseHouseNo: '',
+            SubdivisionVillageZone: '',
+            Street: '',
+            District: '',
+            barangay: '',
+            city: '',
+        },
         priestVisit: '',
         reasonOfDeath: '',
         funeralDate: '',
@@ -36,6 +44,47 @@ const FuneralForm = () => {
         funeralMass: '',
         deathCertificate: [],
     });
+    const [user, setUser] = useState(null);
+    const [cities] = useState(['Taguig City', 'Others']);
+    const [barangays] = useState([
+        'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+        'Central Signal Village',
+        'Comembo',
+        'East Rembo',
+        'Fort Bonifacio',
+        'Hagonoy',
+        'Ibayo-Tipas',
+        'Katuparan',
+        'Ligid-Tipas',
+        'Lower Bicutan',
+        'Maharlika Village',
+        'Napindan',
+        'New Lower Bicutan',
+        'North Daang Hari',
+        'North Signal Village',
+        'Palingon',
+        'Pembo',
+        'Pinagsama',
+        'Pitogo',
+        'Post Proper Northside',
+        'Post Proper Southside',
+        'Rizal',
+        'San Miguel',
+        'Santa Ana',
+        'South Cembo',
+        'South Daang Hari',
+        'South Signal Village',
+        'Tanyag',
+        'Tuktukan',
+        'Upper Bicutan',
+        'Ususan',
+        'Wawa',
+        'West Rembo',
+        'Western Bicutan',
+        'Others'
+    ]);
+    const [customCity, setCustomCity] = useState('');
+    const [customBarangay, setCustomBarangay] = useState('');
 
     // useEffect(() => {
     //     const fetchUser = async () => {
@@ -58,7 +107,6 @@ const FuneralForm = () => {
     //     fetchUser();
     // }, []);
     const config = {
-
         withCredentials: true,
     };
 
@@ -98,25 +146,40 @@ const FuneralForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         if (!isAgreed) {
             toast.error('You must agree to the Terms and Conditions before submitting.');
             return;
         }
-    
+
+        if (formData.address.city === "Others" && !customCity) {
+            toast.error("Please provide a custom city.");
+            return;
+        }
+        if (formData.address.barangay === "Others" && !customBarangay) {
+            toast.error("Please provide a custom barangay.");
+            return;
+        }
+
         try {
             const formDataObj = new FormData();
             if (formData.deathCertificate[0]) {
                 formDataObj.append('deathCertificate', formData.deathCertificate[0]);
             }
-    
-            formDataObj.append('address[state]', formData.address.state);
-            formDataObj.append('address[zip]', formData.address.zip);
-            formDataObj.append('address[country]', formData.address.country);
+
+            formDataObj.append('address[BldgNameTower]', formData.address.BldgNameTower);
+            formDataObj.append('address[LotBlockPhaseHouseNo]', formData.address.LotBlockPhaseHouseNo);
+            formDataObj.append('address[SubdivisionVillageZone]', formData.address.SubdivisionVillageZone);
+            formDataObj.append('address[Street]', formData.address.Street);
+            formDataObj.append('address[District]', formData.address.District);
+
+            // if Others
+            formDataObj.append('address[city]', formData.address.city === "Others" ? customCity : formData.address.city);
+            formDataObj.append('address[barangay]', formData.address.barangay === "Others" ? customBarangay : formData.address.barangay);
+
             formDataObj.append('placingOfPall[by]', formData.placingOfPall.by);
             formDataObj.append('placingOfPall[familyMembers]', JSON.stringify(formData.placingOfPall.familyMembers));
-    
-            // Append other fields
+
             formDataObj.append('name', formData.name);
             formDataObj.append('dateOfDeath', formData.dateOfDeath);
             formDataObj.append('personStatus', formData.personStatus);
@@ -134,20 +197,20 @@ const FuneralForm = () => {
             formDataObj.append('funeralMasstime', formData.funeralMasstime);
             formDataObj.append('funeralMass', formData.funeralMass);
             formDataObj.append('userId', userId);
-    
+
             for (let pair of formDataObj.entries()) {
                 console.log(pair[0] + ': ' + pair[1]);
             }
-    
+
             const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/funeralCreate`,
                 formDataObj,
                 config
             );
-    
+
             toast.success('Form submitted successfully!');
             console.log('Response:', response.data);
-    
+
             setFormData({
                 name: '',
                 dateOfDeath: '',
@@ -156,7 +219,15 @@ const FuneralForm = () => {
                 contactPerson: '',
                 relationship: '',
                 phone: '',
-                address: { state: '', zip: '', country: '' },
+                address: {
+                    BldgNameTower: '',
+                    LotBlockPhaseHouseNo: '',
+                    SubdivisionVillageZone: '',
+                    Street: '',
+                    District: '',
+                    barangay: '',
+                    city: '',
+                },
                 priestVisit: '',
                 reasonOfDeath: '',
                 funeralDate: '',
@@ -169,14 +240,39 @@ const FuneralForm = () => {
                 funeralMass: '',
                 deathCertificate: [],
             });
-    
-            setIsAgreed(false); // Reset checkbox after submission
+
+            setCustomCity('');
+            setCustomBarangay('');
+            setIsAgreed(false);
         } catch (error) {
             console.error('Error submitting form:', error.response ? error.response.data : error.message);
             toast.error('Failed to submit form. Please try again.');
         }
     };
-    
+
+    const handleCityChange = (e) => {
+        const selectedCity = e.target.value;
+        setFormData((prev) => ({
+            ...prev,
+            address: { ...prev.address, city: selectedCity, baranggay: '' },
+        }));
+
+        if (selectedCity === 'Others') {
+            setCustomCity('');
+        }
+    };
+
+    const handleBarangayChange = (e) => {
+        const selectedBarangay = e.target.value;
+        setFormData((prev) => ({
+            ...prev,
+            address: { ...prev.address, barangay: selectedBarangay },
+        }));
+        if (selectedBarangay === 'Others') {
+            setCustomBarangay('');
+        }
+    };
+
 
     return (
         <div className="funeral-form-container">
@@ -253,7 +349,7 @@ const FuneralForm = () => {
                                 />
                             </Form.Group>
                         </Col>
-                        <Col md={4}>
+                        {/* <Col md={4}>
                             <Form.Group controlId="relationship">
                                 <Form.Label>Relasyon sa Namatay</Form.Label>
                                 <Form.Control
@@ -263,7 +359,34 @@ const FuneralForm = () => {
                                     required
                                 />
                             </Form.Group>
+                        </Col> */}
+                        <Col md={4}>
+                            <Form.Group controlId="relationship">
+                                <Form.Label>Relasyon sa Namatay</Form.Label>
+                                <Form.Select
+                                    value={formData.relationship}
+                                    onChange={(e) => handleChange(e, 'relationship')}
+                                    required
+                                >
+                                    <option value="">Pumili ng Relasyon</option>
+                                    <option value="Mother/Nanay">Mother/Nanay</option>
+                                    <option value="Father/Tatay">Father/Tatay</option>
+                                    <option value="Sibling/Kapatid">Sibling/Kapatid</option>
+                                    <option value="Child/Anak">Child/Anak</option>
+                                    <option value="Spouse/Asawa">Spouse/Asawa</option>
+                                    <option value="Stepparent">Stepparent</option>
+                                    <option value="Stepchild">Stepchild</option>
+                                    <option value="In-law">In-law</option>
+                                    <option value="Godparent">Godparent</option>
+                                    <option value="Godchild">Godchild</option>
+                                    <option value="Relative/Kamag-anak">Relative/Kamag-anak</option>
+                                    <option value="Guardian">Guardian</option>
+                                    <option value="Friend/Kaibigan">Friend/Kaibigan</option>
+                                    
+                                </Form.Select>
+                            </Form.Group>
                         </Col>
+
                     </Row>
 
                     <Row>
@@ -278,7 +401,6 @@ const FuneralForm = () => {
                                 />
                             </Form.Group>
                         </Col>
-
 
                         <Col md={6}>
                             <Form.Group controlId="priestVisit">
@@ -296,43 +418,135 @@ const FuneralForm = () => {
                             </Form.Group>
                         </Col>
                     </Row>
+
+                    {/* Address */}
                     <Row>
+                        {/* Building Name/Tower */}
                         <Col md={4}>
-                            <Form.Group controlId="state">
-                                <Form.Label>State</Form.Label>
+                            <Form.Group controlId="BldgNameTower">
+                                <Form.Label>Building Name/Tower</Form.Label>
                                 <Form.Control
                                     type="text"
-                                    value={formData.address.state}
-                                    onChange={(e) => handleChange(e, 'address.state')}
+                                    value={formData.address.BldgNameTower}
+                                    onChange={(e) => handleChange(e, 'address.BldgNameTower')}
+                                />
+                            </Form.Group>
+                        </Col>
+
+                        {/* Lot/Block/Phase/House Number */}
+                        <Col md={4}>
+                            <Form.Group controlId="LotBlockPhaseHouseNo">
+                                <Form.Label>Lot/Block/Phase/House No.</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={formData.address.LotBlockPhaseHouseNo}
+                                    onChange={(e) => handleChange(e, 'address.LotBlockPhaseHouseNo')}
+                                />
+                            </Form.Group>
+                        </Col>
+
+                        {/* Subdivision/Village/Zone */}
+                        <Col md={4}>
+                            <Form.Group controlId="SubdivisionVillageZone">
+                                <Form.Label>Subdivision/Village/Zone</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={formData.address.SubdivisionVillageZone}
+                                    onChange={(e) => handleChange(e, 'address.SubdivisionVillageZone')}
+                                />
+                            </Form.Group>
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <Col md={6}>
+                            <Form.Group controlId="Street">
+                                <Form.Label>Street</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={formData.address.Street}
+                                    onChange={(e) => handleChange(e, 'address.Street')}
                                     required
                                 />
                             </Form.Group>
                         </Col>
 
-                        <Col md={4}>
-                            <Form.Group controlId="zip">
-                                <Form.Label>Zip</Form.Label>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group controlId="barangay">
+                                    <Form.Label>Barangay</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={formData.address.barangay}
+                                        onChange={(e) => handleBarangayChange(e, 'address.barangay')}
+                                        required
+                                    >
+                                        <option value="">Select Barangay</option>
+                                        {barangays.map((barangay, index) => (
+                                            <option key={index} value={barangay}>{barangay}</option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+
+                            {formData.address.barangay === "Others" && (
+                                <Col md={6}>
+                                    <Form.Group controlId="customBarangay">
+                                        <Form.Label>Custom Barangay</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            value={customBarangay}
+                                            onChange={(e) => setCustomBarangay(e.target.value)}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </Col>
+                            )}
+                        </Row>
+
+                        <Col md={6}>
+                            <Form.Group controlId="District">
+                                <Form.Label>District</Form.Label>
                                 <Form.Control
                                     type="text"
-                                    value={formData.address.zip}
-                                    onChange={(e) => handleChange(e, 'address.zip')}
+                                    value={formData.address.District}
+                                    onChange={(e) => handleChange(e, 'address.District')}
                                     required
                                 />
                             </Form.Group>
                         </Col>
+                    </Row>
 
-                        <Col md={4}>
-                            <Form.Group controlId="country">
-                                <Form.Label>Baranggay</Form.Label>
+                    <Row>
+                        <Col md={6}>
+                            <Form.Group controlId="city">
+                                <Form.Label>City</Form.Label>
                                 <Form.Control
-                                    type="text"
-                                    value={formData.address.country}
-                                    onChange={(e) => handleChange(e, 'address.country')}
+                                    as="select"
+                                    value={formData.address.city}
+                                    onChange={(e) => handleCityChange(e, 'address.city')}
                                     required
-                                />
+                                >
+                                    <option value="">Select City</option>
+                                    <option value="Taguig">Taguig</option>
+                                    <option value="Others">Others</option>
+                                </Form.Control>
                             </Form.Group>
                         </Col>
 
+                        {formData.address.city === "Others" && (
+                            <Col md={6}>
+                                <Form.Group controlId="customCity">
+                                    <Form.Label>Add City</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={customCity}
+                                        onChange={(e) => setCustomCity(e.target.value)}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        )}
                     </Row>
 
                     <Row>
@@ -517,7 +731,7 @@ const FuneralForm = () => {
                             onChange={() => setIsAgreed(!isAgreed)}
                         />
                         <label>
-                           Before submitting,click this to open the <span className="terms-link" onClick={() => setIsModalOpen(true)}>Terms and Conditions</span>
+                            Before submitting,click this to open the <span className="terms-link" onClick={() => setIsModalOpen(true)}>Terms and Conditions</span>
                         </label>
                     </div>
 
@@ -534,7 +748,7 @@ const FuneralForm = () => {
                         onAccept={() => { setIsAgreed(true); setIsModalOpen(false); }}
                         termsText={termsAndConditionsText}
                     />
-                    
+
                 </Form>
             </div>
         </div>

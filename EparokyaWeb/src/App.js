@@ -21,6 +21,7 @@ import NavigationForms from './Components/User/NavigationForms';
 // User Forms
 
 import ResourcePage from './Components/ResourcePage';
+import WeddingWall from './Components/WeddingWall/WeddingWall';
 
 import SubmittedForms from './Components/User/Forms/SubmittedFormsNavigation';
 import UserFormGuides from './Components/User/UserFormGuides';
@@ -176,6 +177,7 @@ function App() {
         <Route path="/announcementDetails/:id" element={<AnnouncementDetails />} exact="true" />
 
         <Route path="/resourcePage" element={<ResourcePage />} exact="true" />
+        <Route path="/weddingWall" element={<WeddingWall />} exact="true" />
 
         <Route path="/user/calendar" element={<UserCalendar />} exact="true" />
         <Route path="/user/NavigationForms" element={<NavigationForms />} exact="true" />

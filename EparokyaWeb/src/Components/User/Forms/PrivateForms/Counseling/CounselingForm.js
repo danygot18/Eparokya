@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 import GuestSidebar from '../../../../GuestSideBar';
+import './counselingLayouts/counselingForm.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -10,11 +11,60 @@ const CounselingForm = () => {
         purpose: '',
         contactPerson: { fullName: '', contactNumber: '', relationship: '' },
         contactNumber: '',
-        address: { block: '', lot: '', street: '', phase: '', baranggay: '' },
+        address: {
+            BldgNameTower: '',
+            LotBlockPhaseHouseNo: '',
+            SubdivisionVillageZone: '',
+            Street: '',
+            District: '',
+            barangay: '',
+            city: '',
+        },
         counselingDate: '',
         counselingTime: '',
     });
     const [user, setUser] = useState(null);
+    const [cities] = useState(['Taguig City', 'Others']);
+    const [barangays] = useState([
+        'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+        'Central Signal Village',
+        'Comembo',
+        'East Rembo',
+        'Fort Bonifacio',
+        'Hagonoy',
+        'Ibayo-Tipas',
+        'Katuparan',
+        'Ligid-Tipas',
+        'Lower Bicutan',
+        'Maharlika Village',
+        'Napindan',
+        'New Lower Bicutan',
+        'North Daang Hari',
+        'North Signal Village',
+        'Palingon',
+        'Pembo',
+        'Pinagsama',
+        'Pitogo',
+        'Post Proper Northside',
+        'Post Proper Southside',
+        'Rizal',
+        'San Miguel',
+        'Santa Ana',
+        'South Cembo',
+        'South Daang Hari',
+        'South Signal Village',
+        'Tanyag',
+        'Tuktukan',
+        'Upper Bicutan',
+        'Ususan',
+        'Wawa',
+        'West Rembo',
+        'Western Bicutan',
+        'Others'
+    ]);
+    const [customCity, setCustomCity] = useState('');
+    const [customBarangay, setCustomBarangay] = useState('');
+
     const config = {
         withCredentials: true,
     };
@@ -56,22 +106,79 @@ const CounselingForm = () => {
         });
     };
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     const { fullName, dateOfBirth } = formData.person;
+    //     const { purpose, contactNumber } = formData;
+    //     if (!fullName || !dateOfBirth || !purpose || !contactNumber) {
+    //         toast.error('Please fill out all required fields!');
+    //         return;
+    //     }
+
+    //     try {
+    //         const submissionData = { ...formData, userId: user?._id }; 
+    //         const response = await axios.post(
+    //             `${process.env.REACT_APP_API}/api/v1/counselingSubmit`,
+    //             submissionData,
+    //             config
+    //         );
+    //         toast.success('Counseling form submitted successfully!');
+    //         handleClear();
+    //     } catch (error) {
+    //         console.error('Error submitting counseling form:', error);
+    //         toast.error('Failed to submit the form. Please try again.');
+    //     }
+    // };
+
+    // modified address
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         const { fullName, dateOfBirth } = formData.person;
-        const { purpose, contactNumber } = formData;
+        const { purpose, contactNumber, address } = formData;
+        const { city, barangay } = address;
+
         if (!fullName || !dateOfBirth || !purpose || !contactNumber) {
             toast.error('Please fill out all required fields!');
             return;
         }
-    
+
+        if (!city) {
+            toast.error('Please select a city!');
+            return;
+        }
+        if (city === 'Others' && !customCity) {
+            toast.error('Please specify the city!');
+            return;
+        }
+
+        if (!barangay) {
+            toast.error('Please select a barangay!');
+            return;
+        }
+        if (barangay === 'Others' && !customBarangay) {
+            toast.error('Please specify the barangay!');
+            return;
+        }
+
         try {
-            const submissionData = { ...formData, userId: user?._id }; 
+            const submissionData = {
+                ...formData,
+                address: {
+                    ...address,
+                    city: city === 'Others' ? customCity : city,
+                    barangay: barangay === 'Others' ? customBarangay : barangay,
+                },
+                userId: user?._id,
+            };
+
             const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/counselingSubmit`,
                 submissionData,
                 config
             );
+
             toast.success('Counseling form submitted successfully!');
             handleClear();
         } catch (error) {
@@ -79,14 +186,37 @@ const CounselingForm = () => {
             toast.error('Failed to submit the form. Please try again.');
         }
     };
-    
+
+    const handleCityChange = (e) => {
+        const selectedCity = e.target.value;
+        setFormData((prev) => ({
+            ...prev,
+            address: { ...prev.address, city: selectedCity, barangay: '' },
+        }));
+
+        if (selectedCity === 'Others') {
+            setCustomCity('');
+        }
+    };
+
+    const handleBarangayChange = (e) => {
+        const selectedBarangay = e.target.value;
+        setFormData((prev) => ({
+            ...prev,
+            address: { ...prev.address, barangay: selectedBarangay },
+        }));
+
+        if (selectedBarangay === 'Others') {
+            setCustomBarangay('');
+        }
+    };
 
     return (
-        <Row className="mt-4">
-            <Col md={3}>
+        <div className="counselingForm-container">
+            <div className="counselingForm-sidebar">
                 <GuestSidebar />
-            </Col>
-            <Col md={9}>
+            </div>
+            <div className="counselingForm-content">
                 <Form onSubmit={handleSubmit}>
                     <h4 className="mt-4">Personal Information</h4>
                     <Form.Group>
@@ -141,56 +271,139 @@ const CounselingForm = () => {
                             onChange={(e) => handleChange(e, 'contactPerson.contactNumber')}
                         />
                     </Form.Group>
-                    <Form.Group>
+                    {/* <Form.Group>
                         <Form.Label>Relationship</Form.Label>
                         <Form.Control
                             type="text"
                             value={formData.contactPerson.relationship}
                             onChange={(e) => handleChange(e, 'contactPerson.relationship')}
                         />
+                    </Form.Group> */}
+
+                    <Form.Group controlId="relationship">
+                        <Form.Label>Relationship</Form.Label>
+                        <Form.Select
+                            value={formData.contactPerson.relationship}
+                            onChange={(e) => handleChange(e, 'contactPerson.relationship')}
+                            required
+                        >
+                            <option value="">Select</option>
+                            <option value="Mother/Nanay">Mother/Nanay</option>
+                            <option value="Father/Tatay">Father/Tatay</option>
+                            <option value="Sibling/Kapatid">Sibling/Kapatid</option>
+                            <option value="Child/Anak">Child/Anak</option>
+                            <option value="Spouse/Asawa">Spouse/Asawa</option>
+                            <option value="Stepparent">Stepparent</option>
+                            <option value="Stepchild">Stepchild</option>
+                            <option value="In-law">In-law</option>
+                            <option value="Godparent">Godparent</option>
+                            <option value="Godchild">Godchild</option>
+                            <option value="Relative/Kamag-anak">Relative/Kamag-anak</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="Friend/Kaibigan">Friend/Kaibigan</option>
+
+                        </Form.Select>
                     </Form.Group>
 
                     <h4 className="mt-4">Tirahan</h4>
                     <Form.Group>
-                        <Form.Label>Block (Format: Block No.)
-                        </Form.Label>
+                        <Form.Label>Building Name/Tower</Form.Label>
                         <Form.Control
                             type="text"
-                            value={formData.address.block}
-                            onChange={(e) => handleChange(e, 'address.block')}
+                            value={formData.address.BldgNameTower}
+                            onChange={(e) => handleChange(e, 'address.BldgNameTower')}
                         />
                     </Form.Group>
+
                     <Form.Group>
-                        <Form.Label>Lot (Format: Lot No.)</Form.Label>
+                        <Form.Label>Lot/Block/Phase/House No.</Form.Label>
                         <Form.Control
                             type="text"
-                            value={formData.address.lot}
-                            onChange={(e) => handleChange(e, 'address.lot')}
+                            value={formData.address.LotBlockPhaseHouseNo}
+                            onChange={(e) => handleChange(e, 'address.LotBlockPhaseHouseNo')}
                         />
                     </Form.Group>
+
+                    <Form.Group>
+                        <Form.Label>Subdivision/Village/Zone</Form.Label>
+                        <Form.Control
+                            type="text"
+                            value={formData.address.SubdivisionVillageZone}
+                            onChange={(e) => handleChange(e, 'address.SubdivisionVillageZone')}
+                        />
+                    </Form.Group>
+
                     <Form.Group>
                         <Form.Label>Street</Form.Label>
                         <Form.Control
                             type="text"
-                            value={formData.address.street}
-                            onChange={(e) => handleChange(e, 'address.street')}
-                        />
-
-                        <Form.Label>Phase (Format: Phase No.)</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.address.phase}
-                            onChange={(e) => handleChange(e, 'address.phase')}
-                        />
-
-                        <Form.Label>Baranggay</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.address.baranggay}
-                            onChange={(e) => handleChange(e, 'address.baranggay')}
+                            value={formData.address.Street}
+                            onChange={(e) => handleChange(e, 'address.Street')}
+                            required
                         />
                     </Form.Group>
 
+                    <Form.Group>
+                        <Form.Label>Barangay</Form.Label>
+                        <Form.Control
+                            as="select"
+                            value={formData.address.barangay}
+                            onChange={(e) => handleBarangayChange(e, 'address.barangay')}
+                            required
+                        >
+                            {barangays.map((barangay, index) => (
+                                <option key={index} value={barangay}>{barangay}</option>
+                            ))}
+                        </Form.Control>
+                    </Form.Group>
+
+                    {formData.address.barangay === 'Others' && (
+                        <Form.Group>
+                            <Form.Label>Specify Barangay</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={customBarangay}
+                                onChange={(e) => setCustomBarangay(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+                    )}
+
+                    <Form.Group>
+                        <Form.Label>District</Form.Label>
+                        <Form.Control
+                            type="text"
+                            value={formData.address.District}
+                            onChange={(e) => handleChange(e, 'address.District')}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Form.Group>
+                        <Form.Label>City</Form.Label>
+                        <Form.Control
+                            as="select"
+                            value={formData.address.city}
+                            onChange={(e) => handleCityChange(e, 'address.city')}
+                            required
+                        >
+                            {cities.map((city, index) => (
+                                <option key={index} value={city}>{city}</option>
+                            ))}
+                        </Form.Control>
+                    </Form.Group>
+
+                    {formData.address.city === 'Others' && (
+                        <Form.Group>
+                            <Form.Label>Specify City</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={customCity}
+                                onChange={(e) => setCustomCity(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+                    )}
 
                     <h4 className="mt-4">Schedule</h4>
                     <Form.Group>
@@ -202,9 +415,9 @@ const CounselingForm = () => {
                         />
                     </Form.Group>
                     <Form.Group>
-                        <Form.Label>Oras (Format: 7:00PM)</Form.Label>
+                        <Form.Label>Oras</Form.Label>
                         <Form.Control
-                            type="text"
+                            type="time"
                             value={formData.counselingTime}
                             onChange={(e) => handleChange(e, 'counselingTime')}
                         />
@@ -219,8 +432,8 @@ const CounselingForm = () => {
                         </Button>
                     </div>
                 </Form>
-            </Col>
-        </Row>
+            </div>
+        </div>
     );
 };
 

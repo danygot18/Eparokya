@@ -15,9 +15,9 @@ const BaptismSchema = new mongoose.Schema({
 
   parents: {
     fatherFullName: { type: String, required: false },
-    placeOfFathersBirth: {type: String, required: false},
+    placeOfFathersBirth: { type: String, required: false },
     motherFullName: { type: String, required: false },
-    placeOfMothersBirth: {type: String, required: false},
+    placeOfMothersBirth: { type: String, required: false },
     address: { type: String, required: false },
     marriageStatus: {
       type: String,
@@ -27,34 +27,34 @@ const BaptismSchema = new mongoose.Schema({
   },
 
   ninong: {
-      name: { type: String, required: false },
-      address: { type: String, required: false },
-      religion: { type: String, required: false },  
+    name: { type: String, required: false },
+    address: { type: String, required: false },
+    religion: { type: String, required: false },
   },
 
   ninang: {
-      name: { type: String, required: false },
-      address: { type: String, required: false },
-      religion: { type: String, required: false },
+    name: { type: String, required: false },
+    address: { type: String, required: false },
+    religion: { type: String, required: false },
   },
 
   NinongGodparents: [
     {
-      name: { 
-      type: String, 
-      required: false
-    },
+      name: {
+        type: String,
+        required: false
+      },
     },
 
   ],
 
   NinangGodparents: [
     {
-      name: { 
-        type: String, 
-        required: false 
+      name: {
+        type: String,
+        required: false
       },
-      
+
     },
 
   ],
@@ -70,16 +70,6 @@ const BaptismSchema = new mongoose.Schema({
       },
     },
     marriageCertificate: {
-      public_id: {
-        type: String,
-        required: true,
-      },
-      url: {
-        type: String,
-        required: true,
-      },
-    },
-    baptismPermit: {
       public_id: {
         type: String,
         required: true,
@@ -105,54 +95,35 @@ const BaptismSchema = new mongoose.Schema({
 
   additionalDocs: [
     {
-      baptismPermit:[
+      baptismPermitFrom: {
+        type: String,
+        required: false
+      },
+
+      baptismPermit: [
         {
-            public_id: {
-                type: String,
-                required: false
-            },
-            url: {
-                type: String,
-                required: false
-            },
+          public_id: {
+            type: String,
+            required: false
+          },
+          url: {
+            type: String,
+            required: false
+          },
         }
-    ],
-      baptismPermitFrom: [
-        {
-            public_id: {
-                type: String,
-                required: false
-            },
-            url: {
-                type: String,
-                required: false
-            },
-        }
-    ],
-      certificateOfNoRecord: [
-        {
-            public_id: {
-                type: String,
-                required: false
-            },
-            url: {
-                type: String,
-                required: false
-            },
-        }
-    ],
+      ],
       certificateOfNoRecordBaptism: [
         {
-            public_id: {
-                type: String,
-                required: false
-            },
-            url: {
-                type: String,
-                required: false
-            },
+          public_id: {
+            type: String,
+            required: false
+          },
+          url: {
+            type: String,
+            required: false
+          },
         }
-    ],
+      ],
       createdAt: {
         type: Date,
         default: Date.now,
@@ -173,7 +144,7 @@ const BaptismSchema = new mongoose.Schema({
 
   adminNotes: [
     {
-      priest: {type: mongoose.Schema.Types.ObjectId, ref: 'priest'},
+      priest: { type: mongoose.Schema.Types.ObjectId, ref: 'priest' },
       recordedBy: String,
       bookNumber: String,
       pageNumber: String,
@@ -194,8 +165,8 @@ const BaptismSchema = new mongoose.Schema({
     user: { type: String, enum: ['Admin, User'] },
     reason: { type: String },
   },
-  
-  checklistId: { type: mongoose.Schema.Types.ObjectId, ref: 'BaptismChecklist' }, 
+
+  checklistId: { type: mongoose.Schema.Types.ObjectId, ref: 'BaptismChecklist' },
   termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
 
 });

@@ -1,4 +1,4 @@
-const { WeddingChecklist } = require('../../models/weddingChecklist'); 
+const { WeddingChecklist } = require('../../models/weddingChecklist');
 const { Wedding } = require('../../models/weddings');
 const User = require('../../models/user');
 const mongoose = require('mongoose');
@@ -66,7 +66,7 @@ const uploadToCloudinary = async (file, folder) => {
 //     const ninangArray = Ninang ? JSON.parse(Ninang) : [];
 
 //     const userId = req.user._id;
-    
+
 //     const newWeddingForm = new Wedding({
 //       dateOfApplication,
 //       weddingDate,
@@ -230,15 +230,13 @@ exports.submitWeddingForm = async (req, res) => {
       groomOccupation,
       groomBirthDate,
       groomPhone,
-      groomFather, 
-      groomMother, 
-      brideFather, 
-      brideMother  
+      groomFather,
+      groomMother,
+      brideFather,
+      brideMother
     } = req.body;
 
-    // Log the received body to debug missing fields
 
-    // Validate required fields
     const requiredFields = [
       'dateOfApplication', 'weddingDate', 'weddingTime', 'groomName', 'groomAddress',
       'brideName', 'brideAddress', 'brideReligion', 'brideOccupation', 'brideBirthDate',
@@ -252,7 +250,6 @@ exports.submitWeddingForm = async (req, res) => {
       }
     }
 
-    // Process image uploads
     const images = {};
     const requiredImageFields = [
       "GroomNewBaptismalCertificate",
@@ -262,13 +259,18 @@ exports.submitWeddingForm = async (req, res) => {
       "GroomMarriageBans",
       "GroomOrigCeNoMar",
       "GroomOrigPSA",
+      "GroomPermitFromtheParishOftheBride",
+      "GroomChildBirthCertificate",
+      "GroomOneByOne",
       "BrideNewBaptismalCertificate",
       "BrideNewConfirmationCertificate",
       "BrideMarriageLicense",
       "BrideMarriageBans",
       "BrideOrigCeNoMar",
       "BrideOrigPSA",
-      "PermitFromtheParishOftheBride",
+      "BridePermitFromtheParishOftheBride",
+      "BrideChildBirthCertificate",
+      "BrideOneByOne",
     ];
 
     console.log("Received files:", req.files);
@@ -285,15 +287,31 @@ exports.submitWeddingForm = async (req, res) => {
     }
 
     // Parse JSON fields
-    const groomAddressObject = groomAddress ? JSON.parse(groomAddress) : {};
-    const brideAddressObject = brideAddress ? JSON.parse(brideAddress) : {};
+    // const groomAddressObject = groomAddress ? JSON.parse(groomAddress) : {};
+    // const brideAddressObject = brideAddress ? JSON.parse(brideAddress) : {};
+
+    const groomAddressObject = typeof groomAddress === 'string' ? JSON.parse(groomAddress) : groomAddress;
+    const brideAddressObject = typeof brideAddress === 'string' ? JSON.parse(brideAddress) : brideAddress;
+
+    if (groomAddressObject.baranggay === "Others" && !groomAddressObject.customBarangay) {
+      return res.status(400).json({ message: "Please provide a custom barangay for the groom." });
+    }
+    if (brideAddressObject.baranggay === "Others" && !brideAddressObject.customBarangay) {
+      return res.status(400).json({ message: "Please provide a custom barangay for the bride." });
+    }
+    if (groomAddressObject.city === "Others" && !groomAddressObject.customCity) {
+      return res.status(400).json({ message: "Please provide a custom city for the groom." });
+    }
+    if (brideAddressObject.city === "Others" && !brideAddressObject.customCity) {
+      return res.status(400).json({ message: "Please provide a custom city for the bride." });
+    }
+
+
     const ninongArray = Ninong ? JSON.parse(Ninong) : [];
     const ninangArray = Ninang ? JSON.parse(Ninang) : [];
 
-    // Get authenticated user ID
     const userId = req.user._id;
 
-    // Create new wedding form
     const newWeddingForm = new Wedding({
       dateOfApplication,
       weddingDate,
@@ -312,10 +330,10 @@ exports.submitWeddingForm = async (req, res) => {
       groomOccupation,
       groomBirthDate,
       groomPhone,
-      groomFather, // Convert camelCase to PascalCase
-      groomMother, // Convert camelCase to PascalCase
-      brideFather, // Convert camelCase to PascalCase
-      brideMother, // Convert camelCase to PascalCase
+      groomFather,
+      groomMother,
+      brideFather,
+      brideMother,
       ...images,
       userId,
     });
@@ -338,7 +356,7 @@ exports.submitWeddingForm = async (req, res) => {
 exports.getAllWeddings = async (req, res) => {
   try {
     const weddingList = await Wedding.find({}, 'brideName groomName bridePhone groomPhone weddingDate weddingTime weddingStatus userId')
-  .populate('userId', 'name');
+      .populate('userId', 'name');
 
 
     if (!weddingList || weddingList.length === 0) {
@@ -354,7 +372,7 @@ exports.getAllWeddings = async (req, res) => {
 
 exports.getWeddingById = async (req, res) => {
   try {
-    const { weddingId } = req.params; 
+    const { weddingId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(weddingId)) {
       return res.status(400).json({ message: "Invalid wedding ID format." });
@@ -412,31 +430,31 @@ exports.confirmWedding = async (req, res) => {
 
 exports.declineWedding = async (req, res) => {
   try {
-      const { reason } = req.body; 
-      const userId = req.user._id; 
-      const user = await User.findById(userId);
+    const { reason } = req.body;
+    const userId = req.user._id;
+    const user = await User.findById(userId);
 
-      if (!user) {
-          return res.status(404).json({ message: "User not found." });
-      }
-      const cancellingUser = user.isAdmin ? "Admin" : user.name;
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    const cancellingUser = user.isAdmin ? "Admin" : user.name;
 
-      const wedding = await Wedding.findByIdAndUpdate(
-          req.params.weddingId,
-          {
-              weddingStatus: "Cancelled",
-              cancellingReason: { user: cancellingUser, reason }, 
-          },
-          { new: true }
-      );
-      if (!wedding) {
-          return res.status(404).json({ message: "Wedding not found." });
-      }
+    const wedding = await Wedding.findByIdAndUpdate(
+      req.params.weddingId,
+      {
+        weddingStatus: "Cancelled",
+        cancellingReason: { user: cancellingUser, reason },
+      },
+      { new: true }
+    );
+    if (!wedding) {
+      return res.status(404).json({ message: "Wedding not found." });
+    }
 
-      res.json({ message: "Wedding cancelled successfully", wedding });
+    res.json({ message: "Wedding cancelled successfully", wedding });
   } catch (err) {
-      console.error("Error cancelling wedding:", err);
-      res.status(500).json({ message: "Server error." });
+    console.error("Error cancelling wedding:", err);
+    res.status(500).json({ message: "Server error." });
   }
 };
 
@@ -641,20 +659,20 @@ exports.getMySubmittedForms = async (req, res) => {
 
 exports.getFuneralFormById = async (req, res) => {
   try {
-      const { formId } = req.params; 
+    const { formId } = req.params;
 
-      const weddingForm = await Wedding.findById(formId)
-          .populate('userId', 'name email') 
-          .lean();
+    const weddingForm = await Wedding.findById(formId)
+      .populate('userId', 'name email')
+      .lean();
 
-      if (!weddingForm) {
-          return res.status(404).json({ message: "Wedding form not found." });
-      }
+    if (!weddingForm) {
+      return res.status(404).json({ message: "Wedding form not found." });
+    }
 
-      res.status(200).json(weddingForm);
+    res.status(200).json(weddingForm);
   } catch (error) {
-      console.error("Error fetching wedding form by ID:", error);
-      res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Error fetching wedding form by ID:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 

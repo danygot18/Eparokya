@@ -308,9 +308,17 @@ const FuneralDetails = () => {
                         <div className="house-details-item">
                             <p><strong>Phone:</strong> {funeralDetails?.phone || "N/A"}</p>
                         </div>
+
                         <div className="house-details-item">
-                            <p><strong>Address:</strong> {funeralDetails?.address?.state || "N/A"}, {funeralDetails?.address?.country || "N/A"}, {funeralDetails?.address?.zip || "N/A"}</p>
+                            <p><strong>Bldg Name/Tower:</strong> {funeralDetails?.address?.BldgNameTower || "N/A"}</p>
+                            <p><strong>Lot/Block/Phase/House No.:</strong> {funeralDetails?.address?.LotBlockPhaseHouseNo || "N/A"}</p>
+                            <p><strong>Subdivision/Village/Zone:</strong> {funeralDetails?.address?.SubdivisionVillageZone || "N/A"}</p>
+                            <p><strong>Street:</strong> {funeralDetails?.address?.Street || "N/A"}</p>
+                            <p><strong>Barangay:</strong> {funeralDetails?.address?.barangay === 'Others' ? funeralDetails?.address?.customBarangay || "N/A" : funeralDetails?.address?.barangay || "N/A"}</p>
+                            <p><strong>District:</strong> {funeralDetails?.address?.District || "N/A"}</p>
+                            <p><strong>City:</strong> {funeralDetails?.address?.city === 'Others' ? funeralDetails?.address?.customCity || "N/A" : funeralDetails?.address?.city || "N/A"}</p>                        
                         </div>
+                        
                         <div className="house-details-item">
                             <p><strong>Place of Death:</strong> {funeralDetails?.placeOfDeath || "N/A"}</p>
                         </div>

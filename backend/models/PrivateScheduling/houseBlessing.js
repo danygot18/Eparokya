@@ -4,17 +4,17 @@ const houseBlessingSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     contactNumber: { type: String, required: true },
     address: {
-        houseDetails: { type: String, required: true },
-        block: { type: String, required: false },
-        lot: { type: String, required: false },
-        phase: { type: String, required: true },
-        street: { type: String, required: true },
+        // houseDetails: { type: String, required: true },
+        // block: { type: String, required: false },
+        // lot: { type: String, required: false },
+        // phase: { type: String, required: true },
+        // street: { type: String, required: true },
 
-         //BldgNameTower: { type: String, required: true },
-        // LotBlockPhaseHouseNo: { type: String, required: false },
-        // SubdivisionVillageZone: { type: String, required: false },
-        // Street: { type: String, required: true },
-        // District: { type: String, required: true },
+        BldgNameTower: { type: String, required: false },
+        LotBlockPhaseHouseNo: { type: String, required: false },
+        SubdivisionVillageZone: { type: String, required: false },
+        Street: { type: String, required: true },
+        District: { type: String, required: true },
         
         baranggay: {
             type: String,
@@ -37,7 +37,7 @@ const houseBlessingSchema = new mongoose.Schema({
             }
         },
         district: { type: String, required: true },
-        city: { type: String, enum:['Taguig', 'Others'],  required: true },
+        city: { type: String, enum:['Taguig City', 'Others'],  required: true },
         customCity: {
             type: String,
             required: function() {

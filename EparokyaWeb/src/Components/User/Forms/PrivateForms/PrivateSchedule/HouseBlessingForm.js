@@ -9,21 +9,19 @@ import { toast } from 'react-toastify';
 const HouseBlessingForm = () => {
     const [formData, setFormData] = useState({
         fullName: '',
-        contactNumber: '', // Added missing contact number field
+        contactNumber: '', 
         blessingDate: '',
         blessingTime: '',
         address: {
-            houseDetails: '',
-            block: '',
-            lot: '',
-            phase: '',
-            street: '',
-            baranggay: '',
-            district: '',
+            BldgNameTower: '',
+            LotBlockPhaseHouseNo: '',
+            SubdivisionVillageZone: '',
+            Street: '',
+            District: '',
+            barangay: '',
             city: '',
         },
     });
-
     const [user, setUser] = useState(null);
     const [cities] = useState(['Taguig City', 'Others']);
     const [barangays] = useState([
@@ -229,7 +227,7 @@ const HouseBlessingForm = () => {
                     {/* Address */}
                     <h4 className="mt-4">Address</h4>
 
-                    {['houseDetails', 'block', 'lot', 'phase', 'street', 'district'].map((field) => (
+                    {['BldgNameTower', 'LotBlockPhaseHouseNo', 'SubdivisionVillageZone', 'Street', 'District'].map((field) => (
                         <Form.Group key={field}>
                             <Form.Label>{field.charAt(0).toUpperCase() + field.slice(1)}</Form.Label>
                             <Form.Control

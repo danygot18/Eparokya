@@ -282,7 +282,15 @@ const WeddingDetails = () => {
 
                 {/* Bride Details */}
                 <p><strong>Bride Name:</strong> {weddingDetails?.brideName || "N/A"}</p>
-                <p><strong>Bride Address:</strong> {`${weddingDetails?.brideAddress?.state}, ${weddingDetails?.brideAddress?.zip}, ${weddingDetails?.brideAddress?.city}`}</p>
+                {/* Bride Address */}
+                <h3>Bride Address</h3>
+                <p><strong>Bldg Name/Tower:</strong> {weddingDetails?.brideAddress?.BldgNameTower || "N/A"}</p>
+                <p><strong>Lot/Block/Phase/House No.:</strong> {weddingDetails?.brideAddress?.LotBlockPhaseHouseNo || "N/A"}</p>
+                <p><strong>Subdivision/Village/Zone:</strong> {weddingDetails?.brideAddress?.SubdivisionVillageZone || "N/A"}</p>
+                <p><strong>Street:</strong> {weddingDetails?.brideAddress?.Street || "N/A"}</p>
+                <p><strong>Barangay:</strong> {weddingDetails?.brideAddress?.barangay === 'Others' ? weddingDetails?.brideAddress?.customBarangay || "N/A" : weddingDetails?.brideAddress?.barangay || "N/A"}</p>
+                <p><strong>District:</strong> {weddingDetails?.brideAddress?.District || "N/A"}</p>
+                <p><strong>City:</strong> {weddingDetails?.brideAddress?.city === 'Others' ? weddingDetails?.brideAddress?.customCity || "N/A" : weddingDetails?.brideAddress?.city || "N/A"}</p>
                 <p><strong>Bride Birth Date:</strong> {weddingDetails?.brideBirthDate ? new Date(weddingDetails.brideBirthDate).toLocaleDateString() : "N/A"}</p>
                 <p><strong>Bride Occupation:</strong> {weddingDetails?.brideOccupation || "N/A"}</p>
                 <p><strong>Bride Religion:</strong> {weddingDetails?.brideReligion || "N/A"}</p>
@@ -290,8 +298,15 @@ const WeddingDetails = () => {
 
                 {/* Groom Details */}
                 <p><strong>Groom Name:</strong> {weddingDetails?.groomName || "N/A"}</p>
-                <p><strong>Groom Address:</strong> {`${weddingDetails?.groomAddress?.state}, ${weddingDetails?.groomAddress?.zip}, ${weddingDetails?.groomAddress?.city}`}</p>
-                <p><strong>Groom Phone:</strong> {weddingDetails?.groomPhone || "N/A"}</p>
+                {/* Groom Address */}
+                <h3>Groom Address</h3>
+                <p><strong>Bldg Name/Tower:</strong> {weddingDetails?.groomAddress?.BldgNameTower || "N/A"}</p>
+                <p><strong>Lot/Block/Phase/House No.:</strong> {weddingDetails?.groomAddress?.LotBlockPhaseHouseNo || "N/A"}</p>
+                <p><strong>Subdivision/Village/Zone:</strong> {weddingDetails?.groomAddress?.SubdivisionVillageZone || "N/A"}</p>
+                <p><strong>Street:</strong> {weddingDetails?.groomAddress?.Street || "N/A"}</p>
+                <p><strong>Barangay:</strong> {weddingDetails?.groomAddress?.barangay === 'Others' ? weddingDetails?.groomAddress?.customBarangay || "N/A" : weddingDetails?.groomAddress?.barangay || "N/A"}</p>
+                <p><strong>District:</strong> {weddingDetails?.groomAddress?.District || "N/A"}</p>
+                <p><strong>City:</strong> {weddingDetails?.groomAddress?.city === 'Others' ? weddingDetails?.groomAddress?.customCity || "N/A" : weddingDetails?.groomAddress?.city || "N/A"}</p>                <p><strong>Groom Phone:</strong> {weddingDetails?.groomPhone || "N/A"}</p>
                 <p><strong>Groom Birth Date:</strong> {weddingDetails?.groomBirthDate ? new Date(weddingDetails.groomBirthDate).toLocaleDateString() : "N/A"}</p>
                 <p><strong>Groom Occupation:</strong> {weddingDetails?.groomOccupation || "N/A"}</p>
                 <p><strong>Groom Religion:</strong> {weddingDetails?.groomReligion || "N/A"}</p>
@@ -683,10 +698,10 @@ const WeddingDetails = () => {
           </div>
 
           <div className="button-container">
-                <button onClick={() => navigate(`/adminChat/${weddingDetails?.userId?._id}/${weddingDetails?.userId?.email}`)}>
-                    Go to Admin Chat
-                </button>
-            </div>
+            <button onClick={() => navigate(`/adminChat/${weddingDetails?.userId?._id}/${weddingDetails?.userId?.email}`)}>
+              Go to Admin Chat
+            </button>
+          </div>
 
         </div>
 

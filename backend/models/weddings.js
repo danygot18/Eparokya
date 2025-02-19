@@ -16,9 +16,42 @@ const weddingSchema = mongoose.Schema({
 
   groomName: { type: String, required: true },
   groomAddress: {
-    street: { type: String, required: true },
-    zip: { type: String, required: true },
-    city: { type: String, required: true },
+    // street: { type: String, required: true },
+    // zip: { type: String, required: true },
+    // city: { type: String, required: true },
+    BldgNameTower: { type: String, required: false },
+        LotBlockPhaseHouseNo: { type: String, required: false },
+        SubdivisionVillageZone: { type: String, required: false },
+        Street: { type: String, required: true },
+        District: { type: String, required: true },
+        barangay: {
+          type: String,
+          enum: [
+              'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+              'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
+              'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
+              'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
+              'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
+              'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
+              'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan', 
+              'Others'
+          ],
+          required: true
+      },
+      customBarangay: {
+          type: String,
+          required: function() {
+              return this.address.baranggay === 'Others'; 
+          }
+      },
+      city: { type: String, enum:['Taguig City', 'Others'],  required: true },
+      customCity: {
+          type: String,
+          required: function() {
+              return this.address.city === 'Others'; 
+          }
+      },
+
   },
   groomPhone: { type: String, required: true },
   groomBirthDate: { type: Date, required: true },
@@ -29,42 +62,39 @@ const weddingSchema = mongoose.Schema({
 
   brideName: { type: String, required: true },
   brideAddress: {
-    street: { type: String, required: true },
-    zip: { type: String, required: true },
-    city: { type: String, required: true },
-
-     //BldgNameTower: { type: String, required: true },
-        // LotBlockPhaseHouseNo: { type: String, required: false },
-        // SubdivisionVillageZone: { type: String, required: false },
-        // Street: { type: String, required: true },
-        // District: { type: String, required: true },
-      //   baranggay: {
-      //     type: String,
-      //     enum: [
-      //         'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
-      //         'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
-      //         'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
-      //         'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
-      //         'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
-      //         'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
-      //         'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan', 
-      //         'Others'
-      //     ],
-      //     required: true
-      // },
-      // customBarangay: {
-      //     type: String,
-      //     required: function() {
-      //         return this.address.baranggay === 'Others'; 
-      //     }
-      // },
-      // city: { type: String, enum:['Taguig', 'Others'],  required: true },
-      // customCity: {
-      //     type: String,
-      //     required: function() {
-      //         return this.address.city === 'Others'; 
-      //     }
-      // },
+    
+     BldgNameTower: { type: String, required: false },
+        LotBlockPhaseHouseNo: { type: String, required: false },
+        SubdivisionVillageZone: { type: String, required: false },
+        Street: { type: String, required: true },
+        District: { type: String, required: true },
+        barangay: {
+          type: String,
+          enum: [
+              'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+              'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
+              'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
+              'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
+              'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
+              'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
+              'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan', 
+              'Others'
+          ],
+          required: true
+      },
+      customBarangay: {
+          type: String,
+          required: function() {
+              return this.address.baranggay === 'Others'; 
+          }
+      },
+      city: { type: String, enum:['Taguig City', 'Others'],  required: true },
+      customCity: {
+          type: String,
+          required: function() {
+              return this.address.city === 'Others'; 
+          }
+      },
   },
   bridePhone: { type: String, required: true },
   brideBirthDate: { type: Date, required: true },
@@ -156,6 +186,36 @@ const weddingSchema = mongoose.Schema({
     },
   },
 
+  GroomPermitFromtheParishOftheBride: {
+    public_id: {
+      type: String,
+      required: true,
+    },
+    url: {
+      type: String,
+      required: true,
+    },
+  },
+  GroomChildBirthCertificate: {
+    public_id: {
+      type: String,
+      required: false,
+    },
+    url: {
+      type: String,
+      required: false,
+    },
+  },
+  GroomOneByOne: {
+    public_id: {
+      type: String,
+      required: false,
+    },
+    url: {
+      type: String,
+      required: false,
+    },
+  },
   // Image Fields Bride
   BrideNewBaptismalCertificate: {
     public_id: {
@@ -217,8 +277,7 @@ const weddingSchema = mongoose.Schema({
       required: true,
     },
   },
-
-  PermitFromtheParishOftheBride: {
+  BridePermitFromtheParishOftheBride: {
     public_id: {
       type: String,
       required: true,
@@ -228,8 +287,17 @@ const weddingSchema = mongoose.Schema({
       required: true,
     },
   },
-
-  ChildBirthCertificate: {
+  BrideChildBirthCertificate: {
+    public_id: {
+      type: String,
+      required: false,
+    },
+    url: {
+      type: String,
+      required: false,
+    },
+  },
+  BrideOneByOne: {
     public_id: {
       type: String,
       required: false,

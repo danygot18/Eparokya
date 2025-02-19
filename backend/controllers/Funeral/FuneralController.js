@@ -21,6 +21,10 @@ const validatePlacingOfPall = (placingOfPall) => {
 
 exports.createFuneral = async (req, res) => {
     try {
+        console.log('Funeral Create API hit');
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+        console.log('Request files:', req.files);
+
         const {
             name,
             dateOfDeath,
@@ -44,34 +48,61 @@ exports.createFuneral = async (req, res) => {
             userId,
         } = req.body;
 
-        const address = typeof addressString === 'string' ? JSON.parse(addressString) : addressString;
-        const placingOfPall = typeof placingOfPallString === 'string' ? JSON.parse(placingOfPallString) : placingOfPallString;
+        let address = {}, placingOfPall = {};
+
+        try {
+            console.log('Raw Address:', req.body.address);
+            console.log('Raw Placing of Pall:', req.body.placingOfPall);
+
+            address = typeof req.body.address === 'string' ? JSON.parse(req.body.address) : req.body.address || {};
+            placingOfPall = typeof req.body.placingOfPall === 'string' ? JSON.parse(req.body.placingOfPall) : req.body.placingOfPall || {};
+
+            console.log('Parsed Address:', JSON.stringify(address, null, 2));
+            console.log('Parsed Placing of Pall:', JSON.stringify(placingOfPall, null, 2));
+        } catch (parseError) {
+            console.error('Error parsing address or placingOfPall:', parseError);
+            return res.status(400).json({ message: 'Invalid address or placingOfPall format.' });
+        }
 
         const placingValidation = validatePlacingOfPall(placingOfPall);
         if (!placingValidation.valid) {
             return res.status(400).json({ message: placingValidation.message });
         }
+
         const uploadToCloudinary = async (file, folder) => {
-            if (!file) throw new Error('File is required for upload.');
-            const result = await cloudinary.uploader.upload(file.path, { folder });
-            return { public_id: result.public_id, url: result.secure_url };
+            try {
+                if (!file) throw new Error('No file received for upload.');
+                console.log(`Uploading ${file.originalname} to Cloudinary`);
+                const result = await cloudinary.uploader.upload(file.path, { folder });
+                console.log(`Uploaded: ${result.secure_url}`);
+                return { public_id: result.public_id, url: result.secure_url };
+            } catch (err) {
+                console.error('Cloudinary Upload Error:', JSON.stringify(err, null, 2));
+                throw err;
+            }
         };
 
+        console.log('Checking for deathCertificate file...');
         let deathCertificate;
+
         try {
-            if (req.files && req.files.deathCertificate) {
+            if (req.file) {
+                console.log('Single file upload detected.');
+                deathCertificate = await uploadToCloudinary(req.file, 'eparokya/funeral/docs');
+            } else if (req.files && req.files.deathCertificate) {
+                console.log('Multiple file upload detected.');
                 deathCertificate = await uploadToCloudinary(req.files.deathCertificate[0], 'eparokya/funeral/docs');
             } else {
                 throw new Error('Death Certificate is required.');
             }
-        } catch (error) {
-            return res.status(400).json({ success: false, message: error.message });
+        } catch (uploadError) {
+            console.error('Error uploading death certificate:', JSON.stringify(uploadError, null, 2));
+            return res.status(400).json({ success: false, message: uploadError.message });
         }
+
         if (new Date(funeralDate) < new Date()) {
             return res.status(400).json({ message: "Funeral date cannot be in the past." });
         }
-       
-       
 
         const newFuneral = new Funeral({
             name,
@@ -81,7 +112,11 @@ exports.createFuneral = async (req, res) => {
             contactPerson,
             relationship,
             phone,
-            address,
+            address: {
+                ...address,
+                customBarangay: address.baranggay === 'Others' ? address.customBarangay : undefined,
+                customCity: address.city === 'Others' ? address.customCity : undefined,
+            },
             priestVisit,
             reasonOfDeath,
             funeralDate,
@@ -97,13 +132,27 @@ exports.createFuneral = async (req, res) => {
             userId,
         });
 
+        console.log('Funeral object created:', JSON.stringify(newFuneral, null, 2));
+
         await newFuneral.save();
+        console.log('Funeral record saved successfully');
+
         res.status(201).json({ message: 'Funeral record created successfully', funeral: newFuneral });
+
     } catch (error) {
-        console.error('Error creating funeral record:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error creating funeral record:', JSON.stringify(error, null, 2));
+        console.error('Error keys:', Object.keys(error));
+
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Unknown error',
+            errorDetails: JSON.stringify(error, null, 2) || 'No error details',
+            stack: error.stack || 'No stack trace'
+        });
     }
 };
+
+
 
 
 exports.getFunerals = async (req, res) => {
@@ -182,7 +231,7 @@ exports.confirmFuneral = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(funeralId)) {
             return res.status(400).json({ message: "Invalid funeral ID format." });
         }
-        const funeral = await Funeral.findById(funeralId);          
+        const funeral = await Funeral.findById(funeralId);
         if (!funeral) {
             return res.status(404).json({ message: "Funeral not found." });
         }
@@ -214,27 +263,27 @@ exports.confirmFuneral = async (req, res) => {
 // decline funeral with comment
 exports.declineFuneral = async (req, res) => {
     try {
-        const { reason } = req.body; 
-        const userId = req.user._id; 
+        const { reason } = req.body;
+        const userId = req.user._id;
         const user = await User.findById(userId);
-  
+
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
         const cancellingUser = user.isAdmin ? "Admin" : user.name;
-  
+
         const funeral = await Funeral.findByIdAndUpdate(
             req.params.funeralId,
             {
                 funeralStatus: "Cancelled",
-                cancellingReason: { user: cancellingUser, reason }, 
+                cancellingReason: { user: cancellingUser, reason },
             },
             { new: true }
         );
         if (!funeral) {
             return res.status(404).json({ message: "Funeral not found." });
         }
-  
+
         res.json({ message: "Funeral cancelled successfully", funeral });
     } catch (err) {
         console.error("Error cancelling funeral:", err);
@@ -380,32 +429,32 @@ exports.createComment = async (req, res) => {
 
 exports.createPriestComment = async (req, res) => {
     try {
-      const { funeralId } = req.params;
-      const { priestId } = req.body; 
-  
-      if (!priestId) {
-        return res.status(400).json({ message: "Priest ID is required." });
-      }
-      if (!mongoose.Types.ObjectId.isValid(funeralId) || !mongoose.Types.ObjectId.isValid(priestId)) {
-        return res.status(400).json({ message: "Invalid ID format." });
-      }
-      const funeral = await Funeral.findById(funeralId);
-      if (!funeral) {
-        return res.status(404).json({ message: "Funeral not found." });
-      }
-      const priest = await Priest.findById(priestId);
-      if (!priest) {
-        return res.status(404).json({ message: "Priest not found." });
-      }
-      funeral.priest = priest._id;
-      await funeral.save();
-  
-      res.status(200).json({ message: "Priest assigned successfully.", priest });
+        const { funeralId } = req.params;
+        const { priestId } = req.body;
+
+        if (!priestId) {
+            return res.status(400).json({ message: "Priest ID is required." });
+        }
+        if (!mongoose.Types.ObjectId.isValid(funeralId) || !mongoose.Types.ObjectId.isValid(priestId)) {
+            return res.status(400).json({ message: "Invalid ID format." });
+        }
+        const funeral = await Funeral.findById(funeralId);
+        if (!funeral) {
+            return res.status(404).json({ message: "Funeral not found." });
+        }
+        const priest = await Priest.findById(priestId);
+        if (!priest) {
+            return res.status(404).json({ message: "Priest not found." });
+        }
+        funeral.priest = priest._id;
+        await funeral.save();
+
+        res.status(200).json({ message: "Priest assigned successfully.", priest });
     } catch (error) {
-      console.error("Error assigning priest:", error);
-      res.status(500).json({ success: false, error: error.message });
+        console.error("Error assigning priest:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
-  };
+};
 exports.updateFuneralDate = async (req, res) => {
     try {
         const { funeralId } = req.params;
@@ -488,24 +537,24 @@ exports.getConfirmedFunerals = async (req, res) => {
 // For user fetching
 exports.getMySubmittedForms = async (req, res) => {
     try {
-      const userId = req.user.id;
-      console.log("Authenticated User ID:", userId);
-  
-      const forms = await Funeral.find({ userId: userId });
-  
-      if (!forms.length) {
-        return res.status(404).json({ message: "No forms found for this user." });
-      }
-  
-      res.status(200).json({ forms });
+        const userId = req.user.id;
+        console.log("Authenticated User ID:", userId);
+
+        const forms = await Funeral.find({ userId: userId });
+
+        if (!forms.length) {
+            return res.status(404).json({ message: "No forms found for this user." });
+        }
+
+        res.status(200).json({ forms });
     } catch (error) {
-      console.error("Error fetching submitted funeral forms:", error);
-      res.status(500).json({ message: "Failed to fetch submitted funeral forms." });
+        console.error("Error fetching submitted funeral forms:", error);
+        res.status(500).json({ message: "Failed to fetch submitted funeral forms." });
     }
-  };
-  
-  // details 
-  exports.getFuneralFormById = async (req, res) => {
+};
+
+// details 
+exports.getFuneralFormById = async (req, res) => {
     try {
         const { formId } = req.params; // Extract formId from URL
 

@@ -14,9 +14,12 @@ router.post(
     { name: 'birthCertificate', maxCount: 1 },
     { name: 'marriageCertificate', maxCount: 1 },
     { name: 'baptismPermit', maxCount: 1 },
+    { name: 'certificateOfNoRecordBaptism', maxCount: 1 }, 
   ]),
-  isAuthenticatedUser, BaptismController.submitBaptismForm
+  isAuthenticatedUser,
+  BaptismController.submitBaptismForm
 );
+
 
 router.get('/mySubmittedForms', isAuthenticatedUser, BaptismController.getMySubmittedForms);
 router.get('/confirmedBaptism', BaptismController.getConfirmedBaptisms);

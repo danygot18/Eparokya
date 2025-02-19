@@ -10,49 +10,62 @@ const counselingSchema = new mongoose.Schema({
     contactPerson: {
         fullName: { type: String, required: false },
         contactNumber: { type: String, required: false },
-        relationship: { type: String, required: false },
+        relationship: { type: String, enum: [
+            'Mother/Nanay', 
+            'Father/Tatay', 
+            'Child/Anak', 
+            'Sibling/Kapatid', 
+            'Spouse/Asawa', 
+            'Stepparent', 
+            'Stepchild', 
+            'In-law',
+            'Godparent',
+            'Godchild', 
+            'Relative/Kamag-anak', 
+            'Guardian', 
+            'Friend/Kaibigan'], required: true },
     },
 
     contactNumber: { type: String, required: true },
     address: {
-        block: { type: String, required: false },
-        lot: { type: String, required: false },
-        street: { type: String, required: false },
-        phase: { type: String, required: false },
-        baranggay: { type: String, required: false },
+        // block: { type: String, required: false },
+        // lot: { type: String, required: false },
+        // street: { type: String, required: false },
+        // phase: { type: String, required: false },
+        // baranggay: { type: String, required: false },
 
-         //BldgNameTower: { type: String, required: true },
-        // LotBlockPhaseHouseNo: { type: String, required: false },
-        // SubdivisionVillageZone: { type: String, required: false },
-        // Street: { type: String, required: true },
-        // District: { type: String, required: true },
-      //   baranggay: {
-      //     type: String,
-      //     enum: [
-      //         'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
-      //         'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
-      //         'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
-      //         'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
-      //         'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
-      //         'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
-      //         'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan', 
-      //         'Others'
-      //     ],
-      //     required: true
-      // },
-      // customBarangay: {
-      //     type: String,
-      //     required: function() {
-      //         return this.address.baranggay === 'Others'; 
-      //     }
-      // },
-      // city: { type: String, enum:['Taguig', 'Others'],  required: true },
-      // customCity: {
-      //     type: String,
-      //     required: function() {
-      //         return this.address.city === 'Others'; 
-      //     }
-      // },
+        BldgNameTower: { type: String, required: false },
+        LotBlockPhaseHouseNo: { type: String, required: false },
+        SubdivisionVillageZone: { type: String, required: false },
+        Street: { type: String, required: true },
+        District: { type: String, required: true },
+        barangay: {
+          type: String,
+          enum: [
+              'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+              'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
+              'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
+              'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
+              'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
+              'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
+              'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan', 
+              'Others'
+          ],
+          required: true
+      },
+      customBarangay: {
+          type: String,
+          required: function() {
+              return this.address.baranggay === 'Others'; 
+          }
+      },
+      city: { type: String, enum:['Taguig City', 'Others'],  required: true },
+      customCity: {
+          type: String,
+          required: function() {
+              return this.address.city === 'Others'; 
+          }
+      },
     },
 
     counselingDate: { type: Date, required: false },
