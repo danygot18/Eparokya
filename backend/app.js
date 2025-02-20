@@ -68,7 +68,7 @@ app.use("/api/v1/ministryCategory", require("./routes/ministryCategory"));
 
 app.use("/api/v1/", require("./routes/PrayerWall/prayerWall"));
 app.use("/api/v1", require("./routes/PrayerWall/prayerRequest"));
-
+app.use("/api/v1", require("./routes/PrayerWall/prayerRequestIntention"));
 // Announcements & Posts
 app.use("/api/v1", require("./routes/Announcement/announcement"));
 app.use("/api/v1", require("./routes/Announcement/announcementCategory"));

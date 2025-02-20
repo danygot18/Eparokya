@@ -47,7 +47,7 @@ const PrayerWall = () => {
 
         const { prayers, total } = response.data;
 
-        setPrayers(prayers); // Ensure `includedByUser` is in state
+        setPrayers(prayers); 
         setTotalPrayers(total);
         setLoading(false);
       } catch (error) {

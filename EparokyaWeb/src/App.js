@@ -60,6 +60,7 @@ import SubmittedPrayerWallList from './Components/User/PrayerWall/SubmittedPraye
 
 // User Navigations
 import PrayerWall from './Components/User/PrayerWall/PrayerWall';
+import PrayerRequestIntention from './Components/User/PrayerWall/PrayerRequestIntention';
 import AnnouncementDetails from './Components/AnnouncementDetails';
 
 
@@ -220,7 +221,7 @@ function App() {
         {/* <Route path="/user/UserWeddingChecklist" element={<UserWeddingCheklist />} exact="true" /> */}
 
         <Route path="/user/prayerWall" element={<PrayerWall />} exact="true" />
-
+        <Route path="/user/prayerRequestIntention" element={<PrayerRequestIntention />} exact="true" />
 
         {/* Admin 
         need mo itago yung dashboard from the user*/}

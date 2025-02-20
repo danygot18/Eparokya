@@ -143,7 +143,7 @@ const GuestSideBar = () => {
           </Link>
         </li>
 
-
+      
         <li style={styles.menuItem}>
           <Link
             to="/user/calendar"
@@ -158,10 +158,10 @@ const GuestSideBar = () => {
 
         <li style={styles.menuItem}>
           <Link
-            to="/user/weddingWall"
+            to="/weddingWall"
             style={{
               ...styles.link,
-              ...(location.pathname === "/user/weddingWall" ? styles.activeLink : {}),
+              ...(location.pathname === "/weddingWall" ? styles.activeLink : {}),
             }}
           >
             <FaPray style={styles.icon} /> Wedding
