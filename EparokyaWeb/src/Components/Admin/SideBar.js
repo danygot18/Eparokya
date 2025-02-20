@@ -4,6 +4,27 @@ import Card from "react-bootstrap/Card";
 import Nav from "react-bootstrap/Nav";
 import Dropdown from "react-bootstrap/Dropdown";
 
+// Material UI Icons
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import LiveTvIcon from '@mui/icons-material/LiveTv';
+import PersonIcon from '@mui/icons-material/Person';
+import CategoryIcon from '@mui/icons-material/Category';
+import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
+import HistoryIcon from '@mui/icons-material/History';
+import FeedbackIcon from '@mui/icons-material/Feedback';
+import ForumIcon from '@mui/icons-material/Forum';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ListAltIcon from '@mui/icons-material/ListAlt';
+import EventIcon from '@mui/icons-material/Event';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import AnnouncementIcon from '@mui/icons-material/Announcement';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import LockIcon from '@mui/icons-material/Lock';
+import CelebrationIcon from '@mui/icons-material/Celebration';
+
 const SideBar = () => {
   return (
     <Card className="sidebar-card" style={styles.sidebarCard}>
@@ -12,102 +33,128 @@ const SideBar = () => {
           Admin Panel
         </Card.Title>
         <Nav className="flex-column">
-          <Nav.Item>
+          <div style={styles.navItem}>
             <Link to="/admin/dashboard" className="sidebar-link" style={styles.sidebarLink}>
+              <DashboardIcon style={styles.icon} />
               Dashboard
             </Link>
-          </Nav.Item>
-          <Nav.Item>
+          </div>
+          <div style={styles.navItem}>
             <Link to="/admin/users" className="sidebar-link" style={styles.sidebarLink}>
+              <PeopleIcon style={styles.icon} />
               Users
             </Link>
-            <Nav.Item>
-              <Nav.Item>
-                <Link to="/admin/live" className="sidebar-link" style={styles.sidebarLink}>
-                  Live
-                </Link>
-              </Nav.Item>
-              <Dropdown>
-                <Dropdown.Toggle variant="link" className="sidebar-link" style={styles.sidebarLink}>
-                  Parish Priest
-                </Dropdown.Toggle>
-
-                <Dropdown.Menu>
-                  <Dropdown.Item>
-                    <Link to="/admin/create/priest" className="sidebar-link" style={styles.sidebarLink}>
-                      Add Parish Priests
-                    </Link>
-                  </Dropdown.Item>
-
-                  <Dropdown.Item>
-                    <Link to="/admin/priestList" className="sidebar-link" style={styles.sidebarLink}>
-                      Parish Priests List
-                    </Link>
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-
-
-
-              </Dropdown>
-            </Nav.Item>
-
-
-
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/admin/ministryCategory/create" className="sidebar-link" style={styles.sidebarLink}>
-              Ministry Categories
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/live" className="sidebar-link" style={styles.sidebarLink}>
+              <LiveTvIcon style={styles.icon} />
+              Live
             </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/admin/calendar" className="sidebar-link" style={styles.sidebarLink}>
-              Member Directory
-            </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/admin/calendar" className="sidebar-link" style={styles.sidebarLink}>
-              Member History
-            </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/admin/calendar" className="sidebar-link" style={styles.sidebarLink}>
-              Feedback Form
-            </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/admin/prayerReview" className="sidebar-link" style={styles.sidebarLink}>
-              Prayer Wall Requests
-            </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/admin/calendar" className="sidebar-link" style={styles.sidebarLink}>
-              Calendar
-            </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/admin/postlist" className="sidebar-link" style={styles.sidebarLink}>
-              Post List
-            </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/admin/eventpostlist" className="sidebar-link" style={styles.sidebarLink}>
-              Event Post List
-            </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/admin/adminDate" className="sidebar-link" style={styles.sidebarLink}>
-              Ministry Inventory
-            </Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Link to="/admin/adminDate" className="sidebar-link" style={styles.sidebarLink}>
-              Set Available Date
-            </Link>
-          </Nav.Item>
-
-          <Nav.Item>
+          </div>
+          <div style={styles.navItem}>
             <Dropdown>
               <Dropdown.Toggle variant="link" className="sidebar-link" style={styles.sidebarLink}>
+                <PersonIcon style={styles.icon} />
+                Parish Priest
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item>
+                  <Link to="/admin/create/priest" className="sidebar-link" style={styles.sidebarLink}>
+                    Add Parish Priests
+                  </Link>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <Link to="/admin/priestList" className="sidebar-link" style={styles.sidebarLink}>
+                    Parish Priests List
+                  </Link>
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/ministryCategory/create" className="sidebar-link" style={styles.sidebarLink}>
+              <CategoryIcon style={styles.icon} />
+              Ministry Categories
+            </Link>
+          </div>
+          <div style={styles.navItem}>
+            <Dropdown>
+              <Dropdown.Toggle variant="link" className="sidebar-link" style={styles.sidebarLink}>
+                <PermContactCalendarIcon style={styles.icon} />
+                Member Directory
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item>
+                  <Link to="/admin/memberBatchYear" className="sidebar-link" style={styles.sidebarLink}>
+                    Add Member Batch Year
+                  </Link>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <Link to="/admin/memberDirectory/list" className="sidebar-link" style={styles.sidebarLink}>
+                    Member Directory List
+                  </Link>
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/calendar" className="sidebar-link" style={styles.sidebarLink}>
+              <HistoryIcon style={styles.icon} />
+              Member History
+            </Link>
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/calendar" className="sidebar-link" style={styles.sidebarLink}>
+              <FeedbackIcon style={styles.icon} />
+              Feedback Form
+            </Link>
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/prayerReview" className="sidebar-link" style={styles.sidebarLink}>
+              <ForumIcon style={styles.icon} />
+              Prayer Wall Requests
+            </Link>
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/prayerIntentionList" className="sidebar-link" style={styles.sidebarLink}>
+              <AssignmentIcon style={styles.icon} />
+              Prayer Requests
+            </Link>
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/calendar" className="sidebar-link" style={styles.sidebarLink}>
+              <CalendarTodayIcon style={styles.icon} />
+              Calendar
+            </Link>
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/postlist" className="sidebar-link" style={styles.sidebarLink}>
+              <ListAltIcon style={styles.icon} />
+              Post List
+            </Link>
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/eventpostlist" className="sidebar-link" style={styles.sidebarLink}>
+              <EventIcon style={styles.icon} />
+              Event Post List
+            </Link>
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/adminDate" className="sidebar-link" style={styles.sidebarLink}>
+              <InventoryIcon style={styles.icon} />
+              Ministry Inventory
+            </Link>
+          </div>
+          <div style={styles.navItem}>
+            <Link to="/admin/adminDate" className="sidebar-link" style={styles.sidebarLink}>
+              <DateRangeIcon style={styles.icon} />
+              Set Available Date
+            </Link>
+          </div>
+          <div style={styles.navItem}>
+            <Dropdown>
+              <Dropdown.Toggle variant="link" className="sidebar-link" style={styles.sidebarLink}>
+                <AnnouncementIcon style={styles.icon} />
                 Announcements
               </Dropdown.Toggle>
               <Dropdown.Menu>
@@ -138,11 +185,11 @@ const SideBar = () => {
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-          </Nav.Item>
-
-          <Nav.Item>
+          </div>
+          <div style={styles.navItem}>
             <Dropdown>
               <Dropdown.Toggle variant="link" className="sidebar-link" style={styles.sidebarLink}>
+                <LibraryBooksIcon style={styles.icon} />
                 Resource Page
               </Dropdown.Toggle>
               <Dropdown.Menu>
@@ -163,12 +210,11 @@ const SideBar = () => {
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-          </Nav.Item>
-
-          {/* Private Forms List */}
-          <Nav.Item>
+          </div>
+          <div style={styles.navItem}>
             <Dropdown>
               <Dropdown.Toggle variant="link" className="sidebar-link" style={styles.sidebarLink}>
+                <LockIcon style={styles.icon} />
                 Private Forms List
               </Dropdown.Toggle>
               <Dropdown.Menu>
@@ -202,18 +248,13 @@ const SideBar = () => {
                     House Blessings
                   </Link>
                 </Dropdown.Item>
-                {/* <Dropdown.Item>
-                  <Link to="/admin/streetMassList" className="sidebar-link" style={styles.sidebarLink}>
-                   Street Mass
-                  </Link>
-                </Dropdown.Item> */}
               </Dropdown.Menu>
             </Dropdown>
-          </Nav.Item>
-
-          <Nav.Item>
+          </div>
+          <div style={styles.navItem}>
             <Dropdown>
               <Dropdown.Toggle variant="link" className="sidebar-link" style={styles.sidebarLink}>
+                <CelebrationIcon style={styles.icon} />
                 Mass Forms List
               </Dropdown.Toggle>
               <Dropdown.Menu>
@@ -229,9 +270,15 @@ const SideBar = () => {
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-          </Nav.Item>
+          </div>
         </Nav>
       </Card.Body>
+      <style>{`
+        .sidebar-link:hover {
+          background-color: #e9ecef;
+          border-radius: 5px;
+        }
+      `}</style>
     </Card>
   );
 };
@@ -239,7 +286,7 @@ const SideBar = () => {
 const styles = {
   sidebarCard: {
     width: "250px",
-    minHeight: "100%",
+    minHeight: "100vh",
     backgroundColor: "#f8f9fa",
     border: "1px solid #ddd",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
@@ -251,12 +298,20 @@ const styles = {
     fontSize: "1.2rem",
   },
   sidebarLink: {
-    display: "block",
+    display: "flex",
+    alignItems: "center",
     padding: "10px 15px",
     color: "#333",
     textDecoration: "none",
     fontWeight: "500",
     transition: "background-color 0.3s ease",
+  },
+
+  icon: {
+    marginRight: "8px",
+  },
+  navItem: {
+    marginBottom: "10px",
   },
 };
 

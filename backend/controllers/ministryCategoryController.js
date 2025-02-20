@@ -1,4 +1,5 @@
 const ministryCategory  = require('../models/ministryCategory'); 
+const CustomEvent = require('../models/customEvent');
 const User  = require('../models/user'); 
 
 const mongoose = require('mongoose');
@@ -101,5 +102,21 @@ exports.updateMinistryCategory = async (req, res) => {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Server error", error });
+    }
+  };
+
+  exports.getMinistryEvents = async (req, res) => {
+    try {
+      const { ministryId } = req.params;
+  
+      if (!ministryId) {
+        return res.status(400).json({ message: "Ministry ID is required." });
+      }
+  
+      const events = await CustomEvent.find({ ministryCategory: ministryId });
+  
+      res.status(200).json(events);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch ministry events", error: error.message });
     }
   };

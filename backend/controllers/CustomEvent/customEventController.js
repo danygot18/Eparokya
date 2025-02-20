@@ -11,7 +11,7 @@ exports.getAllCustomEvents = async (req, res) => {
 
 exports.addCustomEvent = async (req, res) => {
   try {
-    const { title, customeventDate } = req.body;
+    const { title, customeventDate, ministryCategory } = req.body;
 
     if (!title || !customeventDate) {
       return res.status(400).json({ message: "Title and event date are required." });
@@ -20,6 +20,7 @@ exports.addCustomEvent = async (req, res) => {
       title,
       description: req.body.description,
       customeventDate,
+      ministryCategory,
     });
 
     res.status(201).json(newEvent);

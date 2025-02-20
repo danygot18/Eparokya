@@ -83,6 +83,7 @@ app.use("/api/v1", require("./routes/Funeral"));
 app.use("/api/v1", require("./routes/counseling"));
 
 app.use("/api/v1", require("./routes/Announcement/AnnouncementComment"));
+app.use("/api/v1", require("./routes/Announcement/ministryAnnouncement"));
 app.use("/api/v1", require("./routes/post"));
 
 // Events & Scheduling
@@ -93,8 +94,6 @@ app.use("/api/v1", require("./routes/PrivateScheduling/houseBlessing"));
 // Resources
 app.use("/api/v1", require("./routes/Resources/resourceCategory"));
 app.use("/api/v1", require("./routes/Resources/resource"));
-
-
 
 app.use("/api/v1", require("./routes/Members/memberYearBatchCategory"));
 app.use("/api/v1", require("./routes/Members/members"));

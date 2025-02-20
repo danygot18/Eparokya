@@ -8,7 +8,7 @@ router.post('/prayerRequestIntention/submit', isAuthenticatedUser, prayerRequest
 router.get('/getAllPrayerRequestIntention', prayerRequestIntentionController.getAllPrayerRequestIntention);
 router.get('/getPrayerRequestIntentionById/:prayerIntentionId', prayerRequestIntentionController.getPrayerRequestIntentionById);
 router.put('/updatePrayerRequestIntention/:prayerIntentionId', prayerRequestIntentionController.updatePrayerRequestIntention);
-router.patch('/markPrayerRequestIntentionAsDone/:prayerIntentionId', prayerRequestIntentionController.markPrayerRequestIntentionAsDone);
+router.post('/markPrayerRequestIntentionAsDone/:prayerIntentionId', prayerRequestIntentionController.markPrayerRequestIntentionAsDone);
 router.delete('/deletePrayerRequestIntention/:prayerIntentionId', prayerRequestIntentionController.deletePrayerRequestIntention);
 
 module.exports = router;

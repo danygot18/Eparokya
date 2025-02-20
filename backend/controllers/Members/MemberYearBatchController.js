@@ -23,15 +23,15 @@ const MemberYearBatchCategory = require('../../models/Members/memberYearBatchCat
 
 exports.createCategory = async (req, res) => {
     try {
-        const { name, yearRange } = req.body;
+        const {  yearRange } = req.body;
         const { startYear, endYear } = yearRange || {};
 
-        if (!name || !startYear || !endYear) {
+        if ( !startYear || !endYear) {
             return res.status(400).json({ message: 'All fields are required.' });
         }
 
         const newCategory = new MemberYearBatchCategory({
-            name,
+            
             yearRange: { startYear, endYear }
         });
 
@@ -46,7 +46,7 @@ exports.createCategory = async (req, res) => {
 exports.getAllCategories = async (req, res) => {
     try {
         const categories = await MemberYearBatchCategory.find();
-        console.log(categories);  // Log the categories to ensure you're getting the data
+        console.log(categories);  
         res.status(200).json({ data: categories });
     } catch (error) {
         res.status(500).json({ message: 'Server error.', error: error.message });
@@ -72,7 +72,7 @@ exports.updateCategory = async (req, res) => {
     try {
         const { name, yearRange } = req.body;
 
-        const category = await MemberYearBatchCategory.findById(req.params.id);
+        const category = await MemberYearBatchCategory.findById(req.params.memberYearId);
         if (!category) {
             return res.status(404).json({ message: 'Category not found.' });
         }
@@ -100,7 +100,7 @@ exports.updateCategory = async (req, res) => {
 
 exports.deleteCategory = async (req, res) => {
     try {
-        const deletedCategory = await MemberYearBatchCategory.findByIdAndDelete(req.params.id);
+        const deletedCategory = await MemberYearBatchCategory.findByIdAndDelete(req.params.memberYearId);
 
         if (!deletedCategory) {
             return res.status(404).json({ message: 'Category not found.' });

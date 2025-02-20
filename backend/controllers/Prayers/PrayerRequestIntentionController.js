@@ -24,11 +24,10 @@ exports.createPrayerRequestIntention = async (req, res) => {
             return res.status(400).json({ message: 'Your submission contains inappropriate language.' });
         }
 
-        // console.log("Intentions before saving:", Intentions); 
-
         const newPrayerRequest = new PrayerRequestIntention({
             ...req.body,
-            Intentions: Array.isArray(Intentions) ? Intentions : [], 
+            userId: req.user._id,
+            Intentions: Array.isArray(Intentions) ? Intentions : [],
         });
 
         await newPrayerRequest.save();
@@ -38,12 +37,10 @@ exports.createPrayerRequestIntention = async (req, res) => {
             data: newPrayerRequest,
         });
     } catch (err) {
-        console.error("Server Error:", err.message); 
+        console.error("Server Error:", err.message);
         res.status(500).json({ message: err.message });
     }
 };
-
-
 
 exports.getAllPrayerRequestIntention = async (req, res) => {
     try {
