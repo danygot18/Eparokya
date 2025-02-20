@@ -1,36 +1,78 @@
 const AnnouncementMinistry = require('../../models/Announcement/ministryAnnouncement');
 // const ministryCategory  = require('../models/ministryCategory'); 
+const cloudinary = require('cloudinary').v2;
 
 exports.createAnnouncement = async (req, res) => {
     try {
         const { ministryCategoryId } = req.params;
+        let imagesLinks = [];
 
-        // Extra logging for better debugging
-        console.log("Incoming Ministry Category ID:", ministryCategoryId);
-        console.log("Incoming Data:", JSON.stringify(req.body, null, 2));
-
-        const announcementData = {
-            ...req.body,
-            ministryCategory: ministryCategoryId, // Attach ministryCategory from the URL
+        // Upload images to Cloudinary directly
+        const uploadToCloudinary = async (file, folder) => {
+            if (!file) throw new Error('File is required for upload.');
+            const result = await cloudinary.uploader.upload(file.path, { folder });
+            return { public_id: result.public_id, url: result.secure_url };
         };
 
-        // Check required fields before saving
-        if (!announcementData.title || !announcementData.description) {
-            return res.status(400).json({ message: 'Title and Description are required.' });
+        // Upload images if present
+        try {
+            if (req.files && req.files.length > 0) {
+                imagesLinks = await Promise.all(
+                    req.files.map(file => uploadToCloudinary(file, 'eparokya/announcements'))
+                );
+            }
+        } catch (uploadError) {
+            return res.status(400).json({ success: false, message: uploadError.message });
         }
 
-        const newAnnouncement = new AnnouncementMinistry(announcementData);
-        await newAnnouncement.save();
+        // Prepare announcement data
+        const announcementData = {
+            ...req.body,
+            tags: Array.isArray(req.body.tags)
+                ? req.body.tags
+                : req.body.tags
+                    ? req.body.tags.split(',').map(tag => tag.trim())
+                    : [],
+            notedBy: Array.isArray(req.body.notedBy)
+                ? req.body.notedBy
+                : req.body.notedBy
+                    ? req.body.notedBy.split(',').map(name => name.trim())
+                    : [],
+            images: imagesLinks.length ? imagesLinks : [],
+            ministryCategory: ministryCategoryId,
+        };
 
+        // Validate required fields
+        if (!announcementData.title || !announcementData.description || !announcementData.tags.length || !announcementData.notedBy.length) {
+            return res.status(400).json({ message: 'All required fields must be filled.' });
+        }
+
+        // Create and save the announcement
+        const newAnnouncement = new AnnouncementMinistry(announcementData);
+        const savedAnnouncement = await newAnnouncement.save();
+
+        // Respond with properly formatted announcement data
         res.status(201).json({
+            success: true,
             message: 'Announcement created successfully.',
-            announcement: newAnnouncement,
+            announcement: savedAnnouncement.toJSON(), // Correctly convert Mongoose object
         });
     } catch (error) {
-        console.error('Error creating announcement:', error);
-        res.status(500).json({ message: 'Failed to create announcement.' });
+        console.error('Detailed Error:', error); // Log the raw error object
+        console.error('Error as JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2)); // Log full error details
+    
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create announcement.',
+            error: error.message,
+            stack: error.stack, // This will give you the full stack trace
+        });
     }
+    
 };
+
+
+
 
 
 

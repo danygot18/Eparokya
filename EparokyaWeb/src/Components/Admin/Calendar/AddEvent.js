@@ -1,16 +1,17 @@
-import React, { useState, useEffect  } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import moment from 'moment';
 
 const AddEvent = () => {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
   const [description, setDescription] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [ministryCategories, setMinistryCategories] = useState([]);
   const [selectedMinistries, setSelectedMinistries] = useState([]);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const fetchMinistries = async () => {
@@ -19,7 +20,7 @@ const AddEvent = () => {
           `${process.env.REACT_APP_API}/api/v1/ministryCategory/getAllMinistryCategories`,
           { withCredentials: true }
         );
-        setMinistryCategories(response.data.categories || []); 
+        setMinistryCategories(response.data.categories || []);
       } catch (error) {
         console.error('Error fetching ministry categories:', error);
       }
@@ -39,28 +40,33 @@ const AddEvent = () => {
 
   const handleAddEvent = async (e) => {
     e.preventDefault();
-  
+
     if (!title || !date) {
       setErrorMessage('Title and Date are required.');
       return;
     }
-  
-    const newEvent = { title, customeventDate: date, ministryCategory: selectedMinistries, };
-    console.log("New Event Data:", newEvent);
-  
+
+    const formattedTime = time ? moment(time, 'HH:mm').format('h:mm A') : '';
+    const newEvent = {
+      title,
+      customeventDate: date,
+      customeventTime: formattedTime,
+      description,
+      ministryCategory: selectedMinistries,
+    };
+    console.log('New Event Data:', newEvent);
+
     try {
       await axios.post(`${process.env.REACT_APP_API}/api/v1/addEvent`, newEvent, {
         withCredentials: true,
       });
-  
-      navigate('/calendar', { state: { newEvent } });
+
+      navigate('/admin/calendar', { state: { newEvent } });
     } catch (error) {
       console.error('Error adding event:', error);
       setErrorMessage('Failed to add event. Please try again.');
     }
   };
-  
-  
 
   return (
     <div style={{ padding: '20px' }}>
@@ -94,6 +100,15 @@ const AddEvent = () => {
             style={{ marginLeft: '10px', marginBottom: '10px', display: 'block' }}
           />
         </label>
+        <label>
+          Event Time (optional):
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            style={{ marginLeft: '10px', marginBottom: '10px', display: 'block' }}
+          />
+        </label>
         <div style={{ marginBottom: '10px' }}>
           <p>Select Ministry Categories (optional):</p>
           {ministryCategories.map((ministry) => (
@@ -110,9 +125,7 @@ const AddEvent = () => {
         <button type="submit" style={{ marginRight: '10px' }}>
           Add Event
         </button>
-        <button type="button" onClick={() => navigate('/')}>
-          Cancel
-        </button>
+        <button type="button" onClick={() => navigate('/')}>Cancel</button>
       </form>
     </div>
   );

@@ -11,15 +11,17 @@ exports.getAllCustomEvents = async (req, res) => {
 
 exports.addCustomEvent = async (req, res) => {
   try {
-    const { title, customeventDate, ministryCategory } = req.body;
+    const { title, customeventDate, customeventTime, ministryCategory, description } = req.body;
 
     if (!title || !customeventDate) {
       return res.status(400).json({ message: "Title and event date are required." });
     }
+
     const newEvent = await CustomEvent.create({
       title,
-      description: req.body.description,
+      description,
       customeventDate,
+      customeventTime, 
       ministryCategory,
     });
 
@@ -28,6 +30,7 @@ exports.addCustomEvent = async (req, res) => {
     res.status(500).json({ message: "Failed to add custom event", error: error.message });
   }
 };
+
 
 exports.deleteCustomEvent = async (req, res) => {
   try {

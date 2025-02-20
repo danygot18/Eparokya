@@ -22,6 +22,7 @@ import NavigationForms from './Components/User/NavigationForms';
 
 import ResourcePage from './Components/ResourcePage';
 import WeddingWall from './Components/WeddingWall/WeddingWall';
+import ParishPriest from './Components/ParishInformation/ParishPriests';
 
 import SubmittedForms from './Components/User/Forms/SubmittedFormsNavigation';
 import UserFormGuides from './Components/User/UserFormGuides';
@@ -188,6 +189,7 @@ function App() {
 
         <Route path="/resourcePage" element={<ResourcePage />} exact="true" />
         <Route path="/weddingWall" element={<WeddingWall />} exact="true" />
+        <Route path="/parishPriests" element={<ParishPriest />} exact="true" />
 
         <Route path="/user/calendar" element={<UserCalendar />} exact="true" />
         <Route path="/user/ministryCalendar" element={<MinistryCalendar />} exact="true" />

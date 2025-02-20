@@ -73,7 +73,7 @@ exports.submitBaptismForm = async (req, res) => {
       NinangGodparents: NinangGodparents ? JSON.parse(NinangGodparents) : [],
       Docs,
       additionalDocs: additionalDocs.length > 0 ? additionalDocs : undefined,
-      userId, // Associate the baptism record with the user
+      userId, 
     });
 
     const savedBaptism = await baptism.save();

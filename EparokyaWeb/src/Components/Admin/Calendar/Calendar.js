@@ -98,7 +98,7 @@ const Calendars = () => {
     if (event.bride && event.groom) {
       return {
         id: `wedding-${event._id}`,
-        title: `${event.bride} & ${event.groom} Wedding`,
+        title: `${event.brideName} & ${event.groomName} Wedding`,
         start: new Date(event.weddingDate),
         end: new Date(event.weddingDate),
         type: 'Wedding',

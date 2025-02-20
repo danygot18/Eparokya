@@ -45,8 +45,8 @@ const MinistryCategoryDetails = () => {
     if (
       !announcementData.title || 
       !announcementData.description || 
-      !announcementData.tags || 
-      !announcementData.notedBy
+      !announcementData.tags.length || 
+      !announcementData.notedBy.length
     ) {
       alert("All fields are required.");
       return;
@@ -54,20 +54,21 @@ const MinistryCategoryDetails = () => {
   
     try {
       const formData = new FormData();
-      
+  
       Object.entries(announcementData).forEach(([key, value]) => {
         if (Array.isArray(value)) {
-          formData.append(key, JSON.stringify(value)); 
+          value.forEach((item) => formData.append(`${key}[]`, item)); 
         } else {
           formData.append(key, value);
         }
       });
   
       formData.append('ministryCategory', ministryCategoryId);
-  
+      formData.append('images', announcementData.images || []);
+
       await axios.post(
         `${process.env.REACT_APP_API}/api/v1/ministryAnnouncementCreate/${ministryCategoryId}`,
-        formData, 
+        formData,
         { withCredentials: true }
       );
   
@@ -76,6 +77,7 @@ const MinistryCategoryDetails = () => {
       console.error('Error creating announcement:', error);
     }
   };
+  
   
 
   const filteredUsers = users.filter((user) =>

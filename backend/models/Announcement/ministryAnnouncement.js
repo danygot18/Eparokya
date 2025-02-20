@@ -5,16 +5,10 @@ const announcementMinistrySchema = new mongoose.Schema({
     description: { type: String, required: true },
     images: [
         {
-            public_id: {
-                type: String,
-                required: false
-            },
-            url: {
-                type: String,
-                required: false
-            },
+            public_id: { type: String },
+            url: { type: String },
         }
-    ],   
+    ],
     tags: [{ type: String, required: true }],
     ministryCategory: {
         type: mongoose.Schema.Types.ObjectId,
@@ -25,9 +19,7 @@ const announcementMinistrySchema = new mongoose.Schema({
     acknowledgedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     notedBy: [{ type: String, required: true }],
     isPinned: { type: Boolean, default: false },
-    dateCreated: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-});
+}, { timestamps: true }); 
 
 announcementMinistrySchema.virtual('id').get(function () {
     return this._id.toHexString();

@@ -59,18 +59,39 @@ const Header = () => {
         </Link>
 
         <Link
-          to="/user/prayerRequestIntention"
-          style={{ ...styles.navDropdownTitle, textDecoration: 'none' }}
-        >
-          Prayer Request Intention
-        </Link>
-
-        <Link
           to="/user/live"
           style={{ ...styles.navDropdownTitle, textDecoration: 'none' }}
         >
           Live
         </Link>
+
+        <Link
+          to="/user/prayerRequestIntention"
+          style={{ ...styles.navDropdownTitle, textDecoration: 'none' }}
+        >
+          Send Prayer
+        </Link>
+
+
+        <NavDropdown
+          title={<span style={styles.navDropdownTitle}>Parish Info</span>}
+          id="parish-info-dropdown"
+          align="end"
+          menuVariant="light"
+        >
+          <NavDropdown.Item as={Link} to="/user/members" style={styles.dropdownItem}>
+            Members
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/parishPriests" style={styles.dropdownItem}>
+            Parish History
+          </NavDropdown.Item>
+          <NavDropdown.Item as={Link} to="/parishPriests" style={styles.dropdownItem}>
+            Parish Priests
+          </NavDropdown.Item>
+        </NavDropdown>
+
+
+
 
         {/* User Navigation Section */}
         <Nav className="d-flex align-items-center">
@@ -83,6 +104,9 @@ const Header = () => {
             >
               <NavDropdown.Item as={Link} to="/profile" style={styles.dropdownItem}>
                 Profile
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/user/ministryCalendar" style={styles.dropdownItem}>
+                Ministry Calendar
               </NavDropdown.Item>
               {user?.isAdmin && (
                 <NavDropdown.Item as={Link} to="/admin/dashboard" style={styles.dropdownItem}>

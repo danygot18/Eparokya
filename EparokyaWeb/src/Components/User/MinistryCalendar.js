@@ -5,16 +5,15 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-// Create the localizer with moment
 const localizer = momentLocalizer(moment);
 
 const MinistryCalendar = () => {
   const [ministries, setMinistries] = useState([]);
   const [selectedMinistry, setSelectedMinistry] = useState(null);
   const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [calendarTitle, setCalendarTitle] = useState('General Calendar');
 
-  // Fetch all ministry categories on mount
   useEffect(() => {
     const fetchMinistries = async () => {
       try {
@@ -31,7 +30,6 @@ const MinistryCalendar = () => {
     fetchMinistries();
   }, []);
 
-  // When a ministry is clicked, fetch its events and format them
   const handleMinistryClick = async (ministry) => {
     setSelectedMinistry(ministry);
     setCalendarTitle(`${ministry.name} Calendar`);
@@ -40,18 +38,23 @@ const MinistryCalendar = () => {
         `${process.env.REACT_APP_API}/api/v1/ministryCategory/ministryEvents/${ministry._id}`,
         { withCredentials: true }
       );
-      // Format each event so that the calendar can mark the date.
       const formattedEvents = response.data.map((event) => ({
         ...event,
         start: new Date(event.customeventDate),
         end: new Date(event.customeventDate),
         title: event.title,
+        customeventTime: event.customeventTime || null,
       }));
       setEvents(formattedEvents);
     } catch (error) {
       console.error('Error fetching ministry events:', error);
       setEvents([]);
     }
+  };
+
+
+  const handleEventClick = (event) => {
+    setSelectedEvent(event);
   };
 
   return (
@@ -70,8 +73,23 @@ const MinistryCalendar = () => {
           startAccessor="start"
           endAccessor="end"
           style={{ height: 500 }}
+          onSelectEvent={handleEventClick}
         />
+        {/* Event Details Display */}
+        {selectedEvent && (
+          <div style={{ marginTop: '20px', padding: '10px', border: '1px solid #ccc', borderRadius: '8px' }}>
+            <h3>Event Details</h3>
+            <p><strong>Ministry:</strong> {selectedMinistry ? selectedMinistry.name : 'General'}</p>
+            <p><strong>Event Title:</strong> {selectedEvent.title}</p>
+            <p><strong>Event Description:</strong> {selectedEvent.description || 'No description provided.'}</p>
+            <p><strong>Event Date:</strong> {moment(selectedEvent.customeventDate).format('MMMM D, YYYY')}</p>
+            {selectedEvent.customeventTime && (
+              <p><strong>Event Time:</strong> {moment(selectedEvent.customeventTime, 'h:mm A').format('h:mm A')}</p>
+            )}
+          </div>
+        )}
       </div>
+
 
       {/* Right Column: Ministry List */}
       <div
