@@ -99,6 +99,8 @@ app.use("/api/v1", require("./routes/Resources/resource"));
 app.use("/api/v1", require("./routes/Members/memberYearBatchCategory"));
 app.use("/api/v1", require("./routes/Members/members"));
 
+app.use("/api/v1", require("./routes/liveVideo"))
+
 
 // Resources
 // app.use("/api/v1", require("./routes/Resource/resourceCategory"));

@@ -21,35 +21,38 @@ const SideBar = () => {
             <Link to="/admin/users" className="sidebar-link" style={styles.sidebarLink}>
               Users
             </Link>
-           
+            <Nav.Item>
+              <Nav.Item>
+                <Link to="/admin/live" className="sidebar-link" style={styles.sidebarLink}>
+                  Live
+                </Link>
+              </Nav.Item>
+              <Dropdown>
+                <Dropdown.Toggle variant="link" className="sidebar-link" style={styles.sidebarLink}>
+                  Parish Priest
+                </Dropdown.Toggle>
 
-          <Nav.Item>
-            <Dropdown>
-              <Dropdown.Toggle variant="link" className="sidebar-link" style={styles.sidebarLink}>
-               Parish Priest
-              </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item>
+                    <Link to="/admin/create/priest" className="sidebar-link" style={styles.sidebarLink}>
+                      Add Parish Priests
+                    </Link>
+                  </Dropdown.Item>
 
-              <Dropdown.Menu>
-                <Dropdown.Item>
-                  <Link to="/admin/create/priest" className="sidebar-link" style={styles.sidebarLink}>
-                    Add Parish Priests 
-                  </Link>
-                </Dropdown.Item>
-                        
-                <Dropdown.Item>
-                  <Link to="/admin/priestList" className="sidebar-link" style={styles.sidebarLink}>
-                    Parish Priests List
-                  </Link>
-                </Dropdown.Item>
-              </Dropdown.Menu>
-
-
-
-            </Dropdown>
-          </Nav.Item>
+                  <Dropdown.Item>
+                    <Link to="/admin/priestList" className="sidebar-link" style={styles.sidebarLink}>
+                      Parish Priests List
+                    </Link>
+                  </Dropdown.Item>
+                </Dropdown.Menu>
 
 
-          
+
+              </Dropdown>
+            </Nav.Item>
+
+
+
           </Nav.Item>
           <Nav.Item>
             <Link to="/admin/ministryCategory/create" className="sidebar-link" style={styles.sidebarLink}>
@@ -143,7 +146,7 @@ const SideBar = () => {
                 Resource Page
               </Dropdown.Toggle>
               <Dropdown.Menu>
-              <Dropdown.Item>
+                <Dropdown.Item>
                   <Link to="/admin/resourceCategory/create" className="sidebar-link" style={styles.sidebarLink}>
                     Create Resource Category
                   </Link>

@@ -192,6 +192,17 @@ const GuestSideBar = () => {
             <FaRegFileAlt style={styles.icon} /> Form Guide
           </Link>
         </li>
+        <li style={styles.menuItem}>
+          <Link
+            to="/user/live"
+            style={{
+              ...styles.link,
+              ...(location.pathname === "/user/FormGuides" ? styles.activeLink : {}),
+            }}
+          >
+            <FaRegFileAlt style={styles.icon} /> Live
+          </Link>
+        </li>
 
       </ul>
 
@@ -208,6 +219,7 @@ const GuestSideBar = () => {
           </Link>
         </li>
       </ul>
+
     </div>
   );
 };

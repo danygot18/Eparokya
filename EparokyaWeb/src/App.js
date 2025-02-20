@@ -148,8 +148,9 @@ import { socket } from "./socket";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 
-
-
+//Live Video
+import AdminLive from './Components/Admin/AdminLive';
+import UserLive from './Components/UserLive';
 
 
 function App() {
@@ -305,6 +306,9 @@ function App() {
         {/* Terms and Condition */}
         {/* Prayer */}
 
+          {/* Live */}
+          <Route path="/admin/live" element={<ProtectedRoute isAdmin={true}><AdminLive /></ProtectedRoute>} />
+          <Route path="/user/live" element={<UserLive />} />
 
       </Routes>
     </Router>
