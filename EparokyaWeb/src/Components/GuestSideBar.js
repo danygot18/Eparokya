@@ -192,7 +192,7 @@ const GuestSideBar = () => {
             <FaRegFileAlt style={styles.icon} /> Form Guide
           </Link>
         </li>
-        <li style={styles.menuItem}>
+        {/* <li style={styles.menuItem}>
           <Link
             to="/user/live"
             style={{
@@ -202,7 +202,7 @@ const GuestSideBar = () => {
           >
             <FaRegFileAlt style={styles.icon} /> Live
           </Link>
-        </li>
+        </li> */}
 
       </ul>
 

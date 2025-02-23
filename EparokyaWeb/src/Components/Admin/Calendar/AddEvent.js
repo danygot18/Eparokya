@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,7 +7,35 @@ const AddEvent = () => {
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [ministryCategories, setMinistryCategories] = useState([]);
+  const [selectedMinistries, setSelectedMinistries] = useState([]);
   const navigate = useNavigate();
+
+
+  useEffect(() => {
+    const fetchMinistries = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/api/v1/ministryCategory/getAllMinistryCategories`,
+          { withCredentials: true }
+        );
+        setMinistryCategories(response.data.categories || []); 
+      } catch (error) {
+        console.error('Error fetching ministry categories:', error);
+      }
+    };
+
+    fetchMinistries();
+  }, []);
+
+  const handleCheckboxChange = (e) => {
+    const { value, checked } = e.target;
+    if (checked) {
+      setSelectedMinistries((prev) => [...prev, value]);
+    } else {
+      setSelectedMinistries((prev) => prev.filter((id) => id !== value));
+    }
+  };
 
   const handleAddEvent = async (e) => {
     e.preventDefault();
@@ -17,7 +45,7 @@ const AddEvent = () => {
       return;
     }
   
-    const newEvent = { title, customeventDate: date };
+    const newEvent = { title, customeventDate: date, ministryCategory: selectedMinistries, };
     console.log("New Event Data:", newEvent);
   
     try {
@@ -66,6 +94,19 @@ const AddEvent = () => {
             style={{ marginLeft: '10px', marginBottom: '10px', display: 'block' }}
           />
         </label>
+        <div style={{ marginBottom: '10px' }}>
+          <p>Select Ministry Categories (optional):</p>
+          {ministryCategories.map((ministry) => (
+            <label key={ministry._id} style={{ display: 'block' }}>
+              <input
+                type="checkbox"
+                value={ministry._id}
+                onChange={handleCheckboxChange}
+              />
+              {ministry.name}
+            </label>
+          ))}
+        </div>
         <button type="submit" style={{ marginRight: '10px' }}>
           Add Event
         </button>

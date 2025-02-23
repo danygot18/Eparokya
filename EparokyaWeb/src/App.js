@@ -74,8 +74,14 @@ import Dashboard from './Components/Admin/Dashboard';
 import UsersList from './Components/Admin/User/UserList';
 import UpdateUser from './Components/Admin/User/UserUpdate';
 
+
+// Members
+import MemberBatchYear from './Components/Admin/Members/MemberBatchYear';
+
 //Calendar
 import Calendar from './Components/Admin/Calendar/Calendar';
+import MinistryCalendar from './Components/User/MinistryCalendar';
+
 import AdminDate from './Components/Admin/AdminDate';
 import AddEvent from './Components/Admin/Calendar/AddEvent';
 
@@ -103,6 +109,8 @@ import PriestList from './Components/Admin/Priest/PriestList';
 
 // Prayer
 import AdminPrayerReview from './Components/Admin/Prayers/AdminPrayerReview';
+import PrayerIntentionsList from './Components/Admin/Prayers/prayerRequestIntentionList';
+import PrayerIntentionDetails from './Components/Admin/Prayers/prayerRequestIntentionDetails';
 
 // Private Forms
 import WeddingList from './Components/Admin/Wedding/WeddingList';
@@ -182,6 +190,7 @@ function App() {
         <Route path="/weddingWall" element={<WeddingWall />} exact="true" />
 
         <Route path="/user/calendar" element={<UserCalendar />} exact="true" />
+        <Route path="/user/ministryCalendar" element={<MinistryCalendar />} exact="true" />
         <Route path="/user/NavigationForms" element={<NavigationForms />} exact="true" />
 
         <Route path="/user/SubmittedFormsNavigation" element={<SubmittedForms />} exact="true" />
@@ -245,6 +254,9 @@ function App() {
         <Route path="/admin/create/announcement" element={<ProtectedRoute isAdmin={true}><Announcement /></ProtectedRoute>} />
         <Route path="/admin/announcementList" element={<ProtectedRoute isAdmin={true}><AnnouncementList /></ProtectedRoute>} />
 
+        {/* Members */}
+        <Route path="/admin/memberBatchYear" element={<ProtectedRoute isAdmin={true}><MemberBatchYear /></ProtectedRoute>} />
+
         {/* Resource */}
         <Route path="/admin/resource/create" element={<ProtectedRoute isAdmin={true}><Resource /></ProtectedRoute>} />
         <Route path="/admin/resourceList" element={<ProtectedRoute isAdmin={true}><ResourceList /></ProtectedRoute>} />
@@ -259,6 +271,8 @@ function App() {
 
         {/* prayer */}
         <Route path="/admin/prayerRequestList" element={<ProtectedRoute isAdmin={true}><PrayerRequestList /></ProtectedRoute>} />
+        <Route path="/admin/prayerIntentionList" element={<ProtectedRoute isAdmin={true}><PrayerIntentionsList /></ProtectedRoute>} />
+        <Route path="/admin/prayerIntention/details/:prayerIntentionId" element={<ProtectedRoute isAdmin={true}><PrayerIntentionDetails /></ProtectedRoute>} />
 
         {/* Private Scheduling */}
         <Route path="/admin/houseBlessingList" element={<ProtectedRoute isAdmin={true}><HouseBlessingList /></ProtectedRoute>} />
@@ -307,9 +321,9 @@ function App() {
         {/* Terms and Condition */}
         {/* Prayer */}
 
-          {/* Live */}
-          <Route path="/admin/live" element={<ProtectedRoute isAdmin={true}><AdminLive /></ProtectedRoute>} />
-          <Route path="/user/live" element={<UserLive />} />
+        {/* Live */}
+        <Route path="/admin/live" element={<ProtectedRoute isAdmin={true}><AdminLive /></ProtectedRoute>} />
+        <Route path="/user/live" element={<UserLive />} />
 
       </Routes>
     </Router>

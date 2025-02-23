@@ -39,7 +39,11 @@ const prayerRequestIntentionSchema = new mongoose.Schema({
         },
       ],
 
-    isDone: { type: Boolean, default: false },
+    isDone: { 
+        type: Boolean,
+         doneAt: {type: Date, 
+                  default: Date.now}, 
+         default: false },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     createdAt: {
         type: Date,

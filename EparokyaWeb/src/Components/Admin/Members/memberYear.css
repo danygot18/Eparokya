@@ -1,0 +1,187 @@
+.memberYear-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background-color: #e8f5e9;
+  }
+  
+  .memberYear-content {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    gap: 40px;
+  }
+  
+  .memberYear-leftPane,
+  .memberYear-rightPane {
+    background-color: #d9ead3;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .memberYear-leftPane {
+    flex: 1;
+  }
+  
+  .memberYear-rightPane {
+    flex: 2;
+  }
+  
+  .memberYear-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .memberYear-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .memberYear-formGroup {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .memberYear-label {
+    margin-bottom: 5px;
+    font-size: 16px;
+  }
+  
+  .memberYear-input,
+  .memberYear-textarea {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+  
+  .memberYear-textarea {
+    min-height: 80px;
+  }
+  
+  .memberYear-buttonGroup {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .memberYear-submitButton {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #388e3c;
+    color: #fff;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .memberYear-cancelButton {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #d32f2f;
+    color: #fff;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .memberYear-searchInput {
+    padding: 10px;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    font-size: 16px;
+  }
+  
+  .memberYear-listTitle {
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  .memberYear-list {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+  
+  .memberYear-listItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #e6f4e9;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+  
+  .memberYear-categoryText {
+    flex: 1;
+    margin-right: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .memberYear-buttonContainer {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .memberYear-editButton {
+    padding: 6px;
+    border-radius: 6px;
+    border: none;
+    background-color: #2e7d32;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .memberYear-deleteButton {
+    padding: 6px;
+    border-radius: 6px;
+    border: none;
+    background-color: #c62828;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .memberYear-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 0;
+  }
+  
+  .memberYear-paginationButton {
+    padding: 5px 10px;
+    border: none;
+    background-color: #d9ead3;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .memberYear-paginationText {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .memberYear-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  
+  

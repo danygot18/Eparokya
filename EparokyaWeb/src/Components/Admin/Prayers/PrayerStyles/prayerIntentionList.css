@@ -1,0 +1,55 @@
+.prayer-intention-container {
+    display: flex;
+    padding: 20px;
+  }
+  
+  .prayer-intention-content {
+    flex-grow: 1;
+    padding: 20px;
+  }
+  
+  .prayer-intention-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .prayer-intention-controls input,
+  .prayer-intention-controls select {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 48%;
+  }
+  
+  .prayer-intention-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  
+  .prayer-intention-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-left: 8px solid #ccc;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .prayer-intention-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .prayer-intention-card h3 {
+    margin-top: 0;
+    font-size: 20px;
+  }
+  
+  .prayer-intention-card p {
+    margin: 8px 0;
+    font-size: 14px;
+    color: #333;
+  }
+  

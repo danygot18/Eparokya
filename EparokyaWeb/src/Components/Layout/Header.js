@@ -60,16 +60,17 @@ const Header = () => {
 
         <Link
           to="/user/prayerRequestIntention"
-          style={{
-            ...styles.homeButton,
-            ...(isHovered ? styles.homeButtonHover : {}),
-          }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          style={{ ...styles.navDropdownTitle, textDecoration: 'none' }}
         >
           Prayer Request Intention
         </Link>
 
+        <Link
+          to="/user/live"
+          style={{ ...styles.navDropdownTitle, textDecoration: 'none' }}
+        >
+          Live
+        </Link>
 
         {/* User Navigation Section */}
         <Nav className="d-flex align-items-center">
