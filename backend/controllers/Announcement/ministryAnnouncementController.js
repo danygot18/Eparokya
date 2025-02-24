@@ -1,5 +1,5 @@
 const AnnouncementMinistry = require('../../models/Announcement/ministryAnnouncement');
-// const ministryCategory  = require('../models/ministryCategory'); 
+// const ministryCategory  = require('../../models/ministryCategory'); 
 const cloudinary = require('cloudinary').v2;
 
 exports.createAnnouncement = async (req, res) => {
@@ -7,14 +7,12 @@ exports.createAnnouncement = async (req, res) => {
         const { ministryCategoryId } = req.params;
         let imagesLinks = [];
 
-        // Upload images to Cloudinary directly
         const uploadToCloudinary = async (file, folder) => {
             if (!file) throw new Error('File is required for upload.');
             const result = await cloudinary.uploader.upload(file.path, { folder });
             return { public_id: result.public_id, url: result.secure_url };
         };
 
-        // Upload images if present
         try {
             if (req.files && req.files.length > 0) {
                 imagesLinks = await Promise.all(
@@ -25,7 +23,6 @@ exports.createAnnouncement = async (req, res) => {
             return res.status(400).json({ success: false, message: uploadError.message });
         }
 
-        // Prepare announcement data
         const announcementData = {
             ...req.body,
             tags: Array.isArray(req.body.tags)
@@ -42,47 +39,132 @@ exports.createAnnouncement = async (req, res) => {
             ministryCategory: ministryCategoryId,
         };
 
-        // Validate required fields
         if (!announcementData.title || !announcementData.description || !announcementData.tags.length || !announcementData.notedBy.length) {
             return res.status(400).json({ message: 'All required fields must be filled.' });
         }
 
-        // Create and save the announcement
         const newAnnouncement = new AnnouncementMinistry(announcementData);
         const savedAnnouncement = await newAnnouncement.save();
 
-        // Respond with properly formatted announcement data
         res.status(201).json({
             success: true,
             message: 'Announcement created successfully.',
-            announcement: savedAnnouncement.toJSON(), // Correctly convert Mongoose object
+            announcement: savedAnnouncement.toJSON(), 
         });
     } catch (error) {
-        console.error('Detailed Error:', error); // Log the raw error object
-        console.error('Error as JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2)); // Log full error details
+        console.error('Detailed Error:', error); 
+        console.error('Error as JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2)); 
     
         res.status(500).json({
             success: false,
             message: 'Failed to create announcement.',
             error: error.message,
-            stack: error.stack, // This will give you the full stack trace
+            stack: error.stack, 
         });
     }
     
 };
 
 
+// exports.getAllAnnouncements = async (req, res) => {
+//     try {
+//         const announcements = await AnnouncementMinistry.find()
+//             .populate('ministryCategory', 'name')
+//             .sort({ createdAt: -1 }); // Sort by latest
+//         res.status(200).json(announcements);
+//     } catch (error) {
+//         console.error('Error fetching announcements:', error);
+//         res.status(500).json({ message: 'Failed to retrieve announcements.' });
+//     }
+// };
 
+// exports.getAnnouncementsByMinistryCategory = async (req, res) => {
+//     try {
+//         const { ministryCategoryId } = req.params;
 
+//         const announcements = await AnnouncementMinistry.find({ ministryCategory: ministryCategoryId })
+//             .populate('ministryCategory', 'name')
+//             .sort({ createdAt: -1 }); // Sort by latest
 
+//         res.status(200).json(announcements);
+//     } catch (error) {
+//         console.error('Error fetching announcements by ministry category:', error);
+//         res.status(500).json({ message: 'Failed to retrieve announcements.' });
+//     }
+// };
 
-exports.getAllAnnouncements = async (req, res) => {
+exports.getAnnouncementsByMinistryCategory = async (req, res) => {
     try {
-        const announcements = await AnnouncementMinistry.find().populate('ministryCategory', 'name');
+        const { ministryCategoryId } = req.params;
+
+        if (!ministryCategoryId || ministryCategoryId === "undefined") {
+            return res.status(400).json({ message: "Invalid or missing ministryCategoryId" });
+        }
+
+        const announcements = await AnnouncementMinistry.find({ ministryCategory: ministryCategoryId })
+            .populate('ministryCategory', 'name')
+            .sort({ createdAt: -1 });
+
         res.status(200).json(announcements);
     } catch (error) {
-        console.error('Error fetching announcements:', error);
+        console.error('Error fetching announcements by ministry category:', error);
         res.status(500).json({ message: 'Failed to retrieve announcements.' });
+    }
+};
+
+
+exports.togglePinAnnouncement = async (req, res) => {
+    try {
+        const { announcementId } = req.params;
+
+        const announcement = await AnnouncementMinistry.findById(announcementId);
+        if (!announcement) {
+            return res.status(404).json({ message: "Announcement not found" });
+        }
+
+        announcement.isPinned = !announcement.isPinned;
+        await announcement.save();
+
+        res.status(200).json({ message: "Pin status updated", isPinned: announcement.isPinned });
+    } catch (error) {
+        console.error("Error updating pin status:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+// exports.getPinnedAnnouncements = async (req, res) => {
+//     try {
+//         const pinnedAnnouncements = await AnnouncementMinistry.find({ isPinned: true })
+//             .populate('ministryCategory', 'name')
+//             .sort({ createdAt: -1 }); 
+
+//         res.status(200).json(pinnedAnnouncements);
+//     } catch (error) {
+//         console.error("Error fetching pinned announcements:", error);
+//         res.status(500).json({ message: "Failed to retrieve pinned announcements." });
+//     }
+// };
+
+
+exports.getPinnedAnnouncementsByMinistryCategory = async (req, res) => {
+    try {
+        const { ministryCategoryId } = req.params;
+
+        if (!ministryCategoryId || ministryCategoryId === "undefined") {
+            return res.status(400).json({ message: "Invalid or missing ministryCategoryId" });
+        }
+
+        const pinnedAnnouncements = await AnnouncementMinistry.find({ 
+            ministryCategory: ministryCategoryId, 
+            isPinned: true 
+        })
+        .populate('ministryCategory', 'name')
+        .sort({ createdAt: -1 });
+
+        res.status(200).json(pinnedAnnouncements);
+    } catch (error) {
+        console.error("Error fetching pinned announcements by ministry category:", error);
+        res.status(500).json({ message: "Failed to retrieve pinned announcements." });
     }
 };
 

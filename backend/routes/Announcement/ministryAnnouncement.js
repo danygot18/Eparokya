@@ -4,7 +4,12 @@ const ministryAnnouncementController = require('../../controllers/Announcement/m
 const upload = require('../../utils/multer'); 
 
 router.post('/ministryAnnouncementCreate/:ministryCategoryId', upload.array('images', 10), ministryAnnouncementController.createAnnouncement);
-router.get('/getAllMinistryAnnouncement', ministryAnnouncementController.getAllAnnouncements);
+// router.get('/getAllMinistryAnnouncement', ministryAnnouncementController.getAllAnnouncements);
+
+router.post("/:announcementId/togglePin", ministryAnnouncementController.togglePinAnnouncement);
+router.get('/getMinistryAnnouncements/:ministryCategoryId', ministryAnnouncementController.getAnnouncementsByMinistryCategory);
+
+router.get('/pinnedMinistryAnnouncement/:ministryCategoryId', ministryAnnouncementController.getPinnedAnnouncementsByMinistryCategory);
 
 router.get('/getMinistryAnnouncementById/:ministryAnnouncementId', ministryAnnouncementController.getAnnouncementById);
 router.put('/updateMinistryAnnouncement/:ministryAnnouncementId', ministryAnnouncementController.updateAnnouncement);

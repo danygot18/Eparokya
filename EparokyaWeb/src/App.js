@@ -10,7 +10,6 @@ import TermsAndConditionText from './Components/TermsAndConditionText';
 import React, { useRef } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-
 // User Routes
 import { Login } from './Components/User/Login'
 import Register from './Components/User/Register'
@@ -26,6 +25,8 @@ import ParishPriest from './Components/ParishInformation/ParishPriests';
 
 import SubmittedForms from './Components/User/Forms/SubmittedFormsNavigation';
 import UserFormGuides from './Components/User/UserFormGuides';
+
+import MinistryAnnouncement from './Components/User/Ministries/MinistryAnnouncement';
 
 import BaptismForm from './Components/User/Forms/PrivateForms/Baptism/BaptismForm';
 import FuneralForm from './Components/User/Forms/PrivateForms/Funeral/FuneralForm';
@@ -190,6 +191,9 @@ function App() {
         <Route path="/resourcePage" element={<ResourcePage />} exact="true" />
         <Route path="/weddingWall" element={<WeddingWall />} exact="true" />
         <Route path="/parishPriests" element={<ParishPriest />} exact="true" />
+
+       
+        <Route path="/user/ministryAnnouncement" element={<MinistryAnnouncement />} exact="true" />
 
         <Route path="/user/calendar" element={<UserCalendar />} exact="true" />
         <Route path="/user/ministryCalendar" element={<MinistryCalendar />} exact="true" />

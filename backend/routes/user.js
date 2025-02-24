@@ -17,7 +17,8 @@ const {
     updateUser, 
     getRegisteredUsersCount,
     getUsersByMinistryCategory,
-    getUsersGroupedByMinistryCategory
+    getUsersGroupedByMinistryCategory,
+    getUserMinistries
      
 } = require('../controllers/userController');
 const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
@@ -37,6 +38,7 @@ router.put('/profile/update', upload.single("avatar"), isAuthenticatedUser, Upda
 router.get('/admin/users', isAuthenticatedUser, isAuthorized("admin"), AllUsers)
 router.route('/admin/user/:id').get(isAuthenticatedUser, isAuthorized("admin"), getUserDetails).delete(isAuthenticatedUser,isAuthorized("admin"), deleteUser).put(isAuthenticatedUser,isAuthorized("admin"), updateUser)
 
+router.get("/userMinistries", isAuthenticatedUser, getUserMinistries);
 router.get('/:ministryCategoryId/getUsers', getUsersByMinistryCategory);
 router.get('/admin/getUsersGroupedByMinistryCategory', isAuthenticatedUser, isAuthorized("admin"), getUsersGroupedByMinistryCategory)
 

@@ -42,8 +42,6 @@ const Header = () => {
       </header> */}
 
 
-
-
       {/* Right: Navigation Links (Including Home Button & User Menu) */}
       <div style={styles.navContainer}>
         <Link
@@ -91,8 +89,6 @@ const Header = () => {
         </NavDropdown>
 
 
-
-
         {/* User Navigation Section */}
         <Nav className="d-flex align-items-center">
           {isAuthenticated ? (
@@ -105,14 +101,21 @@ const Header = () => {
               <NavDropdown.Item as={Link} to="/profile" style={styles.dropdownItem}>
                 Profile
               </NavDropdown.Item>
+
               <NavDropdown.Item as={Link} to="/user/ministryCalendar" style={styles.dropdownItem}>
                 Ministry Calendar
               </NavDropdown.Item>
+
+              <NavDropdown.Item as={Link} to="/user/ministryAnnouncement" style={styles.dropdownItem}>
+                Ministry Announcements
+              </NavDropdown.Item>
+             
               {user?.isAdmin && (
                 <NavDropdown.Item as={Link} to="/admin/dashboard" style={styles.dropdownItem}>
                   Dashboard
                 </NavDropdown.Item>
               )}
+
               <NavDropdown.Item as={Link} to="/chatlist" style={styles.dropdownItem}>
                 Chat
               </NavDropdown.Item>

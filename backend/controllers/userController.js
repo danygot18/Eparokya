@@ -761,7 +761,7 @@ exports.getUsersByMinistryCategory = async (req, res) => {
         console.log("Received ministryId:", ministryCategoryId); // Log the received ID
 
         const ministry = await MinistryCategory.findById(ministryCategoryId);
-        console.log("Ministry found:", ministry); // Log the found ministry
+        console.log("Ministry found:", ministry); 
 
         if (!ministry) {
             return res.status(404).json({ message: 'Ministry category not found' });
@@ -807,6 +807,28 @@ exports.getUsersGroupedByMinistryCategory = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error", error });
     }
 };
+
+// Fetching user ministry:
+exports.getUserMinistries = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // Populate user's ministry categories
+        const user = await User.findById(userId).populate("ministryCategory", "name");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json(user.ministryCategory); // Corrected path
+    } catch (error) {
+        console.error("Error fetching user ministries:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+
+
 exports.deleteUser = async (req, res, next) => {
     try {
         const user = await User.findById(req.params.id);
