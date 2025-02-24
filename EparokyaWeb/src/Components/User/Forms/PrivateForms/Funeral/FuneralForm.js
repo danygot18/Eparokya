@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
+import { Modal, Form, Row, Col } from 'react-bootstrap';
 import GuestSidebar from '../../../../GuestSideBar';
 import TermsModal from "../../../../TermsModal";
 import termsAndConditionsText from "../../../../TermsAndConditionText";
-
+import { Button, TextField, Typography, Stack, Paper, Box, Container, InputLabel, Select, MenuItem,  } from '@mui/material';
+import MetaData from '../../../../Layout/MetaData';
 const FuneralForm = () => {
     const [filePreview, setFilePreview] = useState(null);
     const [filePreviewType, setFilePreviewType] = useState(null);
@@ -275,379 +276,240 @@ const FuneralForm = () => {
 
 
     return (
-        <div className="funeral-form-container">
-            {/* <div className="guest-sidebar">
-                <GuestSidebar />
-            </div> */}
-            <div className="form-content">
-                <h2>Funeral Request Form</h2>
-                <Form onSubmit={handleSubmit}>
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group controlId="name">
-                                <Form.Label>Pangalan ng Patay</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => handleChange(e, 'name')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
+        <Box sx={{ display: "flex", minHeight: "100vh" }}>
+            <MetaData title={'Funeral Form'} />
 
-                    </Row>
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group controlId="dateOfDeath">
-                                <Form.Label>Araw ng Kamatayan</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    value={formData.dateOfDeath}
-                                    onChange={(e) => handleChange(e, 'dateOfDeath')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Col md={6}>
-                            <Form.Group controlId="personStatus">
-                                <Form.Label>Kalagayan sa Buhay</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    value={formData.personStatus}
-                                    onChange={(e) => handleChange(e, 'personStatus')}
-                                    required
-                                >
-                                    <option value="">Select</option>
-                                    <option value="Dalaga/Binata">Dalaga/Binata</option>
-                                    <option value="May Asawa, Biyuda">May Asawa</option>
-                                    <option value="Biyuda">Biyuda</option>
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-                    </Row>
+            <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center", p: 3 }}>
+                <Paper elevation={3} sx={{ padding: 3, width: "100%", maxWidth: 900 }}>
+                    <Typography variant="h4" gutterBottom>Funeral Request Form</Typography>
+                    <form onSubmit={handleSubmit}>
+                        <Stack spacing={2}>
+                            <TextField
+                                label="Pangalan ng Patay"
+                                value={formData.name}
+                                onChange={(e) => handleChange(e, 'name')}
+                                required
+                                fullWidth
+                            />
+                            <TextField
+                                label="Araw ng Kamatayan"
+                                type="date"
+                                value={formData.dateOfDeath}
+                                onChange={(e) => handleChange(e, 'dateOfDeath')}
+                                required
+                                fullWidth
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <InputLabel>Kalagayan sa Buhay</InputLabel>
+                            <Select
+                                value={formData.personStatus}
+                                onChange={(e) => handleChange(e, 'personStatus')}
+                                required
+                                fullWidth
+                                SelectProps={{ native: true }}
+                            >
+                                <MenuItem value="">Select</MenuItem>
+                                <MenuItem value="Dalaga/Binata">Dalaga/Binata</MenuItem>
+                                <MenuItem value="May Asawa, Biyuda">May Asawa</MenuItem>
+                                <MenuItem value="Biyuda">Biyuda</MenuItem>
+                            </Select>
+                            <TextField
+                                label="Edad"
+                                type="number"
+                                value={formData.age}
+                                onChange={(e) => handleChange(e, 'age')}
+                                required
+                                fullWidth
+                            />
+                            <TextField
+                                label="Pangalan ng Magulang, Asawa o Anak"
+                                value={formData.contactPerson}
+                                onChange={(e) => handleChange(e, 'contactPerson')}
+                                required
+                                fullWidth
+                            />
+                            <InputLabel>Relasyon ng Namatayan</InputLabel>
+                            <Select
+                    
+                                select
+                                value={formData.relationship}
+                                onChange={(e) => handleChange(e, 'relationship')}
+                                required
+                                fullWidth
+                                SelectProps={{ native: true }}
+                            >
+                                
+                                <MenuItem value="Mother/Nanay">Mother/Nanay</MenuItem>
+                                <MenuItem value="Father/Tatay">Father/Tatay</MenuItem>
+                                <MenuItem value="Sibling/Kapatid">Sibling/Kapatid</MenuItem>
+                                <MenuItem value="Child/Anak">Child/Anak</MenuItem>
+                                <MenuItem value="Spouse/Asawa">Spouse/Asawa</MenuItem>
+                                <MenuItem value="Stepparent">Stepparent</MenuItem>
+                                <MenuItem value="Stepchild">Stepchild</MenuItem>
+                                <MenuItem value="In-law">In-law</MenuItem>
+                                <MenuItem value="Godparent">Godparent</MenuItem>
+                                <MenuItem value="Godchild">Godchild</MenuItem>
+                                <MenuItem value="Relative/Kamag-anak">Relative/Kamag-anak</MenuItem>
+                                <MenuItem value="Guardian">Guardian</MenuItem>
+                                <MenuItem value="Friend/Kaibigan">Friend/Kaibigan</MenuItem>
+                            </Select>
+                            <TextField
+                                label="Contact Number"
+                                value={formData.phone}
+                                onChange={(e) => handleChange(e, 'phone')}
+                                required
+                                fullWidth
+                            />
+                            <InputLabel>Priest Visit</InputLabel>
+                            <Select
+                                value={formData.priestVisit}
+                                onChange={(e) => handleChange(e, 'priestVisit')}
+                            >
+                                <MenuItem value="">Select</MenuItem>
+                                <MenuItem value="Oo/Yes">Oo/Yes</MenuItem>
+                                <MenuItem value="Hindi/No">Hindi/No</MenuItem>
+                            </Select>
+                            <InputLabel>Address</InputLabel>
+                            <TextField
+                                label="Building Name/Tower"
+                                value={formData.address.BldgNameTower}
+                                onChange={(e) => handleChange(e, 'address.BldgNameTower')}
+                                fullWidth
+                            />
+                            
+                            <TextField
+                                label="Lot/Block/Phase/House No."
+                                value={formData.address.LotBlockPhaseHouseNo}
+                                onChange={(e) => handleChange(e, 'address.LotBlockPhaseHouseNo')}
+                                fullWidth
+                            />
+                            <TextField
+                                label="Subdivision/Village/Zone"
+                                value={formData.address.SubdivisionVillageZone}
+                                onChange={(e) => handleChange(e, 'address.SubdivisionVillageZone')}
+                                fullWidth
+                            />
+                            <TextField
+                                label="Street"
+                                value={formData.address.Street}
+                                onChange={(e) => handleChange(e, 'address.Street')}
+                                required
+                                fullWidth
+                            />
+                            <TextField
 
-                    <Row>
-                        <Col md={4}>
-                            <Form.Group controlId="age">
-                                <Form.Label>Edad</Form.Label>
-                                <Form.Control
-                                    type="number"
-                                    value={formData.age}
-                                    onChange={(e) => handleChange(e, 'age')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Col md={4}>
-                            <Form.Group controlId="contactPerson">
-                                <Form.Label>Panagalan ng Magulang, Asawa o Anak</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.contactPerson}
-                                    onChange={(e) => handleChange(e, 'contactPerson')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-                        {/* <Col md={4}>
-                            <Form.Group controlId="relationship">
-                                <Form.Label>Relasyon sa Namatay</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.relationship}
-                                    onChange={(e) => handleChange(e, 'relationship')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col> */}
-                        <Col md={4}>
-                            <Form.Group controlId="relationship">
-                                <Form.Label>Relasyon sa Namatay</Form.Label>
-                                <Form.Select
-                                    value={formData.relationship}
-                                    onChange={(e) => handleChange(e, 'relationship')}
-                                    required
-                                >
-                                    <option value="">Pumili ng Relasyon</option>
-                                    <option value="Mother/Nanay">Mother/Nanay</option>
-                                    <option value="Father/Tatay">Father/Tatay</option>
-                                    <option value="Sibling/Kapatid">Sibling/Kapatid</option>
-                                    <option value="Child/Anak">Child/Anak</option>
-                                    <option value="Spouse/Asawa">Spouse/Asawa</option>
-                                    <option value="Stepparent">Stepparent</option>
-                                    <option value="Stepchild">Stepchild</option>
-                                    <option value="In-law">In-law</option>
-                                    <option value="Godparent">Godparent</option>
-                                    <option value="Godchild">Godchild</option>
-                                    <option value="Relative/Kamag-anak">Relative/Kamag-anak</option>
-                                    <option value="Guardian">Guardian</option>
-                                    <option value="Friend/Kaibigan">Friend/Kaibigan</option>
-                                    
-                                </Form.Select>
-                            </Form.Group>
-                        </Col>
-
-                    </Row>
-
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group controlId="phone">
-                                <Form.Label>Contact Number</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.phone}
-                                    onChange={(e) => handleChange(e, 'phone')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={6}>
-                            <Form.Group controlId="priestVisit">
-                                <Form.Label>Napuntahan ba ng Pari bago namatay?</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    value={formData.priestVisit}
-                                    onChange={(e) => handleChange(e, 'priestVisit')}
-                                    required
-                                >
-                                    <option value="">Select</option>
-                                    <option value="Oo/Yes">Oo/Yes</option>
-                                    <option value="Hindi/No">Hindi/No</option>
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-
-                    {/* Address */}
-                    <Row>
-                        {/* Building Name/Tower */}
-                        <Col md={4}>
-                            <Form.Group controlId="BldgNameTower">
-                                <Form.Label>Building Name/Tower</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.address.BldgNameTower}
-                                    onChange={(e) => handleChange(e, 'address.BldgNameTower')}
-                                />
-                            </Form.Group>
-                        </Col>
-
-                        {/* Lot/Block/Phase/House Number */}
-                        <Col md={4}>
-                            <Form.Group controlId="LotBlockPhaseHouseNo">
-                                <Form.Label>Lot/Block/Phase/House No.</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.address.LotBlockPhaseHouseNo}
-                                    onChange={(e) => handleChange(e, 'address.LotBlockPhaseHouseNo')}
-                                />
-                            </Form.Group>
-                        </Col>
-
-                        {/* Subdivision/Village/Zone */}
-                        <Col md={4}>
-                            <Form.Group controlId="SubdivisionVillageZone">
-                                <Form.Label>Subdivision/Village/Zone</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.address.SubdivisionVillageZone}
-                                    onChange={(e) => handleChange(e, 'address.SubdivisionVillageZone')}
-                                />
-                            </Form.Group>
-                        </Col>
-                    </Row>
-
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group controlId="Street">
-                                <Form.Label>Street</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.address.Street}
-                                    onChange={(e) => handleChange(e, 'address.Street')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group controlId="barangay">
-                                    <Form.Label>Barangay</Form.Label>
-                                    <Form.Control
-                                        as="select"
-                                        value={formData.address.barangay}
-                                        onChange={(e) => handleBarangayChange(e, 'address.barangay')}
-                                        required
-                                    >
-                                        <option value="">Select Barangay</option>
-                                        {barangays.map((barangay, index) => (
-                                            <option key={index} value={barangay}>{barangay}</option>
-                                        ))}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>
-
+                                select
+                                value={formData.address.barangay}
+                                onChange={(e) => handleBarangayChange(e, 'address.barangay')}
+                                required
+                                fullWidth
+                                SelectProps={{ native: true }}
+                            >
+                                <MenuItem value="">Select Barangay</MenuItem>
+                                {barangays.map((barangay, index) => (
+                                    <option key={index} value={barangay}>{barangay}</option>
+                                ))}
+                            </TextField>
                             {formData.address.barangay === "Others" && (
-                                <Col md={6}>
-                                    <Form.Group controlId="customBarangay">
-                                        <Form.Label>Custom Barangay</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            value={customBarangay}
-                                            onChange={(e) => setCustomBarangay(e.target.value)}
-                                            required
-                                        />
-                                    </Form.Group>
-                                </Col>
+                                <TextField
+                                    label="Custom Barangay"
+                                    value={customBarangay}
+                                    onChange={(e) => setCustomBarangay(e.target.value)}
+                                    required
+                                    fullWidth
+                                />
                             )}
-                        </Row>
+                            <TextField
+                                label="District"
+                                value={formData.address.District}
+                                onChange={(e) => handleChange(e, 'address.District')}
+                                required
+                                fullWidth
+                            />
+                            <TextField
 
-                        <Col md={6}>
-                            <Form.Group controlId="District">
-                                <Form.Label>District</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.address.District}
-                                    onChange={(e) => handleChange(e, 'address.District')}
+                                select
+                                value={formData.address.city}
+                                onChange={(e) => handleCityChange(e, 'address.city')}
+                                required
+                                fullWidth
+                                SelectProps={{ native: true }}
+                            >
+                                <option value="">Select City</option>
+                                <option value="Taguig City">Taguig City</option>
+                                <option value="Others">Others</option>
+                            </TextField>
+                            {formData.address.city === "Others" && (
+                                <TextField
+                                    label="Add City"
+                                    value={customCity}
+                                    onChange={(e) => setCustomCity(e.target.value)}
                                     required
+                                    fullWidth
                                 />
-                            </Form.Group>
-                        </Col>
-                    </Row>
+                            )}
+                            <TextField
+                                label="Dahilan ng Pagkamatay"
+                                value={formData.reasonOfDeath}
+                                onChange={(e) => handleChange(e, 'reasonOfDeath')}
+                                required
+                                fullWidth
+                            />
+                            <TextField
+                                label="Araw ng Libing"
+                                type="date"
+                                value={formData.funeralDate}
+                                onChange={(e) => handleChange(e, 'funeralDate')}
+                                required
+                                fullWidth
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                label="Oras ng Libing"
+                                type="time"
+                                value={formData.funeraltime}
+                                onChange={(e) => handleChange(e, 'funeraltime')}
+                                required
+                                fullWidth
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                label="Saan ililibing"
+                                value={formData.placeOfDeath}
+                                onChange={(e) => handleChange(e, 'placeOfDeath')}
+                                required
+                                fullWidth
+                            />
+                            <InputLabel>Rito na igagawad sa namatay</InputLabel>
+                            <Select
 
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group controlId="city">
-                                <Form.Label>City</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    value={formData.address.city}
-                                    onChange={(e) => handleCityChange(e, 'address.city')}
-                                    required
-                                >
-                                    <option value="">Select City</option>
-                                    <option value="Taguig">Taguig</option>
-                                    <option value="Others">Others</option>
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
+                                select
+                                value={formData.serviceType}
+                                onChange={(e) => handleChange(e, 'serviceType')}
+                                required
+                                fullWidth
+                                SelectProps={{ native: true }}
+                            >                               
+                                <MenuItem value="Misa">Misa</MenuItem>
+                                <MenuItem value="Blessing">Blessing</MenuItem>
+                            </Select>
+                            <InputLabel>Placing of Pall By</InputLabel>
+                            <Select
 
-                        {formData.address.city === "Others" && (
-                            <Col md={6}>
-                                <Form.Group controlId="customCity">
-                                    <Form.Label>Add City</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        value={customCity}
-                                        onChange={(e) => setCustomCity(e.target.value)}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        )}
-                    </Row>
-
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group controlId="reasonOfDeath">
-                                <Form.Label>Dahilan ng Pagkamatay</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.reasonOfDeath}
-                                    onChange={(e) => handleChange(e, 'reasonOfDeath')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Col md={4}>
-                            <Form.Group controlId="funeralDate">
-                                <Form.Label>Araw ng Libing</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    value={formData.funeralDate}
-                                    onChange={(e) => handleChange(e, 'funeralDate')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Col md={4}>
-                            <Form.Group>
-                                <Form.Label>Oras ng Libing</Form.Label>
-                                <Form.Control
-                                    type="time"
-                                    value={formData.funeraltime}
-                                    onChange={(e) => {
-                                        const ampmTime = e.target.value;
-
-                                        // am/pm 00:00 
-                                        const [time, modifier] = ampmTime.split(' ');
-                                        let [hours, minutes] = time.split(':');
-                                        hours = parseInt(hours, 10);
-
-                                        if (modifier === 'AM' && hours === 12) {
-                                            hours = 0; //12 am to 00:00
-                                        } else if (modifier === 'PM' && hours !== 12) {
-                                            hours += 12; // Convert PM to 24hr fmat
-                                        }
-                                        // Format
-                                        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes}`;
-                                        handleChange({ target: { value: formattedTime } }, 'funeraltime');
-                                    }}
-                                />
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={4}>
-                            <Form.Group controlId="placeOfDeath">
-                                <Form.Label>Saan ililibing</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.placeOfDeath}
-                                    onChange={(e) => handleChange(e, 'placeOfDeath')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Col md={4}>
-                            <Form.Group controlId="serviceType">
-                                <Form.Label>Rito na igagawad sa namatay</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    value={formData.serviceType}
-                                    onChange={(e) => handleChange(e, 'serviceType')}
-                                    required
-                                >
-                                    <option value="">Select</option>
-                                    <option value="Misa">Misa</option>
-                                    <option value="Blessing">Blessing</option>
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={4}>
-                            <Form.Group controlId="placingOfPall">
-                                <Form.Label>Placing of Pall By</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    value={formData.placingOfPall.by}
-                                    onChange={(e) => handleChange(e, 'placingOfPall.by')}
-                                    required
-                                >
-                                    <option value="">Select</option>
-                                    <option value="Priest">Pari</option>
-                                    <option value="Family Member">Family Member</option>
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-
-                        {formData.placingOfPall.by === 'Family Member' && (
-                            <Form.Group controlId="familyMembers">
-                                <Form.Label>Family Members</Form.Label>
-                                <Form.Control
-                                    type="text"
+                                select
+                                value={formData.placingOfPall.by}
+                                onChange={(e) => handleChange(e, 'placingOfPall.by')}
+                                required
+                                fullWidth
+                                SelectProps={{ native: true }}
+                            >
+                                <MenuItem value="">Placing of Pall By</MenuItem>
+                                <MenuItem value="Priest">Pari</MenuItem>
+                                <MenuItem value="Family Member">Family Member</MenuItem>
+                            </Select>
+                            {formData.placingOfPall.by === 'Family Member' && (
+                                <TextField
+                                    label="Family Members"
                                     value={formData.placingOfPall.familyMembers.join(', ')}
                                     onChange={(e) =>
                                         handleChange(
@@ -657,101 +519,66 @@ const FuneralForm = () => {
                                     }
                                     placeholder="Enter family members, separated by commas"
                                     required
+                                    fullWidth
                                 />
-                            </Form.Group>
-                        )}
+                            )}
+                            <TextField
+                                label="Araw ng Paggawad"
+                                type="date"
+                                value={formData.funeralMassDate}
+                                onChange={(e) => handleChange(e, 'funeralMassDate')}
+                                required
+                                fullWidth
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                label="Oras ng Paggawad"
+                                type="time"
+                                value={formData.funeralMasstime}
+                                onChange={(e) => handleChange(e, 'funeralMasstime')}
+                                required
+                                fullWidth
+                                InputLabelProps={{ shrink: true }}
+                            />
+                            <TextField
+                                label="Saan gaganapin"
+                                value={formData.funeralMass}
+                                onChange={(e) => handleChange(e, 'funeralMass')}
+                                required
+                                fullWidth
+                            />
+                            <TextField
 
-                        <Col md={4}>
-                            <Form.Group controlId="funeralMassDate">
-                                <Form.Label>Araw ng Paggawad</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    value={formData.funeralMassDate}
-                                    onChange={(e) => handleChange(e, 'funeralMassDate')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={4}>
-                            <Form.Group>
-                                <Form.Label>Oras ng Paggawad</Form.Label>
-                                <Form.Control
-                                    type="time"
-                                    value={formData.funeralMasstime}
-                                    onChange={(e) => {
-                                        const ampmTime = e.target.value;
-
-                                        // am/pm 00:00 
-                                        const [time, modifier] = ampmTime.split(' ');
-                                        let [hours, minutes] = time.split(':');
-                                        hours = parseInt(hours, 10);
-
-                                        if (modifier === 'AM' && hours === 12) {
-                                            hours = 0; //12 am to 00:00
-                                        } else if (modifier === 'PM' && hours !== 12) {
-                                            hours += 12; // Convert PM to 24hr fmat
-                                        }
-                                        // Format
-                                        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes}`;
-                                        handleChange({ target: { value: formattedTime } }, 'funeralMasstime');
-                                    }}
-                                />
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={5}>
-                            <Form.Group controlId="funeralMass">
-                                <Form.Label>Saan gaganapin</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.funeralMass}
-                                    onChange={(e) => handleChange(e, 'funeralMass')}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Form.Group controlId="deathCertificate">
-                            <Form.Label>Death Certificate</Form.Label>
-                            <Form.Control
                                 type="file"
-                                accept="image/*,application/pdf"
+                                inputProps={{ accept: "image/*,application/pdf" }}
                                 onChange={(e) => handleFileChange(e, 'deathCertificate')}
                                 required
+                                fullWidth
                             />
-                        </Form.Group>
-                    </Row>
-
-                    {/* Terms and Conditions Section */}
-                    <div className="terms-section">
-                        <input
-                            type="checkbox"
-                            checked={isAgreed}
-                            onChange={() => setIsAgreed(!isAgreed)}
-                        />
-                        <label>
-                            Before submitting,click this to open the <span className="terms-link" onClick={() => setIsModalOpen(true)}>Terms and Conditions</span>
-                        </label>
-                    </div>
-
-
-
-                    <Button type="submit" disabled={!isAgreed} className="mt-3">
-                        Submit
-                    </Button>
-
-                    {/* Terms Modal */}
+                            <Box>
+                                <input
+                                    type="checkbox"
+                                    checked={isAgreed}
+                                    onChange={() => setIsAgreed(!isAgreed)}
+                                />
+                                <label>
+                                    Before submitting, click this to open the <span style={{ color: 'blue', cursor: 'pointer' }} onClick={() => setIsModalOpen(true)}>Terms and Conditions</span>
+                                </label>
+                            </Box>
+                            <Button type="submit" variant="contained" color="primary" disabled={!isAgreed}>
+                                Submit
+                            </Button>
+                        </Stack>
+                    </form>
                     <TermsModal
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
                         onAccept={() => { setIsAgreed(true); setIsModalOpen(false); }}
                         termsText={termsAndConditionsText}
                     />
-
-                </Form>
-            </div>
-        </div>
+                </Paper>
+            </Box>
+        </Box>
     );
 
 };

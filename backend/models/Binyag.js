@@ -93,43 +93,33 @@ const BaptismSchema = new mongoose.Schema({
     enum: ['Pending', 'Confirmed', 'Cancelled'],
   },
 
-  additionalDocs: [
-    {
-      baptismPermitFrom: {
-        type: String,
-        required: false
-      },
+  additionalDocs: {
+    baptismPermitFrom: {
+      type: String,
+      required: false
+    },
 
-      baptismPermit: [
-        {
-          public_id: {
-            type: String,
-            required: false
-          },
-          url: {
-            type: String,
-            required: false
-          },
-        }
-      ],
-      certificateOfNoRecordBaptism: [
-        {
-          public_id: {
-            type: String,
-            required: false
-          },
-          url: {
-            type: String,
-            required: false
-          },
-        }
-      ],
-      createdAt: {
-        type: Date,
-        default: Date.now,
+    baptismPermit: {
+      public_id: {
+        type: String,
+        required: false,
+      },
+      url: {
+        type: String,
+        required: false,
       },
     },
-  ],
+    certificateOfNoRecordBaptism: {
+      public_id: {
+        type: String,
+        required: false,
+      },
+      url: {
+        type: String,
+        required: false,
+      },
+    },
+  },
 
   comments: [
     {

@@ -1,8 +1,9 @@
-const { BaptismChecklist } = require('../../models/baptismChecklist'); 
+const { BaptismChecklist } = require('../../models/baptismChecklist');
 const Baptism = require("../../models/Binyag");
 const mongoose = require("mongoose");
 const cloudinary = require('cloudinary').v2;
 // Submit Baptism Form
+
 
 exports.submitBaptismForm = async (req, res) => {
   try {
@@ -18,7 +19,8 @@ exports.submitBaptismForm = async (req, res) => {
       NinangGodparents,
     } = req.body;
 
-    const Docs = {};
+    const Docs = { additionalDocs: {} };
+    const additionalDocs = {};
 
     const uploadToCloudinary = async (file, folder) => {
       if (!file) throw new Error('File is required for upload.');
@@ -27,40 +29,42 @@ exports.submitBaptismForm = async (req, res) => {
     };
 
     try {
-      if (req.files && req.files.birthCertificate) {
+      if (req.files?.birthCertificate) {
         Docs.birthCertificate = await uploadToCloudinary(req.files.birthCertificate[0], 'eparokya/baptism/docs');
       } else {
         throw new Error('Birth Certificate is required.');
       }
 
-      if (req.files && req.files.marriageCertificate) {
+      if (req.files?.marriageCertificate) {
         Docs.marriageCertificate = await uploadToCloudinary(req.files.marriageCertificate[0], 'eparokya/baptism/docs');
       } else {
         throw new Error('Marriage Certificate is required.');
       }
 
-    //  Addiitonal Requirements
       if (req.files?.baptismPermit) {
-        additionalDocs.push({
-          baptismPermit: await Promise.all(
+        const uploadedBaptismPermit = await Promise.all(
             req.files.baptismPermit.map(file => uploadToCloudinary(file, 'eparokya/baptism/additionalDocs'))
-          ),
-        });
-      }
-
-      if (req.files?.certificateOfNoRecordBaptism) {
-        additionalDocs.push({
-          certificateOfNoRecordBaptism: await Promise.all(
+        );
+        additionalDocs.baptismPermit = uploadedBaptismPermit[0]; 
+    }
+    
+    if (req.files?.certificateOfNoRecordBaptism) {
+        const uploadedCertificate = await Promise.all(
             req.files.certificateOfNoRecordBaptism.map(file => uploadToCloudinary(file, 'eparokya/baptism/additionalDocs'))
-          ),
-        });
-      }
+        );
+        additionalDocs.certificateOfNoRecordBaptism = uploadedCertificate[0]; 
+    }
+    
+
     } catch (error) {
       return res.status(400).json({ success: false, message: error.message });
     }
 
     const userId = req.user._id;
 
+    if (Object.keys(additionalDocs).length === 0) {
+      additionalDocs = null;
+    }
     const baptism = new Baptism({
       baptismDate,
       baptismTime,
@@ -72,8 +76,8 @@ exports.submitBaptismForm = async (req, res) => {
       NinongGodparents: NinongGodparents ? JSON.parse(NinongGodparents) : [],
       NinangGodparents: NinangGodparents ? JSON.parse(NinangGodparents) : [],
       Docs,
-      additionalDocs: additionalDocs.length > 0 ? additionalDocs : undefined,
-      userId, 
+      additionalDocs,
+      userId,
     });
 
     const savedBaptism = await baptism.save();
@@ -85,11 +89,12 @@ exports.submitBaptismForm = async (req, res) => {
   }
 };
 
+
 exports.listBaptismForms = async (req, res) => {
   try {
     const baptismForms = await Baptism.find()
       .sort({ createdAt: -1 })
-      .populate('userId', 'id name'); 
+      .populate('userId', 'id name');
 
     if (baptismForms.length === 0) {
       return res.status(404).json({ message: "No baptism forms found." });
@@ -315,9 +320,9 @@ exports.updateBaptismChecklist = async (req, res) => {
 exports.addAdminNotes = async (req, res) => {
   try {
     const { baptismId } = req.params;
-    const { priest, recordedBy, bookNumber, pageNumber, lineNumber} = req.body;
+    const { priest, recordedBy, bookNumber, pageNumber, lineNumber } = req.body;
 
-    if (!priest && !recordedBy && !bookNumber && !pageNumber && !lineNumber ) {
+    if (!priest && !recordedBy && !bookNumber && !pageNumber && !lineNumber) {
       return res.status(400).json({ message: "Comment cannot be empty." });
     }
 
@@ -371,20 +376,20 @@ exports.getMySubmittedForms = async (req, res) => {
 // details 
 exports.getBaptismFormById = async (req, res) => {
   try {
-      const { formId } = req.params;
+    const { formId } = req.params;
 
-      const baptismForm = await Baptism.findById(formId)
-          .populate('userId', 'name email') 
-          .lean();
+    const baptismForm = await Baptism.findById(formId)
+      .populate('userId', 'name email')
+      .lean();
 
-      if (!baptismForm) {
-          return res.status(404).json({ message: "Baptism form not found." });
-      }
+    if (!baptismForm) {
+      return res.status(404).json({ message: "Baptism form not found." });
+    }
 
-      res.status(200).json(baptismForm);
+    res.status(200).json(baptismForm);
   } catch (error) {
-      console.error("Error fetching baptism form by ID:", error);
-      res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Error fetching baptism form by ID:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 

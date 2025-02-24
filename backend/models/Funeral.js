@@ -31,7 +31,7 @@ const FuneralSchema = new mongoose.Schema({
         SubdivisionVillageZone: { type: String, required: false },
         Street: { type: String, required: true },
         District: { type: String, required: true },
-        baranggay: {
+        barangay: {
           type: String,
           enum: [
               'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',

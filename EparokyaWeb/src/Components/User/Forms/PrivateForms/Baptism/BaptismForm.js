@@ -40,7 +40,7 @@ const BaptismForm = () => {
             birthCertificate: [],
             marriageCertificate: [],
         },
-        additionalDocs: {
+        additionalDocs: { 
             baptismPermitFrom: '',
             baptismPermit: [],
             certificateOfNoRecordBaptism: [],
@@ -139,73 +139,74 @@ const BaptismForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        console.log('Submitting formData:', formData);
         try {
             const formDataObj = new FormData();
-
-            if (formData.Docs.birthCertificate[0]) {
+    
+            // Append files from Docs
+            if (formData.Docs.birthCertificate.length > 0) {
                 formDataObj.append('birthCertificate', formData.Docs.birthCertificate[0]);
             }
-            if (formData.Docs.marriageCertificate[0]) {
+            if (formData.Docs.marriageCertificate.length > 0) {
                 formDataObj.append('marriageCertificate', formData.Docs.marriageCertificate[0]);
             }
-            // Append optional additional documents
-            if (formData.additionalDocs.baptismPermit[0]) {
-                formDataObj.append('baptismPermit', formData.additionalDocs.baptismPermit[0]);
+    
+            // Access additionalDocs properly (since it's an array)
+            const additionalDocsData = formData.additionalDocs;
+    
+            if (additionalDocsData?.baptismPermitFrom) {
+                formDataObj.append('baptismPermitFrom', additionalDocsData.baptismPermitFrom);
             }
-            if (formData.additionalDocs.certificateOfNoRecordBaptism[0]) {
-                formDataObj.append('certificateOfNoRecordBaptism', formData.additionalDocs.certificateOfNoRecordBaptism[0]);
+            
+            if (additionalDocsData?.baptismPermit?.length > 0) {
+                formDataObj.append('baptismPermit', additionalDocsData.baptismPermit[0]);
             }
-
-            // Append baptismPermitFrom field if provided
-            if (formData.additionalDocs.baptismPermitFrom) {
-                formDataObj.append('baptismPermitFrom', formData.additionalDocs.baptismPermitFrom);
+            
+            if (additionalDocsData?.certificateOfNoRecordBaptism?.length > 0) {
+                formDataObj.append('certificateOfNoRecordBaptism', additionalDocsData.certificateOfNoRecordBaptism[0]);
             }
-
-            // for (let key in formData) {
-            //     if (formData.hasOwnProperty(key)) {
-            //         const value = formData[key];
-            //         if (typeof value === 'object' && !Array.isArray(value)) {
-            //             formDataObj.append(key, JSON.stringify(value));
-            //         } else {
-            //             formDataObj.append(key, value);
-            //         }
-            //     }
-            // }
-
+            
+    
+            // Append other fields (excluding Docs and additionalDocs, as they are handled separately)
             for (let key in formData) {
                 if (formData.hasOwnProperty(key) && key !== 'Docs' && key !== 'additionalDocs') {
                     const value = formData[key];
                     formDataObj.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
                 }
             }
-
+    
             const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/baptismCreate`,
                 formDataObj,
-                config
+                {
+                    withCredentials: true,
+                }
             );
-
-            toast.success('Form submitted successfully!');
+    
             console.log('Response:', response.data);
-
+            toast.success('Form submitted successfully!');
+    
+            // Reset form data
             setFormData({
                 baptismDate: '',
                 baptismTime: '',
                 phone: '',
                 child: { fullName: '', dateOfBirth: '', placeOfBirth: '', gender: '' },
                 parents: { fatherFullName: '', placeOfFathersBirth: '', motherFullName: '', placeOfMothersBirth: '', address: '', marriageStatus: '' },
-                ninong: [{ name: '', address: '', religion: '' }],
-                ninang: [{ name: '', address: '', religion: '' }],
+                ninong: { name: '', address: '', religion: '' },
+                ninang: { name: '', address: '', religion: '' },
                 Docs: { birthCertificate: [], marriageCertificate: [] },
-                additionalDocs: { baptismPermitFrom: '', baptismPermit: [], certificateOfNoRecordBaptism: [] },
+                additionalDocs: { baptismPermitFrom: '', baptismPermit: [], certificateOfNoRecordBaptism: [],
+                    
+                },
             });
-
+    
         } catch (error) {
             console.error('Error submitting form:', error.response ? error.response.data : error.message);
             toast.error('Failed to submit form. Please try again.');
         }
     };
+    
 
     return (
 
@@ -539,7 +540,7 @@ const BaptismForm = () => {
                         ))} */}
 
                     <h4 className="mt-4">Required Documents</h4>
-                    {['BirthCertificate', 'MarriageCertificate'].map(docType => (
+                    {['birthCertificate', 'marriageCertificate'].map(docType => (
                         <Form.Group key={docType}>
                             <Form.Label className="fw-bold text-danger">{docType.replace(/([A-Z])/g, ' $1').trim()} *</Form.Label>
                             <Form.Control

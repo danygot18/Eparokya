@@ -1,13 +1,18 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Metadata from '../Layout/MetaData';
 import { useDispatch, useSelector } from 'react-redux';
 import { register, clearErrors } from '../../Redux/actions/userActions';
 import axios from 'axios';
+import { 
+    Container, TextField, Button, Typography, Box, FormControl, InputLabel, Select, MenuItem, Checkbox, FormGroup, FormControlLabel, Avatar, CircularProgress 
+} from '@mui/material';
+import Metadata from '../Layout/MetaData';
 
 const Register = () => {
     const dispatch = useDispatch();
     const { isAuthenticated, error, loading } = useSelector(state => state.auth);
+    const navigate = useNavigate();
+
     const [user, setUser] = useState({
         name: '',
         email: '',
@@ -19,19 +24,14 @@ const Register = () => {
         zip: '',
         city: '',
         country: '',
-        ministryCategory: [],
+        ministryCategory: []
     });
     const [ministryCategories, setMinistryCategories] = useState([]);
-    const [selectedMinistryCategories, setSelectedMinistryCategories] = useState([]);
-    const { name, email, password, age, preference, phone, barangay, zip, city, country } = user;
     const [avatar, setAvatar] = useState('');
     const [avatarPreview, setAvatarPreview] = useState('/images/default_avatar.jpg');
 
-    let navigate = useNavigate();
     useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/');
-        }
+        if (isAuthenticated) navigate('/');
         if (error) {
             alert(error);
             dispatch(clearErrors());
@@ -40,342 +40,109 @@ const Register = () => {
         const fetchMinistryCategories = async () => {
             try {
                 const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/ministryCategory/getAllMinistryCategories`);
-                console.log("Fetched Ministry Categories:", data); // Log full response to verify
                 if (data.success && data.categories) {
-                    setMinistryCategories(data.categories); // Set categories if successful
-                } else {
-                    console.error('Categories not found in response:', data);
+                    setMinistryCategories(data.categories);
                 }
             } catch (err) {
-                console.error('Failed to fetch ministry categories:', err);
-                setMinistryCategories([]); // Default to empty array if error occurs
+                console.error('Failed to fetch categories:', err);
             }
         };
 
         fetchMinistryCategories();
     }, [error, isAuthenticated, navigate, dispatch]);
 
-
     const submitHandler = (e) => {
         e.preventDefault();
         if (loading) return;
 
         const formData = new FormData();
-        formData.set('name', name);
-        formData.set('email', email);
-        formData.set('password', password);
-        formData.set('age', age);
-        formData.set('preference', preference);
-        formData.set('phone', phone);
-        formData.set('barangay', barangay);
-        formData.set('zip', zip);
-        formData.set('city', city);
-        formData.set('country', country);
-        if (avatar) {
-            formData.set('avatar', avatar);
-        }
-
-        // Append only the selected ministry categories
-        user.ministryCategory.forEach((categoryId) => {
-            formData.append('ministryCategory', categoryId);
+        Object.entries(user).forEach(([key, value]) => {
+            if (key === 'ministryCategory') {
+                value.forEach(categoryId => formData.append('ministryCategory', categoryId));
+            } else {
+                formData.set(key, value);
+            }
         });
-
-        // Log form data entries for debugging
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-        }
+        if (avatar) formData.set('avatar', avatar);
 
         dispatch(register(formData));
     };
 
-
-    // const onChange = e => {
-    //     if (e.target.name === 'avatar') {
-    //         const reader = new FileReader();
-    //         reader.onload = () => {
-    //             if (reader.readyState === 2) {
-    //                 setAvatarPreview(reader.result);
-    //                 setAvatar(reader.result);
-    //             }
-    //         };
-    //         reader.readAsDataURL(e.target.files[0]);
-    //     } else {
-    //         setUser({ ...user, [e.target.name]: e.target.value });
-    //     }
-    // };
-
-
     const onChange = (e) => {
         const { name, value, type, checked, files } = e.target;
-
-        if (type === 'file') {
-            if (files.length > 0) {
-                const file = files[0];
-                const reader = new FileReader();
-
-                reader.onloadend = () => {
-                    setAvatar(reader.result);
-                    setAvatarPreview(reader.result);
-                };
-
-                reader.readAsDataURL(file);
-            }
+        
+        if (type === 'file' && files.length > 0) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatar(reader.result);
+                setAvatarPreview(reader.result);
+            };
+            reader.readAsDataURL(files[0]);
         } else if (name === 'ministryCategory') {
-            setUser((prevState) => {
-                const updatedCategories = checked
-                    ? [...prevState.ministryCategory, value] // Add value (category._id)
-                    : prevState.ministryCategory.filter(id => id !== value); // Remove value (category._id)
-
-                return { ...prevState, ministryCategory: updatedCategories };
-            });
-        } else {
-            setUser((prevState) => ({
-                ...prevState,
-                [name]: value,
+            setUser(prev => ({
+                ...prev,
+                ministryCategory: checked 
+                    ? [...prev.ministryCategory, value] 
+                    : prev.ministryCategory.filter(id => id !== value)
             }));
+        } else {
+            setUser(prev => ({ ...prev, [name]: value }));
         }
     };
 
-
-
-
-
-
-
     return (
-        <Fragment>
+        <Container maxWidth="md">
             <Metadata title={'Register User'} />
-            <div className="row wrapper justify-content-center align-items-center vh-100">
-                <div className="col-10 col-lg-6 col-md-8">
-                    <form className="shadow-lg p-4" onSubmit={submitHandler} encType='multipart/form-data'>
-                        <h1 className="mb-4 text-center">Register</h1>
-
-                        {/* Name */}
-                        <div className="form-group mb-3">
-                            <label htmlFor="name_field">Name</label>
-                            <input
-                                type="text"
-                                id="name_field"
-                                className="form-control"
-                                name='name'
-                                value={name}
-                                onChange={onChange}
-                                required
-                                aria-label="Pangalan"
+            <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
+                <Typography variant="h4" gutterBottom>Register</Typography>
+                <Avatar src={avatarPreview} sx={{ width: 100, height: 100, mb: 2 }} />
+                <form onSubmit={submitHandler} style={{ width: '100%' }}>
+                    <TextField label="Name" name="name" fullWidth margin="normal" value={user.name} onChange={onChange} required />
+                    <TextField label="Email" name="email" type="email" fullWidth margin="normal" value={user.email} onChange={onChange} required />
+                    <TextField label="Password" name="password" type="password" fullWidth margin="normal" value={user.password} onChange={onChange} required />
+                    <TextField label="Age" name="age" type="number" fullWidth margin="normal" value={user.age} onChange={onChange} />
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>Preference</InputLabel>
+                        <Select name="preference" value={user.preference} onChange={onChange}>
+                            <MenuItem value="">Select Preference</MenuItem>
+                            <MenuItem value="He">He</MenuItem>
+                            <MenuItem value="She">She</MenuItem>
+                            <MenuItem value="They/Them">They/Them</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <TextField label="Phone" name="phone" fullWidth margin="normal" value={user.phone} onChange={onChange} />
+                    <TextField label="Barangay" name="barangay" fullWidth margin="normal" value={user.barangay} onChange={onChange} />
+                    <TextField label="Zip" name="zip" fullWidth margin="normal" value={user.zip} onChange={onChange} />
+                    <TextField label="City" name="city" fullWidth margin="normal" value={user.city} onChange={onChange} />
+                    <TextField label="Country" name="country" fullWidth margin="normal" value={user.country} onChange={onChange} />
+                    <FormGroup>
+                        <Typography variant="subtitle1">Ministry Categories</Typography>
+                        {ministryCategories.map(category => (
+                            <FormControlLabel 
+                                key={category._id} 
+                                control={<Checkbox name="ministryCategory" value={category._id} checked={user.ministryCategory.includes(category._id)} onChange={onChange} />} 
+                                label={category.name} 
                             />
-                        </div>
-
-                        {/* Email */}
-                        <div className="form-group mb-3">
-                            <label htmlFor="email_field">Email</label>
-                            <input
-                                type="email"
-                                id="email_field"
-                                className="form-control"
-                                name='email'
-                                value={email}
-                                onChange={onChange}
-                                required
-                                aria-label="Email"
-                            />
-                        </div>
-
-                        {/* Password */}
-                        <div className="form-group mb-3">
-                            <label htmlFor="password_field">Password</label>
-                            <input
-                                type="password"
-                                id="password_field"
-                                className="form-control"
-                                name='password'
-                                value={password}
-                                onChange={onChange}
-                                required
-                                aria-label="Password"
-                            />
-                        </div>
-
-                        {/* Age */}
-                        <div className="form-group mb-3">
-                            <label htmlFor="age_field">Age</label>
-                            <input
-                                type="number"
-                                id="age_field"
-                                className="form-control"
-                                name='age'
-                                value={age}
-                                onChange={onChange}
-                                aria-label="Edad"
-                            />
-                        </div>
-
-                        {/* Preference */}
-                        <div className="form-group mb-3">
-                            <label htmlFor="preference_field">Preference</label>
-                            <select
-                                id="preference_field"
-                                className="form-control"
-                                name='preference'
-                                value={preference}
-                                onChange={onChange}
-                                aria-label="Preference"
-                            >
-                                <option value="">Select Preference</option>
-                                <option value="He">He</option>
-                                <option value="She">She</option>
-                                <option value="They/Them">They/Them</option>
-                            </select>
-                        </div>
-
-
-                        <div className="form-group mb-3">
-                            <label htmlFor="phone_field">Phone Number</label>
-                            <input
-                                type="text"
-                                id="phone_field"
-                                className="form-control"
-                                name='phone'
-                                value={phone}
-                                onChange={onChange}
-                                aria-label="Phone Number"
-                            />
-                        </div>
-
-                       
-
-
-                        <div className="form-group mb-3">
-                            <label className="mb-2">Ministry Category</label>
-                            <div>
-                                {ministryCategories && ministryCategories.length > 0 ? (
-                                    ministryCategories.map((category) => (
-                                        <div key={category._id} className="form-check">
-                                            <input
-                                                type="checkbox"
-                                                id={`category_${category._id}`}
-                                                className="form-check-input"
-                                                name="ministryCategory"
-                                                value={category._id}
-                                                checked={user.ministryCategory?.includes(category._id)}
-                                                onChange={onChange}
-                                                style={{ width: 'auto', marginRight: '5px' }} // Adjust checkbox size
-                                            />
-                                            <label htmlFor={`category_${category._id}`} className="form-check-label">
-                                                {category.name}
-                                            </label>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p>No ministry categories available</p>
-                                )}
-                            </div>
-                        </div>
-
-
-
-                        <div className="form-group mb-3">
-                            <label htmlFor="barangay_field">Baranggay</label>
-                            <input
-                                type="text"
-                                id="barangay_field"
-                                className="form-control"
-                                name='barangay'
-                                value={barangay}
-                                onChange={onChange}
-                                aria-label="Baranggay"
-                            />
-                        </div>
-
-                        
-                        <div className="form-group mb-3">
-                            <label htmlFor="zip_field">Zip</label>
-                            <input
-                                type="text"
-                                id="zip_field"
-                                className="form-control"
-                                name='zip'
-                                value={zip}
-                                onChange={onChange}
-                                aria-label="Zip"
-                            />
-                        </div>
-
-                        {/* City */}
-                        <div className="form-group mb-3">
-                            <label htmlFor="city_field">District (Format:District No.)</label>
-                            <input
-                                type="text"
-                                id="city_field"
-                                className="form-control"
-                                name='city'
-                                value={city}
-                                onChange={onChange}
-                                aria-label="City"
-                            />
-                        </div>
-
-                        {/* Country */}
-                        <div className="form-group mb-3">
-                            <label htmlFor="country_field">Country</label>
-                            <input
-                                type="text"
-                                id="country_field"
-                                className="form-control"
-                                name='country'
-                                value={country}
-                                onChange={onChange}
-                                aria-label="Country"
-                            />
-                        </div>
-
-                        {/* Avatar */}
-                        <div className="form-group mb-4">
-                            <label htmlFor="avatar_upload">Avatar</label>
-                            <div className="d-flex align-items-center mt-2">
-                                <figure className="avatar mr-3">
-                                    <img
-                                        src={avatarPreview}
-                                        alt="Avatar Preview"
-                                        style={{
-                                            objectFit: 'cover',
-                                            width: '80px',
-                                            height: '80px',
-                                            borderRadius: '50%',
-                                        }}
-                                    />
-                                </figure>
-                                <div className="custom-file">
-                                    <input
-                                        type="file"
-                                        name="avatar"
-                                        className="custom-file-input"
-                                        id="customFile"
-                                        accept="images/*"
-                                        onChange={onChange}
-                                    />
-                                    <label className="custom-file-label" htmlFor="customFile">
-                                        Choose Avatar
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <button
-                            id="register_button"
-                            type="submit"
-                            className="btn btn-block btn-primary py-2"
-                        >
-                            {loading ? 'Registering...' : 'REGISTER'}
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </Fragment>
+                        ))}
+                    </FormGroup>
+                    <Button variant="contained" component="label" fullWidth sx={{ mt: 2 }}>
+                        Upload Avatar
+                        <input type="file" name="avatar" hidden onChange={onChange} accept="image/*" />
+                    </Button>
+                    <Button 
+                        type="submit" 
+                        variant="contained" 
+                        color="primary" 
+                        fullWidth 
+                        sx={{ mt: 3 }}
+                        disabled={loading}
+                    >
+                        {loading ? <CircularProgress size={24} /> : 'Register'}
+                    </Button>
+                </form>
+            </Box>
+        </Container>
     );
-
-
-
 };
 
 export default Register;
