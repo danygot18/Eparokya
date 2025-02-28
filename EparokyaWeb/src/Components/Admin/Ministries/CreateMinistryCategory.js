@@ -34,7 +34,6 @@ const MinistryCategory = () => {
             });
     
             console.log("Fetched categories:", response.data);
-    
             // Ensure we're extracting the array properly
             setCategories(response.data.categories || []); 
         } catch (error) {

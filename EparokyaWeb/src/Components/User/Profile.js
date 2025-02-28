@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Loader from '../Layout/Loader';
+import { Container, Grid, Card, CardContent, Typography, Avatar, Button, List, ListItem, ListItemText } from '@mui/material';
 import MetaData from '../Layout/MetaData';
 import { useSelector } from 'react-redux';
 import '../Layout/styles/style.css'; // Custom CSS for exact layout
@@ -10,14 +11,14 @@ const Profile = () => {
   const { user: reduxUser, loading } = useSelector((state) => state.auth);
   const [user, setUser] = useState(reduxUser);
 
-  console.log('user', user?.ministryCategory); // Check that "user" exists and is populated
+  console.log('user', user?.ministryCategory);
 
   const fetchUserProfile = async () => {
     try {
       const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, {
-        
+
         withCredentials: true,
-       
+
       });
       return data;
     } catch (error) {
@@ -31,7 +32,7 @@ const Profile = () => {
       const profileData = await fetchUserProfile();
       if (profileData) {
         console.log('Fetched User Profile:', profileData);
-        setUser(profileData.user); // Update the user state with the fetched profile data
+        setUser(profileData.user);
       }
     };
 
@@ -93,9 +94,21 @@ const Profile = () => {
                 </p>
                 <p>
                   <strong>Address:</strong>{' '}
-                  {user?.barangay || 'N/A'}, {user?.city || 'N/A'},{' '}
-                  {user?.country || 'N/A'}
+                  {user?.address?.BldgNameTower ? `${user.address.BldgNameTower}, ` : ''}
+                  {user?.address?.LotBlockPhaseHouseNo ? `${user.address.LotBlockPhaseHouseNo}, ` : ''}
+                  {user?.address?.SubdivisionVillageZone ? `${user.address.SubdivisionVillageZone}, ` : ''}
+                  {user?.address?.Street || 'N/A'},{' '}
+                  {user?.address?.District || 'N/A'},{' '}
+                  {user?.address?.barangay === 'Others'
+                    ? user?.address?.customBarangay || 'N/A'
+                    : user?.address?.barangay || 'N/A'
+                  },{' '}
+                  {user?.address?.city === 'Others'
+                    ? user?.address?.customCity || 'N/A'
+                    : user?.address?.city || 'N/A'}
                 </p>
+
+
                 <p>
                   <strong>Age:</strong> {user?.age || 'N/A'}
                 </p>
@@ -110,18 +123,21 @@ const Profile = () => {
                 </p>
 
                 {/* Display Ministry Categories */}
-                <p>
-                  <strong>Ministry:</strong>{' '}
-                  {user?.ministryCategory && user?.ministryCategory.length > 0 ? (
-                    <ul>
-                      {user.ministryCategory.map((category) => (
-                        <li key={category?._id}>{category?.name}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    'N/A'
-                  )}
-                </p>
+                <p><strong>Ministries:</strong></p>
+                {user?.ministryRoles?.length > 0 ? (
+                  <List>
+                    {user.ministryRoles.map((roleItem, index) => (
+                      <ListItem key={index}>
+                        <ListItemText
+                          primary={roleItem?.ministry.name || 'Unknown Ministry'}
+                          secondary={`Role: ${roleItem?.role || 'N/A'}${roleItem?.role === 'Others' ? ` - ${roleItem?.customRole}` : ''}`}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography>N/A</Typography>
+                )}
               </div>
             </div>
           </div>

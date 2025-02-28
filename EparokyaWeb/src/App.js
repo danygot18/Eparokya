@@ -79,6 +79,7 @@ import UpdateUser from './Components/Admin/User/UserUpdate';
 
 // Members
 import MemberBatchYear from './Components/Admin/Members/MemberBatchYear';
+import MemberDirectory from './Components/Admin/Members/MemberDirectory';
 
 //Calendar
 import Calendar from './Components/Admin/Calendar/Calendar';
@@ -108,6 +109,7 @@ import ResourceList from './Components/Admin/Resources/ResourceList';
 // Priest
 import CreatePriest from './Components/Admin/Priest/CreatePriest';
 import PriestList from './Components/Admin/Priest/PriestList';
+
 
 // Prayer
 import AdminPrayerReview from './Components/Admin/Prayers/AdminPrayerReview';
@@ -262,6 +264,7 @@ function App() {
 
         {/* Members */}
         <Route path="/admin/memberBatchYear" element={<ProtectedRoute isAdmin={true}><MemberBatchYear /></ProtectedRoute>} />
+        <Route path="/admin/memberDirectory" element={<ProtectedRoute isAdmin={true}><MemberDirectory /></ProtectedRoute>} />
 
         {/* Resource */}
         <Route path="/admin/resource/create" element={<ProtectedRoute isAdmin={true}><Resource /></ProtectedRoute>} />

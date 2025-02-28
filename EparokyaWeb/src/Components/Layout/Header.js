@@ -93,7 +93,7 @@ const Header = () => {
         <Nav className="d-flex align-items-center">
           {isAuthenticated ? (
             <NavDropdown
-              title={<span style={styles.navDropdownTitle}>{user.name}</span>}
+              title={<span style={styles.navDropdownTitle}>{user?.name || 'User'}</span>}
               id="user-nav-dropdown"
               align="end"
               menuVariant="light"

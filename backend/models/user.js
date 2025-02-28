@@ -97,14 +97,35 @@ const userSchema = new mongoose.Schema({
         },
         url: {
             type: String,
-            required: true 
+            required: true
         }
     },
-    ministryCategory: [
+    // ministryCategory: [
+    //     {
+    //         type: mongoose.Schema.Types.ObjectId,
+    //         ref: 'ministryCategory',
+    //         required: true,
+    //     }
+    // ],
+
+    ministryRoles: [
         {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'ministryCategory',
-            required: true,
+            ministry: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'ministryCategory',
+                required: true
+            },
+            role: {
+                type: String,
+                enum: ['Coordinator', 'Assistant Coordinator', 'Office Worker', 'Member', 'Others'],
+                required: false
+            },
+            customRole: {
+                type: String,
+                required: function () {
+                    return this.role === 'Others';
+                }
+            }
         }
     ],
     email: {
@@ -140,21 +161,55 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    barangay: {
-        type: String,
-        default: ''
-    },
-    zip: {
-        type: String,
-        default: ''
-    },
-    city: {
-        type: String,
-        default: ''
-    },
-    country: {
-        type: String,
-        default: ''
+    // barangay: {
+    //     type: String,
+    //     default: ''
+    // },
+    // zip: {
+    //     type: String,
+    //     default: ''
+    // },
+    // city: {
+    //     type: String,
+    //     default: ''
+    // },
+    // country: {
+    //     type: String,
+    //     default: ''
+    // },
+    address: {
+        BldgNameTower: { type: String, required: false },
+        LotBlockPhaseHouseNo: { type: String, required: false },
+        SubdivisionVillageZone: { type: String, required: false },
+        Street: { type: String, required: true },
+        District: { type: String, required: true },
+        barangay: {
+            type: String,
+            enum: [
+                'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+                'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
+                'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
+                'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
+                'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
+                'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
+                'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan',
+                'Others'
+            ],
+            required: true
+        },
+        customBarangay: {
+            type: String,
+            required: function () {
+                return this.address.baranggay === 'Others';
+            }
+        },
+        city: { type: String, enum: ['Taguig City', 'Others'], required: true },
+        customCity: {
+            type: String,
+            required: function () {
+                return this.address.city === 'Others';
+            }
+        },
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,

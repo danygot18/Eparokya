@@ -414,49 +414,130 @@ const mongoose = require('mongoose');
 
 // }
 
+// exports.registerUser = async (req, res, next) => {
+//     try {
+//         console.log('Received ministryCategory:', req.body.ministryCategory);
+
+//         // Upload avatar
+//         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+//             folder: 'baghub/avatar',
+//             width: 150,
+//             crop: "scale"
+//         });
+
+//         // Extract fields
+//         const { name, email, password, age, preference, phone, barangay, zip, city, country, ministryCategory } = req.body;
+
+//         let ministryCategoryArray = [];
+
+//         // Ensure ministryCategory is processed correctly
+//         if (ministryCategory) {
+//             let categoryArray = Array.isArray(ministryCategory) ? ministryCategory : [ministryCategory];
+
+//             // Log the data before processing
+//             console.log('Raw request body:', req.body);
+
+//             // Process the categories if they are valid
+//             ministryCategoryArray = categoryArray
+//                 .map(item => {
+//                     // Check if it's an object and try to extract the ID
+//                     if (typeof item === "string") {
+//                         return item; // It's already an ID
+//                     } else if (item && item._id) {
+//                         return item._id; // Extract _id if it's an object
+//                     } else {
+//                         return null;
+//                     }
+//                 })
+//                 .filter(id => mongoose.Types.ObjectId.isValid(id)) // Ensure valid ObjectId
+//                 .map(id => new mongoose.Types.ObjectId(id)); // Convert to ObjectId
+
+//             // Log the processed ministry categories
+//             console.log('Processed ministryCategory:', ministryCategoryArray);
+//         }
+
+//         // Create user
+//         const user = await User.create({
+//             name,
+//             email,
+//             password,
+//             avatar: {
+//                 public_id: result.public_id,
+//                 url: result.secure_url
+//             },
+//             age,
+//             preference,
+//             phone,
+//             barangay,
+//             zip,
+//             city,
+//             country,
+//             ministryCategory: ministryCategoryArray, // Save the processed category IDs
+//         });
+
+//         if (!user) {
+//             return res.status(500).json({
+//                 success: false,
+//                 message: 'User not created'
+//             });
+//         }
+
+//         sendToken(user, 200, res);
+//     } catch (error) {
+//         console.error('Error registering user:', error);
+//         res.status(500).json({ success: false, message: 'Internal Server Error' });
+//     }
+// };
+
+
 exports.registerUser = async (req, res, next) => {
     try {
-        console.log('Received ministryCategory:', req.body.ministryCategory);
+        console.log('Received ministryRoles:', req.body.ministryRoles);
+        console.log('Received address:', req.body.address);
 
-        // Upload avatar
         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
             folder: 'baghub/avatar',
             width: 150,
             crop: "scale"
         });
 
-        // Extract fields
-        const { name, email, password, age, preference, phone, barangay, zip, city, country, ministryCategory } = req.body;
+        const { name, email, password, age, preference, phone, address, ministryRoles } = req.body;
 
-        let ministryCategoryArray = [];
-
-        // Ensure ministryCategory is processed correctly
-        if (ministryCategory) {
-            let categoryArray = Array.isArray(ministryCategory) ? ministryCategory : [ministryCategory];
-
-            // Log the data before processing
-            console.log('Raw request body:', req.body);
-
-            // Process the categories if they are valid
-            ministryCategoryArray = categoryArray
-                .map(item => {
-                    // Check if it's an object and try to extract the ID
-                    if (typeof item === "string") {
-                        return item; // It's already an ID
-                    } else if (item && item._id) {
-                        return item._id; // Extract _id if it's an object
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(id => mongoose.Types.ObjectId.isValid(id)) // Ensure valid ObjectId
-                .map(id => new mongoose.Types.ObjectId(id)); // Convert to ObjectId
-
-            // Log the processed ministry categories
-            console.log('Processed ministryCategory:', ministryCategoryArray);
+        // ✅ FIX: Ensure `address` is properly parsed
+        let parsedAddress = {};
+        try {
+            parsedAddress = JSON.parse(address);
+        } catch (error) {
+            console.error("Error parsing address:", error);
+            return res.status(400).json({ success: false, message: "Invalid address format" });
         }
 
-        // Create user
+        // ✅ FIX: Ensure `ministryRoles` is an array
+        let ministryRolesArray = [];
+        if (ministryRoles) {
+            try {
+                const parsedRoles = JSON.parse(ministryRoles);
+                console.log("Parsed ministryRoles:", parsedRoles);
+
+                // ✅ Ensure correct structure
+                ministryRolesArray = parsedRoles.map(item => {
+                    if (item && item.ministry && item.role) {
+                        return {
+                            ministry: new mongoose.Types.ObjectId(item.ministry),
+                            role: item.role,
+                            customRole: item.role === 'Others' ? item.customRole || '' : undefined
+                        };
+                    }
+                    return null;
+                }).filter(item => item !== null);
+
+            } catch (error) {
+                console.error('Error parsing ministryRoles:', error);
+                return res.status(400).json({ success: false, message: "Invalid ministryRoles format" });
+            }
+        }
+
+        // ✅ Create User with Correct Address Structure
         const user = await User.create({
             name,
             email,
@@ -468,11 +549,12 @@ exports.registerUser = async (req, res, next) => {
             age,
             preference,
             phone,
-            barangay,
-            zip,
-            city,
-            country,
-            ministryCategory: ministryCategoryArray, // Save the processed category IDs
+            address: {
+                ...parsedAddress, // ✅ Use parsed address
+                customBarangay: parsedAddress.barangay === 'Others' ? parsedAddress.customBarangay : undefined,
+                customCity: parsedAddress.city === 'Others' ? parsedAddress.customCity : undefined,
+            },
+            ministryRoles: ministryRolesArray
         });
 
         if (!user) {
@@ -489,10 +571,14 @@ exports.registerUser = async (req, res, next) => {
     }
 };
 
+
 exports.Profile = async (req, res, next) => {
     try {
         const user = await User.findById(req.user.id)
-            .populate("ministryCategory") 
+            .populate({
+                path: "ministryRoles",
+                populate: { path: "ministry", select: "name" } // Populate ministry field inside ministryRoles
+            })
             .select("-password"); 
 
         if (!user) {
@@ -514,6 +600,7 @@ exports.Profile = async (req, res, next) => {
         });
     }
 };
+
 
 exports.LoginUser = async (req, res, next) => {
     const { email, password } = req.body;
@@ -696,12 +783,41 @@ exports.UpdateProfile = async (req, res, next) => {
 
 exports.AllUsers = async (req, res, next) => {
     const users = await User.find()
-    .populate("ministryCategory");
+    .populate("ministryRoles.ministry", "name");
     res.status(200).json({
         success: true,
         users
     })
 }
+
+// exports.AllUsers = async (req, res, next) => {
+//     try {
+//         const { search, category } = req.query;
+//         let query = {};
+
+//         if (search) {
+//             query.$or = [
+//                 { name: { $regex: search, $options: "i" } }, 
+//                 { email: { $regex: search, $options: "i" } }
+//             ];
+//         }
+//         if (category) {
+//             query.ministryCategory = category;
+//         }
+//         const users = await User.find(query).populate("ministryCategory");
+//         res.status(200).json({
+//             success: true,
+//             users
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: "Failed to retrieve users",
+//             error: error.message
+//         });
+//     }
+// };
+
 
 exports.getUserDetails = async (req, res, next) => {
     const user = await User.findById(req.params.id);
@@ -716,6 +832,79 @@ exports.getUserDetails = async (req, res, next) => {
         user
     })
 }
+
+exports.deleteUser = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: `User not found with id: ${req.params.id}`,
+            });
+        }
+        if (user.avatar && user.avatar.public_id) {
+            try {
+                await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+            } catch (cloudinaryError) {
+                console.error("Error deleting avatar from Cloudinary:", cloudinaryError);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error deleting avatar from Cloudinary',
+                    error: cloudinaryError.message,
+                });
+            }
+        }
+
+        // Delete the user from the database
+        await User.findByIdAndDelete(req.params.id);
+
+        return res.status(200).json({
+            success: true,
+            message: 'User deleted successfully',
+        });
+    } catch (error) {
+        console.error("Server error:", error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message,
+        });
+    }
+};
+
+exports.updateUser = async (req, res, next) => {
+    const newUserData = {
+        name: req.body.name,
+        email: req.body.email,
+        isAdmin: req.body.isAdmin, // Ensure boolean value
+    };
+
+    try {
+        const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
+            new: true,
+            runValidators: true,
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: user,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message,
+        });
+    }
+};
 
 // exports.getUsersGroupedByMinistryCategory = async (req, res) => {
 //     try {
@@ -755,26 +944,26 @@ exports.getUserDetails = async (req, res, next) => {
 //     })
 // }
 
-exports.getUsersByMinistryCategory = async (req, res) => {
-    try {
-        const { ministryCategoryId } = req.params;
-        console.log("Received ministryId:", ministryCategoryId); // Log the received ID
+// exports.getUsersByMinistryCategory = async (req, res) => {
+//     try {
+//         const { ministryCategoryId } = req.params;
+//         console.log("Received ministryId:", ministryCategoryId); // Log the received ID
 
-        const ministry = await MinistryCategory.findById(ministryCategoryId);
-        console.log("Ministry found:", ministry); 
+//         const ministry = await MinistryCategory.findById(ministryCategoryId);
+//         console.log("Ministry found:", ministry); 
 
-        if (!ministry) {
-            return res.status(404).json({ message: 'Ministry category not found' });
-        }
+//         if (!ministry) {
+//             return res.status(404).json({ message: 'Ministry category not found' });
+//         }
 
-        const users = await User.find({ ministryCategory: ministryCategoryId }).select('-password');
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
+//         const users = await User.find({ ministryCategory: ministryCategoryId }).select('-password');
+//         res.status(200).json(users);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Server error', error: error.message });
+//     }
+// };
 
-
+// report
 exports.getUsersGroupedByMinistryCategory = async (req, res) => {
     try {
         // Fetch all ministry categories
@@ -783,12 +972,11 @@ exports.getUsersGroupedByMinistryCategory = async (req, res) => {
         if (!ministryCategories.length) {
             return res.status(404).json({ message: "No ministry categories found" });
         }
-
-        // Prepare an array to store category-wise user data
         const results = await Promise.all(
             ministryCategories.map(async (category) => {
-                const users = await User.find({ ministryCategory: category._id })
-                    .populate("ministryCategory");
+                const users = await User.find({
+                    "ministryRoles.ministry": category._id, // ✅ Fix: Search inside ministryRoles.ministry
+                }).populate("ministryRoles.ministry"); // ✅ Fix: Populate ministryRoles.ministry instead
 
                 return {
                     ministryCategory: category.name,
@@ -808,68 +996,117 @@ exports.getUsersGroupedByMinistryCategory = async (req, res) => {
     }
 };
 
+
+exports.getUsersByMinistryCategory = async (req, res) => {
+    try {
+        const { ministryCategoryId } = req.params;
+        console.log("Received ministryId:", ministryCategoryId); // Log the received ID
+
+        const ministry = await MinistryCategory.findById(ministryCategoryId);
+        console.log("Ministry found:", ministry);
+
+        if (!ministry) {
+            return res.status(404).json({ message: 'Ministry category not found' });
+        }
+
+        // Updated query: Find users where at least one ministryRoles entry has the given ministryCategoryId
+        const users = await User.find({ 
+            "ministryRoles.ministryName": ministry.name  // ✅ Match by name instead
+        }).select('-password');
+
+        res.status(200).json({ users });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// exports.getUsersGroupedByMinistryCategory = async (req, res) => {
+//     try {
+//         // Fetch all ministry categories
+//         const ministryCategories = await MinistryCategory.find();
+
+//         if (!ministryCategories.length) {
+//             return res.status(404).json({ message: "No ministry categories found" });
+//         }
+
+//         // Prepare an array to store category-wise user data
+//         const results = await Promise.all(
+//             ministryCategories.map(async (category) => {
+//                 const users = await User.find({ ministryCategory: category._id })
+//                     .populate("ministryCategory");
+
+//                 return {
+//                     ministryCategory: category.name,
+//                     userCount: users.length,
+//                     users,
+//                 };
+//             })
+//         );
+
+//         res.status(200).json({
+//             success: true,
+//             data: results,
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ success: false, message: "Server error", error });
+//     }
+// };
+
+
+
 // Fetching user ministry:
-exports.getUserMinistries = async (req, res) => {
-    try {
-        const userId = req.user.id;
 
-        // Populate user's ministry categories
-        const user = await User.findById(userId).populate("ministryCategory", "name");
+// exports.getUsersGroupedByMinistryCategory = async (req, res) => {
+//     try {
+//         const ministryCategories = await MinistryCategory.find();
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+//         if (!ministryCategories.length) {
+//             return res.status(404).json({ message: "No ministry categories found" });
+//         }
 
-        res.status(200).json(user.ministryCategory); // Corrected path
-    } catch (error) {
-        console.error("Error fetching user ministries:", error);
-        res.status(500).json({ message: "Server error", error: error.message });
-    }
-};
+//         const results = await Promise.all(
+//             ministryCategories.map(async (category) => {
+//                 const users = await User.find({
+//                     "ministryRoles.ministry": category._id, 
+//                 }).populate("ministryRoles.ministry"); 
+
+//                 return {
+//                     ministryCategory: category.name,
+//                     userCount: users.length,
+//                     users,
+//                 };
+//             })
+//         );
+
+//         res.status(200).json({
+//             success: true,
+//             data: results,
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ success: false, message: "Server error", error });
+//     }
+// };
 
 
+// exports.getUserMinistries = async (req, res) => {
+//     try {
+//         const userId = req.user.id;
 
-exports.deleteUser = async (req, res, next) => {
-    try {
-        const user = await User.findById(req.params.id);
+//         // Populate user's ministry categories
+//         const user = await User.findById(userId).populate("ministryCategory", "name");
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: `User not found with id: ${req.params.id}`,
-            });
-        }
+//         if (!user) {
+//             return res.status(404).json({ message: "User not found" });
+//         }
 
-        // Check if the user has an avatar with a public_id before attempting to delete
-        if (user.avatar && user.avatar.public_id) {
-            try {
-                await cloudinary.v2.uploader.destroy(user.avatar.public_id);
-            } catch (cloudinaryError) {
-                console.error("Error deleting avatar from Cloudinary:", cloudinaryError);
-                return res.status(500).json({
-                    success: false,
-                    message: 'Error deleting avatar from Cloudinary',
-                    error: cloudinaryError.message,
-                });
-            }
-        }
-
-        // Delete the user from the database
-        await User.findByIdAndDelete(req.params.id);
-
-        return res.status(200).json({
-            success: true,
-            message: 'User deleted successfully',
-        });
-    } catch (error) {
-        console.error("Server error:", error);
-        return res.status(500).json({
-            success: false,
-            message: 'Server error',
-            error: error.message,
-        });
-    }
-};
+//         res.status(200).json(user.ministryCategory); // Corrected path
+//     } catch (error) {
+//         console.error("Error fetching user ministries:", error);
+//         res.status(500).json({ message: "Server error", error: error.message });
+//     }
+// };
 
 
 // exports.updateUser = async (req, res, next) => {
@@ -890,40 +1127,35 @@ exports.deleteUser = async (req, res, next) => {
 //     })
 // }
 
-exports.updateUser = async (req, res, next) => {
-    const newUserData = {
-        name: req.body.name,
-        email: req.body.email,
-        isAdmin: req.body.isAdmin, // Ensure boolean value
-    };
 
+
+//Reports
+
+//getting user ministry 
+exports.getUserMinistries = async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
-            new: true,
-            runValidators: true,
-        });
+        const userId = req.user.id;
+        const user = await User.findById(userId).populate("ministryRoles.ministry", "name");
 
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found',
-            });
+            return res.status(404).json({ message: "User not found" });
         }
 
-        return res.status(200).json({
-            success: true,
-            data: user,
-        });
+        const ministries = user.ministryRoles.map(role => ({
+            ministryId: role.ministry._id,
+            ministryName: role.ministry.name,
+            role: role.role, 
+            customRole: role.customRole || null 
+        }));
+
+        res.status(200).json(ministries);
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: 'Server error',
-            error: error.message,
-        });
+        console.error("Error fetching user ministries:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
-//Reports
+
 exports.getRegisteredUsersCount = async (req, res, next) => {
     try {
       const count = await User.countDocuments();
@@ -932,6 +1164,61 @@ exports.getRegisteredUsersCount = async (req, res, next) => {
       res.status(500).json({ success: false, message: "Failed to fetch user count", error });
     }
   };
+
+exports.getUsersByMinistryCategory = async (req, res) => {
+    try {
+        const { ministryCategoryId } = req.params;
+        const { search, category } = req.query; 
+
+        const ministryCategory = await MinistryCategory.findById(ministryCategoryId);
+        if (!ministryCategory) {
+            return res.status(404).json({ message: "Ministry category not found" });
+        }
+
+        let filter = { "ministryRoles.ministry": ministryCategoryId }; // ✅ Fix: Search inside ministryRoles
+
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: "i" } }, 
+                { email: { $regex: search, $options: "i" } } 
+            ];
+        }
+
+        if (category) {
+            filter["ministryRoles.ministry"] = category; // ✅ Fix: Adjusted category filter
+        }
+
+        const users = await User.find(filter)
+            .populate("ministryRoles.ministry") // ✅ Fix: Populate ministryRoles.ministry instead
+            .sort({ createdAt: -1 }); 
+
+        if (!users.length) {
+            return res.status(404).json({ message: "No users found for this ministry category" });
+        }
+
+        res.status(200).json({
+            ministryCategory: ministryCategory.name,
+            users: users.map(user => ({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                avatar: user.avatar?.url || "",
+                joined: user.createdAt, 
+                ministryRoles: user.ministryRoles
+                    .filter(role => role.ministry?._id.toString() === ministryCategoryId) // ✅ Fix: Only return relevant ministry roles
+                    .map(role => ({
+                        ministryName: role.ministry?.name || "",
+                        role: role.role,
+                        customRole: role.customRole || null
+                    }))
+            })),
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error", error });
+    }
+};
+
   
 // exports.updateUser = async (req, res) => {
 //     try {
@@ -956,50 +1243,50 @@ exports.getRegisteredUsersCount = async (req, res, next) => {
 //     }
 // };
 
-exports.getUsersByMinistryCategory = async (req, res) => {
-    try {
-        const { ministryCategoryId } = req.params;
-        const { search, category } = req.query; 
+// exports.getUsersByMinistryCategory = async (req, res) => {
+//     try {
+//         const { ministryCategoryId } = req.params;
+//         const { search, category } = req.query; 
 
-        const ministryCategory = await MinistryCategory.findById(ministryCategoryId);
-        if (!ministryCategory) {
-            return res.status(404).json({ message: "Ministry category not found" });
-        }
+//         const ministryCategory = await MinistryCategory.findById(ministryCategoryId);
+//         if (!ministryCategory) {
+//             return res.status(404).json({ message: "Ministry category not found" });
+//         }
 
-        let filter = { ministryCategory: ministryCategoryId };
+//         let filter = { ministryCategory: ministryCategoryId };
 
-        if (search) {
-            filter.$or = [
-                { name: { $regex: search, $options: "i" } }, 
-                { email: { $regex: search, $options: "i" } } 
-            ];
-        }
+//         if (search) {
+//             filter.$or = [
+//                 { name: { $regex: search, $options: "i" } }, 
+//                 { email: { $regex: search, $options: "i" } } 
+//             ];
+//         }
 
-        if (category) {
-            filter.ministryCategory = category;
-        }
-        const users = await User.find(filter)
-            .populate("ministryCategory")
-            .sort({ createdAt: -1 }); 
+//         if (category) {
+//             filter.ministryCategory = category;
+//         }
+//         const users = await User.find(filter)
+//             .populate("ministryCategory")
+//             .sort({ createdAt: -1 }); 
 
-        if (!users.length) {
-            return res.status(404).json({ message: "No users found for this ministry category" });
-        }
+//         if (!users.length) {
+//             return res.status(404).json({ message: "No users found for this ministry category" });
+//         }
 
-        res.status(200).json({
-            ministryCategory: ministryCategory.name,
-            users: users.map(user => ({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                avatar: user.avatar?.url || "",
-                joined: user.createdAt, 
-                ministryCategory: user.ministryCategory.map(cat => cat.name).join(", ") 
-            })),
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error", error });
-    }
-};
+//         res.status(200).json({
+//             ministryCategory: ministryCategory.name,
+//             users: users.map(user => ({
+//                 _id: user._id,
+//                 name: user.name,
+//                 email: user.email,
+//                 avatar: user.avatar?.url || "",
+//                 joined: user.createdAt, 
+//                 ministryCategory: user.ministryCategory.map(cat => cat.name).join(", ") 
+//             })),
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: "Server error", error });
+//     }
+// };
 

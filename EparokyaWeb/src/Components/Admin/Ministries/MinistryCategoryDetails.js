@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import SideBar from "../SideBar";
 import "./ministryCategoryDetails.css";
+import eparokyaLogo from "../../../assets/images/EPAROKYA-SYST.png";
 
 const MinistryCategoryDetails = () => {
   const { id: ministryCategoryId } = useParams();
@@ -21,7 +22,10 @@ const MinistryCategoryDetails = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
-
+  const config = {
+    withCredentials: true,
+  };
+  
   useEffect(() => {
     const fetchUsers = async () => {
       if (!ministryCategoryId) return;
@@ -220,7 +224,7 @@ const MinistryCategoryDetails = () => {
               >
                 <div className="announcement-header">
                   <img
-                    src="../../../../../public/EPAROKYA-SYST.png"
+                    src={eparokyaLogo}
                     alt="Saint Joseph Parish - Taguig"
                     className="announcement-image"
                   />

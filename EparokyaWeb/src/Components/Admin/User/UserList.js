@@ -2,13 +2,13 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Table, Button, Form } from 'react-bootstrap'; // Bootstrap Table and Button
-import { FaEdit, FaTrashAlt } from 'react-icons/fa'; // Icons from react-icons
+import { Table, Button, Form } from 'react-bootstrap';
+import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import MetaData from '../../Layout/MetaData';
 import Loader from '../../Layout/Loader';
 import SideBar from '../SideBar';
 import axios from 'axios';
-import { getToken, successMsg, errMsg } from '../../../Utils/helpers'
+import { getToken, successMsg, errMsg } from '../../../Utils/helpers';
 
 const UsersList = () => {
   const [loading, setLoading] = useState(true);
@@ -16,19 +16,19 @@ const UsersList = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [isDeleted, setIsDeleted] = useState('');
   const [search, setSearch] = useState('');
-  const [ministryCategories, setMinistryCategories] = useState([]); // Store ministry categories
+  const [ministryCategories, setMinistryCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const navigate = useNavigate();
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   const config = {
-    withCredentials: true
+    withCredentials: true,
   };
 
   const listUsers = async () => {
     try {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_API}/api/v1/admin/users?search=${search}&category=${selectedCategory}`,
+        `${process.env.REACT_APP_API}/api/v1/admin/users?search=${search}&ministry=${selectedCategory}`, 
         config
       );
       console.log("Fetched users:", data.users);
@@ -42,17 +42,19 @@ const UsersList = () => {
 
   const fetchMinistryCategories = async () => {
     try {
-      const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/ministryCategory/getAllMinistryCategories`, config);
-      setMinistryCategories(data.categories); // Ensure it's stored as an array
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/ministryCategory/getAllMinistryCategories`,
+        config
+      );
+      setMinistryCategories(data.ministryCategories || []);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
-      setMinistryCategories([]); // Prevent UI from breaking
+      setMinistryCategories([]);
     }
   };
 
   useEffect(() => {
     listUsers();
-    console.log("Fetching categories...");
     fetchMinistryCategories();
 
     if (error) {
@@ -114,7 +116,6 @@ const UsersList = () => {
               </Form.Group>
             </Form>
 
-            {/* 🔽 Filter Dropdown for Ministry Category */}
             <Form className="mb-3">
               <Form.Group controlId="category">
                 <Form.Label>Filter by Ministry Category:</Form.Label>
@@ -157,9 +158,11 @@ const UsersList = () => {
                         <td>{user.name}</td>
                         <td>{user.email}</td>
                         <td>
-                          {Array.isArray(user.ministryCategory) && user.ministryCategory.length > 0
-                            ? user.ministryCategory.map((category) => category.name).join(', ')
-                            : "No Category"}
+                          {Array.isArray(user.ministryRoles) && user.ministryRoles.length > 0
+                            ? user.ministryRoles
+                                .map((role) => role.ministry?.name || "Unknown")
+                                .join(', ')
+                            : "No Ministry"}
                         </td>
                         <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                         <td>
