@@ -241,6 +241,8 @@ exports.isAuthenticatedUser = async (req, res, next) => {
 //         next()
 //     }
 // }
+
+
 exports.isAuthorized = (...roles) => {
     
     try {

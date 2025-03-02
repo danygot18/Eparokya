@@ -6,6 +6,19 @@ const cookieParser = require("cookie-parser");
 const errorHandler = require("./helpers/error-handler");
 
 
+// For natification:
+const { Server } = require("socket.io");
+const http = require("http");
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: ["https://eparokya.vercel.app", "http://localhost:3000"],
+    credentials: true,
+  },
+});
+
+
 // const allowedOrigins = ["https://eparokya.vercel.app","*", null];
 
 // Load environment variables
@@ -61,14 +74,23 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 // User & Authentication
 app.use("/api/v1", require("./routes/user"));
 app.use("/api/v1/chat", require("./routes/chat"));
+
 // Prayer Wall
+
+app.use("/api/v1", require("./routes/Notification/notification"));
+
+
 
 // Ministry & Members
 app.use("/api/v1/ministryCategory", require("./routes/ministryCategory"));
 
 app.use("/api/v1/", require("./routes/PrayerWall/prayerWall"));
 app.use("/api/v1", require("./routes/PrayerWall/prayerRequest"));
-app.use("/api/v1", require("./routes/PrayerWall/prayerRequestIntention"));
+// app.use("/api/v1", require("./routes/PrayerWall/prayerRequestIntention"));
+
+const prayerRequestRoutes = require("./routes/PrayerWall/prayerRequestIntention")(io);
+app.use("/api/v1", prayerRequestRoutes);
+
 // Announcements & Posts
 app.use("/api/v1", require("./routes/Announcement/announcement"));
 app.use("/api/v1", require("./routes/Announcement/announcementCategory"));
@@ -111,4 +133,5 @@ app.use("/api/v1", require("./routes/liveVideo"))
 // Chat Feature
 
 
-module.exports = app;
+module.exports = { app, server };
+// module.exports = app;

@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import GuestSidebar from "../../GuestSideBar";
 import "./PrayerStyles/prayerIntention.css";
+import { socket } from "../../../socket/index.js"; 
 
 const PrayerRequestIntention = () => {
   const [formData, setFormData] = useState({
@@ -64,45 +65,89 @@ const PrayerRequestIntention = () => {
   };
   
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
   
-    if (formData.prayerType === "Others (Iba pa)" && !formData.addPrayer) {
-      toast.error("Please specify your prayer when selecting Others.");
-      return;
-    }
+  //   if (formData.prayerType === "Others (Iba pa)" && !formData.addPrayer) {
+  //     toast.error("Please specify your prayer when selecting Others.");
+  //     return;
+  //   }
   
-    try {
-      const payload = {
-        ...formData,
-        Intentions: formData.intentions.map((intention) => ({ name: intention.name })), 
-      };
+  //   try {
+  //     const payload = {
+  //       ...formData,
+  //       Intentions: formData.intentions.map((intention) => ({ name: intention.name })), 
+  //     };
   
-      console.log("Submitting payload:", payload); 
+  //     console.log("Submitting payload:", payload); 
   
-      await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/prayerRequestIntention/submit`,
-        payload,
-        config
-      );
+  //     await axios.post(
+  //       `${process.env.REACT_APP_API}/api/v1/prayerRequestIntention/submit`,
+  //       payload,
+  //       config
+  //     );
   
-      toast.success("Prayer submitted. This will be reviewed shortly.");
-      setFormData({
-        offerorsName: "",
-        prayerType: "",
-        addPrayer: "",
-        prayerDescription: "",
-        prayerRequestDate: "",
-        prayerRequestTime: "",
-        intentions: [], 
-      });
-    } catch (error) {
-      console.error("Submission error:", error.response?.data); 
-      toast.error(error.response?.data?.message || "Something went wrong");
-    }
-  };
+  //     toast.success("Prayer submitted. This will be reviewed shortly.");
+  //     setFormData({
+  //       offerorsName: "",
+  //       prayerType: "",
+  //       addPrayer: "",
+  //       prayerDescription: "",
+  //       prayerRequestDate: "",
+  //       prayerRequestTime: "",
+  //       intentions: [], 
+  //     });
+  //   } catch (error) {
+  //     console.error("Submission error:", error.response?.data); 
+  //     toast.error(error.response?.data?.message || "Something went wrong");
+  //   }
+  // };
   
-  
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (formData.prayerType === "Others (Iba pa)" && !formData.addPrayer) {
+    toast.error("Please specify your prayer when selecting Others.");
+    return;
+  }
+
+  try {
+    const payload = {
+      ...formData,
+      Intentions: formData.intentions.map((intention) => ({ name: intention.name })),
+    };
+
+    console.log("Submitting payload:", payload);
+
+    await axios.post(
+      `${process.env.REACT_APP_API}/api/v1/prayerRequestIntention/submit`,
+      payload,
+      config
+    );
+
+    // Emit WebSocket notification for admins
+    socket.emit("prayerRequestSubmitted", {
+      message: `New prayer request submitted by ${formData.offerrorsName || "a user"}.`,
+      timestamp: new Date(),
+    });
+
+    toast.success("Prayer submitted. This will be reviewed shortly.");
+    setFormData({
+      offerrorsName: "",
+      prayerType: "",
+      addPrayer: "",
+      prayerDescription: "",
+      prayerRequestDate: "",
+      prayerRequestTime: "",
+      intentions: [],
+    });
+  } catch (error) {
+    console.error("Submission error:", error.response?.data);
+    toast.error(error.response?.data?.message || "Something went wrong");
+  }
+};
+
   
 
   const handleClear = () => {

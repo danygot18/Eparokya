@@ -1,12 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const PrayerRequestIntention = require('../../models/PrayerWall/prayerRequestIntention');
+const Notification = require('../../models/Notification/notification');
+const User = require('../../models/user');
 const { body, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const leoProfanity = require('leo-profanity');
 
-exports.createPrayerRequestIntention = async (req, res) => {
+exports.createPrayerRequestIntention = async (req, res, io) => { 
     console.log("Received Data:", req.body);
+    console.log("Authenticated User:", req.user); 
+
+    if (!req.user) {
+        return res.status(401).json({ message: "User is not defined. Please authenticate." });
+    }
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -26,11 +33,38 @@ exports.createPrayerRequestIntention = async (req, res) => {
 
         const newPrayerRequest = new PrayerRequestIntention({
             ...req.body,
-            userId: req.user._id,
+            userId: req.user._id, 
             Intentions: Array.isArray(Intentions) ? Intentions : [],
         });
 
         await newPrayerRequest.save();
+
+        //  Find all Admins
+        const admins = await User.find({ isAdmin: true }, '_id');
+        const adminIds = admins.map(admin => admin._id.toString());
+
+        // Save Notification to Database
+        const notification = new Notification({
+            user: req.user._id,
+            type: "prayer request",
+            message: "A new prayer request has been submitted.",
+            link: `/admin/prayer-requests`,
+            isRead: false
+        });
+
+        await notification.save();
+
+        //  Emit Notification to Connected Admins
+        if (io) {
+            io.emit("send-notification", { adminIds, message: notification.message, link: notification.link });
+            io.emit("push-notification", {
+                message: notification.message,
+                link: notification.link,
+                adminIds: adminIds,
+            });
+        } else {
+            console.error("Socket.io is not initialized");
+        }
 
         res.status(201).json({
             message: 'Prayer submitted. This will be reviewed shortly.',

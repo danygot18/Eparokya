@@ -11,7 +11,7 @@ const ParishPriest = () => {
     const fetchPriests = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllPriest`);
-        setPriests(response.data); // ✅ Use response.data directly
+        setPriests(response.data); 
         setLoading(false);
       } catch (error) {
         console.error('Error fetching priests:', error);

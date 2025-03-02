@@ -7,6 +7,8 @@ import { logout } from '../../Redux/actions/userActions';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import logo from '../../assets/images/EparokyaHomeLogo.png';
+import NotificationBell from "../Notification/NotificationBell";
+
 
 
 const Header = () => {
@@ -44,6 +46,7 @@ const Header = () => {
 
       {/* Right: Navigation Links (Including Home Button & User Menu) */}
       <div style={styles.navContainer}>
+      
         <Link
           to="/"
           style={{
@@ -70,7 +73,8 @@ const Header = () => {
           Send Prayer
         </Link>
 
-
+        <NotificationBell />
+        
         <NavDropdown
           title={<span style={styles.navDropdownTitle}>Parish Info</span>}
           id="parish-info-dropdown"

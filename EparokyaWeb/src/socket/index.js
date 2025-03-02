@@ -12,3 +12,9 @@ export const socket = io(`https://eparokya.onrender.com`, {
     reconnectionDelayMax: 2000, // max delay in ms between reconnection attempts
     timeout: 5000, // connection timeout before failing
 });
+
+export const connectSocket = () => {
+    if (!socket.connected) {
+        socket.connect();
+    }
+};
