@@ -18,7 +18,8 @@ const {
     getRegisteredUsersCount,
     getUsersByMinistryCategory,
     getUsersGroupedByMinistryCategory,
-    getUserMinistries
+    getUserMinistries,
+    getUserFormCounts,
      
 } = require('../controllers/userController');
 const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
@@ -42,6 +43,7 @@ router.get("/userMinistries", isAuthenticatedUser, getUserMinistries);
 router.get('/:ministryCategoryId/getUsers', getUsersByMinistryCategory);
 router.get('/admin/getUsersGroupedByMinistryCategory', isAuthenticatedUser, isAuthorized("admin"), getUsersGroupedByMinistryCategory)
 
+router.get("/formCounts/user", isAuthenticatedUser, getUserFormCounts);
 // router.put('/profile/update', UpdateProfile);
 
 module.exports = router;

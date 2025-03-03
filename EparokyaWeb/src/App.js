@@ -143,6 +143,7 @@ import MinistryCategoryDetails from './Components/Admin/Ministries/MinistryCateg
 
 import ResourceCategory from './Components/Admin/Resources/ResourceCategory';
 
+import FormCounts from './Components/Admin/UserFormCounts/FormCounts';
 
 //Guest View
 import { Prayers } from './Components/Guest/Prayers';
@@ -254,6 +255,8 @@ function App() {
         <Route path="/admin/ministryCategoryDetails/:id" element={<ProtectedRoute isAdmin={true}><MinistryCategoryDetails /></ProtectedRoute>} />
 
         <Route path="/admin/prayerReview" element={<ProtectedRoute isAdmin={true}><AdminPrayerReview /></ProtectedRoute>} />
+
+        <Route path="/admin/formCounts" element={<ProtectedRoute isAdmin={true}><FormCounts /></ProtectedRoute>} />
 
 
         {/* announcement - update */}

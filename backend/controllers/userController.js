@@ -380,6 +380,10 @@ const cloudinary = require('cloudinary')
 const crypto = require('crypto')
 const sendEmail = require('../utils/sendEmail');
 const MinistryCategory = require("../models/ministryCategory");
+const {Wedding} = require("../models/weddings");
+const Binyag = require("../models/Binyag");
+const Counseling = require("../models/counseling");
+const HouseBlessing = require("../models/PrivateScheduling/houseBlessing");
 const mongoose = require('mongoose');
 
 // exports.registerUser = async (req, res, next) => {
@@ -1219,7 +1223,45 @@ exports.getUsersByMinistryCategory = async (req, res) => {
     }
 };
 
-  
+exports.getUserFormCounts = async (req, res) => {
+    try {
+        // Debugging: Check if models are loaded
+        console.log("Wedding model:", !!Wedding);
+        console.log("Binyag model:", !!Binyag);
+        console.log("Counseling model:", !!Counseling);
+        console.log("HouseBlessing model:", !!HouseBlessing);
+
+        // Fetch all users
+        const users = await User.find({}, "_id name email");
+
+        // Get form submission counts per user
+        const userFormData = await Promise.all(
+            users.map(async (user) => {
+                const weddingCount = Wedding ? await Wedding.countDocuments({ userId: user._id }) : 0;
+                const baptismCount = Binyag ? await Binyag.countDocuments({ userId: user._id }) : 0;
+                const counselingCount = Counseling ? await Counseling.countDocuments({ userId: user._id }) : 0;
+                const houseBlessingCount = HouseBlessing ? await HouseBlessing.countDocuments({ userId: user._id }) : 0;
+
+                return {
+                    userId: user._id,
+                    name: user.name,
+                    email: user.email,
+                    wedding: weddingCount,
+                    baptism: baptismCount,
+                    counseling: counselingCount,
+                    houseBlessing: houseBlessingCount,
+                };
+            })
+        );
+
+        res.status(200).json(userFormData);
+    } catch (error) {
+        console.error("Error fetching user form counts:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
 // exports.updateUser = async (req, res) => {
 //     try {
 //         const { isAdmin } = req.body;
