@@ -26,12 +26,13 @@ module.exports = (socket) => {
     socket.on("send-notification", (data) => {
         const { adminIds, message, link } = data;
 
-        adminIds.forEach((adminId) => {
-            const adminSocket = USERS.get(adminId);
-            if (adminSocket) {
-                adminSocket.emit("push-notification", { message, link });
-            }
+        adminIds
+        .map(adminId => USERS.get(adminId))
+        .filter(adminSocket => adminSocket)
+        .forEach(adminSocket => {
+            adminSocket.emit("push-notification", { message, link });
         });
+    
     });
 
     socket.on('disconnect', () => {

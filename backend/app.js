@@ -133,5 +133,5 @@ app.use("/api/v1", require("./routes/liveVideo"))
 // Chat Feature
 
 
-module.exports = { app, server };
+module.exports = { app, server, io };
 // module.exports = app;

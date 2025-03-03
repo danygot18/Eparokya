@@ -19,10 +19,12 @@ module.exports = (io) => {
     const prayerRequestIntentionController = require('../../controllers/Prayers/PrayerRequestIntentionController');
     const { isAuthenticatedUser } = require('../../middleware/auth');
 
-    // Pass `io` to the controller function
-    router.post('/prayerRequestIntention/submit', isAuthenticatedUser, (req, res) => 
-        prayerRequestIntentionController.createPrayerRequestIntention(req, res, io)
-    );
+    router.use((req, res, next) => {
+        req.app.set("io", io);  
+        next();
+    });
+
+    router.post('/prayerRequestIntention/submit', isAuthenticatedUser, prayerRequestIntentionController.createPrayerRequestIntention);
 
     router.get('/getAllPrayerRequestIntention', prayerRequestIntentionController.getAllPrayerRequestIntention);
     router.get('/getPrayerRequestIntentionById/:prayerIntentionId', prayerRequestIntentionController.getPrayerRequestIntentionById);
@@ -32,3 +34,4 @@ module.exports = (io) => {
 
     return router;
 };
+

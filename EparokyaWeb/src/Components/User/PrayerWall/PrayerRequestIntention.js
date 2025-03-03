@@ -45,7 +45,7 @@ const PrayerRequestIntention = () => {
   const handleIntentionChange = (index, value) => {
     setFormData((prev) => {
       const newIntentions = [...prev.intentions];
-      newIntentions[index].name = value; // Ensure name is updated
+      newIntentions[index].name = value; 
       return { ...prev, intentions: newIntentions };
     });
   };

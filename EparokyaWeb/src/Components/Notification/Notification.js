@@ -23,8 +23,9 @@ const Notification = () => {
 
     fetchNotifications();
 
-    socket.on("send-notification", (data) => {
-      console.log("📩 Received Notification:", data);
+    socket.on("push-notification", (data) => {
+
+      console.log("Received Notification:", data);
       toast.success(`New Notification: ${data.message}`);
 
       setNotifications((prev) => [...prev, { 

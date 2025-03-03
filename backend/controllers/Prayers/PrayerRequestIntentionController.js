@@ -7,9 +7,9 @@ const { body, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const leoProfanity = require('leo-profanity');
 
-exports.createPrayerRequestIntention = async (req, res, io) => { 
+exports.createPrayerRequestIntention = async (req, res) => {
     console.log("Received Data:", req.body);
-    console.log("Authenticated User:", req.user); 
+    console.log("Authenticated User:", req.user);
 
     if (!req.user) {
         return res.status(401).json({ message: "User is not defined. Please authenticate." });
@@ -33,29 +33,30 @@ exports.createPrayerRequestIntention = async (req, res, io) => {
 
         const newPrayerRequest = new PrayerRequestIntention({
             ...req.body,
-            userId: req.user._id, 
+            userId: req.user._id,
             Intentions: Array.isArray(Intentions) ? Intentions : [],
         });
 
         await newPrayerRequest.save();
 
-        //  Find all Admins
+        // ✅ Find all Admins
         const admins = await User.find({ isAdmin: true }, '_id');
         const adminIds = admins.map(admin => admin._id.toString());
 
-        // Save Notification to Database
+        // ✅ Save Notification to Database
         const notification = new Notification({
             user: req.user._id,
             type: "prayer request",
             message: "A new prayer request has been submitted.",
-            link: `/admin/prayer-requests`,
+            link: `${process.env.FRONTEND_URL}/admin/prayerIntentionList`,
             isRead: false
         });
 
         await notification.save();
 
-        //  Emit Notification to Connected Admins
-        if (io) {
+        // ✅ Emit Notification to Connected Admins (Check io)
+        if (req.app.get("io")) {
+            const io = req.app.get("io"); // Get Socket.io instance
             io.emit("send-notification", { adminIds, message: notification.message, link: notification.link });
             io.emit("push-notification", {
                 message: notification.message,
@@ -63,7 +64,7 @@ exports.createPrayerRequestIntention = async (req, res, io) => {
                 adminIds: adminIds,
             });
         } else {
-            console.error("Socket.io is not initialized");
+            console.error("❌ Socket.io is not initialized");
         }
 
         res.status(201).json({
@@ -71,10 +72,11 @@ exports.createPrayerRequestIntention = async (req, res, io) => {
             data: newPrayerRequest,
         });
     } catch (err) {
-        console.error("Server Error:", err.message);
+        console.error("❌ Server Error:", err.message);
         res.status(500).json({ message: err.message });
     }
 };
+
 
 exports.getAllPrayerRequestIntention = async (req, res) => {
     try {

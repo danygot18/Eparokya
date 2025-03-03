@@ -16,5 +16,8 @@ export const socket = io(`https://eparokya.onrender.com`, {
 export const connectSocket = () => {
     if (!socket.connected) {
         socket.connect();
+        console.log("Attempting to connect WebSocket...");
+    } else {
+        console.log("WebSocket already connected:", socket.id);
     }
 };
