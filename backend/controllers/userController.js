@@ -505,9 +505,8 @@ exports.registerUser = async (req, res, next) => {
             crop: "scale"
         });
 
-        const { name, email, password, age, preference, phone, address, ministryRoles } = req.body;
+        const { name, email, password, age, civilStatus, preference, phone, address, ministryRoles } = req.body;
 
-        // ✅ FIX: Ensure `address` is properly parsed
         let parsedAddress = {};
         try {
             parsedAddress = JSON.parse(address);
@@ -516,14 +515,12 @@ exports.registerUser = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "Invalid address format" });
         }
 
-        // ✅ FIX: Ensure `ministryRoles` is an array
         let ministryRolesArray = [];
         if (ministryRoles) {
             try {
                 const parsedRoles = JSON.parse(ministryRoles);
                 console.log("Parsed ministryRoles:", parsedRoles);
 
-                // ✅ Ensure correct structure
                 ministryRolesArray = parsedRoles.map(item => {
                     if (item && item.ministry && item.role) {
                         return {
@@ -541,7 +538,6 @@ exports.registerUser = async (req, res, next) => {
             }
         }
 
-        // ✅ Create User with Correct Address Structure
         const user = await User.create({
             name,
             email,
@@ -551,10 +547,11 @@ exports.registerUser = async (req, res, next) => {
                 url: result.secure_url
             },
             age,
+            civilStatus,
             preference,
             phone,
             address: {
-                ...parsedAddress, // ✅ Use parsed address
+                ...parsedAddress, 
                 customBarangay: parsedAddress.barangay === 'Others' ? parsedAddress.customBarangay : undefined,
                 customCity: parsedAddress.city === 'Others' ? parsedAddress.customCity : undefined,
             },

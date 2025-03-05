@@ -161,22 +161,20 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    // barangay: {
-    //     type: String,
-    //     default: ''
-    // },
-    // zip: {
-    //     type: String,
-    //     default: ''
-    // },
-    // city: {
-    //     type: String,
-    //     default: ''
-    // },
-    // country: {
-    //     type: String,
-    //     default: ''
-    // },
+    civilStatus: {
+        type: String,
+        enum: [
+            'Single', 
+            'Married', 
+            'Divorced', 
+            'Widowed', 
+            'Separated', 
+            'In Civil Partnership', 
+            'Former Civil Partner', 
+            ],
+    required: true
+
+    },
     address: {
         BldgNameTower: { type: String, required: false },
         LotBlockPhaseHouseNo: { type: String, required: false },
