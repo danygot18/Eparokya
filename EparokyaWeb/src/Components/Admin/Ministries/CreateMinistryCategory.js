@@ -242,180 +242,180 @@ const MinistryCategory = () => {
     );
 };
 
-const styles = {
-    wrapper: {
-        display: 'flex',
-        minHeight: '100vh',
-        backgroundColor: '#e8f5e9',
-    },
-    content: {
-        display: 'flex',
-        flex: 1,
-        padding: '20px',
-        gap: '40px',
-    },
-    leftPane: {
-        flex: 1,
-        backgroundColor: '#d9ead3',
-        padding: '20px',
-        borderRadius: '10px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    },
-    rightPane: {
-        flex: 2,
-        backgroundColor: '#d9ead3',
-        padding: '20px',
-        borderRadius: '10px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    },
-    title: {
-        textAlign: 'center',
-        marginBottom: '20px',
-        color: '#333',
-        fontSize: '24px',
-        fontWeight: 'bold',
-    },
-    form: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '15px',
-    },
-    formGroup: {
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    label: {
-        marginBottom: '5px',
-        fontSize: '16px',
-    },
-    input: {
-        padding: '10px',
-        borderRadius: '6px',
-        border: '1px solid #ccc',
-        fontSize: '16px',
-    },
-    textarea: {
-        padding: '10px',
-        borderRadius: '6px',
-        border: '1px solid #ccc',
-        fontSize: '16px',
-        minHeight: '80px',
-    },
-    buttonGroup: {
-        display: 'flex',
-        gap: '10px',
-    },
-    submitButton: {
-        flex: 1,
-        padding: '10px',
-        borderRadius: '6px',
-        backgroundColor: '#388e3c',
-        color: '#fff',
-        border: 'none',
-        fontSize: '16px',
-        cursor: 'pointer',
-    },
-    cancelButton: {
-        flex: 1,
-        padding: '10px',
-        borderRadius: '6px',
-        backgroundColor: '#d32f2f',
-        color: '#fff',
-        border: 'none',
-        fontSize: '16px',
-        cursor: 'pointer',
-    },
-    searchInput: {
-        padding: '10px',
-        width: '100%',
-        borderRadius: '6px',
-        border: '1px solid #ccc',
-        marginBottom: '20px',
-        fontSize: '16px',
-    },
-    listTitle: {
-        marginBottom: '10px',
-        fontSize: '20px',
-        fontWeight: 'bold',
-    },
-    list: {
-        listStyleType: 'none',
-        padding: '0',
-        marginBottom: '20px',
-    },
-    listItem: {
-        padding: '10px',
-        borderBottom: '1px solid #ccc',
-    },
-    pagination: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px',
-        padding: '10px 0',
-    },
-    paginationButton: {
-        padding: '5px 10px',
-        border: 'none',
-        backgroundColor: '#d9ead3',
-        cursor: 'pointer',
-        fontSize: '16px',
-    },
+    const styles = {
+        wrapper: {
+            display: 'flex',
+            minHeight: '100vh',
+            backgroundColor: '#e8f5e9',
+        },
+        content: {
+            display: 'flex',
+            flex: 1,
+            padding: '20px',
+            gap: '40px',
+        },
+        leftPane: {
+            flex: 1,
+            backgroundColor: '#d9ead3',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        },
+        rightPane: {
+            flex: 2,
+            backgroundColor: '#d9ead3',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        },
+        title: {
+            textAlign: 'center',
+            marginBottom: '20px',
+            color: '#333',
+            fontSize: '24px',
+            fontWeight: 'bold',
+        },
+        form: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '15px',
+        },
+        formGroup: {
+            display: 'flex',
+            flexDirection: 'column',
+        },
+        label: {
+            marginBottom: '5px',
+            fontSize: '16px',
+        },
+        input: {
+            padding: '10px',
+            borderRadius: '6px',
+            border: '1px solid #ccc',
+            fontSize: '16px',
+        },
+        textarea: {
+            padding: '10px',
+            borderRadius: '6px',
+            border: '1px solid #ccc',
+            fontSize: '16px',
+            minHeight: '80px',
+        },
+        buttonGroup: {
+            display: 'flex',
+            gap: '10px',
+        },
+        submitButton: {
+            flex: 1,
+            padding: '10px',
+            borderRadius: '6px',
+            backgroundColor: '#388e3c',
+            color: '#fff',
+            border: 'none',
+            fontSize: '16px',
+            cursor: 'pointer',
+        },
+        cancelButton: {
+            flex: 1,
+            padding: '10px',
+            borderRadius: '6px',
+            backgroundColor: '#d32f2f',
+            color: '#fff',
+            border: 'none',
+            fontSize: '16px',
+            cursor: 'pointer',
+        },
+        searchInput: {
+            padding: '10px',
+            width: '100%',
+            borderRadius: '6px',
+            border: '1px solid #ccc',
+            marginBottom: '20px',
+            fontSize: '16px',
+        },
+        listTitle: {
+            marginBottom: '10px',
+            fontSize: '20px',
+            fontWeight: 'bold',
+        },
+        list: {
+            listStyleType: 'none',
+            padding: '0',
+            marginBottom: '20px',
+        },
+        listItem: {
+            padding: '10px',
+            borderBottom: '1px solid #ccc',
+        },
+        pagination: {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            padding: '10px 0',
+        },
+        paginationButton: {
+            padding: '5px 10px',
+            border: 'none',
+            backgroundColor: '#d9ead3',
+            cursor: 'pointer',
+            fontSize: '16px',
+        },
 
-    paginationText: {
-        fontSize: '16px',
-        fontWeight: 'bold',
-    },
-    actions: {
-        marginTop: '10px',
-        display: 'flex',
-        gap: '10px',
-    },
+        paginationText: {
+            fontSize: '16px',
+            fontWeight: 'bold',
+        },
+        actions: {
+            marginTop: '10px',
+            display: 'flex',
+            gap: '10px',
+        },
 
-    listItem: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '10px 15px',
-        borderBottom: '1px solid #ddd',
-        borderRadius: '8px',
-        backgroundColor: '#e6f4e9',
-        marginBottom: '10px',
-        fontSize: '16px',
-    },
-    
-    categoryText: {
-        flex: 1,
-        marginRight: '15px',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-    },
-    
-    buttonContainer: {
-        display: 'flex',
-        gap: '10px',
-    },
-    
-    editButton: {
-        padding: '6px',
-        borderRadius: '6px',
-        border: 'none',
-        backgroundColor: '#2e7d32',
-        color: '#fff',
-        cursor: 'pointer',
-        fontSize: '14px',
-    },
-    
-    deleteButton: {
-        padding: '6px',
-        borderRadius: '6px',
-        border: 'none',
-        backgroundColor: '#c62828',
-        color: '#fff',
-        cursor: 'pointer',
-        fontSize: '14px',
-    },
-};
+        listItem: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 15px',
+            borderBottom: '1px solid #ddd',
+            borderRadius: '8px',
+            backgroundColor: '#e6f4e9',
+            marginBottom: '10px',
+            fontSize: '16px',
+        },
+        
+        categoryText: {
+            flex: 1,
+            marginRight: '15px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+        },
+        
+        buttonContainer: {
+            display: 'flex',
+            gap: '10px',
+        },
+        
+        editButton: {
+            padding: '6px',
+            borderRadius: '6px',
+            border: 'none',
+            backgroundColor: '#2e7d32',
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: '14px',
+        },
+        
+        deleteButton: {
+            padding: '6px',
+            borderRadius: '6px',
+            border: 'none',
+            backgroundColor: '#c62828',
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: '14px',
+        },
+    };
 
 export default MinistryCategory;

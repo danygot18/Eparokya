@@ -46,6 +46,12 @@ const SideBar = () => {
             </Link>
           </div>
           <div style={styles.navItem}>
+            <Link to="/admin/formCounts" className="sidebar-link" style={styles.sidebarLink}>
+              <PeopleIcon style={styles.icon} />
+              User Submission
+            </Link>
+          </div>
+          <div style={styles.navItem}>
             <Link to="/admin/live" className="sidebar-link" style={styles.sidebarLink}>
               <LiveTvIcon style={styles.icon} />
               Live

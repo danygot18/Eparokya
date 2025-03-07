@@ -67,6 +67,7 @@ const WeddingForm = () => {
         BrideChildBirthCertificate: "",
         BrideOneByOne: "",
     });
+    const [isMarried, setIsMarried] = useState(false);
     const [user, setUser] = useState(null);
     const config = {
         withCredentials: true,
@@ -120,6 +121,9 @@ const WeddingForm = () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config);
                 setUser(response.data.user);
+                if (response.data.user.civilStatus === "Married") {
+                    alert("Sorry, but a 'Married' user cannot submit an application / Paumanhin. Ang kasal ay hindi na maaring magsagot ng applikasyon.");
+                }
             } catch (error) {
                 console.error('Error fetching user:', error.response ? error.response.data : error.message);
             }
@@ -226,7 +230,7 @@ const WeddingForm = () => {
             setCustomBarangay('');
         }
     };
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -311,6 +315,14 @@ const WeddingForm = () => {
     return (
         <form onSubmit={handleSubmit} encType="multipart/form-data">
             <h2>Wedding Form</h2>
+
+            {/* Warning message if user is married */}
+            {isMarried && (
+                <div style={{ color: "red", fontWeight: "bold", marginBottom: "10px" }}>
+                    Sorry, but a "Married" user cannot submit an application. <br />
+                    Paumanhin, ang "kasal" ay hindi maaring mag-sagot ng applikasyon.
+                </div>
+            )}
 
             {/* Wedding Date & Time */}
             <Form.Group>

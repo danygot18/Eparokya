@@ -110,6 +110,9 @@ import ResourceList from './Components/Admin/Resources/ResourceList';
 import CreatePriest from './Components/Admin/Priest/CreatePriest';
 import PriestList from './Components/Admin/Priest/PriestList';
 
+// FeedbackForm
+import EventType from './Components/Admin/FeedbackForm/Types/EventType';
+import ActivityType from './Components/Admin/FeedbackForm/Types/ActivityType';
 
 // Prayer
 import AdminPrayerReview from './Components/Admin/Prayers/AdminPrayerReview';
@@ -195,7 +198,7 @@ function App() {
         <Route path="/weddingWall" element={<WeddingWall />} exact="true" />
         <Route path="/parishPriests" element={<ParishPriest />} exact="true" />
 
-       
+
         <Route path="/user/ministryAnnouncement" element={<MinistryAnnouncement />} exact="true" />
 
         <Route path="/user/calendar" element={<UserCalendar />} exact="true" />
@@ -276,6 +279,12 @@ function App() {
         {/* Priest */}
         <Route path="/admin/create/priest" element={<ProtectedRoute isAdmin={true}><CreatePriest /></ProtectedRoute>} />
         <Route path="/admin/priestList" element={<ProtectedRoute isAdmin={true}><PriestList /></ProtectedRoute>} />
+
+        {/* FeedbackForm */}
+        {/* Types */}
+        <Route path="/admin/EventType" element={<ProtectedRoute isAdmin={true}><EventType /></ProtectedRoute>} />
+        <Route path="/admin/ActivityType" element={<ProtectedRoute isAdmin={true}><ActivityType /></ProtectedRoute>} />
+
 
         {/* counseling */}
         <Route path="/admin/counselingList" element={<ProtectedRoute isAdmin={true}><CounselingList /></ProtectedRoute>} />

@@ -578,7 +578,7 @@ exports.Profile = async (req, res, next) => {
         const user = await User.findById(req.user.id)
             .populate({
                 path: "ministryRoles",
-                populate: { path: "ministry", select: "name" } // Populate ministry field inside ministryRoles
+                populate: { path: "ministry", select: "name" } 
             })
             .select("-password"); 
 
@@ -606,7 +606,6 @@ exports.Profile = async (req, res, next) => {
 exports.LoginUser = async (req, res, next) => {
     const { email, password } = req.body;
 
-    // Checks if email and password is entered by user
     if (!email || !password) {
         return res.status(400).json({ error: 'Please enter email & password' })
     }
@@ -669,10 +668,8 @@ exports.ForgotPassword = async (req, res, next) => {
         return res.status(404).json({ error: 'User not found with this email' })
         // return next(new ErrorHandler('User not found with this email', 404));
     }
-    // Get reset token
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
-    // Create reset password url
     const resetUrl = `${req.protocol}://localhost:3000/password/reset/${resetToken}`;
     const message = `Your password reset token is as follow:\n\n${resetUrl}\n\nIf you have not requested this email, then ignore it.`
     try {
@@ -697,7 +694,6 @@ exports.ForgotPassword = async (req, res, next) => {
 }
 
 exports.ResetPassword = async (req, res, next) => {
-    // Hash URL token
     const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex')
     const user = await User.findOne({
         resetPasswordToken,
@@ -714,7 +710,6 @@ exports.ResetPassword = async (req, res, next) => {
         // return next(new ErrorHandler('Password does not match', 400))
     }
 
-    // Setup new password
     user.password = req.body.password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
@@ -857,7 +852,6 @@ exports.deleteUser = async (req, res, next) => {
             }
         }
 
-        // Delete the user from the database
         await User.findByIdAndDelete(req.params.id);
 
         return res.status(200).json({
@@ -878,7 +872,7 @@ exports.updateUser = async (req, res, next) => {
     const newUserData = {
         name: req.body.name,
         email: req.body.email,
-        isAdmin: req.body.isAdmin, // Ensure boolean value
+        isAdmin: req.body.isAdmin, 
     };
 
     try {
@@ -976,8 +970,8 @@ exports.getUsersGroupedByMinistryCategory = async (req, res) => {
         const results = await Promise.all(
             ministryCategories.map(async (category) => {
                 const users = await User.find({
-                    "ministryRoles.ministry": category._id, // ✅ Fix: Search inside ministryRoles.ministry
-                }).populate("ministryRoles.ministry"); // ✅ Fix: Populate ministryRoles.ministry instead
+                    "ministryRoles.ministry": category._id, 
+                }).populate("ministryRoles.ministry"); 
 
                 return {
                     ministryCategory: category.name,
@@ -1001,7 +995,7 @@ exports.getUsersGroupedByMinistryCategory = async (req, res) => {
 exports.getUsersByMinistryCategory = async (req, res) => {
     try {
         const { ministryCategoryId } = req.params;
-        console.log("Received ministryId:", ministryCategoryId); // Log the received ID
+        console.log("Received ministryId:", ministryCategoryId);
 
         const ministry = await MinistryCategory.findById(ministryCategoryId);
         console.log("Ministry found:", ministry);
@@ -1010,9 +1004,8 @@ exports.getUsersByMinistryCategory = async (req, res) => {
             return res.status(404).json({ message: 'Ministry category not found' });
         }
 
-        // Updated query: Find users where at least one ministryRoles entry has the given ministryCategoryId
         const users = await User.find({ 
-            "ministryRoles.ministryName": ministry.name  // ✅ Match by name instead
+            "ministryRoles.ministryName": ministry.name  
         }).select('-password');
 
         res.status(200).json({ users });
@@ -1176,7 +1169,7 @@ exports.getUsersByMinistryCategory = async (req, res) => {
             return res.status(404).json({ message: "Ministry category not found" });
         }
 
-        let filter = { "ministryRoles.ministry": ministryCategoryId }; // ✅ Fix: Search inside ministryRoles
+        let filter = { "ministryRoles.ministry": ministryCategoryId }; 
 
         if (search) {
             filter.$or = [
@@ -1186,11 +1179,11 @@ exports.getUsersByMinistryCategory = async (req, res) => {
         }
 
         if (category) {
-            filter["ministryRoles.ministry"] = category; // ✅ Fix: Adjusted category filter
+            filter["ministryRoles.ministry"] = category; 
         }
 
         const users = await User.find(filter)
-            .populate("ministryRoles.ministry") // ✅ Fix: Populate ministryRoles.ministry instead
+            .populate("ministryRoles.ministry") 
             .sort({ createdAt: -1 }); 
 
         if (!users.length) {
@@ -1206,7 +1199,7 @@ exports.getUsersByMinistryCategory = async (req, res) => {
                 avatar: user.avatar?.url || "",
                 joined: user.createdAt, 
                 ministryRoles: user.ministryRoles
-                    .filter(role => role.ministry?._id.toString() === ministryCategoryId) // ✅ Fix: Only return relevant ministry roles
+                    .filter(role => role.ministry?._id.toString() === ministryCategoryId) 
                     .map(role => ({
                         ministryName: role.ministry?.name || "",
                         role: role.role,
@@ -1222,16 +1215,13 @@ exports.getUsersByMinistryCategory = async (req, res) => {
 
 exports.getUserFormCounts = async (req, res) => {
     try {
-        // Debugging: Check if models are loaded
         console.log("Wedding model:", !!Wedding);
         console.log("Binyag model:", !!Binyag);
         console.log("Counseling model:", !!Counseling);
         console.log("HouseBlessing model:", !!HouseBlessing);
 
-        // Fetch all users
         const users = await User.find({}, "_id name email");
 
-        // Get form submission counts per user
         const userFormData = await Promise.all(
             users.map(async (user) => {
                 const weddingCount = Wedding ? await Wedding.countDocuments({ userId: user._id }) : 0;

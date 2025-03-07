@@ -79,7 +79,10 @@ app.use("/api/v1/chat", require("./routes/chat"));
 
 app.use("/api/v1", require("./routes/Notification/notification"));
 
-
+// Sentiment Analysis
+app.use("/api/v1/", require("./routes/FeedbackForm/sentimentAnalysis"));
+app.use("/api/v1/", require("./routes/FeedbackForm/Types/eventType"));
+app.use("/api/v1/", require("./routes/FeedbackForm/Types/activityType"));
 
 // Ministry & Members
 app.use("/api/v1/ministryCategory", require("./routes/ministryCategory"));

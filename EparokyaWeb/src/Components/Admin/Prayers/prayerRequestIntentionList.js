@@ -29,26 +29,8 @@ const PrayerRequestIntentionList = () => {
         return matchesSearch && matchesFilter;
     });
 
-    const prayerTypeColors = {
-        'For the sick and suffering (Para sa mga may sakit at nagdurusa)': '#FF6B6B',
-        'For those who have died (Para sa mga namatay na)': '#4ECDC4',
-        'Special Intentions(Natatanging Kahilingan)': '#FFD93D',
-        'For family and friends (Para sa pamilya at mga kaibigan)': '#1A535C',
-        'For those who are struggling (Para sa mga nahihirapan/naghihirap)': '#FF9F1C',
-        'For peace and justice (Para sa kapayapaan at katarungan)': '#2EC4B6',
-        'For the Church (Para sa Simbahan)': '#5D5FEF',
-        'For vocations (Para sa mga bokasyon)': '#9D4EDD',
-        'For forgiveness of sins (Para sa kapatawaran ng mga kasalanan)': '#F25F5C',
-        'For guidance and wisdom (Para sa gabay at karunungan)': '#247BA0',
-        'For strength and courage (Para sa lakas at tapang)': '#70C1B3',
-        'For deeper faith and love (Para sa mas malalim na pananampalataya at pag-ibig)': '#B5838D',
-        'For perseverance (Para sa pagtitiyaga/pagtitiis)': '#6D597A',
-        'Others (Iba pa)': '#F28482'
-    };
-
-
-    const getPrayerTypeColor = (prayerType) => {
-        return prayerTypeColors[prayerType] || '#CCCCCC';
+    const getBorderColor = (isDone) => {
+        return isDone ? '#28a745' : '#dc3545'; 
     };
 
     const handleCardClick = (prayerIntentionId) => {
@@ -68,12 +50,10 @@ const PrayerRequestIntentionList = () => {
                     />
                     <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
                         <option value="">All Prayer Types</option>
-                        {Object.keys(prayerTypeColors).map((type) => (
+                        {[...new Set(prayerRequests.map(req => req.prayerType))].map((type) => (
                             <option key={type} value={type}>{type}</option>
                         ))}
                     </select>
-
-
                 </div>
 
                 <div className="prayer-intention-grid">
@@ -81,7 +61,7 @@ const PrayerRequestIntentionList = () => {
                         <div
                             key={request._id}
                             className="prayer-intention-card"
-                            style={{ borderLeft: `8px solid ${getPrayerTypeColor(request.prayerType)}` }}
+                            style={{ borderLeft: `8px solid ${getBorderColor(request.isDone)}` }}
                             onClick={() => handleCardClick(request._id)}
                         >
                             <h3>Prayer Intention #{index + 1}</h3>
@@ -89,7 +69,7 @@ const PrayerRequestIntentionList = () => {
                             <p><strong>Prayer Type:</strong> {request.prayerType === 'Others (Iba pa)' ? request.addPrayer : request.prayerType}</p>
                             <p><strong>Date:</strong> {new Date(request.prayerRequestDate).toLocaleDateString()}</p>
                             <p><strong>Time:</strong> {new Date(`1970-01-01T${request.prayerRequestTime}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
-                            <p><strong>Is Done:</strong> {request.isDone ? 'Yes' : 'No'}</p>
+                            <p><strong>Is Done:</strong> <span style={{ color: request.isDone ? 'green' : 'red' }}>{request.isDone ? 'Yes' : 'No'}</span></p>
                             <p><strong>Submitted By:</strong> {request.userId?.name || 'N/A'}</p>
                             <p><strong>Created At:</strong> {new Date(request.createdAt).toLocaleDateString()}</p>
                         </div>
@@ -98,7 +78,6 @@ const PrayerRequestIntentionList = () => {
             </div>
         </div>
     );
-
 };
 
 export default PrayerRequestIntentionList;
