@@ -59,3 +59,17 @@ const socket = require('./socket');
 
 io.on('connection', socket);
 
+// ---------------------- SENTIMENT ANALYSIS ---------------------- //
+let sentimentAnalyzer;
+
+(async () => {
+    try {
+        const { pipeline } = await import('@xenova/transformers'); // ✅ Dynamic Import
+        sentimentAnalyzer = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
+        console.log('✅ Sentiment model loaded successfully!');
+    } catch (error) {
+        console.error("❌ Error loading sentiment model:", error);
+    }
+})();
+
+

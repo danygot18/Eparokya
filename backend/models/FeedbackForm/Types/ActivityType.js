@@ -8,8 +8,7 @@ const ActivityTypeSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now,
-      },
+    },
 });
 
-const ActivityType = mongoose.model('ActivityType', ActivityTypeSchema);
-module.exports = { ActivityType };
+module.exports = mongoose.model('ActivityType', ActivityTypeSchema);

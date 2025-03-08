@@ -13,18 +13,36 @@ const EventSentimentSchema = new mongoose.Schema(
       required: true,
     },
     responses: {
-        type: [
-          {
-            question: { type: String, required: true }, 
-            emoji: { type: String, required: true }, 
-            comment: { type: String, required: true }, 
-            sentimentResult: { type: String, required: true }, 
-          },
-        ],
-        validate: [(val) => val.length === 5, "Must have exactly 5 responses."],
-      },
+      type: [
+        {
+          question: { type: String, required: true }, 
+          emoji: { type: String, required: true }, 
+          sentimentResult: { 
+            score: { type: Number, required: true },
+            comparative: { type: Number, required: true },
+            magnitude: { type: Number, required: true },
+            words: { type: [String], required: true },
+            positive: { type: [String], required: true },
+            negative: { type: [String], required: true },
+          }, 
+        },
+      ],
+      validate: [(val) => val.length === 5, "Must have exactly 5 responses."],
+    },
+    comment: {
+      type: String, 
+      required: true,
+    },
+    commentSentiment: { 
+      score: { type: Number, required: true },
+      comparative: { type: Number, required: true },
+      words: { type: [String], required: true },
+      positive: { type: [String], required: true },
+      negative: { type: [String], required: true },
+    },
     overallSentiment: {
       type: String, 
+      enum: ["Very Positive", "Positive", "Neutral", "Negative", "Very Negative"], 
     },
     confidence: {
       type: Number, 

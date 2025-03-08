@@ -8,8 +8,7 @@ const EventTypeSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now,
-      },
+    },
 });
 
-const EventType = mongoose.model('EventType', EventTypeSchema);
-module.exports = { EventType };
+module.exports = mongoose.model('EventType', EventTypeSchema); 
