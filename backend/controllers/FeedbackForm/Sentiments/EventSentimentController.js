@@ -1,6 +1,6 @@
 const EventSentiment = require("../../../models/FeedbackForm/Sentiments/EventSentiment");
 const EventType = require("../../../models/FeedbackForm/Types/EventType");
-const analyzeSentiment = require("../../../utils/SentimentAnalyzer");
+const analyzeSentiment = require("../../../utils/sentimentAnalyzer");
 
 // Analyze and save sentiment response for an event
 exports.analyzeSentiment = async (req, res) => {
