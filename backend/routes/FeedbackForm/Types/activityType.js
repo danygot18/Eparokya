@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const activityTypeController = require("../controllers/activityTypeController");
+const activityTypeController = require("../../../controllers/FeedbackForm/Types/ActivityTypeController");
 
 router.post("/createActivityType", activityTypeController.createActivityType);
 router.get("/getAllActivityTypes", activityTypeController.getAllActivityTypes);

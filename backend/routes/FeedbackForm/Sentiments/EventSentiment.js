@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const eventSentimentController = require("../../../controllers/FeedbackForm/Sentiment/EventSentimentController");
+const eventSentimentController = require("../../../controllers/FeedbackForm/Sentiments/EventSentimentController");
 
 router.post("/analyzeEventSentiment", eventSentimentController.analyzeSentiment);
 

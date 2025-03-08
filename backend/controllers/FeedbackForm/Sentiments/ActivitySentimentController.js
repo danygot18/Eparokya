@@ -1,6 +1,6 @@
 const ActivitySentiment = require("../../models/ActivitySentiment");
 const ActivityType = require("../../models/ActivityType");
-const analyzeSentiment = require("../../utils/sentimentAnalyzer");
+const analyzeSentiment = require("../../../utils/sentimentAnalyzer");
 
 // Analyze and save sentiment response for an activity
 exports.analyzeSentiment = async (req, res) => {
