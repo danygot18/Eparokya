@@ -1,0 +1,156 @@
+const EventSentiment = require("../../../models/FeedbackForm/Sentiments/EventSentiment");
+const EventType = require("../../../models/FeedbackForm/Types/EventType");
+const Sentiment = require("sentiment");
+const analyzeSentiment = require("../../../utils/sentimentAnalyzer");
+
+const emojiSentimentMap = {
+    "😡": -2, "😠": -2, "😞": -1, "😕": -1, "😐": 0,
+    "😊": 1, "😃": 2, "😄": 2, "😍": 3, "👍": 2
+};
+
+const calculateEmojiSentiment = (responses) => {
+    if (!responses || !Array.isArray(responses)) return {
+        score: 0, comparative: 0, magnitude: 0, words: [], positive: [], negative: []
+    };
+
+    let total = 0, count = 0, magnitude = 0;
+    let positiveWords = [], negativeWords = [];
+
+    responses.forEach((r) => {
+        if (r.emoji && emojiSentimentMap[r.emoji] !== undefined) {
+            let sentimentValue = emojiSentimentMap[r.emoji];
+            total += sentimentValue;
+            magnitude += Math.abs(sentimentValue);
+            count++;
+
+            if (sentimentValue > 0) positiveWords.push(r.emoji);
+            else if (sentimentValue < 0) negativeWords.push(r.emoji);
+        }
+    });
+
+    let score = count > 0 ? total / count : 0;
+    return {
+        score,
+        comparative: score,
+        magnitude,
+        words: [...positiveWords, ...negativeWords],
+        positive: positiveWords,
+        negative: negativeWords
+    };
+};
+
+const determineOverallSentiment = (basicScore, advancedScore, advancedLabel, emojiScore) => {
+    const weightedAvg = (0.3 * basicScore) + (0.5 * advancedScore) + (0.7 * emojiScore); // More weight to emoji & AI
+    
+    if (weightedAvg > 1.0) return "very positive";
+    if (weightedAvg > 0.4) return "positive";
+    if (weightedAvg < -0.3) return "negative";
+    if (weightedAvg < -1.0) return "very negative";
+
+    return "neutral";
+};
+
+const confidenceScore = (basicScore, advancedScore, emojiScore) => {
+    return Math.min(1.5, Math.abs((basicScore + advancedScore) / 2) + (Math.abs(emojiScore) / 5));
+};
+
+const sentimentToStars = (label, basicSentiment) => {
+    if (basicSentiment.positive.length > 0 && basicSentiment.negative.length > 0) {
+        return "4 stars"; 
+    }
+
+    const sentimentMapping = {
+        "very positive": "5 stars",
+        "positive": "4 stars",
+        "neutral": "3 stars",
+        "negative": "2 stars",
+        "very negative": "1 star"
+    };
+
+    return sentimentMapping[label?.toLowerCase()] || "3 stars"; 
+};
+exports.analyzeSentiment = async (req, res) => {
+    try {
+        console.log("Received Request Body:", req.body);
+        const { userId, eventTypeId, responses, comment } = req.body;
+
+        if (!userId || !eventTypeId || !responses) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        let emojiSentiment = calculateEmojiSentiment(responses);
+
+        let commentSentiment = comment
+            ? await analyzeSentiment(emojiSentiment.score, comment)
+            : {
+                basic: { score: 0, comparative: 0, magnitude: 0, words: [], positive: [], negative: [], method: "basic" },
+                advanced: { label: "neutral", score: 0, magnitude: 0, method: "huggingface" }
+            };
+
+        // Adjust basic sentiment score if mixed words are detected
+        if (commentSentiment.basic.positive.length > 0 && commentSentiment.basic.negative.length > 0) {
+            emojiSentiment.score *= 0.7;  // Reduce influence if mixed feedback
+        }
+        
+        const overallSentiment = determineOverallSentiment(
+            commentSentiment?.basic?.score || 0,
+            commentSentiment?.advanced?.score || 0,
+            emojiSentiment.score
+        );
+
+        const finalConfidence = confidenceScore(
+            commentSentiment?.basic?.score || 0,
+            commentSentiment?.advanced?.score || 0,
+            emojiSentiment.score
+        );
+
+        const sentimentResult = new Sentiment({
+            userId,
+            eventTypeId,
+            responses,
+            comment: comment || null,
+            emojiSentiment,
+            commentSentiment: {
+                ...commentSentiment,
+                label: sentimentToStars(overallSentiment, commentSentiment.basic)  
+            },
+            overallSentiment,
+            confidence: finalConfidence
+        });
+
+        await sentimentResult.save();
+
+        res.status(200).json(sentimentResult);
+    } catch (error) {
+        console.error("Sentiment Analysis Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+exports.getAllSentiments = async (req, res) => {
+    try {
+        const sentiments = await EventSentiment.find()
+            .populate("userId", "name")
+            .populate("eventTypeId", "name");
+
+        res.status(200).json(sentiments);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching sentiments", error });
+    }
+};
+
+exports.getSentimentsByEventType = async (req, res) => {
+    try {
+        const { eventTypeId } = req.params;
+        const sentiments = await EventSentiment.find({ eventTypeId })
+            .populate("userId", "name");
+
+        if (!sentiments.length) {
+            return res.status(404).json({ message: "No sentiments found for this event type" });
+        }
+
+        res.status(200).json(sentiments);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching sentiments", error });
+    }
+};

@@ -18,7 +18,7 @@ const EventSentimentSchema = new mongoose.Schema(
           question: { type: String, required: true }, 
           emoji: { type: String, required: true }, 
           sentimentResult: { 
-            score: { type: Number, required: true },
+            score: { type: Number, required: true }, 
             comparative: { type: Number, required: true },
             magnitude: { type: Number, required: true },
             words: { type: [String], required: true },
@@ -34,18 +34,22 @@ const EventSentimentSchema = new mongoose.Schema(
       required: true,
     },
     commentSentiment: { 
+      label: { type: String, enum: ["1 star", "2 stars", "3 stars", "4 stars", "5 stars"], required: true }, 
       score: { type: Number, required: true },
       comparative: { type: Number, required: true },
+      magnitude: { type: Number, required: true }, 
       words: { type: [String], required: true },
-      positive: { type: [String], required: true },
-      negative: { type: [String], required: true },
+      positive: { type: [String] },
+      negative: { type: [String]},
     },
     overallSentiment: {
       type: String, 
       enum: ["Very Positive", "Positive", "Neutral", "Negative", "Very Negative"], 
+      required: true,
     },
     confidence: {
       type: Number, 
+      required: true, 
     },
   },
   { timestamps: true }

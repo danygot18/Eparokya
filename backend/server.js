@@ -6,7 +6,9 @@ const http = require('http');
 const app = require('./app');
 const { server } = require('./app');
 
-dotenv.config({ path: './config/config.env' });
+// dotenv.config({ path: './config/config.env' });
+dotenv.config({ path: './config/.env' });
+console.log("Hugging Face API Key:", process.env.HUGGING_FACE_API_KEY || "NOT FOUND");
 
 connectDatabase();
 
