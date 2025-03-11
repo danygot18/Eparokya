@@ -33,4 +33,4 @@ const ActivitySentimentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("ActivitySentiment", ActivitySentimentSchema);
+module.exports = mongoose.model('ActivitySentiment', ActivitySentimentSchema);

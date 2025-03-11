@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const AdminSelectionSchema = new mongoose.Schema({
-  category: { type: String, required: true, enum: ["event", "activities"] },
+  category: { type: String, required: true, enum: ["event", "activities", "priest"] },
   typeId: { 
     type: mongoose.Schema.Types.ObjectId, 
     refPath: "typeModel" 
@@ -9,12 +9,12 @@ const AdminSelectionSchema = new mongoose.Schema({
   typeModel: {
     type: String,
     required: true,
-    enum: ["eventType", "activityType"],
+    enum: ["EventType", "ActivityType", "Priest"],
   },
   date: String,
   time: String,
   isActive: { type: Boolean, default: true },
 });
 
-const AdminSelection = mongoose.model("AdminSelection", AdminSelectionSchema);
-module.exports = AdminSelection;
+module.exports = mongoose.model('AdminSelection', AdminSelectionSchema);
+

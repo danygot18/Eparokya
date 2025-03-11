@@ -57,4 +57,4 @@ const priestSchema = new mongoose.Schema({
 
 });
 
-module.exports = mongoose.model('priest', priestSchema);
+module.exports = mongoose.model('Priest', priestSchema);

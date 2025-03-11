@@ -55,4 +55,4 @@ const EventSentimentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("EventSentiment", EventSentimentSchema);
+module.exports = mongoose.model('EventSentiment', EventSentimentSchema);
