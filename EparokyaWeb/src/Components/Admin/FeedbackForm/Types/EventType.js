@@ -5,18 +5,21 @@ import { Table, Button } from "react-bootstrap";
 const EventType = () => {
   const [eventTypes, setEventTypes] = useState([]);
   const [show, setShow] = useState(false);
+  const config = {
+    withCredentials: true,
+};
 
   useEffect(() => {
     fetchEventTypes();
   }, []);
 
   const fetchEventTypes = async () => {
-    const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/createEventType`);
+    const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllEventType`, config);
     setEventTypes(response.data);
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteEventType${id}`);
+    await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteEventType/${id}`);
     fetchEventTypes();
   };
 

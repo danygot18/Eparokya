@@ -65,7 +65,9 @@ const connectDatabase = require('./config/database');
 const { server, io } = require('./app'); // Use the existing server & io instance
 const socket = require('./socket');
 
-dotenv.config({ path: './config/config.env' });
+// dotenv.config({ path: './config/config.env' });
+dotenv.config({ path: './config/.env' });
+console.log("Hugging Face API Key:", process.env.HUGGING_FACE_API_KEY || "NOT FOUND");
 
 // Connect to Database
 connectDatabase();
@@ -86,4 +88,18 @@ server.listen(port, () => {
 
 // Use the existing io instance
 io.on('connection', socket);
+
+// ---------------------- SENTIMENT ANALYSIS ---------------------- //
+let sentimentAnalyzer;
+
+(async () => {
+    try {
+        const { pipeline } = await import('@xenova/transformers'); // ✅ Dynamic Import
+        sentimentAnalyzer = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
+        console.log('✅ Sentiment model loaded successfully!');
+    } catch (error) {
+        console.error("❌ Error loading sentiment model:", error);
+    }
+})();
+
 

@@ -86,6 +86,9 @@ app.use("/api/v1/", require("./routes/FeedbackForm/Types/activityType"));
 
 app.use("/api/v1/", require("./routes/FeedbackForm/Sentiments/EventSentiment"));
 
+app.use("/api/v1/", require("./routes/FeedbackForm/AdminSelection/adminSelection"));
+
+
 // Ministry & Members
 app.use("/api/v1/ministryCategory", require("./routes/ministryCategory"));
 

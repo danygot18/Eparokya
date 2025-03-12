@@ -1,4 +1,4 @@
-const { EventType } = require("../../../models/FeedbackForm/Types/EventType");
+const EventType = require("../../../models/FeedbackForm/Types/EventType");
 
 exports.createEventType = async (req, res) => {
   try {
