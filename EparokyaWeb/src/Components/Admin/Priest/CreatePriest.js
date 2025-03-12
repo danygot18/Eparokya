@@ -7,7 +7,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import MetaData from "../../Layout/MetaData";
 const CreatePriest = () => {
   const [priestData, setPriestData] = useState({
     title: "",
@@ -72,6 +72,7 @@ const CreatePriest = () => {
 
   return (
     <div className="ministry-category-details">
+      <MetaData title="Add Priest" />
       <SideBar />
 
       {/* Create Priest Form (Centered) */}

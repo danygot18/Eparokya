@@ -642,25 +642,48 @@ exports.LoginUser = async (req, res, next) => {
     sendToken(user, 200, res)
 }
 
+// exports.Logout = async (req, res, next) => {
+//     try {
+//         res.cookie('token', null, {
+//             expires: new Date(Date.now()),
+//             httpOnly: true
+//         });
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Logged out'
+//         });
+//     } catch (error) {
+//         console.error('Error logging out:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: 'Internal Server Error'
+//         });
+//     }
+// }
 exports.Logout = async (req, res, next) => {
     try {
-        res.cookie('token', null, {
-            expires: new Date(Date.now()),
-            httpOnly: true
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // Secure in production
+            sameSite: "None", // Important for cross-origin cookies
         });
 
         res.status(200).json({
             success: true,
-            message: 'Logged out'
+            message: 'Logged out',
         });
     } catch (error) {
         console.error('Error logging out:', error);
         res.status(500).json({
             success: false,
-            message: 'Internal Server Error'
+            message: 'Internal Server Error',
         });
     }
-}
+};
+
+
+
 
 exports.ForgotPassword = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
