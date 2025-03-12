@@ -72,9 +72,9 @@ const Header = () => {
         
         <NotificationUser user={user} />
 
-        {user?.isAdmin && (
+        {/* {user?.isAdmin && (
           <NotificationBell />
-        )}
+        )} */}
         
         <NavDropdown
           title={<span style={styles.navDropdownTitle}>Parish Info</span>}

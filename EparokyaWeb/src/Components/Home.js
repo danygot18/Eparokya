@@ -41,7 +41,7 @@ const ImageSlider = ({ images }) => {
   );
 };
 
-export const Home = ({setIsDashboard}) => {
+export const Home = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,9 +50,6 @@ export const Home = ({setIsDashboard}) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setIsDashboard(false); // ✅ Reset to MainHeader
-  }, [setIsDashboard]);
 
   const bannerImages = [
     `${process.env.PUBLIC_URL}/EParokya-SampleBanner.png`,
