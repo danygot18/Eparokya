@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import SideBar from '../SideBar';
 import './PrayerStyles/prayerRequestIntentionDetails.css';
+import { socket } from '../../../socket';
 
 const PrayerRequestIntentionDetails = () => {
   const { prayerIntentionId } = useParams();
@@ -25,6 +26,8 @@ const PrayerRequestIntentionDetails = () => {
   const markAsPrayed = async () => {
     try {
       await axios.post(`${process.env.REACT_APP_API}/api/v1/markPrayerRequestIntentionAsDone/${prayerIntentionId}`);
+      socket.emit('send-notification-user', { userId: prayerRequest.userId._id, message: `Your prayer request for ${prayerRequest.offerrorsName} has been prayed.` });
+      
       setPrayerRequest({ ...prayerRequest, isDone: true });
       setShowModal(false);
     } catch (error) {

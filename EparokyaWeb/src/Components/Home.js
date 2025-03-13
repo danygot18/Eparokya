@@ -50,6 +50,7 @@ export const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const navigate = useNavigate();
 
+
   const bannerImages = [
     `${process.env.PUBLIC_URL}/EParokya-SampleBanner.png`,
     `${process.env.PUBLIC_URL}/EParokya2-SampleBanner.png`,

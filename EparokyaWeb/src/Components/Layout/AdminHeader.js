@@ -12,7 +12,7 @@ import NotificationBell from "../Notification/NotificationBell";
 import NotificationUser from "../Notification/NotificationUser";
 
 
-const Header = () => {
+const AdminHeader = () => {
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector(state => state.auth);
   const [isHovered, setIsHovered] = React.useState(false);
@@ -30,7 +30,7 @@ const Header = () => {
     <Container fluid style={styles.header}>
       {/* Left: Logo */}
       <Link to="/" style={styles.logo}>
-        Eparokya
+        Eparokya Admin Dashboard
       </Link>
 
       {/* <header style={{ height: "80px", display: "flex", alignItems: "center" }}>
@@ -55,43 +55,13 @@ const Header = () => {
           Home
         </Link>
 
-        <Link
-          to="/user/live"
-          style={{ ...styles.navDropdownTitle, textDecoration: 'none' }}
-        >
-          Live
-        </Link>
 
-        <Link
-          to="/user/prayerRequestIntention"
-          style={{ ...styles.navDropdownTitle, textDecoration: 'none' }}
-        >
-          Send Prayer
-        </Link>
-        
-        
-        <NotificationUser user={user} />
 
-        {/* {user?.isAdmin && (
+        {user?.isAdmin && (
           <NotificationBell />
-        )} */}
+        )}
         
-        <NavDropdown
-          title={<span style={styles.navDropdownTitle}>Parish Info</span>}
-          id="parish-info-dropdown"
-          align="end"
-          menuVariant="light"
-        >
-          <NavDropdown.Item as={Link} to="/user/members" style={styles.dropdownItem}>
-            Members
-          </NavDropdown.Item>
-          <NavDropdown.Item as={Link} to="/parishPriests" style={styles.dropdownItem}>
-            Parish History
-          </NavDropdown.Item>
-          <NavDropdown.Item as={Link} to="/parishPriests" style={styles.dropdownItem}>
-            Parish Priests
-          </NavDropdown.Item>
-        </NavDropdown>
+
 
 
         {/* User Navigation Section */}
@@ -104,24 +74,7 @@ const Header = () => {
               align="end"
               menuVariant="light"
             >
-              <NavDropdown.Item as={Link} to="/profile" style={styles.dropdownItem}>
-                Profile
-              </NavDropdown.Item>
-
-              <NavDropdown.Item as={Link} to="/user/ministryCalendar" style={styles.dropdownItem}>
-                Ministry Calendar
-              </NavDropdown.Item>
-
-              <NavDropdown.Item as={Link} to="/user/ministryAnnouncement" style={styles.dropdownItem}>
-                Ministry Announcements
-              </NavDropdown.Item>
-             
-              {user?.isAdmin && (
-                <NavDropdown.Item as={Link} to="/admin/dashboard" style={styles.dropdownItem}>
-                  Dashboard
-                </NavDropdown.Item>
-              )}
-
+  
               <NavDropdown.Item as={Link} to="/chatlist" style={styles.dropdownItem}>
                 Chat
               </NavDropdown.Item>
@@ -147,7 +100,7 @@ const Header = () => {
 
 };
 
-export default Header;
+export default AdminHeader;
 
 const styles = {
   header: {

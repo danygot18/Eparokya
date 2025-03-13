@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import SideBar from "./SideBar";
 import { Button, TextField, Typography, Stack, Paper, Box } from "@mui/material";
+import MetaData from "../Layout/MetaData";
 
 const AdminLive = () => {
     const [liveUrl, setLiveUrl] = useState("");
@@ -56,7 +57,7 @@ const AdminLive = () => {
     return (
         <Box sx={{ display: "flex", minHeight: "100vh" }}>
             <SideBar />
-
+            <MetaData title="Admin Live" />
             <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center", p: 3 }}>
                 <Paper elevation={3} sx={{ padding: 3, width: "100%", maxWidth: 900 }}>
                     <Typography variant="h5" gutterBottom>

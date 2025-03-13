@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import SideBar from '../SideBar'; 
 import axios from "axios";
 import "./priest.css";
-
+import MetaData from '../../Layout/MetaData';
 
 const PriestList = () => {
     const [priests, setPriests] = useState([]);
@@ -47,6 +47,7 @@ const PriestList = () => {
 
     return (
         <div className="priestList-page">
+            <MetaData title="List Parish Priest" />
             <SideBar />
             <div className="priestList-container">
                 {priests.map(priest => (

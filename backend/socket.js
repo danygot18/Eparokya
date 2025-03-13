@@ -35,6 +35,19 @@ module.exports = (socket) => {
     
     });
 
+    socket.on("send-notification-user", (data) => {
+
+        const { userId, message } = data;
+        console.log("User ID", userId, message, ); 
+        const userSocket = USERS.get(userId);
+        // console.log("User Socket", userSocket);
+        if (userSocket) {
+        console.log("User ID", userId, message, ); 
+            userSocket.emit("push-notification-user", {  message });
+            
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected');
     });
