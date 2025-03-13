@@ -5,8 +5,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-const socket = io(process.env.REACT_APP_SOCKET_URL, { withCredentials: true });
+import { socket } from "../../socket/index.js";
 
 const NotificationUser = ({ user }) => {
   const [notifications, setNotifications] = useState([]);
@@ -47,11 +46,9 @@ const NotificationUser = ({ user }) => {
   useEffect(() => {
     socket.connect();
     fetchNotifications();
-    console.log("User:", user); 
-    if (user?._id) {
-        socket.emit("join", user._id); // User joins a room
+
         socket.on("push-notification-user", (data) => {
-            console.log("New Notification:", data);
+
             toast.success(`New Notification: ${data.message}`);
 
             setNotifications((prev) => [
@@ -59,15 +56,15 @@ const NotificationUser = ({ user }) => {
                 ...prev,
             ]);
 
-            setUnreadCount((prev) => prev + 1);
+            setUnreadCount((prev) => (typeof prev === "number" ? prev + 1 : 1));
         });
-    }
+    
 
     return () => {
-        socket.off("send-notification-user");
+        socket.off("push-notification-user");
         socket.disconnect();
     };
-}, [user]);
+}, [fetchNotifications]);
 
 
   return (
