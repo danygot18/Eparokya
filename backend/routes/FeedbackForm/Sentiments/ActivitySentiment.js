@@ -1,14 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const activitySentimentController = require("../../../controllers/FeedbackForm/Sentiment/ActivitySentimentController");
+const ActivitySentimentController = require("../../../controllers/FeedbackForm/Sentiments/ActivitySentimentController");
+const { isAuthenticatedUser, isAuthorized } = require('../../../middleware/auth');
 
-// Route to analyze and save activity sentiment
-router.post("/analyzeActivitySentiment", activitySentimentController.analyzeSentiment);
+router.post("/analyzeActivitySentiment", isAuthenticatedUser, ActivitySentimentController.analyzeSentiment);
 
-// Route to get all activity sentiment results
-router.get("/getAllActivitySentiment", activitySentimentController.getAllSentiments);
+router.get("/getAllActivitySentiment", ActivitySentimentController.getAllSentiments);
 
-// Route to get activity sentiment results by activity type
-router.get("/sentimentActivityType/:activitySentimentId", activitySentimentController.getSentimentsByActivityType);
+router.get("/sentimentActivityType/:activitySentimentId", ActivitySentimentController.getSentimentsByActivityType);
 
 module.exports = router;

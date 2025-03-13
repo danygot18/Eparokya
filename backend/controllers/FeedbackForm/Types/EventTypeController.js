@@ -3,8 +3,6 @@ const EventType = require("../../../models/FeedbackForm/Types/EventType");
 exports.createEventType = async (req, res) => {
   try {
     const { name } = req.body;
-
-    // Check if EventType already exists
     const existingEventType = await EventType.findOne({ name });
     if (existingEventType) {
       return res.status(400).json({ error: "EventType already exists" });
@@ -19,8 +17,6 @@ exports.createEventType = async (req, res) => {
     res.status(500).json({ error: "Failed to create EventType" });
   }
 };
-
-// Get All EventTypes
 exports.getAllEventTypes = async (req, res) => {
   try {
     const eventTypes = await EventType.find();
@@ -30,8 +26,6 @@ exports.getAllEventTypes = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch EventTypes" });
   }
 };
-
-// Get EventType by ID
 exports.getEventTypeById = async (req, res) => {
   try {
     const eventType = await EventType.findById(req.params.id);
@@ -45,8 +39,6 @@ exports.getEventTypeById = async (req, res) => {
   }
 };
 
-
-// Delete EventType
 exports.deleteEventType = async (req, res) => {
   try {
     const eventType = await EventType.findByIdAndDelete(req.params.id);

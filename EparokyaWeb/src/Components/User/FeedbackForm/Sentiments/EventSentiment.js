@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Container, Typography, Grid, Button, TextField, Modal, Box } from "@mui/material";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import axios from "axios";
@@ -19,7 +19,7 @@ const EventSentiment = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [userId, setUserId] = useState(null);
 
-  const config = { withCredentials: true };
+  const config = useMemo(() => ({ withCredentials: true }), []);
 
   useEffect(() => {
     // Fetch Active Admin Selection
@@ -27,8 +27,19 @@ const EventSentiment = () => {
       .get(`${process.env.REACT_APP_API}/api/v1/admin-selections/active`, config)
       .then((res) => setAdminSelection(res.data))
       .catch((err) => console.error("Error fetching admin selection:", err));
-  }, []);
-  
+  }, [config]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config);
+        setUserId(response.data.user._id);
+      } catch (error) {
+        console.error('Error fetching user:', error.response ? error.response.data : error.message);
+      }
+    };
+    fetchUser();
+  }, [config]);
 
   const handleSelectEmoji = (index, emoji) => {
     const updatedResponses = [...responses];
@@ -42,23 +53,30 @@ const EventSentiment = () => {
       console.error("Missing eventTypeId:", adminSelection);
       return;
     }
-  
+
     if (responses.includes(null)) {
       alert("Please answer all questions before submitting.");
       return;
     }
-  
+
+    if (!userId) {
+      alert("User not found. Please log in again.");
+      console.error("User ID is missing:", userId);
+      return;
+    }
+
     const requestData = {
-      eventTypeId: adminSelection.typeId._id, // Ensure this is not undefined
+      userId,
+      eventTypeId: adminSelection.typeId._id,
       responses: responses.map((emoji, index) => ({
         question: questions[index],
         emoji,
       })),
       comment,
     };
-  
-    console.log("Submitting Sentiment:", requestData); // Debugging log
-  
+
+    console.log("Submitting Sentiment:", requestData);
+
     try {
       await axios.post(
         `${process.env.REACT_APP_API}/api/v1/analyzeEventSentiment`,
@@ -71,8 +89,6 @@ const EventSentiment = () => {
       alert(error.response?.data?.error || "Failed to submit feedback.");
     }
   };
-  
-  
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>

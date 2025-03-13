@@ -1,15 +1,15 @@
 const mongoose = require("mongoose");
 
-const ActivitySentimentSchema = new mongoose.Schema(
+const PriestSentimentSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-   activityTypeId: {
+    priestId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ActivityType",
+      ref: "Priest",
       required: true,
     },
     responses: {
@@ -55,4 +55,4 @@ const ActivitySentimentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('ActivitySentiment', ActivitySentimentSchema);
+module.exports = mongoose.model('PriestSentiment', PriestSentimentSchema);

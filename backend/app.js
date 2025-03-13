@@ -85,6 +85,8 @@ app.use("/api/v1/", require("./routes/FeedbackForm/Types/eventType"));
 app.use("/api/v1/", require("./routes/FeedbackForm/Types/activityType"));
 
 app.use("/api/v1/", require("./routes/FeedbackForm/Sentiments/EventSentiment"));
+app.use("/api/v1/", require("./routes/FeedbackForm/Sentiments/ActivitySentiment"));
+app.use("/api/v1/", require("./routes/FeedbackForm/Sentiments/PriestSentiment"));
 
 app.use("/api/v1/", require("./routes/FeedbackForm/AdminSelection/adminSelection"));
 

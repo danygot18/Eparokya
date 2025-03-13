@@ -50,6 +50,13 @@ const AdminSelection = () => {
         fetchSelections(); 
     }, [selectedCategory]);
 
+    const getTypeModel = (category) => {
+        if (category === "event") return "EventType";
+        if (category === "activities") return "ActivityType";
+        if (category === "priest") return "Priest";
+        return "";
+    };
+
     const handleAddSelection = async () => {
         if (!selectedCategory || !selectedType || !selectedDate || !selectedTime) {
             alert("Please complete all selections.");
@@ -61,6 +68,7 @@ const AdminSelection = () => {
                 `${process.env.REACT_APP_API}/api/v1/addSelection`,
                 { 
                     category: selectedCategory, 
+                    typeModel: getTypeModel(selectedCategory), // ✅ Ensure correct model is sent
                     typeId: selectedType, 
                     date: selectedDate, 
                     time: selectedTime 

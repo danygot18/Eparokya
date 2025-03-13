@@ -55,7 +55,7 @@ exports.getSelections = async (req, res) => {
   }
 };
 
-// ✅ Get Active Selection
+// Get Active Selection
 exports.getActiveSelection = async (req, res) => {
   try {
     const activeSelection = await AdminSelection.findOne({ isActive: true });
@@ -94,9 +94,7 @@ exports.getActiveSelection = async (req, res) => {
 
 
 
-
-
-// ✅ Deactivate Selection
+// Deactivate Selection
 exports.deactivateSelection = async (req, res) => {
   try {
     const { adminSelectionId } = req.params;

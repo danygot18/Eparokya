@@ -5,7 +5,6 @@ exports.createActivityType = async (req, res) => {
     try {
       const { name } = req.body;
   
-      // Check if ActivityType already exists
       const existingActivityType = await ActivityType.findOne({ name });
       if (existingActivityType) {
         return res.status(400).json({ error: "ActivityType already exists" });
@@ -21,7 +20,6 @@ exports.createActivityType = async (req, res) => {
     }
   };
   
-  // Get All ActivityTypes
   exports.getAllActivityTypes = async (req, res) => {
     try {
       const activityTypes = await ActivityType.find();
@@ -32,7 +30,6 @@ exports.createActivityType = async (req, res) => {
     }
   };
   
-  // Get ActivityType by ID
   exports.getActivityTypeById = async (req, res) => {
     try {
       const activityType = await ActivityType.findById(req.params.id);

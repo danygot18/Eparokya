@@ -16,5 +16,5 @@ const AdminSelectionSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
 });
 
-module.exports = mongoose.model('AdminSelection', AdminSelectionSchema);
-
+const AdminSelection = mongoose.models.AdminSelection || mongoose.model("AdminSelection", AdminSelectionSchema);
+module.exports = AdminSelection;

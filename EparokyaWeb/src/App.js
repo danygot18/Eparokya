@@ -173,6 +173,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import AdminLive from './Components/Admin/AdminLive';
 import UserLive from './Components/UserLive';
 
+import Bible from './Components/Admin/Resources/Bible';
+
 
 function App() {
   const { user } = useSelector(state => state.auth);
@@ -281,6 +283,8 @@ function App() {
         {/* Resource */}
         <Route path="/admin/resource/create" element={<ProtectedRoute isAdmin={true}><Resource /></ProtectedRoute>} />
         <Route path="/admin/resourceList" element={<ProtectedRoute isAdmin={true}><ResourceList /></ProtectedRoute>} />
+
+        <Route path="/admin/bible" element={<ProtectedRoute isAdmin={true}><Bible /></ProtectedRoute>} />
 
         {/* Priest */}
         <Route path="/admin/create/priest" element={<ProtectedRoute isAdmin={true}><CreatePriest /></ProtectedRoute>} />
