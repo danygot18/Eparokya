@@ -173,7 +173,6 @@ import { useDispatch, useSelector } from 'react-redux';
 //Live Video
 import AdminLive from './Components/Admin/AdminLive';
 import UserLive from './Components/UserLive';
-
 import Bible from './Components/Admin/Resources/Bible';
 
 function Layout() {
@@ -184,15 +183,15 @@ function Layout() {
     <div className="app-layout">
       {isDashboard ? <AdminHeader /> : <Header />}
 
-      <Routes>
-        <Route
-          path="/admin/dashboard"
-          element={<ProtectedRoute isAdmin={true}> <Dashboard /> </ProtectedRoute>}
-        />
-        <Route path="/" element={<Home />} />
-      </Routes>
-
-
+          <Routes>
+            <Route
+              path="/admin/dashboard"
+              element={<ProtectedRoute isAdmin={true}> <Dashboard /> </ProtectedRoute>}
+            />
+            <Route path="/" element={<Home />} />
+          </Routes>
+        
+      
     </div>
   );
 }
@@ -213,17 +212,21 @@ function App() {
 
   return (
 
-    <Router>
-      {/* <Header /> */}
-      <Layout />
+        <Router>
+          {/* <Header /> */}
+          <Layout />
 
-      <Routes>
+          <Routes>
 
-        <Route path="/" element={<Home />} exact="true" />
-        <Route path="/login" element={<Login />} exact="true" />
-        <Route path="/register" element={<Register />} exact="true" />
-        <Route path="/profile" element={<Profile />} exact="true" />
-        <Route path="/announcementDetails/:id" element={<AnnouncementDetails />} exact="true" />
+          
+
+
+
+            <Route path="/" element={<Home />} exact="true" />
+            <Route path="/login" element={<Login />} exact="true" />
+            <Route path="/register" element={<Register />} exact="true" />
+            <Route path="/profile" element={<Profile />} exact="true" />
+            <Route path="/announcementDetails/:id" element={<AnnouncementDetails />} exact="true" />
 
             <Route path="/resourcePage" element={<ResourcePage />} exact="true" />
             <Route path="/weddingWall" element={<WeddingWall />} exact="true" />
@@ -281,8 +284,8 @@ function App() {
             {/* Admin 
         need mo itago yung dashboard from the user*/}
 
-        <Route path="/admin/users" element={<ProtectedRoute isAdmin={true}><UsersList /></ProtectedRoute>} />
-        <Route path="/admin/user/:id" element={<ProtectedRoute isAdmin={true}><UpdateUser /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute isAdmin={true}><UsersList /></ProtectedRoute>} />
+            <Route path="/admin/user/:id" element={<ProtectedRoute isAdmin={true}><UpdateUser /></ProtectedRoute>} />
 
             {/* calendar */}
             <Route path="/admin/calendar" element={<ProtectedRoute isAdmin={true}><Calendar /></ProtectedRoute>} />
@@ -305,12 +308,11 @@ function App() {
             <Route path="/admin/memberBatchYear" element={<ProtectedRoute isAdmin={true}><MemberBatchYear /></ProtectedRoute>} />
             <Route path="/admin/memberDirectory" element={<ProtectedRoute isAdmin={true}><MemberDirectory /></ProtectedRoute>} />
 
-        {/* Resource */}
-        <Route path="/admin/resource/create" element={<ProtectedRoute isAdmin={true}><Resource /></ProtectedRoute>} />
-        <Route path="/admin/resourceList" element={<ProtectedRoute isAdmin={true}><ResourceList /></ProtectedRoute>} />
+            {/* Resource */}
+            <Route path="/admin/resource/create" element={<ProtectedRoute isAdmin={true}><Resource /></ProtectedRoute>} />
+            <Route path="/admin/resourceList" element={<ProtectedRoute isAdmin={true}><ResourceList /></ProtectedRoute>} />
 
-        <Route path="/admin/bible" element={<ProtectedRoute isAdmin={true}><Bible /></ProtectedRoute>} />
-           
+            <Route path="/admin/bible" element={<ProtectedRoute isAdmin={true}><Bible /></ProtectedRoute>} />
 
             {/* Priest */}
             <Route path="/admin/create/priest" element={<ProtectedRoute isAdmin={true}><CreatePriest /></ProtectedRoute>} />
@@ -386,8 +388,8 @@ function App() {
             <Route path="/admin/live" element={<ProtectedRoute isAdmin={true}><AdminLive /></ProtectedRoute>} />
             <Route path="/user/live" element={<UserLive />} />
 
-      </Routes>
-    </Router>
+          </Routes>
+        </Router>
 
   );
 }
