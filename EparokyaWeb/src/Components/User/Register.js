@@ -52,6 +52,9 @@ const Register = () => {
   const [ministryCategories, setMinistryCategories] = useState([]);
   const [ministryRoles, setMinistryRoles] = useState({});
   const [customRoles, setCustomRoles] = useState({});
+  const [startYear, setStartYear] = useState("");
+  const [endYear, setEndYear] = useState("");
+
   const [avatar, setAvatar] = useState("");
   const [avatarPreview, setAvatarPreview] = useState(
     "/images/default_avatar.jpg"
@@ -124,18 +127,71 @@ const Register = () => {
     fetchMinistryCategories();
   }, [error, isAuthenticated, navigate, dispatch]);
 
+  // const handleMinistryChange = (event) => {
+  //   const { value, checked } = event.target;
+  //   setUser((prev) => {
+  //     const updatedMinistryRoles = checked
+  //       ? prev.ministryRoles.some((roleObj) => roleObj.ministry === value)
+  //         ? prev.ministryRoles
+  //         : [...prev.ministryRoles, { ministry: value, role: "" }]
+  //       : prev.ministryRoles.filter((roleObj) => roleObj.ministry !== value);
+
+  //     return { ...prev, ministryRoles: updatedMinistryRoles };
+  //   });
+  // };
+
   const handleMinistryChange = (event) => {
     const { value, checked } = event.target;
+  
     setUser((prev) => {
-      const updatedMinistryRoles = checked
-        ? prev.ministryRoles.some((roleObj) => roleObj.ministry === value)
-          ? prev.ministryRoles
-          : [...prev.ministryRoles, { ministry: value, role: "" }]
-        : prev.ministryRoles.filter((roleObj) => roleObj.ministry !== value);
-
+      let updatedMinistryRoles = [...prev.ministryRoles];
+  
+      if (checked) {
+        // Prompt for start and end years only when a new ministry is added
+        const startYear = prompt("Enter start year:");
+        const endYear = prompt("Enter end year (optional):");
+  
+        if (!prev.ministryRoles.some((roleObj) => roleObj.ministry === value)) {
+          updatedMinistryRoles.push({
+            ministry: value,
+            role: "",
+            startYear: parseInt(startYear, 10),
+            endYear: endYear ? parseInt(endYear, 10) : undefined,
+          });
+        }
+      } else {
+        // Remove the ministry from the list
+        updatedMinistryRoles = prev.ministryRoles.filter(
+          (roleObj) => roleObj.ministry !== value
+        );
+      }
+  
       return { ...prev, ministryRoles: updatedMinistryRoles };
     });
   };
+
+  
+  const handleStartYearChange = (event, ministryId) => {
+    const { value } = event.target;
+    setUser((prev) => ({
+      ...prev,
+      ministryRoles: prev.ministryRoles.map((roleObj) =>
+        roleObj.ministry === ministryId ? { ...roleObj, startYear: value } : roleObj
+      ),
+    }));
+  };
+  
+  const handleEndYearChange = (event, ministryId) => {
+    const { value } = event.target;
+    setUser((prev) => ({
+      ...prev,
+      ministryRoles: prev.ministryRoles.map((roleObj) =>
+        roleObj.ministry === ministryId ? { ...roleObj, endYear: value } : roleObj
+      ),
+    }));
+  };
+  
+
 
   const handleRoleChange = (event, ministryId) => {
     const { value } = event.target;
@@ -144,10 +200,10 @@ const Register = () => {
       ministryRoles: prev.ministryRoles.map((roleObj) =>
         roleObj.ministry === ministryId
           ? {
-              ...roleObj,
-              role: value,
-              customRole: value === "Others" ? "" : undefined,
-            }
+            ...roleObj,
+            role: value,
+            customRole: value === "Others" ? "" : undefined,
+          }
           : roleObj
       ),
     }));
@@ -440,9 +496,10 @@ const Register = () => {
           <FormGroup>
             <Typography variant="subtitle1">Ministry Categories</Typography>
             {ministryCategories.map((category) => {
-              const ministryExists = user.ministryRoles?.some(
+              const ministryObj = user.ministryRoles?.find(
                 (roleObj) => roleObj.ministry === category._id
               );
+              const ministryExists = Boolean(ministryObj);
 
               return (
                 <div key={category._id}>
@@ -457,47 +514,60 @@ const Register = () => {
                     label={category.name}
                   />
                   {ministryExists && category.name !== "Parishioner" && (
-                    <FormControl fullWidth margin="normal">
-                      <InputLabel>Role</InputLabel>
-                      <Select
-                        value={
-                          user.ministryRoles.find(
-                            (roleObj) => roleObj.ministry === category._id
-                          )?.role || ""
-                        }
-                        onChange={(e) => handleRoleChange(e, category._id)}
+                    <>
+                      <FormControl fullWidth margin="normal">
+                        <InputLabel>Role</InputLabel>
+                        <Select
+                          value={ministryObj.role || ""}
+                          onChange={(e) => handleRoleChange(e, category._id)}
+                          required
+                        >
+                          <MenuItem value="Coordinator">Coordinator</MenuItem>
+                          <MenuItem value="Assistant Coordinator">Assistant Coordinator</MenuItem>
+                          <MenuItem value="Office Worker">Office Worker</MenuItem>
+                          <MenuItem value="Member">Member</MenuItem>
+                          <MenuItem value="Others">Others</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {ministryObj.role === "Others" && (
+                        <TextField
+                          label="Custom Role"
+                          fullWidth
+                          margin="normal"
+                          value={ministryObj.customRole || ""}
+                          onChange={(e) => handleCustomRoleChange(e, category._id)}
+                          required
+                        />
+                      )}
+
+                      {/* Start Year Input */}
+                      <TextField
+                        label="Start Year"
+                        type="number"
+                        fullWidth
+                        margin="normal"
+                        value={ministryObj.startYear || ""}
+                        onChange={(e) => handleStartYearChange(e, category._id)}
                         required
-                      >
-                        <MenuItem value="Coordinator">Coordinator</MenuItem>
-                        <MenuItem value="Assistant Coordinator">
-                          Assistant Coordinator
-                        </MenuItem>
-                        <MenuItem value="Office Worker">Office Worker</MenuItem>
-                        <MenuItem value="Member">Member</MenuItem>
-                        <MenuItem value="Others">Others</MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
-                  {user.ministryRoles.find(
-                    (roleObj) => roleObj.ministry === category._id
-                  )?.role === "Others" && (
-                    <TextField
-                      label="Custom Role"
-                      fullWidth
-                      margin="normal"
-                      value={
-                        user.ministryRoles.find(
-                          (roleObj) => roleObj.ministry === category._id
-                        )?.customRole || ""
-                      }
-                      onChange={(e) => handleCustomRoleChange(e, category._id)}
-                      required
-                    />
+                      />
+
+                      {/* End Year Input */}
+                      <TextField
+                        label="End Year (If on-going please state the on-going year)"
+                        type="number"
+                        fullWidth
+                        margin="normal"
+                        value={ministryObj.endYear || ""}
+                        onChange={(e) => handleEndYearChange(e, category._id)}
+                      />
+                    </>
                   )}
                 </div>
               );
             })}
           </FormGroup>
+
 
           {/* Avatar Upload */}
           <Button

@@ -115,6 +115,14 @@ const userSchema = new mongoose.Schema({
                 ref: 'ministryCategory',
                 required: true
             },
+            startYear: {
+                type: Number,
+                required: true,
+            },
+            endYear: {
+                type: Number,
+                required: false,
+            },
             role: {
                 type: String,
                 enum: ['Coordinator', 'Assistant Coordinator', 'Office Worker', 'Member', 'Others'],
@@ -128,6 +136,7 @@ const userSchema = new mongoose.Schema({
             }
         }
     ],
+   
     email: {
         type: String,
         required: [true, 'Please provide your email address'],

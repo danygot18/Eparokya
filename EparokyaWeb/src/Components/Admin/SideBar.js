@@ -110,11 +110,32 @@ const SideBar = () => {
             </Link>
           </div>
           <div style={styles.navItem}>
-            <Link to="/admin/calendar" className="sidebar-link" style={styles.sidebarLink}>
-              <FeedbackIcon style={styles.icon} />
-              Feedback Form
-            </Link>
+            <Dropdown>
+              <Dropdown.Toggle variant="link" className="sidebar-link" style={styles.sidebarLink}>
+                <PersonIcon style={styles.icon} />
+                Feedback Form
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item>
+                  <Link to="/admin/AdminSelection" className="sidebar-link" style={styles.sidebarLink}>
+                    Add Active Form
+                  </Link>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <Link to="/admin/SentimentResults" className="sidebar-link" style={styles.sidebarLink}>
+                    Sentiment Results
+                  </Link>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <Link to="/admin/SentimentResults" className="sidebar-link" style={styles.sidebarLink}>
+                    Sentiment Lists
+                  </Link>
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
           </div>
+
+
           <div style={styles.navItem}>
             <Link to="/admin/prayerReview" className="sidebar-link" style={styles.sidebarLink}>
               <ForumIcon style={styles.icon} />

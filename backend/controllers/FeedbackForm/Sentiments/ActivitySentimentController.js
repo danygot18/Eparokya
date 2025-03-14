@@ -1,6 +1,6 @@
 const ActivitySentiment = require("../../../models/FeedbackForm/Sentiments/ActivitySentiment");
 const ActivityType = require("../../../models/FeedbackForm/Types/ActivityType");
-const AdminSelection = require("../../../models/FeedbackForm/AdminSelection/adminSelection");
+const AdminSelection = require("../../../models/FeedbackForm/AdminSelection/AdminSelection");
 const Sentiment = require("sentiment");
 const analyzeSentiment = require("../../../utils/sentimentAnalyzer");
 

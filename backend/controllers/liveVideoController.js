@@ -1,6 +1,5 @@
 const LiveVideo = require("../models/liveVideo");
 
-// Save or update live video link
 exports.setLiveVideo = async (req, res) => {
     try {
         const { url, description, title } = req.body;
@@ -22,7 +21,6 @@ exports.setLiveVideo = async (req, res) => {
     }
 };
 
-// Get live video
 exports.getLiveVideo = async (req, res) => {
     try {
         const liveVideo = await LiveVideo.findOne();
@@ -36,7 +34,6 @@ exports.getLiveVideo = async (req, res) => {
     }
 };
 
-// Stop live video (delete from DB)
 exports.stopLiveVideo = async (req, res) => {
     try {
         await LiveVideo.deleteOne();

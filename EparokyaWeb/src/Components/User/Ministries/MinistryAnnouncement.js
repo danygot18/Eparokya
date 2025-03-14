@@ -12,7 +12,7 @@ const MinistryAnnouncement = () => {
   const [pinnedAnnouncements, setPinnedAnnouncements] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [ministryCategory, setMinistryCategories] = useState([]);
-  const [acknowledged, setAcknowledged] = useState(new Set());  // Using Set for better performance
+  const [acknowledged, setAcknowledged] = useState(new Set()); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const [userId, setUserId] = useState(null);
