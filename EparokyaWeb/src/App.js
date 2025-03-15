@@ -194,7 +194,7 @@ function Layout() {
           path="/admin/dashboard"
           element={<ProtectedRoute isAdmin={true}> <Dashboard /> </ProtectedRoute>}
         />
-        <Route path="/" element={<Home />} />
+        
       </Routes>
 
 

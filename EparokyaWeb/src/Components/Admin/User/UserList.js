@@ -65,14 +65,14 @@ const UsersList = () => {
   }, [search, selectedCategory]);
 
   return (
-    <div className="container-fluid">
+    <div >
       <MetaData title="All Users" />
 
       {/* Flexbox Layout to Align Sidebar & User List Side by Side */}
       <div className="d-flex">
 
         {/* Sidebar: Fixed width, full height */}
-        <div className="bg-light p-3 min-vh-100" style={{ width: '250px' }}>
+        <div className="bg-light " style={{ width: '250px' }}>
           <SideBar />
         </div>
 

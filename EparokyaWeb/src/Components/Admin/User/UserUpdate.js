@@ -104,9 +104,9 @@ const UpdateUser = () => {
 
 
     return (
-        <Fragment>
+        <div>
             <MetaData title={`Update User`} />
-            <div className="row">
+            <div className="d-flex">
                 <div className="col-12 col-md-2">
                     <SideBar />
                 </div>
@@ -156,7 +156,7 @@ const UpdateUser = () => {
                     </div>
                 </div>
             </div>
-        </Fragment>
+        </div>
     );
 };
 
