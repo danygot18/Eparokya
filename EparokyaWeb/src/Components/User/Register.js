@@ -32,7 +32,7 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
-    age: "",
+    birthDate: "",
     preference: "",
     civilStatus: "",
     phone: "",
@@ -54,6 +54,7 @@ const Register = () => {
   const [customRoles, setCustomRoles] = useState({});
   const [startYear, setStartYear] = useState("");
   const [endYear, setEndYear] = useState("");
+  const [displayDate, setDisplayDate] = useState("");
 
   const [avatar, setAvatar] = useState("");
   const [avatarPreview, setAvatarPreview] = useState(
@@ -142,15 +143,15 @@ const Register = () => {
 
   const handleMinistryChange = (event) => {
     const { value, checked } = event.target;
-  
+
     setUser((prev) => {
       let updatedMinistryRoles = [...prev.ministryRoles];
-  
+
       if (checked) {
         // Prompt for start and end years only when a new ministry is added
         const startYear = prompt("Enter start year:");
         const endYear = prompt("Enter end year (optional):");
-  
+
         if (!prev.ministryRoles.some((roleObj) => roleObj.ministry === value)) {
           updatedMinistryRoles.push({
             ministry: value,
@@ -165,12 +166,12 @@ const Register = () => {
           (roleObj) => roleObj.ministry !== value
         );
       }
-  
+
       return { ...prev, ministryRoles: updatedMinistryRoles };
     });
   };
 
-  
+
   const handleStartYearChange = (event, ministryId) => {
     const { value } = event.target;
     setUser((prev) => ({
@@ -180,7 +181,7 @@ const Register = () => {
       ),
     }));
   };
-  
+
   const handleEndYearChange = (event, ministryId) => {
     const { value } = event.target;
     setUser((prev) => ({
@@ -190,7 +191,6 @@ const Register = () => {
       ),
     }));
   };
-  
 
 
   const handleRoleChange = (event, ministryId) => {
@@ -229,6 +229,24 @@ const Register = () => {
     }));
   };
 
+  const handleDateChange = (e) => {
+    const rawDate = e.target.value;
+    setUser({ ...user, birthDate: rawDate });
+
+    // Convert to readable format
+    const dateObj = new Date(rawDate);
+    if (!isNaN(dateObj.getTime())) {
+      const formattedDate = dateObj.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      setDisplayDate(formattedDate);
+    } else {
+      setDisplayDate("");
+    }
+  };
+
   const onChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -246,26 +264,37 @@ const Register = () => {
   const submitHandler = (e) => {
     e.preventDefault();
     if (loading) return;
-
+  
     const formData = new FormData();
-
+  
     Object.entries(user).forEach(([key, value]) => {
-      if (key === "ministryRoles") {
+      if (key === "ministryRoles" || key === "address") {
         console.log(`Before appending: ${key} =`, value);
         formData.append(key, JSON.stringify(value));
-      } else if (key === "address") {
-        console.log(`Before appending: ${key} =`, value);
-        formData.append(key, JSON.stringify(value));
+      } else if (key === "birthDate") {
+        if (value) {
+          const dateObj = new Date(value);
+          if (!isNaN(dateObj.getTime())) {
+            const formattedDate = dateObj.toISOString().split("T")[0]; 
+            formData.append(key, formattedDate);
+          } else {
+            formData.append(key, ""); 
+          }
+        } else {
+          formData.append(key, "");
+        }
       } else {
         formData.append(key, value);
       }
     });
-
+  
     if (avatar) formData.append("avatar", avatar);
-
+  
     console.log("Final formData:", Object.fromEntries(formData));
     dispatch(register(formData));
   };
+  
+
 
   return (
     <Container maxWidth="md">
@@ -306,16 +335,25 @@ const Register = () => {
             onChange={(e) => setUser({ ...user, password: e.target.value })}
             required
           />
+
           <TextField
-            label="Age"
-            name="age"
-            type="number"
+            label="Birth Date"
+            name="birthDate"
+            type="date"
             fullWidth
             margin="normal"
-            value={user.age}
-            onChange={(e) => setUser({ ...user, age: e.target.value })}
+            InputLabelProps={{ shrink: true }}
+            value={user.birthDate} // Stays in YYYY-MM-DD format
+            onChange={handleDateChange}
             required
           />
+          {/* Show formatted date below the input */}
+          {displayDate && (
+            <p style={{ color: "#555", fontSize: "14px", marginTop: "-10px" }}>
+              Selected: {displayDate}
+            </p>
+          )}
+
           <TextField
             label="Phone"
             name="phone"

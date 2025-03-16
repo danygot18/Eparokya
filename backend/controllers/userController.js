@@ -123,12 +123,16 @@ exports.registerUser = async (req, res, next) => {
         console.log('Received address:', req.body.address);
 
         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
-            folder: 'baghub/avatar',
+            folder: 'eparokya/avatar',
             width: 150,
             crop: "scale"
         });
 
-        const { name, email, password, age, civilStatus, preference, phone, address, ministryRoles } = req.body;
+        const { name, email, password, birthDate, civilStatus, preference, phone, address, ministryRoles } = req.body;
+
+        if (!birthDate || isNaN(Date.parse(birthDate))) {
+            return res.status(400).json({ success: false, message: "Invalid birthDate format" });
+        }
 
         let parsedAddress = {};
         try {
@@ -173,7 +177,7 @@ exports.registerUser = async (req, res, next) => {
                 public_id: result.public_id,
                 url: result.secure_url
             },
-            age,
+            birthDate: new Date(birthDate),
             civilStatus,
             preference,
             phone,
@@ -894,14 +898,17 @@ exports.getUserFormCounts = async (req, res) => {
 exports.getMemberStatuses = async (req, res) => {
     try {
         const currentYear = new Date().getFullYear();
-        const users = await User.find({}, "_id name email ministryRoles").populate("ministryRoles.ministry", "name");
+        
+        // Fetch all required fields from User
+        const users = await User.find({}, "name email avatar birthDate civilStatus preference ministryRoles")
+            .populate("ministryRoles.ministry", "name");
 
         const memberStatuses = users.map((user) => {
             let isActive = false;
 
             user.ministryRoles.forEach((role) => {
                 if (!role.endYear || role.endYear >= currentYear) {
-                    isActive = true; // If any ministry role is still valid in the current year, the user is active
+                    isActive = true; // If any ministry role is still valid, the user is active
                 }
             });
 
@@ -909,6 +916,10 @@ exports.getMemberStatuses = async (req, res) => {
                 userId: user._id,
                 name: user.name,
                 email: user.email,
+                avatar: user.avatar || "",  // Ensure avatar is included
+                birthDate: user.birthDate || null, // Ensure birthDate is included
+                civilStatus: user.civilStatus || "N/A",
+                preference: user.preference || "N/A",
                 isActive,
                 ministries: user.ministryRoles.map((role) => ({
                     ministry: role.ministry?.name || "Unknown",
@@ -925,6 +936,7 @@ exports.getMemberStatuses = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 // exports.updateUser = async (req, res) => {
 //     try {

@@ -82,7 +82,7 @@ const Header = () => {
           align="end"
           menuVariant="light"
         >
-          <NavDropdown.Item as={Link} to="/user/members" style={styles.dropdownItem}>
+          <NavDropdown.Item as={Link} to="/memberHistory" style={styles.dropdownItem}>
             Members
           </NavDropdown.Item>
           <NavDropdown.Item as={Link} to="/parishPriests" style={styles.dropdownItem}>

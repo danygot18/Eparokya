@@ -153,10 +153,10 @@ const userSchema = new mongoose.Schema({
     //     type: String,
     //     default: ''
     // },
-    age: {
-        type: Number,
-        min: [1, 'Age must be between 1 and 1000'],
-        max: [1000, 'Age must be between 1 and 1000']
+   
+    birthDate: {
+        type: Date,
+        required: true, 
     },
     preference: {
         type: String,

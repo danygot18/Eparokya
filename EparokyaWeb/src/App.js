@@ -114,6 +114,7 @@ import ResourceList from './Components/Admin/Resources/ResourceList';
 // Priest
 import CreatePriest from './Components/Admin/Priest/CreatePriest';
 import PriestList from './Components/Admin/Priest/PriestList';
+import PriestNavigation from './Components/Admin/Priest/PriestNavigation';
 
 // FeedbackForm
 import EventType from './Components/Admin/FeedbackForm/Types/EventType';
@@ -325,6 +326,7 @@ function App() {
         {/* Priest */}
         <Route path="/admin/create/priest" element={<ProtectedRoute isAdmin={true}><CreatePriest /></ProtectedRoute>} />
         <Route path="/admin/priestList" element={<ProtectedRoute isAdmin={true}><PriestList /></ProtectedRoute>} />
+        <Route path="/admin/priestNavigation" element={<ProtectedRoute isAdmin={true}><PriestNavigation /></ProtectedRoute>} />
 
         {/* FeedbackForm */}
         {/* Types */}

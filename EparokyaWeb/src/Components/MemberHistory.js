@@ -12,47 +12,82 @@ import {
   TextField,
   CircularProgress,
   Box,
+  Avatar,
 } from "@mui/material";
 import axios from "axios";
 
-const MemberHistory = ({ ministryCategoryId }) => {
-  const [members, setMembers] = useState([]);
+const MemberHistory = () => {
+  const [ministries, setMinistries] = useState({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    if (!ministryCategoryId) return;
-
-    const fetchMembers = async () => {
+    const fetchMemberStatuses = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getUsersByMinistryCategory/${ministryCategoryId}`);
+        const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getMemberStatuses`);
         if (response.status === 200) {
-          setMembers(response.data.users);
+          // console.log("API Response:", response.data);
+          const memberStatuses = response.data;
+          const grouped = {};
+          memberStatuses.forEach((user) => {
+            // console.log("User Data:", user); 
+  
+            user.ministries.forEach((ministryRole) => {
+              const ministryName = ministryRole.ministry || "Unknown Ministry";
+              if (!grouped[ministryName]) {
+                grouped[ministryName] = [];
+              }
+              grouped[ministryName].push({
+                userId: user.userId,
+                name: user.name,
+                email: user.email,
+                role: ministryRole.role,
+                yearsActive: ministryRole.endYear
+                  ? `${ministryRole.startYear} - ${ministryRole.endYear}`
+                  : `${ministryRole.startYear} - Ongoing`,
+                isActive: user.isActive,
+                avatar: user.avatar || "", 
+                birthDate: user.birthDate || "N/A", 
+                civilStatus: user.civilStatus || "N/A",
+                preference: user.preference || "N/A",
+              });
+            });
+          });
+  
+          setMinistries(grouped);
         }
       } catch (error) {
-        console.error("Error fetching members:", error);
+        console.error("Error fetching member statuses:", error);
       } finally {
         setLoading(false);
       }
     };
+  
+    fetchMemberStatuses();
+  }, []);
 
-    fetchMembers();
-  }, [ministryCategoryId]);
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const dateObj = new Date(dateString);
+    return isNaN(dateObj.getTime())
+      ? "Invalid Date"
+      : dateObj.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  };
 
-  const currentYear = new Date().getFullYear();
-
-  const filteredMembers = members.filter(
-    (member) =>
-      member.name.toLowerCase().includes(search.toLowerCase()) ||
-      member.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredMinistries = {};
+  Object.keys(ministries).forEach((ministryName) => {
+    filteredMinistries[ministryName] = ministries[ministryName].filter(
+      (member) =>
+        member.name.toLowerCase().includes(search.toLowerCase()) ||
+        member.email.toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
   return (
-    <Container maxWidth="md">
+    <Container maxWidth="lg">
       <Typography variant="h4" gutterBottom>
-        Member History
+        Parish Members
       </Typography>
-
       <TextField
         label="Search Member"
         variant="outlined"
@@ -66,42 +101,55 @@ const MemberHistory = ({ ministryCategoryId }) => {
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell><strong>Name</strong></TableCell>
-                <TableCell><strong>Email</strong></TableCell>
-                <TableCell><strong>Role</strong></TableCell>
-                <TableCell><strong>Years Active</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredMembers.map((member) => {
-                const isActive = member.ministryRoles.some(
-                  (role) => !role.endYear || role.endYear >= currentYear
-                );
-
-                return (
-                  <TableRow key={member._id}>
-                    <TableCell>{member.name}</TableCell>
-                    <TableCell>{member.email}</TableCell>
-                    <TableCell>{member.ministryRoles.map((r) => r.role).join(", ")}</TableCell>
-                    <TableCell>
-                      {member.ministryRoles.map((r) =>
-                        r.endYear ? `${r.startYear} - ${r.endYear}` : `${r.startYear} - Ongoing`
-                      ).join(", ")}
-                    </TableCell>
-                    <TableCell style={{ color: isActive ? "green" : "red" }}>
-                      {isActive ? "Active" : "Inactive"}
-                    </TableCell>
+        Object.keys(filteredMinistries).map((ministryName) => (
+          <Box key={ministryName} mb={4}>
+            <Typography variant="h5" gutterBottom>
+              {ministryName}
+            </Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell><strong>Avatar</strong></TableCell>
+                    <TableCell><strong>Name</strong></TableCell>
+                    <TableCell><strong>Email</strong></TableCell>
+                    <TableCell><strong>Birth Date</strong></TableCell>
+                    <TableCell><strong>Civil Status</strong></TableCell>
+                    <TableCell><strong>Preference</strong></TableCell>
+                    <TableCell><strong>Role</strong></TableCell>
+                    <TableCell><strong>Years Active</strong></TableCell>
+                    <TableCell><strong>Status</strong></TableCell>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {filteredMinistries[ministryName].map((member) => (
+                    <TableRow key={member.userId}>
+                      {/* Avatar (Rounded Square, 50x50px) */}
+                      <TableCell>
+                        <Avatar
+                          src={member.avatar.url || "/default-avatar.png"}
+                          alt={member.name}
+                          sx={{ width: 50, height: 50, borderRadius: 2 }}
+                        />
+                      </TableCell>
+
+                      <TableCell>{member.name}</TableCell>
+                      <TableCell>{member.email}</TableCell>
+                      <TableCell>{formatDate(member.birthDate)}</TableCell>
+                      <TableCell>{member.civilStatus || "N/A"}</TableCell>
+                      <TableCell>{member.preference || "N/A"}</TableCell>
+                      <TableCell>{member.role}</TableCell>
+                      <TableCell>{member.yearsActive}</TableCell>
+                      <TableCell style={{ color: member.isActive ? "green" : "red" }}>
+                        {member.isActive ? "Active" : "Inactive"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        ))
       )}
     </Container>
   );
