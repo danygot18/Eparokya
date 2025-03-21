@@ -114,6 +114,9 @@ app.use("/api/v1", require("./routes/Binyag"));
 app.use("/api/v1", require("./routes/Funeral"));
 app.use("/api/v1", require("./routes/counseling"));
 
+// MassForms
+app.use("/api/v1", require("./routes/MassForms/massBaptism"));
+
 app.use("/api/v1", require("./routes/Announcement/AnnouncementComment"));
 app.use("/api/v1", require("./routes/Announcement/ministryAnnouncement"));
 app.use("/api/v1", require("./routes/post"));

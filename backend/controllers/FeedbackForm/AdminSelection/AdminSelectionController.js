@@ -67,11 +67,14 @@ exports.getActiveSelection = async (req, res) => {
     console.log("Active selection category:", activeSelection.category);
     console.log("Available modelMap keys:", Object.keys(modelMap));
 
-    const categoryKey = activeSelection.category.charAt(0).toUpperCase() + activeSelection.category.slice(1) + "Type";
-    console.log("Resolved categoryKey:", categoryKey);
+    const categoryKey = activeSelection.category === "priest"
+      ? "Priest" 
+      : activeSelection.category.charAt(0).toUpperCase() + activeSelection.category.slice(1) + "Type";
+
+    console.log("Resolved categoryKey:", categoryKey); 
 
     const Model = modelMap[categoryKey];
-    
+
     if (!Model) {
       console.error("Invalid category:", categoryKey);
       return res.status(500).json({ error: "Invalid typeModel" });

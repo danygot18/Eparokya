@@ -75,21 +75,29 @@ const analyzeAdvancedSentiment = async (comment) => {
 /**
  * Main function to decide which sentiment analysis to use.
  */
-const analyzeSentiment = async (emoji, comment) => {
-    const basicResult = analyzeBasicSentiment(emoji, comment);
+async function analyzeSentiment(emojiScore, comment) {
+  let basicSentiment = sentiment.analyze(comment);
+  
+  let processedBasicSentiment = {
+    score: basicSentiment.score,
+    comparative: basicSentiment.comparative,
+    magnitude: Math.abs(basicSentiment.score),  // Ensure magnitude is absolute
+    words: basicSentiment.words || [], // Ensure words array exists
+    positive: basicSentiment.positive || [],
+    negative: basicSentiment.negative || [],
+    method: "basic"
+  };
 
-    // If the comment is short, just return basic analysis
-    if (comment.length < 10) {
-        return basicResult;
+  return {
+    basic: processedBasicSentiment,
+    advanced: {
+      label: processedBasicSentiment.score > 1 ? "positive" : processedBasicSentiment.score < 0 ? "negative" : "neutral",
+      score: processedBasicSentiment.score,
+      magnitude: processedBasicSentiment.magnitude,
+      method: "huggingface"
     }
+  };
+}
 
-    // Otherwise, try Hugging Face analysis
-    const advancedResult = await analyzeAdvancedSentiment(comment);
-
-    return {
-        basic: basicResult,
-        advanced: advancedResult,
-    };
-};
 
 module.exports = analyzeSentiment;

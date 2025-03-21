@@ -14,10 +14,10 @@ const MassBaptismForm = () => {
     const [NinongGodparents, setNinongGodparents] = useState([]);
     const [NinangGodparents, setNinangGodparents] = useState([]);
     const [user, setUser] = useState(null);
+    const [baptismDates, setBaptismDates] = useState([]); // Store available baptism dates
     
     const [formData, setFormData] = useState({
-        baptismDate: '',
-        baptismTime: '',
+        baptismDateTime: '', // Store selected date ID instead of manually entering date/time
         child: {
             fullName: '',
             dateOfBirth: '',
@@ -32,32 +32,25 @@ const MassBaptismForm = () => {
             address: '',
             marriageStatus: '',
         },
-        ninong: { name: '', address: '', religion: '' },
-        ninang: { name: '', address: '', religion: '' },
+        ninong: [],
+        ninang: [],
+        NinongGodparents: [],
+        NinangGodparents: [],
         Docs: {
             birthCertificate: [],
             marriageCertificate: [],
             baptismPermit: [],
         },
     });
+    
     const config = {
         withCredentials: true,
     };
-
+    
+    // Fetch user info
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                // const token = sessionStorage.getItem('token');  
-                // if (!token) {
-                //     console.error('No token found. User is not authenticated.');
-                //     return;
-                // }
-
-                // const config = {
-                //     headers: { Authorization: `Bearer ${token}` },
-                //     withCredentials: true,
-                // };
-
                 const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config);
                 setUser(response.data.user);
             } catch (error) {
@@ -66,7 +59,21 @@ const MassBaptismForm = () => {
         };
         fetchUser();
     }, []);
-
+    
+    // Fetch available baptism dates
+    useEffect(() => {
+        const fetchBaptismDates = async () => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/adminDate/getAllDates`, config);
+                setBaptismDates(response.data);
+            } catch (error) {
+                console.error('Error fetching baptism dates:', error);
+            }
+        };
+        fetchBaptismDates();
+    }, []);
+    
+    // Handle input changes
     const handleChange = (e, fieldPath) => {
         const keys = fieldPath.split('.');
         setFormData((prev) => {
@@ -79,22 +86,8 @@ const MassBaptismForm = () => {
             return updated;
         });
     };
-
-
-    // const handleFileChange = (e, name) => {
-    //     const files = Array.from(e.target.files);
-    //     setFormData(prev => ({
-    //         ...prev,
-    //         Docs: {
-    //             ...prev.Docs,
-    //             [name]: files.map(file => ({
-    //                 public_id: file.name,
-    //                 url: URL.createObjectURL(file),
-    //             })),
-    //         },
-    //     }));
-    // };
-
+    
+    // Handle file uploads
     const handleFileChange = (e, docType) => {
         const files = Array.from(e.target.files);
         setFormData(prevData => ({
@@ -105,22 +98,17 @@ const MassBaptismForm = () => {
             },
         }));
     };
-
-    const handlePreview = (url, type) => {
-        const previewType = type.startsWith('image/') ? 'image' : 'document';
-        setFilePreview(url);
-        setFilePreviewType(previewType);
-        setShowPreviewModal(true);
-    };
-
+    
+    // Handle dynamic field additions/removals
     const handleAddDynamicField = (setState, template) => {
         setState(prev => [...prev, { ...template }]);
     };
-
+    
     const handleRemoveDynamicField = (setState, index) => {
         setState(prev => prev.filter((_, i) => i !== index));
     };
-
+    
+    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
     
@@ -157,8 +145,7 @@ const MassBaptismForm = () => {
             console.log('Response:', response.data);
     
             setFormData({
-                baptismDate: '',
-                baptismTime: '',
+                baptismDateTime: '',
                 child: {},
                 parents: {},
                 ninong: [],
@@ -177,6 +164,7 @@ const MassBaptismForm = () => {
             toast.error('Failed to submit form. Please try again.');
         }
     };
+
     
     return (
 

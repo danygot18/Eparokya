@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const dateSchema = new mongoose.Schema({
     category: {
         type: String,
-        enum: ['Wedding', 'Funeral', 'Christening', 'Counseling'],
+        enum: ['Wedding', 'Baptism'],
         required: true,
     },
     date: {
@@ -28,7 +28,7 @@ const dateSchema = new mongoose.Schema({
     },
     submittedParticipants: {
         type: Number,
-        default: 0, // total submissions
+        default: 0, 
     },
     createdAt: {
         type: Date,

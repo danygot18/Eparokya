@@ -1,6 +1,6 @@
 const PriestSentiment = require("../../../models/FeedbackForm/Sentiments/PriestSentiment");
-const AdminSelection = require("../../../models/FeedbackForm/AdminSelection/AdminSelection");
-const { analyzeSentiment } = require("../../../utils/sentimentAnalyzer");
+const AdminSelection = require("../../../models/FeedbackForm/AdminSelection/adminSelection");
+const analyzeSentiment = require("../../../utils/sentimentAnalyzer");
 const Sentiment = require("sentiment");
 
 const emojiSentimentMap = {
@@ -71,9 +71,31 @@ exports.analyzeSentiment = async (req, res) => {
 
     let emojiSentiment = calculateEmojiSentiment(responses);
 
-    let commentSentiment = comment ? await analyzeSentiment(emojiSentiment.score, comment) : {
+    let commentSentiment = comment
+  ? await analyzeSentiment(emojiSentiment.score, comment)
+  : {
       basic: { score: 0, comparative: 0, magnitude: 0, words: [], positive: [], negative: [], method: "basic" },
       advanced: { label: "neutral", score: 0, magnitude: 0, method: "huggingface" }
+    };
+
+// Ensure basic sentiment object is valid (Fix missing words, positive, and negative arrays)
+if (!commentSentiment.basic) {
+  commentSentiment.basic = { score: 0, comparative: 0, magnitude: 0, words: [], positive: [], negative: [], method: "basic" };
+}
+
+
+    // Debugging logs before saving
+    console.log("Comment Sentiment Before Save:", commentSentiment);
+    console.log("Emoji Sentiment Before Save:", emojiSentiment);
+    console.log("Priest ID Before Save:", priestId);
+
+    // Ensure required fields exist
+    const processedCommentSentiment = {
+      magnitude: commentSentiment?.basic?.magnitude || 0,
+      comparative: commentSentiment?.basic?.comparative || 0,
+      score: commentSentiment?.basic?.score || 0,
+      label: sentimentToStars(commentSentiment?.advanced?.label || "neutral", commentSentiment.basic),
+      method: "basic",
     };
 
     if (commentSentiment.basic.positive.length > 0 && commentSentiment.basic.negative.length > 0) {
@@ -83,8 +105,10 @@ exports.analyzeSentiment = async (req, res) => {
     const overallSentiment = determineOverallSentiment(
       commentSentiment?.basic?.score || 0,
       commentSentiment?.advanced?.score || 0,
+      commentSentiment?.advanced?.label || "Neutral", 
       emojiSentiment.score
     );
+    
 
     const finalConfidence = confidenceScore(
       commentSentiment?.basic?.score || 0,
@@ -95,22 +119,28 @@ exports.analyzeSentiment = async (req, res) => {
     const processedResponses = responses.map((r) => ({
       question: r.question,
       emoji: r.emoji,
-      sentimentResult: calculateEmojiSentiment([r]) 
+      sentimentResult: calculateEmojiSentiment([r])
     }));
 
     const sentimentResult = new PriestSentiment({
       userId,
-      eventTypeId: priestId,
-      responses: processedResponses, 
+      priestId, // ✅ Ensure priestId is assigned
+      responses: processedResponses,
       comment: comment || null,
       commentSentiment: {
-        ...commentSentiment,
-        label: sentimentToStars(overallSentiment, commentSentiment.basic)
+        magnitude: commentSentiment?.basic?.magnitude || 0,
+        comparative: commentSentiment?.basic?.comparative || 0,
+        score: commentSentiment?.basic?.score || 0,
+        words: commentSentiment?.basic?.words || [],
+        positive: commentSentiment?.basic?.positive || [],
+        negative: commentSentiment?.basic?.negative || [],
+        label: sentimentToStars(commentSentiment?.advanced?.label || "neutral", commentSentiment.basic),
+        method: "basic",
       },
       overallSentiment,
-      confidence: finalConfidence
+      confidence: finalConfidence,
     });
-
+    
     await sentimentResult.save();
 
     res.status(200).json(sentimentResult);
@@ -121,29 +151,29 @@ exports.analyzeSentiment = async (req, res) => {
 };
 
 exports.getAllPriestSentiments = async (req, res) => {
-    try {
-      const sentiments = await PriestSentiment.find()
-        .populate("userId", "name")
-        .populate("priestId", "name");
-  
-      res.status(200).json(sentiments);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching priest sentiments", error });
+  try {
+    const sentiments = await PriestSentiment.find()
+      .populate("userId", "name")
+      .populate("priestId", "name");
+
+    res.status(200).json(sentiments);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching priest sentiments", error });
+  }
+};
+
+exports.getSentimentsByPriest = async (req, res) => {
+  try {
+    const { priestId } = req.params;
+    const sentiments = await PriestSentiment.find({ priestId })
+      .populate("userId", "name");
+
+    if (!sentiments.length) {
+      return res.status(404).json({ message: "No sentiments found for this priest" });
     }
-  };
-  
-  exports.getSentimentsByPriest = async (req, res) => {
-    try {
-      const { priestId } = req.params;
-      const sentiments = await PriestSentiment.find({ priestId })
-        .populate("userId", "name");
-  
-      if (!sentiments.length) {
-        return res.status(404).json({ message: "No sentiments found for this priest" });
-      }
-  
-      res.status(200).json(sentiments);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching priest sentiments", error });
-    }
-  };
+
+    res.status(200).json(sentiments);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching priest sentiments", error });
+  }
+};

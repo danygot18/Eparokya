@@ -1,6 +1,6 @@
 const EventSentiment = require("../../../models/FeedbackForm/Sentiments/EventSentiment");
 const EventType = require("../../../models/FeedbackForm/Types/EventType");
-const AdminSelection = require("../../../models/FeedbackForm/AdminSelection/AdminSelection");
+const AdminSelection = require("../../../models/FeedbackForm/AdminSelection/adminSelection");
 const Sentiment = require("sentiment");
 const analyzeSentiment = require("../../../utils/sentimentAnalyzer");
 

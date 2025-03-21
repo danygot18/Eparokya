@@ -86,16 +86,17 @@ const AdminSelection = () => {
     const handleDeactivateSelection = async (id) => {
         try {
             const response = await axios.put(
-                `${process.env.REACT_APP_API}/api/v1/deactivateSelection/${id}`,
+                `${process.env.REACT_APP_API}/api/v1/deactivateSelection/${id}`, // Ensure `id` is correct
                 {},
                 { withCredentials: true }
             );
             alert(response.data.message);
-            fetchSelections(); // Refresh the list after deactivation
+            fetchSelections(); // Refresh list
         } catch (error) {
-            console.error("Error deactivating selection:", error);
+            console.error("Error deactivating selection:", error.response?.data || error.message);
         }
     };
+    
 
     return (
         <div>
