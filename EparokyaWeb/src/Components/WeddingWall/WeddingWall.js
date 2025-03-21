@@ -16,7 +16,9 @@ const WeddingWall = () => {
     return (
         <div className="weddingWall-container">
             {/* Left Sidebar - GuestSideBar */}
-            <div className="weddingWall-sidebar guestSideBar">
+            <div 
+            // className="weddingWall-sidebar guestSideBar"
+            >
                 <GuestSideBar/>
             </div>
     

@@ -138,7 +138,7 @@ const PrayerWall = () => {
 
   return (
     <div className="prayer-wall-container">
-      <div className="guest-sidebar">
+      <div >
         <GuestSidebar />
       </div>
 

@@ -2156,17 +2156,11 @@ body {
 .prayer-wall-container {
   display: flex;
   flex-direction: row;
-  gap: 20px; /* Increase gap between sidebar and content */
+  /* gap: 20px; */
 }
 
 /* Guest Sidebar styling */
-.guest-sidebar {
-  width: 300px; /* Adjust width as per need */
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
+
 
 /* Main content area for prayer wall */
 .prayer-wall {

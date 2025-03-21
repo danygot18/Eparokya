@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Dimensions, Modal, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Modal,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Button, Image } from "native-base";
@@ -10,29 +18,50 @@ import baseURL from "../../assets/common/baseUrl";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import RNPickerSelect from 'react-native-picker-select';
+import RNPickerSelect from "react-native-picker-select";
+import { barangays } from "../../assets/common/barangays.js";
+import CheckBox from "@react-native-community/checkbox";
+import { Picker } from "@react-native-picker/picker";
 
 var { height, width } = Dimensions.get("window");
 
 const Register2 = () => {
-  const [age, setAge] = useState(null);
-  const [phone, setPhone] = useState("");
-  const [barangay, setBarangay] = useState("");
-  const [zip, setZip] = useState("");
-  const [city, setCity] = useState("");
-  const [country, setCountry] = useState("");
-  const [preference, setPreference] = useState("They/Them");
+  const route = useRoute();
+  const { email, name, password } = route.params;
+  console.log("Email:", email, "Name:", name, "Password:", password);
+
+  const [user, setUser] = useState({
+    name: name,
+    email: email,
+    password: password,
+    age: "",
+    preference: "They/Them",
+    civilStatus: "",
+    phone: "",
+    address: {
+      BldgNameTower: "",
+      LotBlockPhaseHouseNo: "",
+      SubdivisionVillageZone: "",
+      Street: "",
+      District: "",
+      barangay: "",
+      city: "",
+      customCity: "",
+    },
+    ministryRoles: [],
+  });
+
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
-  const [ministryCategory, setMinistryCategories] = useState([]);
-  const [selectedMinistryCategories, setSelectedMinistryCategories] = useState([]);
+  const [ministryCategories, setMinistryCategories] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [ministryModalVisible, setMinistryModalVisible] = useState(false);
   const navigation = useNavigation();
-  const route = useRoute();
 
-  const { email, name, password } = route.params;
 
-  const defaultImage = require('../../assets/EPAROKYA-SYST.png');
+
+
+  const defaultImage = require("../../assets/EPAROKYA-SYST.png");
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -48,10 +77,11 @@ const Register2 = () => {
   };
 
   useEffect(() => {
-    axios.get(`${baseURL}/getAllMinistryCategories`)
+    axios
+      .get(`${baseURL}/ministryCategory/getAllMinistryCategories`)
       .then((response) => {
         console.log("Fetched Categories:", response.data);
-        setMinistryCategories(response.data || []);
+        setMinistryCategories(response.data.categories || []);
       })
       .catch((error) => {
         console.error("Fetch Error:", error.response ? error.response.data : error.message);
@@ -59,14 +89,12 @@ const Register2 = () => {
       });
   }, []);
 
-
   const handleMinistryCategoryChange = (categoryId) => {
-    setSelectedMinistryCategories((prevSelected) => {
-      if (prevSelected.includes(categoryId)) {
-        return prevSelected.filter((id) => id !== categoryId); // Deselect if already selected
-      } else {
-        return [...prevSelected, categoryId]; // Add if not selected
-      }
+    setUser((prevUser) => {
+      const updatedRoles = prevUser.ministryRoles.includes(categoryId)
+        ? prevUser.ministryRoles.filter((id) => id !== categoryId) // Deselect if already selected
+        : [...prevUser.ministryRoles, categoryId]; // Add if not selected
+      return { ...prevUser, ministryRoles: updatedRoles };
     });
   };
 
@@ -105,13 +133,17 @@ const Register2 = () => {
 
   const register = () => {
     if (
-      age === null ||
-      phone === "" ||
-      barangay === "" ||
-      zip === "" ||
-      city === "" ||
-      country === "" ||
-      selectedMinistryCategories.length === 0
+      !user.age ||
+      !user.phone ||
+      !user.address.barangay ||
+      !user.address.BldgNameTower ||
+      !user.address.LotBlockPhaseHouseNo ||
+      !user.address.SubdivisionVillageZone ||
+      !user.address.Street ||
+      !user.address.District ||
+      !user.address.country ||
+      !user.civilStatus ||
+      user.ministryRoles.length === 0
     ) {
       setError("Please fill in the form correctly");
       return;
@@ -119,32 +151,52 @@ const Register2 = () => {
 
     const formData = new FormData();
 
-    formData.append('name', name);
-    formData.append('email', email);
-    formData.append('password', password);
-    formData.append('age', age);
-    formData.append('phone', phone);
-    formData.append('barangay', barangay);
-    formData.append('zip', zip);
-    formData.append('city', city);
-    formData.append('country', country);
-    formData.append('preference', preference);
-    formData.append('ministryCategory', selectedMinistryCategories);
+    formData.append("name", user.name);
+    formData.append("email", user.email);
+    formData.append("password", user.password);
+    formData.append("age", user.age);
+    formData.append("phone", user.phone);
+    formData.append("preference", user.preference);
+    formData.append("civilStatus", user.civilStatus);
+
+    // Append address as a JSON string
+    const address = {
+      BldgNameTower: user.address.BldgNameTower,
+      LotBlockPhaseHouseNo: user.address.LotBlockPhaseHouseNo,
+      SubdivisionVillageZone: user.address.SubdivisionVillageZone,
+      Street: user.address.Street,
+      District: user.address.District,
+      barangay: user.address.barangay,
+      city: user.address.city,
+      country: user.address.country,
+    };
+    formData.append("address", JSON.stringify(address));
+
+    // Append ministryRoles as a JSON string
+    const ministryRoles = user.ministryRoles.map((categoryId) => ({
+      ministry: categoryId,
+      role: "Member", // Default role, update as needed
+      startYear: new Date().getFullYear(), // Default start year, update as needed
+      endYear: new Date().getFullYear() + 1, // Default end year, update as needed
+    }));
+    formData.append("ministryRoles", JSON.stringify(ministryRoles));
 
     if (selectedImage) {
-      formData.append('image', {
+      formData.append("avatar", {
         uri: selectedImage,
-        type: 'image/jpeg',
-        name: 'image.jpg',
+        type: "image/jpeg",
+        name: "image.jpg",
       });
     }
-
+    console.log("formData:", formData);
     axios
-      .post(`${baseURL}/users/register`, formData, {
+      .post(`${baseURL}/register`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+
         },
       })
+
       .then((res) => {
         if (res.status === 200) {
           Toast.show({
@@ -158,6 +210,7 @@ const Register2 = () => {
           }, 500);
         }
       })
+
       .catch((error) => {
         Toast.show({
           position: "bottom",
@@ -170,34 +223,23 @@ const Register2 = () => {
       });
   };
 
-  // useEffect(() => {
-  //   axios
-  //     .get(`${baseURL}/ministryCategory/`)
-  //     .then((response) => {
-  //       console.log("Fetched Categories:", response.data);
-  //       setMinistryCategories(response.data || []);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Fetch Error:", error);
-  //       setMinistryCategories([]);
-  //     });
-  // }, []);
-
-
   return (
     <KeyboardAwareScrollView
       viewIsInsideTabBar={true}
       extraHeight={200}
       enableOnAndroid={true}
+      paddingTop={20}
     >
       <FormContainer style={styles.container}>
+        <Text padding={10} fontSize={5}>
+          Select Image
+        </Text>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
           <Image
             source={selectedImage ? { uri: selectedImage } : defaultImage}
             style={styles.profileImage}
             alt="Profile Image"
           />
-
         </TouchableOpacity>
 
         <Modal
@@ -211,22 +253,13 @@ const Register2 = () => {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Select Profile</Text>
-              <TouchableOpacity
-                onPress={handleImagePick}
-                style={styles.modalButton}
-              >
+              <TouchableOpacity onPress={handleImagePick} style={styles.modalButton}>
                 <Text style={styles.modalButtonText}>Choose from Gallery</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleTakePhoto}
-                style={styles.modalButton}
-              >
+              <TouchableOpacity onPress={handleTakePhoto} style={styles.modalButton}>
                 <Text style={styles.modalButtonText}>Take a Photo</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleRemoveProfile}
-                style={styles.modalButton}
-              >
+              <TouchableOpacity onPress={handleRemoveProfile} style={styles.modalButton}>
                 <Text style={styles.modalButtonText}>Remove Profile Picture</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -242,91 +275,206 @@ const Register2 = () => {
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Age</Text>
           <RNPickerSelect
-            placeholder={{ label: 'Select Age', value: null }}
-            onValueChange={(value) => setAge(value)}
+            placeholder={{ label: "Select Age", value: null }}
+            onValueChange={(value) => setUser({ ...user, age: value })}
             items={Array.from({ length: 100 }, (_, i) => ({
               label: `${i + 1}`,
-              value: i + 1
+              value: i + 1,
             }))}
             style={pickerSelectStyles}
-            value={age}
+            value={user.age}
           />
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Preference</Text>
           <RNPickerSelect
-            placeholder={{ label: 'Select Preference', value: null }}
-            onValueChange={(value) => setPreference(value)}
+            placeholder={{ label: "Select Preference", value: null }}
+            onValueChange={(value) => setUser({ ...user, preference: value })}
             items={[
-              { label: 'He', value: 'He' },
-              { label: 'She', value: 'She' },
-              { label: 'They/Them', value: 'They/Them' }
+              { label: "He", value: "He" },
+              { label: "She", value: "She" },
+              { label: "They/Them", value: "They/Them" },
             ]}
             style={pickerSelectStyles}
-            value={preference}
+            value={user.preference}
           />
         </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Ministry Categories</Text>
-          {ministryCategory.length > 0 && (
-            <View>
-              {ministryCategory.map((category) => (
-                <View key={category._id} style={styles.checkboxContainer}>
-                  <CheckBox
-                    value={selectedMinistryCategories.includes(category._id)}
-                    onValueChange={() => handleMinistryCategoryChange(category._id)}
-                  />
-                  <Text>{category.name}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
+
 
         <Input
           placeholder={"Phone Number"}
           name={"phone"}
           id={"phone"}
           keyboardType={"numeric"}
-          onChangeText={(text) => setPhone(text)}
+          onChangeText={(text) => setUser({ ...user, phone: text })}
+        />
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Civil Status</Text>
+          <RNPickerSelect
+            placeholder={{ label: "Select Civil Status ", value: null }}
+            onValueChange={(value) => setUser({ ...user, civilStatus: value })}
+            items={[
+              { label: "Single", value: "Single" },
+              { label: "Married", value: "Married" },
+              { label: "Widowed", value: "Widowed" },
+              { label: "Separated", value: "Separated" },
+            ]}
+            style={pickerSelectStyles}
+            value={user.civilStatus}
+          />
+        </View>
+
+        <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 5 }}>
+          Ministry Categories
+        </Text>
+
+        {/* Touchable Dropdown */}
+        <TouchableOpacity
+          style={{
+            borderWidth: 1,
+            borderColor: "#ccc",
+            padding: 10,
+            borderRadius: 5,
+          }}
+          onPress={() => setMinistryModalVisible(true)}
+        >
+          <Text>
+            {user.ministryRoles.length > 0
+              ? ministryCategories
+                .filter((cat) => user.ministryRoles.includes(cat._id))
+                .map((cat) => cat.name)
+                .join(", ")
+              : "Select Ministries"}
+          </Text>
+        </TouchableOpacity>
+        <Modal visible={ministryModalVisible} animationType="slide" transparent>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}
+          >
+            <View
+              style={{
+                width: "80%",
+                backgroundColor: "white",
+                padding: 20,
+                borderRadius: 10,
+              }}
+            >
+              <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
+                Select Ministries (Max 3)
+              </Text>
+              <FlatList
+                data={ministryCategories}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => (
+                  <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
+                    <CheckBox
+                      value={user.ministryRoles.includes(item._id)}
+                      onValueChange={() => handleMinistryCategoryChange(item._id)}
+                    />
+                    <Text>{item.name}</Text>
+                  </View>
+                )}
+              />
+              <TouchableOpacity
+                onPress={() => setMinistryModalVisible(false)}
+                style={{
+                  backgroundColor: "#007BFF",
+                  padding: 10,
+                  borderRadius: 5,
+                  alignItems: "center",
+                  marginTop: 10,
+                }}
+              >
+                <Text style={{ color: "white", fontWeight: "bold" }}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        <Text style={styles.label} marginTop={20}>Address</Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Barangay</Text>
+          <RNPickerSelect
+            placeholder={{ label: "Select Barangay", value: null }}
+            onValueChange={(value) => setUser({ ...user, address: { ...user.address, barangay: value } })}
+            items={barangays.map((barangay) => ({ label: barangay, value: barangay }))}
+            style={pickerSelectStyles}
+            value={user.address.barangay}
+          />
+        </View>
+        <Input
+          placeholder={"Building Name/Tower"}
+          name={"BldgNameTower"}
+          id={"BldgNameTower"}
+          onChangeText={(text) => setUser({ ...user, address: { ...user.address, BldgNameTower: text } })}
         />
         <Input
-          placeholder={"Barangay"}
-          name={"barangay"}
-          id={"barangay"}
-          onChangeText={(text) => setBarangay(text)}
+          placeholder={"Lot/Block/Phase/House No."}
+          name={"LotBlockPhaseHouseNo"}
+          id={"LotBlockPhaseHouseNo"}
+          onChangeText={(text) => setUser({ ...user, address: { ...user.address, LotBlockPhaseHouseNo: text } })}
         />
         <Input
-          placeholder={"Zip Code"}
-          name={"zip"}
-          id={"zip"}
-          keyboardType={"numeric"}
-          onChangeText={(text) => setZip(text)}
+          placeholder={"Subdivision/Village/Zone"}
+          name={"SubdivisionVillageZone"}
+          id={"SubdivisionVillageZone"}
+          onChangeText={(text) => setUser({ ...user, address: { ...user.address, SubdivisionVillageZone: text } })}
         />
+        <Input
+          placeholder={"Street"}
+          name={"Street"}
+          id={"Street"}
+          onChangeText={(text) => setUser({ ...user, address: { ...user.address, Street: text } })}
+        />
+        <Input
+          placeholder={"District"}
+          name={"District"}
+          id={"District"}
+          onChangeText={(text) => setUser({ ...user, address: { ...user.address, District: text } })}
+        />
+
+
         <Input
           placeholder={"City"}
           name={"city"}
           id={"city"}
-          onChangeText={(text) => setCity(text)}
+          onChangeText={(text) => setUser({ ...user, address: { ...user.address, city: text } })}
         />
+        {/* <View style={styles.inputContainer}>
+          <Text style={styles.label}>City</Text>
+          <RNPickerSelect
+            placeholder={{ label: "Select City ", value: null }}
+            onValueChange={(value) => setUser({ ...user.address, city: value })}
+            items={[
+              { label: "Taguig City", value: "Taguig City" },
+              { label: "Others", value: "Others" },
+
+            ]}
+            style={pickerSelectStyles}
+            value={user.city}
+          />
+        </View> */}
+
         <Input
           placeholder={"Country"}
           name={"country"}
           id={"country"}
-          onChangeText={(text) => setCountry(text)}
+          onChangeText={(text) => setUser({ ...user, address: { ...user.address, country: text } })}
         />
 
         <View style={styles.buttonGroup}>
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
         </View>
 
-        <Button
-          variant={"ghost"}
-          onPress={register}
-          style={styles.registerButton}
-        >
+        <Button variant={"ghost"} onPress={register} style={styles.registerButton}>
           <Text style={styles.buttonText}>Register</Text>
         </Button>
       </FormContainer>
@@ -361,7 +509,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   registerButton: {
-    backgroundColor: '#1C5739',
+    backgroundColor: "#1C5739",
     width: "80%",
     borderRadius: 20,
     alignSelf: "center",
@@ -403,13 +551,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-
-    checkboxContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginBottom: 10,
-    },
-
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
   },
 });
 
@@ -419,9 +565,9 @@ const pickerSelectStyles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 4,
-    color: 'black',
+    color: "black",
     paddingRight: 30,
     width: "100%",
   },
@@ -430,9 +576,9 @@ const pickerSelectStyles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 4,
-    color: 'black',
+    color: "black",
     paddingRight: 30,
     width: "100%",
   },

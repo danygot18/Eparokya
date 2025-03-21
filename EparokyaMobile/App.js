@@ -17,6 +17,8 @@ import Main from './Main';
 import { persistor, store } from "./State/store";
 import { setTheme } from "./State/preferenceSlice";
 import { PersistGate } from 'redux-persist/integration/react';
+import 'react-native-gesture-handler';
+import 'react-native-reanimated';
 
 
 

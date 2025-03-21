@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+
 } from "react-native";
 import { Container } from "native-base";
 import axios from "axios";
@@ -46,6 +47,7 @@ const UserProfile = ({ navigation }) => {
       };
       const { data } = await axios.get(`${baseURL}/profile`, config);
       setUserProfile(data?.user);
+      console.log(data?.user)
     } catch (error) {
       console.error(error);
       // setIsAuthenticated(false);
@@ -71,7 +73,7 @@ const UserProfile = ({ navigation }) => {
   };
 
   return (
-    <FormContainer>
+    
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.profileSection}>
           {selectedImage ? (
@@ -149,7 +151,7 @@ const UserProfile = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </FormContainer>
+   
   );
 };
 

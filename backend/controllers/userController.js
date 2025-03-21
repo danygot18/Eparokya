@@ -117,10 +117,11 @@ const mongoose = require('mongoose');
 //     }
 // };
 
+//Pass Register 3-20-2025
 exports.registerUser = async (req, res, next) => {
     try {
-        console.log('Received ministryRoles:', req.body.ministryRoles);
-        console.log('Received address:', req.body.address);
+        console.log('Request Body:', req.body);
+        console.log('Uploaded File:', req.file);
 
         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
             folder: 'eparokya/avatar',
