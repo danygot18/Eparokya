@@ -15,7 +15,6 @@ const emojiMapping = {
   };
   
 
-// Function to Detect Language (English or Filipino)
 const detectLanguage = (text) => {
   const filipinoWords = ["salamat", "mahal", "ganda", "masaya", "lungkot", "galit"];
   return filipinoWords.some((word) => text.toLowerCase().includes(word)) ? "tl" : "en";

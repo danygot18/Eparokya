@@ -42,6 +42,7 @@ const ImageSlider = ({ images }) => {
 };
 
 const ResourcePage = () => {
+    const [user, setUser] = useState(null);
     const [resources, setResources] = useState([]);
     const [categories, setCategories] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -50,6 +51,7 @@ const ResourcePage = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState("");
     const navigate = useNavigate();
+    const config = { withCredentials: true };
 
 
   useEffect(() => {
@@ -57,18 +59,37 @@ const ResourcePage = () => {
     fetchCategories();
   }, []);
 
+   useEffect(() => {
+      const fetchUser = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API}/api/v1/profile`,
+            config
+          );
+          console.log("User Data:", response.data);
+          setUser(response.data.user);
+        } catch (error) {
+          console.error("Error fetching user:", error);
+        }
+      };
+      fetchUser();
+    }, []);
+
   const fetchResources = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API}/api/v1/getAllResource`
-      );
-      
-      setResources(response.data.data || []);
+        const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllResource`);
+        setResources(response.data.data || []);
+        console.log(response.data.data )
+
+        // const bookmarksResponse = await axios.get(
+        //     `${process.env.REACT_APP_API}/api/v1/userBookmarks/${user}`
+        // );
+        // setBookmarkedResources(bookmarksResponse.data.bookmarks || []);
     } catch (error) {
-      console.error("Error fetching resources:", error);
-      setResources([]);
+        console.error("Error fetching resources:", error);
+        setResources([]);
     }
-  };
+};
 
   const fetchCategories = async () => {
     try {
@@ -86,13 +107,25 @@ const ResourcePage = () => {
     setSearchTerm(term);
   };
 
-  const handleBookmark = (resourceId) => {
-    setBookmarkedResources((prev) =>
-      prev.includes(resourceId)
-        ? prev.filter((id) => id !== resourceId)
-        : [...prev, resourceId]
-    );
-  };
+  const handleBookmark = async (resourceId) => {
+    try {
+        const response = await axios.post(
+            `${process.env.REACT_APP_API}/api/v1/resources/${resourceId}/toggleBookmark`,
+            { userId: user._id }, 
+            config
+        );
+
+        if (response.data.success) {
+            setBookmarkedResources((prev) =>
+                prev.includes(resourceId)
+                    ? prev.filter((id) => id !== resourceId)
+                    : [...prev, resourceId]
+            );
+        }
+    } catch (error) {
+        console.error("Error toggling bookmark:", error);
+    }
+};
 
   const handleOpenModal = (link) => {
     setModalContent(link);

@@ -39,6 +39,10 @@ import CounselingForm from './Components/User/Forms/PrivateForms/Counseling/Coun
 import PrayerRequestForm from './Components/User/Forms/PrivateForms/Prayer/PrayerRequestForm';
 import HouseBlessingForm from './Components/User/Forms/PrivateForms/PrivateSchedule/HouseBlessingForm';
 
+
+// MassForms
+import MassBaptismForm from './Components/User/Forms/MassForms/Baptism/MassBaptismForms';
+
 import MySubmittedWeddingForm from './Components/User/Forms/PrivateForms/Wedding/MySubmittedWeddingForm';
 import SubmittedWeddingList from './Components/User/Forms/PrivateForms/Wedding/SubmittedWeddingList';
 // import UserWeddingChecklist from './Components/User/Forms/PrivateForms/Wedding/UserWeddingChecklist';
@@ -80,7 +84,6 @@ import SentimentResult from './Components/Admin/FeedbackForm/SentimentResults/Se
 //User
 import UsersList from './Components/Admin/User/UserList';
 import UpdateUser from './Components/Admin/User/UserUpdate';
-
 
 // Members
 import MemberBatchYear from './Components/Admin/Members/MemberBatchYear';
@@ -183,7 +186,7 @@ import UserLive from './Components/UserLive';
 import Bible from './Components/Admin/Resources/Bible';
 
 function Layout() {
-  const location = useLocation(); // ✅ Now inside Router
+  const location = useLocation(); // Now inside Router
   const isDashboard = location.pathname.startsWith("/admin");
 
   return (
@@ -257,12 +260,14 @@ function App() {
         <Route path="/user/prayerRequest" element={<PrayerRequestForm />} exact="true" />
         <Route path="/user/houseBlessingForm" element={<HouseBlessingForm />} exact="true" />
 
+        {/* Mass Forms */}
+        <Route path="/user/massBaptism" element={<MassBaptismForm />} exact="true" />
+
         <Route path="/user/mySubmittedWeddingForm/:formId" element={<MySubmittedWeddingForm />} exact="true" />
         <Route path="/user/mySubmittedBaptismForm/:formId" element={<MySubmittedBaptismForm />} exact="true" />
         <Route path="/user/mySubmittedFuneralForm/:formId" element={<MySubmittedFuneralForm />} exact="true" />
         <Route path="/user/mySubmittedCounselingForm/:formId" element={<MySubmittedCounselingForm />} exact="true" />
         <Route path="/user/mySubmittedHouseBlessingForm/:formId" element={<MySubmittedHouseBlessingForm />} exact="true" />
-
 
         {/* 
         <Route path="/user/mySubmittedCounselingForm/:formId" element={<MySubmittedCounselingForm />} exact="true" />

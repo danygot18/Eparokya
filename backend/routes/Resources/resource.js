@@ -28,6 +28,7 @@ router.put(
   ]), 
   resourceController.updateResource
 );
+router.put('/resource/:resourceId/bookmark', resourceController.toggleBookmark);
 
 router.delete('/deleteResource/:resourceId', resourceController.deleteResource);
 

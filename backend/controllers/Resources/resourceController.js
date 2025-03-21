@@ -167,6 +167,46 @@ exports.deleteResource = async (req, res) => {
     }
 };
 
+exports.toggleBookmark = async (req, res) => {
+  try {
+      const { userId } = req.body;
+      const { resourceId } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(resourceId)) {
+          return res.status(400).json({ success: false, message: "Invalid user or resource ID" });
+      }
+
+      const resource = await Resource.findById(resourceId);
+      if (!resource) {
+          return res.status(404).json({ success: false, message: "Resource not found" });
+      }
+
+      const bookmarkIndex = resource.bookmarks.findIndex(bookmark => bookmark.userId.toString() === userId);
+
+      let message;
+      if (bookmarkIndex !== -1) {
+          resource.bookmarks.splice(bookmarkIndex, 1);
+          message = "Bookmark removed";
+      } else {
+          resource.bookmarks.push({ userId });
+          message = "Bookmark added";
+      }
+
+      await resource.save();
+
+      return res.status(200).json({
+          success: true,
+          message,
+          resource: {
+              _id: resource._id,
+              bookmarks: resource.bookmarks,
+          },
+      });
+  } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 
   
 
