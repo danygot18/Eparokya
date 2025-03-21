@@ -780,7 +780,6 @@ exports.removeAvailableDate = async (req, res) => {
   }
 };
 
-
 // For user:
 exports.getMySubmittedForms = async (req, res) => {
   try {
@@ -800,7 +799,7 @@ exports.getMySubmittedForms = async (req, res) => {
   }
 };
 
-exports.getFuneralFormById = async (req, res) => {
+exports.getWeddingFormById = async (req, res) => {
   try {
     const { formId } = req.params;
 
@@ -818,7 +817,6 @@ exports.getFuneralFormById = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
 
 //For Reports
 exports.getWeddingsPerMonth = async (req, res) => {
