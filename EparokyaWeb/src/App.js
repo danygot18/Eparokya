@@ -42,6 +42,7 @@ import HouseBlessingForm from './Components/User/Forms/PrivateForms/PrivateSched
 
 // MassForms
 import MassBaptismForm from './Components/User/Forms/MassForms/Baptism/MassBaptismForms';
+import MassWeddingForm from './Components/User/Forms/MassForms/Wedding/MassWeddingForm';
 
 import MySubmittedWeddingForm from './Components/User/Forms/PrivateForms/Wedding/MySubmittedWeddingForm';
 import SubmittedWeddingList from './Components/User/Forms/PrivateForms/Wedding/SubmittedWeddingList';
@@ -262,6 +263,7 @@ function App() {
 
         {/* Mass Forms */}
         <Route path="/user/massBaptism" element={<MassBaptismForm />} exact="true" />
+        <Route path="/user/massWedding" element={<MassWeddingForm />} exact="true" />
 
         <Route path="/user/mySubmittedWeddingForm/:formId" element={<MySubmittedWeddingForm />} exact="true" />
         <Route path="/user/mySubmittedBaptismForm/:formId" element={<MySubmittedBaptismForm />} exact="true" />

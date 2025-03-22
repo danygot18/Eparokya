@@ -103,13 +103,16 @@ const EventSentiment = () => {
           <Typography variant="h5" sx={{ mt: 2 }}>
             Event Type: {adminSelection.typeId?.name}
           </Typography>
+          <Typography variant="h6" sx={{ mt: 1 }}>
+            Active Form Type: {adminSelection.category.charAt(0).toUpperCase() + adminSelection.category.slice(1)}
+          </Typography>
         </>
       ) : (
         <Typography variant="h6" color="error">
           No active event found.
         </Typography>
       )}
-
+  
       <Typography variant="h6" sx={{ mt: 3 }}>
         Feedback Form
       </Typography>
@@ -130,7 +133,7 @@ const EventSentiment = () => {
           </Grid>
         </Box>
       ))}
-
+  
       <TextField
         label="Other Comments/Suggestions"
         fullWidth
@@ -140,11 +143,11 @@ const EventSentiment = () => {
         onChange={(e) => setComment(e.target.value)}
         sx={{ mt: 2 }}
       />
-
+  
       <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 3 }}>
         Submit Feedback
       </Button>
-
+  
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box
           sx={{
@@ -169,6 +172,7 @@ const EventSentiment = () => {
       </Modal>
     </Container>
   );
+  
 };
 
 export default EventSentiment;

@@ -75,7 +75,7 @@ const MassBaptismForm = () => {
   useEffect(() => {
     const fetchBaptismDates = async () => {
       try {
-        const category = "Baptism"; // Define the category here
+        const category = "Baptism"; 
         const response = await axios.get(
           `${process.env.REACT_APP_API}/api/v1/getActiveDatesByCategory/${category}`,
           config

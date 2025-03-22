@@ -104,25 +104,42 @@ export const Home = () => {
     }
   };
 
-  const checkForActiveFeedbackForm = async () => {
-    setModalLoading(true); // Show loading state
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API}/api/v1/admin-selections/active`
-      );
-  
-      if (response.data && response.data.isActive) {
-        setActiveFeedback(response.data);
-        setTimeout(() => {
-          setShowModal(true); // Ensure state update before rendering modal
-        }, 100); // Small delay to ensure proper state update
-      }
-    } catch (error) {
-      console.error("Error fetching active feedback form:", error);
-    } finally {
-      setModalLoading(false);
+const checkForActiveFeedbackForm = async () => {
+  setModalLoading(true);
+  try {
+    console.log("Function checkForActiveFeedbackForm is being called");
+
+    const response = await axios.get(
+      `${process.env.REACT_APP_API}/api/v1/admin-selections/active`
+    );
+
+    console.log("API Response:", response.data);
+
+    if (response.data && response.data.isActive) {
+      setActiveFeedback(response.data);
+      console.log("Active feedback found:", response.data);
+
+      // TEMP FIX: Force show modal for debugging
+      console.log("Forcing modal to open...");
+      setTimeout(() => {
+        setShowModal(true);
+        console.log("Modal state should now be true!");
+      }, 100);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching active feedback form:", error);
+  } finally {
+    setModalLoading(false);
+  }
+};
+  
+  
+  
+  
+  useEffect(() => {
+    console.log("showModal state changed:", showModal);
+  }, [showModal]);
+  
   
   
   const handleNavigateToSentiment = () => {

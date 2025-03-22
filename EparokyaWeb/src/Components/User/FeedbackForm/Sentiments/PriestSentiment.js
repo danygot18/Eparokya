@@ -103,13 +103,16 @@ const PriestSentiment = () => {
           <Typography variant="h5" sx={{ mt: 2 }}>
             Priest: {activePriest.typeId?.name}
           </Typography>
+          <Typography variant="h6" sx={{ mt: 1 }}>
+            Active Form Type: {activePriest.category.charAt(0).toUpperCase() + activePriest.category.slice(1)}
+          </Typography>
         </>
       ) : (
         <Typography variant="h6" color="error">
           No active priest found.
         </Typography>
       )}
-
+  
       <Typography variant="h6" sx={{ mt: 3 }}>
         Feedback Form
       </Typography>
@@ -130,7 +133,7 @@ const PriestSentiment = () => {
           </Grid>
         </Box>
       ))}
-
+  
       <TextField
         label="Other Comments/Suggestions"
         fullWidth
@@ -140,11 +143,11 @@ const PriestSentiment = () => {
         onChange={(e) => setComment(e.target.value)}
         sx={{ mt: 2 }}
       />
-
+  
       <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 3 }}>
         Submit Feedback
       </Button>
-
+  
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box
           sx={{
@@ -169,6 +172,7 @@ const PriestSentiment = () => {
       </Modal>
     </Container>
   );
+  
 };
 
 export default PriestSentiment;

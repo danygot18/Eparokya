@@ -100,13 +100,16 @@ const ActivitySentiment = () => {
           <Typography variant="h5" sx={{ mt: 2 }}>
             Activity Type: {adminSelection.typeId?.name}
           </Typography>
+          <Typography variant="h6" sx={{ mt: 1 }}>
+            Active Form Type: {adminSelection.category.charAt(0).toUpperCase() + adminSelection.category.slice(1)}
+          </Typography>
         </>
       ) : (
         <Typography variant="h6" color="error">
           No active activity found.
         </Typography>
       )}
-
+  
       <Typography variant="h6" sx={{ mt: 3 }}>
         Feedback Form
       </Typography>
@@ -127,7 +130,7 @@ const ActivitySentiment = () => {
           </Grid>
         </Box>
       ))}
-
+  
       <TextField
         label="Other Comments/Suggestions"
         fullWidth
@@ -137,11 +140,11 @@ const ActivitySentiment = () => {
         onChange={(e) => setComment(e.target.value)}
         sx={{ mt: 2 }}
       />
-
+  
       <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 3 }}>
         Submit Feedback
       </Button>
-
+  
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box
           sx={{
@@ -165,7 +168,7 @@ const ActivitySentiment = () => {
         </Box>
       </Modal>
     </Container>
-  );
+  );  
 };
 
 export default ActivitySentiment;
