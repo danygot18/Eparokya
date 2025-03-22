@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  ScrollView,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Button } from "native-base";
 import FormContainer from "../../Shared/Form/FormContainer";
@@ -16,73 +23,82 @@ const Register = (props) => {
   const [error, setError] = useState("");
   const navigation = useNavigation();
 
+  // Function to navigate to the next screen
   const goToNextPage = () => {
     if (email === "" || name === "" || password === "") {
       setError("Please fill in the form correctly");
       return;
     }
-    navigation.navigate("Register2", { email, name, password });
+
+    // Navigate to Register2 with the collected data
+    navigation.navigate("Register2", {
+      email,
+      name,
+      password,
+    });
   };
 
   return (
-    <KeyboardAwareScrollView
-      viewIsInsideTabBar={true}
-      extraHeight={200}
-      enableOnAndroid={true}
-    >
-      <FormContainer style={styles.container}>
-        <Input
-          placeholder={"Email"}
-          name={"email"}
-          id={"email"}
-          onChangeText={(text) => setEmail(text.toLowerCase())}
-        />
-        <Input
-          placeholder={"Name"}
-          name={"name"}
-          id={"name"}
-          onChangeText={(text) => setName(text)}
-        />
-        <Input
-          placeholder={"Password"}
-          name={"password"}
-          id={"password"}
-          secureTextEntry={true}
-          onChangeText={(text) => setPassword(text)}
-        />
-        <View style={styles.buttonGroup}>
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-        </View>
+    <KeyboardAvoidingView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <FormContainer>
+          <Input
+            placeholder={"Email"}
+            name={"email"}
+            id={"email"}
+            onChangeText={(text) => setEmail(text.toLowerCase())}
+          />
+          <Input
+            placeholder={"Name"}
+            name={"name"}
+            id={"name"}
+            onChangeText={(text) => setName(text)}
+          />
+          <Input
+            placeholder={"Password"}
+            name={"password"}
+            id={"password"}
+            secureTextEntry={true}
+            onChangeText={(text) => setPassword(text)}
+          />
 
-        <Button
-          variant={"ghost"}
-          onPress={goToNextPage}
-          style={styles.arrowButton}
-        >
-          <View style={styles.arrowIconContainer}>
-            <MaterialIcons name="arrow-forward" size={24} color="white" />
+          <View style={styles.buttonGroup}>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
           </View>
-        </Button>
-      </FormContainer>
-    </KeyboardAwareScrollView>
+
+          <Button onPress={goToNextPage} style={styles.registerButton}>
+            <Text style={styles.buttonText}>Next</Text>
+          </Button>
+        </FormContainer>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 20,
+  },
   buttonGroup: {
     width: "100%",
     margin: 10,
     alignItems: "center",
   },
-  errorText: {
-    color: "red",
-    textAlign: "center",
-  },
-  arrowButton: {
-    backgroundColor: '#1C5739',
+  registerButton: {
+    backgroundColor: "#1C5739",
     width: "80%",
     borderRadius: 20,
     alignSelf: "center",
+  },
+  buttonText: {
+    color: "#fff",
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
   },
 });
 

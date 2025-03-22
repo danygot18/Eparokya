@@ -9,6 +9,7 @@ const Binyag = require("../models/Binyag");
 const Counseling = require("../models/counseling");
 const HouseBlessing = require("../models/PrivateScheduling/houseBlessing");
 const mongoose = require('mongoose');
+const fs = require("fs");
 
 // exports.registerUser = async (req, res, next) => {
 //     const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
@@ -118,12 +119,105 @@ const mongoose = require('mongoose');
 // };
 
 //Pass Register 3-20-2025
+// exports.registerUser = async (req, res, next) => {
+//     try {
+//         console.log('Request Body:', req.body);
+//         console.log('Uploaded File:', req.file);
+
+//         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+//             folder: 'eparokya/avatar',
+//             width: 150,
+//             crop: "scale"
+//         });
+
+//         const { name, email, password, birthDate, civilStatus, preference, phone, address, ministryRoles } = req.body;
+
+//         if (!birthDate || isNaN(Date.parse(birthDate))) {
+//             return res.status(400).json({ success: false, message: "Invalid birthDate format" });
+//         }
+
+//         let parsedAddress = {};
+//         try {
+//             parsedAddress = JSON.parse(address);
+//         } catch (error) {
+//             console.error("Error parsing address:", error);
+//             return res.status(400).json({ success: false, message: "Invalid address format" });
+//         }
+
+//         let ministryRolesArray = [];
+//         if (ministryRoles) {
+//             try {
+//                 const parsedRoles = JSON.parse(ministryRoles);
+//                 console.log("Parsed ministryRoles:", parsedRoles);
+        
+//                 let startYear, endYear;
+//                 if (parsedRoles.length > 0) {
+//                     startYear = parsedRoles[0].startYear;
+//                     endYear = parsedRoles[0].endYear;
+//                 }
+        
+//                 ministryRolesArray = parsedRoles.map(item => ({
+//                     ministry: new mongoose.Types.ObjectId(item.ministry),
+//                     role: item.role,
+//                     customRole: item.role === 'Others' ? item.customRole || '' : undefined,
+//                     startYear: startYear,
+//                     endYear: endYear
+//                 }));
+        
+//             } catch (error) {
+//                 console.error('Error parsing ministryRoles:', error);
+//                 return res.status(400).json({ success: false, message: "Invalid ministryRoles format" });
+//             }
+//         }
+        
+
+//         const user = await User.create({
+//             name,
+//             email,
+//             password,
+//             avatar: {
+//                 public_id: result.public_id,
+//                 url: result.secure_url
+//             },
+//             birthDate: new Date(birthDate),
+//             civilStatus,
+//             preference,
+//             phone,
+//             address: {
+//                 ...parsedAddress, 
+//                 customBarangay: parsedAddress.barangay === 'Others' ? parsedAddress.customBarangay : undefined,
+//                 customCity: parsedAddress.city === 'Others' ? parsedAddress.customCity : undefined,
+//             },
+//             ministryRoles: ministryRolesArray
+//         });
+
+//         if (!user) {
+//             return res.status(500).json({
+//                 success: false,
+//                 message: 'User not created'
+//             });
+//         }
+
+//         sendToken(user, 200, res);
+//     } catch (error) {
+//         console.error('Error registering user:', error);
+//         res.status(500).json({ success: false, message: 'Internal Server Error' });
+//     }
+// };
+
+
 exports.registerUser = async (req, res, next) => {
     try {
         console.log('Request Body:', req.body);
         console.log('Uploaded File:', req.file);
 
-        const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+        // Check if a file was uploaded
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: "No file uploaded" });
+        }
+
+        // Upload the file to Cloudinary
+        const result = await cloudinary.v2.uploader.upload(req.file.path, {
             folder: 'eparokya/avatar',
             width: 150,
             crop: "scale"
@@ -203,6 +297,195 @@ exports.registerUser = async (req, res, next) => {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 };
+
+// exports.registerUser = async (req, res, next) => {
+//     try {
+//         console.log('Request Body:', req.body);
+//         console.log('Uploaded File:', req.file);
+
+//         if (!req.body.avatar) {
+//             return res.status(400).json({ success: false, message: "No file uploaded" });
+//         }
+
+//         // Upload the base64-encoded image to Cloudinary
+//         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+//             folder: 'eparokya/avatar',
+//             width: 150,
+//             crop: "scale"
+//         });
+
+//         const { name, email, password, birthDate, civilStatus, preference, phone, address, ministryRoles } = req.body;
+
+//         if (!birthDate || isNaN(Date.parse(birthDate))) {
+//             return res.status(400).json({ success: false, message: "Invalid birthDate format" });
+//         }
+
+//         let parsedAddress = {};
+//         try {
+//             parsedAddress = JSON.parse(address);
+//         } catch (error) {
+//             console.error("Error parsing address:", error);
+//             return res.status(400).json({ success: false, message: "Invalid address format" });
+//         }
+
+//         let ministryRolesArray = [];
+//         if (ministryRoles) {
+//             try {
+//                 const parsedRoles = JSON.parse(ministryRoles);
+//                 console.log("Parsed ministryRoles:", parsedRoles);
+
+//                 let startYear, endYear;
+//                 if (parsedRoles.length > 0) {
+//                     startYear = parsedRoles[0].startYear;
+//                     endYear = parsedRoles[0].endYear;
+//                 }
+
+//                 ministryRolesArray = parsedRoles.map(item => ({
+//                     ministry: new mongoose.Types.ObjectId(item.ministry),
+//                     role: item.role,
+//                     customRole: item.role === 'Others' ? item.customRole || '' : undefined,
+//                     startYear: startYear,
+//                     endYear: endYear
+//                 }));
+
+//             } catch (error) {
+//                 console.error('Error parsing ministryRoles:', error);
+//                 return res.status(400).json({ success: false, message: "Invalid ministryRoles format" });
+//             }
+//         }
+
+//         const user = await User.create({
+//             name,
+//             email,
+//             password,
+//             avatar: {
+//                 public_id: result.public_id,
+//                 url: result.secure_url
+//             },
+//             birthDate: new Date(birthDate),
+//             civilStatus,
+//             preference,
+//             phone,
+//             address: {
+//                 ...parsedAddress,
+//                 customBarangay: parsedAddress.barangay === 'Others' ? parsedAddress.customBarangay : undefined,
+//                 customCity: parsedAddress.city === 'Others' ? parsedAddress.customCity : undefined,
+//             },
+//             ministryRoles: ministryRolesArray
+//         });
+
+//         if (!user) {
+//             return res.status(500).json({
+//                 success: false,
+//                 message: 'User not created'
+//             });
+//         }
+
+//         sendToken(user, 200, res);
+//     } catch (error) {
+//         console.error('Error registering user:', error);
+//         res.status(500).json({ success: false, message: 'Internal Server Error' });
+//     }
+// };
+
+// exports.registerUser = async (req, res, next) => {
+//     try {
+//       console.log('Request Body:', req.body);
+//       console.log('Uploaded File:', req.file);
+  
+//       if (!req.file) {
+//         return res.status(400).json({ success: false, message: "No file uploaded" });
+//       }
+  
+//       // Log the file path and check if it exists
+//       console.log('File Path:', req.file.path);
+//       const fileExists = fs.existsSync(req.file.path);
+//       console.log('File Exists:', fileExists);
+  
+//       // Upload the file to Cloudinary
+//       const result = await cloudinary.v2.uploader.upload(req.file.path, {
+//         folder: 'eparokya/avatar',
+//         width: 150,
+//         crop: "scale"
+//       });
+  
+//       // Delete the temporary file after uploading to Cloudinary
+//       fs.unlinkSync(req.file.path);
+  
+//       const { name, email, password, birthDate, civilStatus, preference, phone, address, ministryRoles } = req.body;
+  
+//       if (!birthDate || isNaN(Date.parse(birthDate))) {
+//         return res.status(400).json({ success: false, message: "Invalid birthDate format" });
+//       }
+  
+//       let parsedAddress = {};
+//       try {
+//         parsedAddress = JSON.parse(address);
+//       } catch (error) {
+//         console.error("Error parsing address:", error);
+//         return res.status(400).json({ success: false, message: "Invalid address format" });
+//       }
+  
+//       let ministryRolesArray = [];
+//       if (ministryRoles) {
+//         try {
+//           const parsedRoles = JSON.parse(ministryRoles);
+//           console.log("Parsed ministryRoles:", parsedRoles);
+  
+//           let startYear, endYear;
+//           if (parsedRoles.length > 0) {
+//             startYear = parsedRoles[0].startYear;
+//             endYear = parsedRoles[0].endYear;
+//           }
+  
+//           ministryRolesArray = parsedRoles.map(item => ({
+//             ministry: new mongoose.Types.ObjectId(item.ministry),
+//             role: item.role,
+//             customRole: item.role === 'Others' ? item.customRole || '' : undefined,
+//             startYear: startYear,
+//             endYear: endYear
+//           }));
+  
+//         } catch (error) {
+//           console.error('Error parsing ministryRoles:', error);
+//           return res.status(400).json({ success: false, message: "Invalid ministryRoles format" });
+//         }
+//       }
+  
+//       const user = await User.create({
+//         name,
+//         email,
+//         password,
+//         avatar: {
+//           public_id: result.public_id,
+//           url: result.secure_url
+//         },
+//         birthDate: new Date(birthDate),
+//         civilStatus,
+//         preference,
+//         phone,
+//         address: {
+//           ...parsedAddress,
+//           customBarangay: parsedAddress.barangay === 'Others' ? parsedAddress.customBarangay : undefined,
+//           customCity: parsedAddress.city === 'Others' ? parsedAddress.customCity : undefined,
+//         },
+//         ministryRoles: ministryRolesArray
+//       });
+  
+//       if (!user) {
+//         return res.status(500).json({
+//           success: false,
+//           message: 'User not created'
+//         });
+//       }
+  
+//       sendToken(user, 200, res);
+//     } catch (error) {
+//       console.error('Error registering user:', error);
+//       res.status(500).json({ success: false, message: 'Internal Server Error' });
+//     }
+//   };
+
 
 exports.Profile = async (req, res, next) => {
     try {

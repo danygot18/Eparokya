@@ -7,6 +7,7 @@ import {
   Modal,
   TouchableOpacity,
   FlatList,
+  ScrollView,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -17,70 +18,47 @@ import axios from "axios";
 import baseURL from "../../assets/common/baseUrl";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
 import RNPickerSelect from "react-native-picker-select";
-import { barangays } from "../../assets/common/barangays.js";
 import CheckBox from "@react-native-community/checkbox";
-import { Picker } from "@react-native-picker/picker";
+import CalendarPicker from "react-native-calendar-picker";
 
 var { height, width } = Dimensions.get("window");
 
 const Register2 = () => {
   const route = useRoute();
-  const { email, name, password } = route.params;
-  console.log("Email:", email, "Name:", name, "Password:", password);
+  const { email, name, password, selectedImage } = route.params;
+  console.log(route.params);
+  const navigation = useNavigation();
 
   const [user, setUser] = useState({
     name: name,
     email: email,
     password: password,
-    age: "",
+    selectedImage: selectedImage,
+    birthday: "",
     preference: "They/Them",
     civilStatus: "",
     phone: "",
-    address: {
-      BldgNameTower: "",
-      LotBlockPhaseHouseNo: "",
-      SubdivisionVillageZone: "",
-      Street: "",
-      District: "",
-      barangay: "",
-      city: "",
-      customCity: "",
-    },
-    ministryRoles: [],
+    ministryRoles: [], // Updated to match the new model
   });
 
   const [error, setError] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
   const [ministryCategories, setMinistryCategories] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
   const [ministryModalVisible, setMinistryModalVisible] = useState(false);
-  const navigation = useNavigation();
-
-
-
-
-  const defaultImage = require("../../assets/EPAROKYA-SYST.png");
-
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-  };
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [currentMinistryRole, setCurrentMinistryRole] = useState({
+    ministry: null,
+    startYear: "",
+    endYear: "",
+    role: "",
+    customRole: "",
+  });
+  const [isAddingMinistryRole, setIsAddingMinistryRole] = useState(false);
 
   useEffect(() => {
     axios
       .get(`${baseURL}/ministryCategory/getAllMinistryCategories`)
       .then((response) => {
-        console.log("Fetched Categories:", response.data);
         setMinistryCategories(response.data.categories || []);
       })
       .catch((error) => {
@@ -89,59 +67,44 @@ const Register2 = () => {
       });
   }, []);
 
-  const handleMinistryCategoryChange = (categoryId) => {
-    setUser((prevUser) => {
-      const updatedRoles = prevUser.ministryRoles.includes(categoryId)
-        ? prevUser.ministryRoles.filter((id) => id !== categoryId) // Deselect if already selected
-        : [...prevUser.ministryRoles, categoryId]; // Add if not selected
-      return { ...prevUser, ministryRoles: updatedRoles };
-    });
+  const handleDateChange = (date) => {
+    setUser({ ...user, birthday: date.toISOString().split("T")[0] }); // Format as YYYY-MM-DD
+    setShowCalendar(false); // Hide the calendar after selecting a date
   };
 
-  const handleImagePick = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      console.log("Image selected:", result.assets[0].uri);
-      setSelectedImage(result.assets[0].uri);
-    }
-    setModalVisible(false);
-  };
-
-  const handleTakePhoto = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-    setModalVisible(false);
-  };
-
-  const handleRemoveProfile = () => {
-    setSelectedImage(null);
-    setModalVisible(false);
-  };
-
-  const register = () => {
+  const handleAddMinistryRole = () => {
     if (
-      !user.age ||
+      !currentMinistryRole.ministry ||
+      !currentMinistryRole.startYear ||
+      !currentMinistryRole.role
+    ) {
+      setError("Please fill in all required fields for the ministry role.");
+      return;
+    }
+
+    // Add the current ministry role to the user's ministryRoles array
+    setUser((prevUser) => ({
+      ...prevUser,
+      ministryRoles: [...prevUser.ministryRoles, currentMinistryRole],
+    }));
+
+    // Reset the current ministry role form
+    setCurrentMinistryRole({
+      ministry: null,
+      startYear: "",
+      endYear: "",
+      role: "",
+      customRole: "",
+    });
+
+    // Close the modal
+    setIsAddingMinistryRole(false);
+  };
+
+  const goToNextPage = () => {
+    if (
+      !user.birthday ||
       !user.phone ||
-      !user.address.barangay ||
-      !user.address.BldgNameTower ||
-      !user.address.LotBlockPhaseHouseNo ||
-      !user.address.SubdivisionVillageZone ||
-      !user.address.Street ||
-      !user.address.District ||
-      !user.address.country ||
       !user.civilStatus ||
       user.ministryRoles.length === 0
     ) {
@@ -149,78 +112,17 @@ const Register2 = () => {
       return;
     }
 
-    const formData = new FormData();
-
-    formData.append("name", user.name);
-    formData.append("email", user.email);
-    formData.append("password", user.password);
-    formData.append("age", user.age);
-    formData.append("phone", user.phone);
-    formData.append("preference", user.preference);
-    formData.append("civilStatus", user.civilStatus);
-
-    // Append address as a JSON string
-    const address = {
-      BldgNameTower: user.address.BldgNameTower,
-      LotBlockPhaseHouseNo: user.address.LotBlockPhaseHouseNo,
-      SubdivisionVillageZone: user.address.SubdivisionVillageZone,
-      Street: user.address.Street,
-      District: user.address.District,
-      barangay: user.address.barangay,
-      city: user.address.city,
-      country: user.address.country,
-    };
-    formData.append("address", JSON.stringify(address));
-
-    // Append ministryRoles as a JSON string
-    const ministryRoles = user.ministryRoles.map((categoryId) => ({
-      ministry: categoryId,
-      role: "Member", // Default role, update as needed
-      startYear: new Date().getFullYear(), // Default start year, update as needed
-      endYear: new Date().getFullYear() + 1, // Default end year, update as needed
-    }));
-    formData.append("ministryRoles", JSON.stringify(ministryRoles));
-
-    if (selectedImage) {
-      formData.append("avatar", {
-        uri: selectedImage,
-        type: "image/jpeg",
-        name: "image.jpg",
-      });
-    }
-    console.log("formData:", formData);
-    axios
-      .post(`${baseURL}/register`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-
-        },
-      })
-
-      .then((res) => {
-        if (res.status === 200) {
-          Toast.show({
-            topOffset: 60,
-            type: "success",
-            text1: "Registration Succeeded",
-            text2: "Please Log in to your account",
-          });
-          setTimeout(() => {
-            navigation.navigate("Login");
-          }, 500);
-        }
-      })
-
-      .catch((error) => {
-        Toast.show({
-          position: "bottom",
-          bottomOffset: 20,
-          type: "error",
-          text1: "Something went wrong",
-          text2: "Please try again",
-        });
-        console.error("Error:", error);
-      });
+    navigation.navigate("Register3", {
+      email: user.email,
+      name: user.name,
+      password: user.password,
+      selectedImage: user.selectedImage,
+      birthday: user.birthday,
+      preference: user.preference,
+      civilStatus: user.civilStatus,
+      phone: user.phone,
+      ministryRoles: user.ministryRoles,
+    });
   };
 
   return (
@@ -231,59 +133,20 @@ const Register2 = () => {
       paddingTop={20}
     >
       <FormContainer style={styles.container}>
-        <Text padding={10} fontSize={5}>
-          Select Image
-        </Text>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Image
-            source={selectedImage ? { uri: selectedImage } : defaultImage}
-            style={styles.profileImage}
-            alt="Profile Image"
-          />
-        </TouchableOpacity>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Select Profile</Text>
-              <TouchableOpacity onPress={handleImagePick} style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Choose from Gallery</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleTakePhoto} style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Take a Photo</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleRemoveProfile} style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Remove Profile Picture</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={styles.modalCloseButton}
-              >
-                <Text style={styles.modalButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Age</Text>
-          <RNPickerSelect
-            placeholder={{ label: "Select Age", value: null }}
-            onValueChange={(value) => setUser({ ...user, age: value })}
-            items={Array.from({ length: 100 }, (_, i) => ({
-              label: `${i + 1}`,
-              value: i + 1,
-            }))}
-            style={pickerSelectStyles}
-            value={user.age}
-          />
+          <Text style={styles.label}>Birthday</Text>
+          <TouchableOpacity
+            onPress={() => setShowCalendar(true)}
+            style={styles.dateInput}
+          >
+            <Text>{user.birthday || "Select Birthday"}</Text>
+          </TouchableOpacity>
+          {showCalendar && (
+            <CalendarPicker
+              onDateChange={handleDateChange}
+              selectedStartDate={user.birthday ? new Date(user.birthday) : null}
+            />
+          )}
         </View>
 
         <View style={styles.inputContainer}>
@@ -300,8 +163,6 @@ const Register2 = () => {
             value={user.preference}
           />
         </View>
-
-
 
         <Input
           placeholder={"Phone Number"}
@@ -328,10 +189,9 @@ const Register2 = () => {
         </View>
 
         <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 5 }}>
-          Ministry Categories
+          Ministry Roles
         </Text>
 
-        {/* Touchable Dropdown */}
         <TouchableOpacity
           style={{
             borderWidth: 1,
@@ -339,143 +199,103 @@ const Register2 = () => {
             padding: 10,
             borderRadius: 5,
           }}
-          onPress={() => setMinistryModalVisible(true)}
+          onPress={() => setIsAddingMinistryRole(true)}
         >
-          <Text>
-            {user.ministryRoles.length > 0
-              ? ministryCategories
-                .filter((cat) => user.ministryRoles.includes(cat._id))
-                .map((cat) => cat.name)
-                .join(", ")
-              : "Select Ministries"}
-          </Text>
+          <Text>Add Ministry Role</Text>
         </TouchableOpacity>
-        <Modal visible={ministryModalVisible} animationType="slide" transparent>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgba(0,0,0,0.5)",
-            }}
-          >
-            <View
-              style={{
-                width: "80%",
-                backgroundColor: "white",
-                padding: 20,
-                borderRadius: 10,
-              }}
-            >
-              <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
-                Select Ministries (Max 3)
-              </Text>
-              <FlatList
-                data={ministryCategories}
-                keyExtractor={(item) => item._id}
-                renderItem={({ item }) => (
-                  <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-                    <CheckBox
-                      value={user.ministryRoles.includes(item._id)}
-                      onValueChange={() => handleMinistryCategoryChange(item._id)}
-                    />
-                    <Text>{item.name}</Text>
-                  </View>
-                )}
+
+        {/* Display Added Ministry Roles */}
+        <ScrollView>
+          {user.ministryRoles.map((item, index) => (
+            <View key={index} style={styles.ministryRoleItem}>
+              <Text>{item.ministry}</Text>
+              <Text>{item.startYear} - {item.endYear || "Present"}</Text>
+              <Text>{item.role === "Others" ? item.customRole : item.role}</Text>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Modal for Adding Ministry Roles */}
+        <Modal visible={isAddingMinistryRole} animationType="slide" transparent>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Add Ministry Role</Text>
+
+              <RNPickerSelect
+                placeholder={{ label: "Select Ministry", value: null }}
+                onValueChange={(value) =>
+                  setCurrentMinistryRole({ ...currentMinistryRole, ministry: value })
+                }
+                items={ministryCategories.map((cat) => ({
+                  label: cat.name,
+                  value: cat._id,
+                }))}
+                style={pickerSelectStyles}
               />
-              <TouchableOpacity
-                onPress={() => setMinistryModalVisible(false)}
-                style={{
-                  backgroundColor: "#007BFF",
-                  padding: 10,
-                  borderRadius: 5,
-                  alignItems: "center",
-                  marginTop: 10,
-                }}
+
+              <Input
+                placeholder="Start Year"
+                value={currentMinistryRole.startYear}
+                onChangeText={(text) =>
+                  setCurrentMinistryRole({ ...currentMinistryRole, startYear: text })
+                }
+                keyboardType="numeric"
+              />
+
+              <Input
+                placeholder="End Year (Optional)"
+                value={currentMinistryRole.endYear}
+                onChangeText={(text) =>
+                  setCurrentMinistryRole({ ...currentMinistryRole, endYear: text })
+                }
+                keyboardType="numeric"
+              />
+
+              <RNPickerSelect
+                placeholder={{ label: "Select Role", value: null }}
+                onValueChange={(value) =>
+                  setCurrentMinistryRole({ ...currentMinistryRole, role: value })
+                }
+                items={[
+                  { label: "Coordinator", value: "Coordinator" },
+                  { label: "Assistant Coordinator", value: "Assistant Coordinator" },
+                  { label: "Office Worker", value: "Office Worker" },
+                  { label: "Member", value: "Member" },
+                  { label: "Others", value: "Others" },
+                ]}
+                style={pickerSelectStyles}
+              />
+
+              {currentMinistryRole.role === "Others" && (
+                <Input
+                  placeholder="Custom Role"
+                  value={currentMinistryRole.customRole}
+                  onChangeText={(text) =>
+                    setCurrentMinistryRole({ ...currentMinistryRole, customRole: text })
+                  }
+                />
+              )}
+
+              <Button onPress={handleAddMinistryRole} style={styles.modalButton}>
+                <Text style={styles.buttonText}>Add Role</Text>
+              </Button>
+
+              <Button
+                onPress={() => setIsAddingMinistryRole(false)}
+                style={styles.modalButton}
               >
-                <Text style={{ color: "white", fontWeight: "bold" }}>Done</Text>
-              </TouchableOpacity>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </Button>
             </View>
           </View>
         </Modal>
-
-        <Text style={styles.label} marginTop={20}>Address</Text>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Barangay</Text>
-          <RNPickerSelect
-            placeholder={{ label: "Select Barangay", value: null }}
-            onValueChange={(value) => setUser({ ...user, address: { ...user.address, barangay: value } })}
-            items={barangays.map((barangay) => ({ label: barangay, value: barangay }))}
-            style={pickerSelectStyles}
-            value={user.address.barangay}
-          />
-        </View>
-        <Input
-          placeholder={"Building Name/Tower"}
-          name={"BldgNameTower"}
-          id={"BldgNameTower"}
-          onChangeText={(text) => setUser({ ...user, address: { ...user.address, BldgNameTower: text } })}
-        />
-        <Input
-          placeholder={"Lot/Block/Phase/House No."}
-          name={"LotBlockPhaseHouseNo"}
-          id={"LotBlockPhaseHouseNo"}
-          onChangeText={(text) => setUser({ ...user, address: { ...user.address, LotBlockPhaseHouseNo: text } })}
-        />
-        <Input
-          placeholder={"Subdivision/Village/Zone"}
-          name={"SubdivisionVillageZone"}
-          id={"SubdivisionVillageZone"}
-          onChangeText={(text) => setUser({ ...user, address: { ...user.address, SubdivisionVillageZone: text } })}
-        />
-        <Input
-          placeholder={"Street"}
-          name={"Street"}
-          id={"Street"}
-          onChangeText={(text) => setUser({ ...user, address: { ...user.address, Street: text } })}
-        />
-        <Input
-          placeholder={"District"}
-          name={"District"}
-          id={"District"}
-          onChangeText={(text) => setUser({ ...user, address: { ...user.address, District: text } })}
-        />
-
-
-        <Input
-          placeholder={"City"}
-          name={"city"}
-          id={"city"}
-          onChangeText={(text) => setUser({ ...user, address: { ...user.address, city: text } })}
-        />
-        {/* <View style={styles.inputContainer}>
-          <Text style={styles.label}>City</Text>
-          <RNPickerSelect
-            placeholder={{ label: "Select City ", value: null }}
-            onValueChange={(value) => setUser({ ...user.address, city: value })}
-            items={[
-              { label: "Taguig City", value: "Taguig City" },
-              { label: "Others", value: "Others" },
-
-            ]}
-            style={pickerSelectStyles}
-            value={user.city}
-          />
-        </View> */}
-
-        <Input
-          placeholder={"Country"}
-          name={"country"}
-          id={"country"}
-          onChangeText={(text) => setUser({ ...user, address: { ...user.address, country: text } })}
-        />
 
         <View style={styles.buttonGroup}>
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
         </View>
 
-        <Button variant={"ghost"} onPress={register} style={styles.registerButton}>
-          <Text style={styles.buttonText}>Register</Text>
+        <Button variant={"ghost"} onPress={goToNextPage} style={styles.registerButton}>
+          <Text style={styles.buttonText}>Next</Text>
         </Button>
       </FormContainer>
     </KeyboardAwareScrollView>
@@ -488,12 +308,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 20,
-  },
   label: {
     fontSize: 16,
     color: "#000",
@@ -502,6 +316,13 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 20,
     width: "80%",
+  },
+  dateInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 4,
+    padding: 10,
+    width: "100%",
   },
   buttonGroup: {
     width: "100%",
@@ -525,37 +346,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
-    backgroundColor: "#fff",
+    width: "80%",
+    backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    alignItems: "center",
-    width: "80%",
   },
   modalTitle: {
     fontSize: 18,
-    marginBottom: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
   modalButton: {
-    marginVertical: 10,
-  },
-  modalButtonText: {
-    fontSize: 16,
-    color: "#1C5739",
-  },
-  modalCloseButton: {
-    marginTop: 20,
-    backgroundColor: "#ddd",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    marginTop: 10,
+    backgroundColor: "#1C5739",
+    padding: 10,
     borderRadius: 5,
-  },
-  checkboxContainer: {
-    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+  },
+  ministryRoleItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
 });
 
