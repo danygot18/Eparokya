@@ -207,6 +207,33 @@ exports.toggleBookmark = async (req, res) => {
   }
 };
 
+exports.getUserBookmarks = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ success: false, message: "Invalid user ID" });
+        }
+        const resources = await Resource.find({ "bookmarks.userId": userId });
+
+        if (!resources || resources.length === 0) {
+            return res.status(404).json({ success: false, message: "No bookmarks found for this user" });
+        }
+        res.status(200).json({
+            success: true,
+            bookmarks: resources.map(resource => ({
+                _id: resource._id,
+                title: resource.title,
+                description: resource.description,
+                link: resource.link,
+                images: resource.images,
+                resourceCategory: resource.resourceCategory,
+            })),
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 
   
 

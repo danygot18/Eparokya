@@ -129,11 +129,13 @@ exports.toggleInclude = async (req, res) => {
       return res.status(404).json({ message: "Prayer not found" });
     }
 
-    const isIncluded = prayer.includeBy.includes(userId);
+    const isAlreadyIncluded = prayer.includeBy.includes(userId);
 
-    if (isIncluded) {
-      prayer.includeBy = prayer.includeBy.filter((id) => id.toString() !== userId);
+    if (isAlreadyIncluded) {
+      // Remove user from includeBy array (uninclude)
+      prayer.includeBy = prayer.includeBy.filter(id => id.toString() !== userId.toString());
     } else {
+      // Add user to includeBy array (include)
       prayer.includeBy.push(userId);
     }
 
@@ -141,7 +143,7 @@ exports.toggleInclude = async (req, res) => {
 
     res.status(200).json({
       includeCount: prayer.includeBy.length,
-      includedByUser: !isIncluded, // Send updated status
+      includedByUser: !isAlreadyIncluded, // Return correct toggle state
     });
   } catch (error) {
     console.error("Error toggling include:", error);

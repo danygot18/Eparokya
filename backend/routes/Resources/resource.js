@@ -28,8 +28,8 @@ router.put(
   ]), 
   resourceController.updateResource
 );
-router.put('/resource/:resourceId/bookmark', resourceController.toggleBookmark);
-
+router.post('/toggleBookmark/:resourceId', resourceController.toggleBookmark);
+router.get("/userBookmarks/:userId", resourceController.getUserBookmarks);
 router.delete('/deleteResource/:resourceId', resourceController.deleteResource);
 
 module.exports = router;

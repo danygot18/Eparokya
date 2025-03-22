@@ -39,15 +39,19 @@ const PrayerWall = () => {
     const fetchPrayers = async () => {
       try {
         setLoading(true);
-
         const response = await axios.get(
           `${process.env.REACT_APP_API}/api/v1/prayer-wall?page=${currentPage}&limit=${prayersPerPage}`,
           { withCredentials: true }
         );
-
+  
         const { prayers, total } = response.data;
-
-        setPrayers(prayers); 
+        
+        setPrayers(
+          prayers.map(prayer => ({
+            ...prayer,
+            includedByUser: prayer.includedByUser || false, // Default to false if not present
+          }))
+        );
         setTotalPrayers(total);
         setLoading(false);
       } catch (error) {
@@ -55,10 +59,10 @@ const PrayerWall = () => {
         setLoading(false);
       }
     };
-
+  
     fetchPrayers();
   }, [currentPage]);
-
+  
   const handleNewPrayerSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
@@ -108,33 +112,35 @@ const PrayerWall = () => {
       alert("You must be logged in to include a prayer.");
       return;
     }
-
+  
     try {
-      setLoadingPrayerId(prayerId); // Show processing state
-
+      setLoadingPrayerId(prayerId);
+  
       const response = await axios.put(
         `${process.env.REACT_APP_API}/api/v1/toggleInclude/${prayerId}`,
         {},
         { withCredentials: true }
       );
-
+  
       setPrayers((prevPrayers) =>
         prevPrayers.map((prayer) =>
           prayer._id === prayerId
             ? {
-              ...prayer,
-              includeCount: response.data.includeCount, // Update include count
-              includedByUser: response.data.includedByUser, // Persist state
-            }
+                ...prayer,
+                includeCount: response.data.includeCount,
+                includedByUser: response.data.includedByUser, // Ensure we get this from backend
+              }
             : prayer
         )
       );
     } catch (error) {
       console.error("Error including prayer:", error);
     } finally {
-      setLoadingPrayerId(null); // Reset loading state
+      setLoadingPrayerId(null);
     }
   };
+  
+  
 
   return (
     <div className="prayer-wall-container">
