@@ -13,15 +13,14 @@ const NavigationForm = () => {
                 { name: "Private Funeral", path: "/user/funeralForm" },
                 { name: "Mass Intentions", path: "/user/prayerRequest" },
                 { name: "Counseling", path: "/user/counselingForm" },
-                { name: "Street Mass", path: "/user/streetMassForm" }, // Fixed Duplicate Path
                 { name: "House Blessing", path: "/user/houseBlessingForm" },
             ],
         },
         {
             title: "Mass Forms",
             forms: [
-                { name: "Kasalang Bayan", path: "/forms/mass/mass-wedding" },
-                { name: "Binyagang Bayan", path: "/forms/mass/mass-baptism" },
+                { name: "Kasalang Bayan", path: "/user/massWedding" },
+                { name: "Binyagang Bayan", path: "/user/massBaptism" },
             ],
         },
     ];

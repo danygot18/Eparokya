@@ -15,6 +15,31 @@ exports.getAllDates = async (req, res) => {
     }
 };
 
+exports.getActiveDatesByCategory = async (req, res) => {
+    const { category } = req.params;
+    console.log("Received Category:", category);
+
+    try {
+        const dates = await adminDate.find({
+            category: { $regex: new RegExp(category, "i") },
+            isEnabled: true
+        });
+
+        console.log("Fetched Dates:", dates);
+
+        const updatedDates = dates.map(date => ({
+            ...date.toObject(),
+            availableParticipants: date.calculateAvailable(),
+        }));
+
+        res.status(200).json(updatedDates);
+    } catch (error) {
+        console.error('Error fetching active dates:', error);
+        res.status(500).json({ message: 'Failed to fetch active dates', error });
+    }
+};
+
+
 exports.createDate = async (req, res) => {
     const { category, date, time, maxParticipants } = req.body;
 
@@ -55,7 +80,6 @@ exports.toggleDate = async (req, res) => {
         res.status(500).json({ message: 'Failed to update status', error });
     }
 };
-
 
 exports.confirmParticipant = async (req, res) => {
     const { adminDateId } = req.params;

@@ -31,12 +31,6 @@ const resourceSchema = new mongoose.Schema(
       ],
       default: [],
     },
-    ratings: [
-      {
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-        rating: { type: Number, min: 1, max: 5 },
-      },
-    ],
     bookmarks: [
       { userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } }
     ],
