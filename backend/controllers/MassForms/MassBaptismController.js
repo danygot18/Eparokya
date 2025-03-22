@@ -11,86 +11,100 @@ exports.getActiveBaptismDates = async (req, res) => {
     }
 };
 
-exports.createBaptism = async (req, res) => {
-    try {
-        const { baptismDateTime, child, parents, ninong, ninang, NinongGodparents, NinangGodparents } = req.body;
-        const userId = req.user._id;
-
-        const selectedDate = await AdminDate.findById(baptismDateTime);
-        if (!selectedDate || !selectedDate.isEnabled) {
-            return res.status(400).json({ message: 'Selected baptism date is not available or has been disabled' });
-        }
-
-        if (!selectedDate.canAcceptParticipants()) {
-            return res.status(400).json({ message: 'This baptism event is already full' });
-        }
-
-        const Docs = { additionalDocs: {} };
-        let additionalDocs = {};
-
-        const uploadToCloudinary = async (file, folder) => {
-            if (!file) throw new Error('File is required for upload.');
-            const result = await cloudinary.uploader.upload(file.path, { folder });
-            return { public_id: result.public_id, url: result.secure_url };
-        };
-
+    exports.createBaptism = async (req, res) => {
         try {
-            if (req.files?.birthCertificate) {
-                Docs.birthCertificate = await uploadToCloudinary(req.files.birthCertificate[0], 'eparokya/baptism/docs');
-            } else {
-                throw new Error('Birth Certificate is required.');
+            console.log("Received files:", req.files); 
+            console.log("Received body:", req.body); 
+
+            const { baptismDateTime, child, parents, ninong, ninang, NinongGodparents, NinangGodparents } = req.body;
+            const userId = req.user._id;
+
+            if (!baptismDateTime) {
+                return res.status(400).json({ message: 'Baptism date is required' });
             }
 
-            if (req.files?.marriageCertificate) {
-                Docs.marriageCertificate = await uploadToCloudinary(req.files.marriageCertificate[0], 'eparokya/baptism/docs');
-            } else {
-                throw new Error('Marriage Certificate is required.');
+            const selectedDate = await AdminDate.findById(baptismDateTime.trim());
+            if (!selectedDate || !selectedDate.isEnabled) {
+                return res.status(400).json({ message: 'Selected baptism date is not available or has been disabled' });
             }
 
-            if (req.files?.baptismPermit) {
-                const uploadedBaptismPermit = await Promise.all(
-                    req.files.baptismPermit.map(file => uploadToCloudinary(file, 'eparokya/baptism/additionalDocs'))
-                );
-                additionalDocs.baptismPermit = uploadedBaptismPermit[0];
+            if (!selectedDate.canAcceptParticipants()) {
+                return res.status(400).json({ message: 'This baptism event is already full' });
             }
 
-            if (req.files?.certificateOfNoRecordBaptism) {
-                const uploadedCertificate = await Promise.all(
-                    req.files.certificateOfNoRecordBaptism.map(file => uploadToCloudinary(file, 'eparokya/baptism/additionalDocs'))
-                );
-                additionalDocs.certificateOfNoRecordBaptism = uploadedCertificate[0];
+            const Docs = { additionalDocs: {} };
+            let additionalDocs = {};
+
+            const uploadToCloudinary = async (file, folder) => {
+                if (!file) throw new Error('File is required for upload.');
+                const result = await cloudinary.uploader.upload(file.path, { folder });
+                return { public_id: result.public_id, url: result.secure_url };
+            };
+
+            try {
+                console.log("Checking file uploads...");
+                
+                if (req.files?.birthCertificate && req.files.birthCertificate[0]) {
+                    Docs.birthCertificate = await uploadToCloudinary(req.files.birthCertificate[0], 'eparokya/baptism/docs');
+                } else {
+                    return res.status(400).json({ success: false, message: 'Birth Certificate is required.' });
+                }
+
+                if (req.files?.marriageCertificate && req.files.marriageCertificate[0]) {
+                    Docs.marriageCertificate = await uploadToCloudinary(req.files.marriageCertificate[0], 'eparokya/baptism/docs');
+                } else {
+                    return res.status(400).json({ success: false, message: 'Marriage Certificate is required.' });
+                }
+
+                if (req.files?.baptismPermit) {
+                    const uploadedBaptismPermit = await Promise.all(
+                        req.files.baptismPermit.map(file => uploadToCloudinary(file, 'eparokya/baptism/additionalDocs'))
+                    );
+                    additionalDocs.baptismPermit = uploadedBaptismPermit[0];
+                }
+
+                if (req.files?.certificateOfNoRecordBaptism) {
+                    const uploadedCertificate = await Promise.all(
+                        req.files.certificateOfNoRecordBaptism.map(file => uploadToCloudinary(file, 'eparokya/baptism/additionalDocs'))
+                    );
+                    additionalDocs.certificateOfNoRecordBaptism = uploadedCertificate[0];
+                }
+            } catch (error) {
+                console.error("File upload error:", error.message);
+                return res.status(400).json({ success: false, message: error.message });
             }
+
+            if (Object.keys(additionalDocs).length === 0) {
+                additionalDocs = null;
+            }
+
+            console.log("Parsing JSON fields...");
+            const newBaptism = new Baptism({
+                baptismDateTime,
+                userId,
+                child: child ? JSON.parse(child) : null,
+                parents: parents ? JSON.parse(parents) : null,
+                ninong: ninong ? JSON.parse(ninong) : [],
+                ninang: ninang ? JSON.parse(ninang) : [],
+                NinongGodparents: NinongGodparents ? JSON.parse(NinongGodparents) : [],
+                NinangGodparents: NinangGodparents ? JSON.parse(NinangGodparents) : [],
+                Docs,
+                additionalDocs,
+                binyagStatus: 'Pending',
+            });
+
+            console.log("Saving baptism entry...");
+            await newBaptism.save();
+            await AdminDate.findByIdAndUpdate(baptismDateTime, { $inc: { submittedParticipants: 1 } });
+
+            res.status(201).json({ success: true, message: 'Baptism registration created successfully', baptism: newBaptism });
         } catch (error) {
-            return res.status(400).json({ success: false, message: error.message });
+            console.error('Error creating baptism:', error);
+            res.status(500).json({ success: false, message: 'Error creating baptism', error: error.message });
         }
+    };
 
-        if (Object.keys(additionalDocs).length === 0) {
-            additionalDocs = null;
-        }
 
-        const newBaptism = new Baptism({
-            baptismDateTime,
-            userId,
-            child: child ? JSON.parse(child) : null,
-            parents: parents ? JSON.parse(parents) : null,
-            ninong: ninong ? JSON.parse(ninong) : [],
-            ninang: ninang ? JSON.parse(ninang) : [],
-            NinongGodparents: NinongGodparents ? JSON.parse(NinongGodparents) : [],
-            NinangGodparents: NinangGodparents ? JSON.parse(NinangGodparents) : [],
-            Docs,
-            additionalDocs,
-            binyagStatus: 'Pending',
-        });
-
-        await newBaptism.save();
-        await AdminDate.findByIdAndUpdate(baptismDateTime, { $inc: { submittedParticipants: 1 } });
-
-        res.status(201).json({ success: true, message: 'Baptism registration created successfully', baptism: newBaptism });
-    } catch (error) {
-        console.error('Error creating baptism:', error);
-        res.status(500).json({ success: false, message: 'Error creating baptism', error: error.message });
-    }
-};
 
 exports.getAllBaptisms = async (req, res) => {
     try {

@@ -4,6 +4,7 @@ import MetaData from "./Layout/MetaData";
 import axios from "axios";
 import { FaHeart, FaComment } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { Modal, Button } from "react-bootstrap";
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -15,9 +16,7 @@ const ImageSlider = ({ images }) => {
 
   const goPrev = (e) => {
     e.stopPropagation();
-    setCurrentIndex((prev) =>
-      prev - 1 < 0 ? images.length - 1 : prev - 1
-    );
+    setCurrentIndex((prev) => (prev - 1 < 0 ? images.length - 1 : prev - 1));
   };
 
   return (
@@ -48,8 +47,10 @@ export const Home = () => {
   const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showModal, setShowModal] = useState(false); // State to control modal visibility
+  const [activeFeedback, setActiveFeedback] = useState(null); // State to store active feedback form
+  const [modalLoading, setModalLoading] = useState(true);
   const navigate = useNavigate();
-
 
   const bannerImages = [
     `${process.env.PUBLIC_URL}/EParokya-SampleBanner.png`,
@@ -68,8 +69,9 @@ export const Home = () => {
   }, []);
 
   useEffect(() => {
-    fetchAnnouncements(announcements);
+    fetchAnnouncements();
     fetchCategories();
+    checkForActiveFeedbackForm(); // Check for active feedback form on component mount
   }, []);
 
   const fetchAnnouncements = async () => {
@@ -77,7 +79,6 @@ export const Home = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/getAllAnnouncements`
       );
-      // console.log(response.data);
       setAnnouncements(response.data.announcements || []);
       setFilteredAnnouncements(response.data.announcements || []);
     } catch (error) {
@@ -94,13 +95,55 @@ export const Home = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/getAllannouncementCategory`
       );
-      // console.log(response.data);
       setCategories(response.data.categories || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
       setCategories([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkForActiveFeedbackForm = async () => {
+    setModalLoading(true); // Show loading state
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/admin-selections/active`
+      );
+  
+      if (response.data && response.data.isActive) {
+        setActiveFeedback(response.data);
+        setTimeout(() => {
+          setShowModal(true); // Ensure state update before rendering modal
+        }, 100); // Small delay to ensure proper state update
+      }
+    } catch (error) {
+      console.error("Error fetching active feedback form:", error);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+  
+  
+  const handleNavigateToSentiment = () => {
+    console.log("Navigating with activeFeedback:", activeFeedback);
+    if (activeFeedback) {
+      let path = "";
+      switch (activeFeedback.category) {
+        case "priest":
+          path = "/user/PriestSentiment";
+          break;
+        case "event":
+          path = "/user/EventSentiment";
+          break;
+        case "activity":
+          path = "/user/ActivitySentiment";
+          break;
+        default:
+          console.error("Invalid feedback category:", activeFeedback.category);
+          return;
+      }
+      navigate(path, { state: { activeFeedback } });
     }
   };
 
@@ -112,13 +155,16 @@ export const Home = () => {
       return;
     }
 
-    const filtered = announcements.filter((announcement) =>
-      announcement.name.toLowerCase().includes(term.toLowerCase()) ||
-      (announcement.tags && announcement.tags.some(tag => tag.toLowerCase().includes(term.toLowerCase())))
+    const filtered = announcements.filter(
+      (announcement) =>
+        announcement.name.toLowerCase().includes(term.toLowerCase()) ||
+        (announcement.tags &&
+          announcement.tags.some((tag) =>
+            tag.toLowerCase().includes(term.toLowerCase())
+          ))
     );
     setFilteredAnnouncements(filtered);
   };
-
 
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(categoryId);
@@ -131,19 +177,18 @@ export const Home = () => {
   const displayedAnnouncements = announcements.filter((announcement) => {
     const matchesCategory = selectedCategory
       ? announcement.announcementCategory?._id === selectedCategory
-      : true; 
-  
+      : true;
+
     const matchesSearch = searchTerm
       ? announcement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (announcement.tags &&
           announcement.tags.some((tag) =>
             tag.toLowerCase().includes(searchTerm.toLowerCase())
           ))
-      : true; 
-  
-    return matchesCategory && matchesSearch; 
+      : true;
+
+    return matchesCategory && matchesSearch;
   });
-  
 
   return (
     <div style={styles.homeContainer}>
@@ -170,7 +215,6 @@ export const Home = () => {
               onChange={(e) => handleSearch(e.target.value)}
               style={styles.searchInput}
             />
-
           </div>
 
           {/* Categories */}
@@ -212,7 +256,6 @@ export const Home = () => {
                   style={styles.announcementCard}
                   onClick={() => handleCardClick(announcement._id)}
                 >
-
                   {/* Content */}
                   <div style={styles.cardContent}>
                     {/* User Info */}
@@ -232,11 +275,9 @@ export const Home = () => {
                       {announcement.description}
                     </p>
 
-
                     {/* Image / Slider */}
                     <div style={styles.imageSliderContainer}>
-                      {announcement.images &&
-                        announcement.images.length > 0 ? (
+                      {announcement.images && announcement.images.length > 0 ? (
                         <ImageSlider images={announcement.images} />
                       ) : announcement.image ? (
                         <img
@@ -276,6 +317,52 @@ export const Home = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal for Active Feedback Form */}
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        centered
+        backdrop="static" // Prevent closing on backdrop click
+        keyboard={false} // Prevent closing on pressing the Esc key
+        style={styles.modal} // Apply z-index to the modal
+        backdropClassName="custom-backdrop" // Optional: Add a custom class for the backdrop
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Active Feedback Form</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={styles.modalBody}>
+          {modalLoading ? (
+            <p>Loading feedback details...</p> // Show a loading message or spinner
+          ) : activeFeedback ? (
+            <>
+              <p>
+                <strong>Category:</strong> {activeFeedback.category || "N/A"}
+              </p>
+              <p>
+                <strong>Date:</strong> {activeFeedback.date || "N/A"}
+              </p>
+              <p>
+                <strong>Time:</strong> {activeFeedback.time || "N/A"}
+              </p>
+              <Button
+                variant="primary"
+                onClick={handleNavigateToSentiment}
+                style={styles.modalButton}
+              >
+                Go to Feedback Form
+              </Button>
+            </>
+          ) : (
+            <p>No active feedback form available.</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
@@ -461,6 +548,19 @@ const styles = {
     alignItems: "center",
     gap: "5px",
     fontSize: "14px",
+  },
+  modalBody: {
+    padding: "20px",
+    textAlign: "center",
+  },
+  modalButton: {
+    marginTop: "10px",
+  },
+  modal: {
+    zIndex: 1050, // Ensure the modal is above the backdrop
+  },
+  backdrop: {
+    zIndex: 1040, // Ensure the backdrop is below the modal
   },
 };
 

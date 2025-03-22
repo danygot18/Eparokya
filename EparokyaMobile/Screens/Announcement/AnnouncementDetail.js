@@ -97,47 +97,27 @@ const AnnouncementDetails = () => {
     }
   };
 
-  // const toggleLikeComment = async (commentId) => {
-  //   try {
-  //     const res = await axios.put(
-  //       `${baseURL}/anouncementCommentLike/${commentId}`,
-  //       {},
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-
-  //     setComments((prevComments) =>
-  //       prevComments.map((comment) =>
-  //         comment._id === commentId
-  //           ? { ...comment, likedBy: res.data.data.likedBy }
-  //           : comment
-  //       )
-  //     );
-  //   } catch (error) {
-  //     console.error("Error toggling like on comment:", error);
-  //   }
-  // };
-
   const toggleLikeComment = async (commentId) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-        const res = await axios.put(
-            `${baseURL}/anouncementCommentLike/${commentId}`,
-            {},
-            config
-        );
+      const res = await axios.put(
+        `${baseURL}/anouncementCommentLike/${commentId}`,
+        {},
+        config
+      );
 
-        setComments(prevComments =>
-            prevComments.map(comment =>
-                comment._id === commentId
-                    ? { ...comment, likedBy: res.data.data.likedBy }
-                    : comment
-            )
-        );
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment._id === commentId
+            ? { ...comment, likedBy: res.data.data.likedBy }
+            : comment
+        )
+      );
     } catch (error) {
-        console.error('Error toggling like on comment:', error);
+      console.error("Error toggling like on comment:", error);
     }
-};
+  };
 
   const toggleReplies = (commentId) => {
     setExpandedReplies((prev) => ({ ...prev, [commentId]: !prev[commentId] }));
@@ -166,6 +146,30 @@ const AnnouncementDetails = () => {
     }
   };
 
+  const renderUserAvatar = (user) => {
+    if (!user) {
+      return (
+        <Avatar
+          size="sm"
+          source={require("../../assets/profile.png")} // Add a default avatar image
+        />
+      );
+    }
+    return (
+      <Avatar
+        size="sm"
+        source={{ uri: user.avatar?.url || "https://ui-avatars.com/api/?name=Anonymous" }}
+      />
+    );
+  };
+
+  const renderUserName = (user) => {
+    if (!user) {
+      return <Text fontWeight="bold" color="#26572E">Deleted User</Text>;
+    }
+    return <Text fontWeight="bold" color="#26572E">{user.name}</Text>;
+  };
+
   if (loading) return <Spinner size="lg" />;
 
   return (
@@ -182,7 +186,7 @@ const AnnouncementDetails = () => {
                 Saint Joseph Parish - Taguig
               </Text>
               <Text fontSize="sm" color="gray.500">
-              {announcement.createdAt
+                {announcement.createdAt
                   ? format(new Date(announcement.createdAt), "PPP")
                   : "Date not available"}
               </Text>
@@ -256,12 +260,9 @@ const AnnouncementDetails = () => {
                 pb={2}
               >
                 <HStack space={3} alignItems="center">
-                  <Avatar
-                    size="sm"
-                    source={{ uri: comment.user.avatar?.url }}
-                  />
+                  {renderUserAvatar(comment.user)}
                   <VStack>
-                    <Text fontWeight="bold"color="#26572E" >{comment.user.name}</Text>
+                    {renderUserName(comment.user)}
                     <Text>{comment.text}</Text>
                   </VStack>
                 </HStack>
@@ -282,12 +283,9 @@ const AnnouncementDetails = () => {
                   <VStack space={2} mt={2}>
                     {comment.replies.map((reply) => (
                       <HStack key={reply._id} space={3} alignItems="center">
-                        <Avatar
-                          size="sm"
-                          source={{ uri: reply.user.avatar?.url }}
-                        />
+                        {renderUserAvatar(reply.user)}
                         <VStack>
-                          <Text fontWeight="bold">{reply.user.name}</Text>
+                          {renderUserName(reply.user)}
                           <Text>{reply.text}</Text>
                         </VStack>
                       </HStack>

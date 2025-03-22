@@ -6,7 +6,6 @@ const modelMap = {
   Priest: require("../../../models/Priest/priest"),
 };
 
-// ✅ Add Selection
 exports.addSelection = async (req, res) => {
   try {
     const { category, typeModel, typeId, date, time } = req.body;
@@ -32,7 +31,6 @@ exports.addSelection = async (req, res) => {
   }
 };
 
-// ✅ Get All Selections
 exports.getSelections = async (req, res) => {
   try {
     const selections = await AdminSelection.find();
@@ -55,7 +53,6 @@ exports.getSelections = async (req, res) => {
   }
 };
 
-// Get Active Selection
 exports.getActiveSelection = async (req, res) => {
   try {
     const activeSelection = await AdminSelection.findOne({ isActive: true });
@@ -95,9 +92,6 @@ exports.getActiveSelection = async (req, res) => {
   }
 };
 
-
-
-// Deactivate Selection
 exports.deactivateSelection = async (req, res) => {
   try {
     const { adminSelectionId } = req.params;

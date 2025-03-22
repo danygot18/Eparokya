@@ -31,33 +31,29 @@ const ChatList = () => {
     fetchChats();
   }, [user._id]);
 
-  console.log(chats);
   return (
     <div className="chat-page">
       <GuestSideBar />
-
       <div className="chat-container">
         <h2 className="chat-title">Chat List</h2>
-        
-          {loading ? (
-            <p className="chat-loading">Loading chats...</p>
-          ) : chats.length > 0 ? (
-            <div className="chat-lists">
-              {chats.map((chat) => (
-                <div
-                  key={chat.id}
-                  className="chat-card"
-                  onClick={() => navigate(`/chat/${chat.id}/${chat.email}`)}
-                >
-                  <p className="chat-email">{chat.email}</p>
-                  <p className="chat-id">{chat.id}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="chat-empty">No chats available.</p>
-          )}
-        
+        {loading ? (
+          <p className="chat-loading">Loading chats...</p>
+        ) : chats.length > 0 ? (
+          <div className="chat-lists">
+            {chats.map((chat) => (
+              <div
+                key={chat.id}
+                className="chat-card"
+                onClick={() => navigate(`/chat/${chat.id}/${chat.email}`)}
+              >
+                <p className="chat-email">{chat.email}</p>
+                <p className="chat-id">{chat.id}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="chat-empty">No chats available.</p>
+        )}
       </div>
     </div>
   );

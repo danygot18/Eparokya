@@ -164,7 +164,9 @@ const handleSubmit = async (e) => {
 
   return (
     <div className="prayerRequestIntention-container">
-      <GuestSidebar className="prayerRequestIntention-sidebar" />
+      <GuestSidebar 
+      // className="prayerRequestIntention-sidebar" 
+      />
       <div className="prayerRequestIntention-box">
         <h2 className="prayerRequestIntention-title">Prayer Request</h2>
         <p className="prayerRequestIntention-subtext">

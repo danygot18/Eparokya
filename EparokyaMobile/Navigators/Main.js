@@ -87,8 +87,9 @@ const Main = () => (
   >
     <Tab.Screen name="Home" component={Home} />
     <Tab.Screen name="Forms" component={FormsNavigator} />
-    <Tab.Screen name="Profile" component={UserNavigator} />
     <Tab.Screen name="Chats" component={ChatNavigator} />
+    <Tab.Screen name="Profile" component={UserNavigator} />
+    
   </Tab.Navigator>
 );
 

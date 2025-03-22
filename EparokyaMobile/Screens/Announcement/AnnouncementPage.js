@@ -13,7 +13,6 @@ import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import baseURL from "../../assets/common/baseUrl";
-import SyncStorage from "sync-storage";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 
@@ -21,23 +20,20 @@ const AnnouncementPage = ({ navigation }) => {
   const [announcements, setAnnouncements] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
-  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState([]);
-  const [likeCount, setLikeCount] = useState(0);
-  const [userId, setUserId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const { user, token } = useSelector((state) => state.auth);
+
+  const POSTS_PER_PAGE = 5; // Number of posts per page
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(
-          `${baseURL}/getAllannouncementCategory`
-        );
+        const response = await axios.get(`${baseURL}/getAllannouncementCategory`);
         setCategories(response.data.categories);
-        console.log("Categories:", response.data);
       } catch (err) {
         console.error("Error fetching categories:", err);
       }
@@ -46,9 +42,13 @@ const AnnouncementPage = ({ navigation }) => {
     const fetchAnnouncements = async () => {
       try {
         const response = await axios.get(`${baseURL}/getAllAnnouncements`);
-        setAnnouncements(response.data.announcements);
-        console.log("Announcements:", response.data);
-        setFilteredAnnouncements(response.data.announcements);
+        console.log("Announcements:", response.data.announcements);
+        const sortedAnnouncements = response.data.announcements.sort(
+          (a, b) => new Date(b.dateCreated) - new Date(a.dateCreated)
+        );
+        setAnnouncements(sortedAnnouncements);
+        setFilteredAnnouncements(sortedAnnouncements);
+        setTotalPages(Math.ceil(sortedAnnouncements.length / POSTS_PER_PAGE));
       } catch (err) {
         console.error("Failed to fetch announcements:", err);
       }
@@ -76,21 +76,12 @@ const AnnouncementPage = ({ navigation }) => {
     });
 
     setFilteredAnnouncements(filtered);
+    setTotalPages(Math.ceil(filtered.length / POSTS_PER_PAGE));
+    setCurrentPage(1); // Reset to the first page when filtering
   }, [searchTerm, selectedCategory, announcements]);
 
   const handleSearch = (term) => {
     setSearchTerm(term);
-
-    if (term.trim() === "") {
-      setFilteredAnnouncements(announcements);
-      return;
-    }
-
-    const filtered = announcements.filter((announcement) =>
-      announcement.name.toLowerCase().includes(term.toLowerCase()) ||
-      (announcement.tags && announcement.tags.some(tag => tag.toLowerCase().includes(term.toLowerCase())))
-    );
-    setFilteredAnnouncements(filtered);
   };
 
   const handleCategoryPress = (categoryId) => {
@@ -138,12 +129,26 @@ const AnnouncementPage = ({ navigation }) => {
     }
   };
 
-
-
-
-
   const handleCardPress = (item) => {
     navigation.navigate("AnnouncementDetail", { announcementId: item._id });
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const getPaginatedData = () => {
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+    const endIndex = startIndex + POSTS_PER_PAGE;
+    return filteredAnnouncements.slice(startIndex, endIndex);
   };
 
   return (
@@ -169,25 +174,7 @@ const AnnouncementPage = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {autocompleteSuggestions.length > 0 && searchTerm && (
-        <View style={styles.autocompleteSuggestions}>
-          {autocompleteSuggestions.map((item) => (
-            <TouchableOpacity
-              key={item._id}
-              onPress={() => {
-                setSearchTerm(item.name);
-                handleCardPress(item);
-              }}
-              style={styles.suggestionItem}
-            >
-              <Text>{item.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-
-
-<ScrollView
+      <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.categoryContainer}
@@ -216,7 +203,7 @@ const AnnouncementPage = ({ navigation }) => {
       </ScrollView>
 
       <FlatList
-        data={filteredAnnouncements}
+        data={getPaginatedData()}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -239,17 +226,14 @@ const AnnouncementPage = ({ navigation }) => {
                 />
               ))}
 
-            {/* Like and Comments Count */}
-
             <View style={styles.interactionContainer}>
               <LikedCount
                 handleLike={() => handleLike(item._id)}
                 item={item}
                 user={user}
               />
-              {/* Comments Count */}
               <TouchableOpacity
-                onPress={() => handleNavigateToDetail(item._id)}
+                onPress={() => handleCardPress(item)}
               >
                 <MaterialIcons name="comment" size={24} color="gray" />
               </TouchableOpacity>
@@ -259,12 +243,33 @@ const AnnouncementPage = ({ navigation }) => {
         )}
       />
 
+      {/* Pagination Controls */}
+      <View style={styles.paginationContainer}>
+        <TouchableOpacity
+          style={styles.paginationButton}
+          onPress={handlePreviousPage}
+          disabled={currentPage === 1}
+        >
+          <Text style={styles.paginationText}>Previous</Text>
+        </TouchableOpacity>
+        <Text style={styles.paginationText}>
+          Page {currentPage} of {totalPages}
+        </Text>
+        <TouchableOpacity
+          style={styles.paginationButton}
+          onPress={handleNextPage}
+          disabled={currentPage === totalPages}
+        >
+          <Text style={styles.paginationText}>Next</Text>
+        </TouchableOpacity>
+      </View>
+
       <Toast />
     </ScrollView>
   );
 };
 
-//Liked
+// Liked Component
 const LikedCount = ({ handleLike, item, user }) => {
   const [likeCount, setLikeCount] = useState(item.likedBy?.length || 0);
   const [isLiked, setIsLiked] = useState(item.likedBy?.includes(user?._id));
@@ -303,41 +308,35 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
   },
-  userInfo: {
-    position: "absolute",
-    bottom: 10,
-    left: 20,
+  searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  welcomeText: {
-    fontSize: 18,
-    color: "white",
-    fontWeight: "bold",
+    backgroundColor: "#b3cf99",
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    marginTop: 20,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
   },
   searchInput: {
-    margin: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    backgroundColor: "white",
+    flex: 1,
+    fontSize: 16,
+    color: "#2f4f2f",
+    marginRight: 10,
+  },
+  searchIconContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   categoryContainer: {
     flexDirection: "row",
     marginHorizontal: 10,
   },
-  categoryIcon: {
-    alignItems: "center",
-    marginHorizontal: 10,
-  },
-
   categoryBox: {
     justifyContent: "center",
     alignItems: "center",
@@ -349,11 +348,6 @@ const styles = StyleSheet.create({
   selectedCategory: {
     borderColor: "green",
     borderWidth: 2,
-  },
-  categoryImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
   },
   categoryText: {
     fontSize: 16,
@@ -384,44 +378,20 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 14,
   },
-  searchContainer: {
+  paginationContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#b3cf99",
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    marginTop: 20,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
+    padding: 10,
   },
-  searchInput: {
-    flex: 1,
+  paginationButton: {
+    padding: 10,
+    backgroundColor: "#b3cf99",
+    borderRadius: 5,
+  },
+  paginationText: {
     fontSize: 16,
     color: "#2f4f2f",
-    marginRight: 10,
-  },
-  searchIconContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  autocompleteSuggestions: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    marginHorizontal: 10,
-    padding: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-  suggestionItem: {
-    paddingVertical: 5,
   },
 });
 

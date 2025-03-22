@@ -237,7 +237,7 @@ exports.isAuthenticatedUser = async (req, res, next) => {
 //     return (req, res, next) => {
 //         if (!req.user.isAdmin) {
 //             return res.status(403).json({ message: `You are not allowed to acccess or do something on this resource` })
-//         }
+//         }  
 //         next()
 //     }
 // }

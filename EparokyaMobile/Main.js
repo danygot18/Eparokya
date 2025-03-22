@@ -8,6 +8,8 @@ import SyncStorage from 'sync-storage'
 import { Button } from 'native-base';
 import { USER_LOGIN_SUCCESS } from './Redux/constants';
 import UserNavigator from './Navigators/UserNavigator';
+import 'react-native-gesture-handler';
+import 'react-native-reanimated';
 
 import { socket } from './socket';
 

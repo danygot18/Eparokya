@@ -1,64 +1,67 @@
-import React, { useEffect, useState } from 'react';
-import { View, FlatList, Pressable, StyleSheet, Text } from 'react-native';
+import React, { useState, useCallback, useRef } from 'react';
+import { View, Pressable, StyleSheet, Text } from 'react-native';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import baseURL from '../../../assets/common/baseUrl';
-
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 const UserChatList = () => {
-    const { user, token } = useSelector((state) => state.auth); 
-    const [chats, setChats] = useState([]); 
-    const [loading, setLoading] = useState(true); 
-    const navigation = useNavigation(); 
+    const { user, token } = useSelector((state) => state.auth);
+    const [chats, setChats] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const navigation = useNavigation();
 
-    useEffect(() => {
-        const getChatUsers = async () => {
-            if (!user?._id) return;
-            try {
-                const { data } = await axios.get(`${baseURL}/chat/getAllMessage/${user._id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                console.log(data.users)
-                setChats(data?.users || []);
-            } catch (err) {
-                console.error('Error fetching chat users:', err);
-            } finally {
-                setLoading(false); 
-            }
-        };
-        setLoading(false);
-        getChatUsers();
-        console.log(getChatUsers())
-    }, [user?._id, token]);
 
-    
+    const getChatUsers = async () => {
+        if (!user?._id) return;
+        try {
+            const { data } = await axios.get(`${baseURL}/chat/getAllMessage/${user._id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            console.log('Chat users:', data.users);
+            setChats(Array.isArray(data?.users) ? data.users : []);
+        } catch (err) {
+            console.error('Error fetching chat users:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            getChatUsers();
+        }, [user?._id, token])
+    );
+
     return (
         <View style={styles.container}>
             {loading ? (
                 <Text style={styles.loadingText}>Loading chats...</Text>
             ) : chats.length > 0 ? (
-                <FlatList
+                <Animated.FlatList
                     data={chats}
-                    renderItem={({ item, index }) => (
-                        <Pressable
-                            onPress={() =>
-                                navigation.navigate('UserChat', {
-                                    userId: item.id,
-                                    email: item.email,
-                                })
-                            }
-                            style={styles.chatItem}
-                        >
-                            <View style={styles.chatInfo}>
-                                <Text style={styles.username}>{item.email}</Text>
-                                <Text style={styles.lastMessage}>
-                                    {item.lastMessage || 'No messages yet.'} {/* Use item.lastMessage */}
-                                </Text>
-                            </View>
-                        </Pressable>
+                    keyExtractor={(item) => item.id.toString()} // Ensure key is a string
+                    renderItem={({ item }) => (
+                        <Animated.View entering={FadeIn.duration(300)}>
+                            <Pressable
+                                onPress={() =>
+                                    navigation.navigate('UserChat', {
+                                        userId: item.id,
+                                        email: item.email,
+                                    })
+                                }
+                                style={styles.chatItem}
+                            >
+                                <View style={styles.chatInfo}>
+                                    <Text style={styles.username}>{item.name || item.email}</Text>
+                                    <Text style={styles.timestamp}>
+                                        Last message: {new Date(item?.lastMessageAt || Date.now()).toLocaleString()}
+                                    </Text>
+                                </View>
+                            </Pressable>
+                        </Animated.View>
                     )}
-                    keyExtractor={(item, index) => item?.id || `chat-${index}`} 
                 />
             ) : (
                 <Text style={styles.emptyText}>No chats available.</Text>

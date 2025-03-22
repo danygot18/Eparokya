@@ -26,7 +26,9 @@ const {
 } = require('../controllers/userController');
 const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
 
-router.post('/register', upload.single("avatar"), registerUser);
+router.post('/register',
+     upload.single("avatar"),
+      registerUser);
 router.post('/login', LoginUser);
 router.get('/profile', isAuthenticatedUser, Profile);
 router.get('/logout', Logout);

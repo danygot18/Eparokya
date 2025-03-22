@@ -5,6 +5,8 @@ const adminDateController = require('../controllers/adminDateController');
 router.get('/getAllDates', adminDateController.getAllDates);
 router.post('/createDate', adminDateController.createDate);
 
+router.get('/getActiveDatesByCategory/:category', adminDateController.getActiveDatesByCategory);
+
 router.put('/:adminDateId/update', adminDateController.updateSubmitted);
 router.put('/:adminDateId/editMax', adminDateController.editMaxParticipants);
 

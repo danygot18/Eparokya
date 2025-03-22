@@ -15,9 +15,7 @@ const ImageSlider = ({ images }) => {
 
   const goPrev = (e) => {
     e.stopPropagation();
-    setCurrentIndex((prev) =>
-      prev - 1 < 0 ? images.length - 1 : prev - 1
-    );
+    setCurrentIndex((prev) => (prev - 1 < 0 ? images.length - 1 : prev - 1));
   };
 
   return (
@@ -42,27 +40,49 @@ const ImageSlider = ({ images }) => {
 };
 
 const ResourcePage = () => {
-    const [resources, setResources] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState(null);
-    const [bookmarkedResources, setBookmarkedResources] = useState([]);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [modalContent, setModalContent] = useState("");
-    const navigate = useNavigate();
-
+  const [user, setUser] = useState(null);
+  const [resources, setResources] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [bookmarkedResources, setBookmarkedResources] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState("");
+  const navigate = useNavigate();
+  const config = { withCredentials: true };
 
   useEffect(() => {
+    fetchUser();
     fetchResources();
     fetchCategories();
   }, []);
+
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/profile`,
+        config
+      );
+      setUser(response.data.user);
+      const bookmarksResponse = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/userBookmarks/${response.data.user._id}`,
+        config
+      );
+
+      const bookmarkedIds = bookmarksResponse.data.bookmarks.map(
+        (bookmark) => bookmark._id
+      );
+      setBookmarkedResources(bookmarkedIds);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  };
 
   const fetchResources = async () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/getAllResource`
       );
-      
       setResources(response.data.data || []);
     } catch (error) {
       console.error("Error fetching resources:", error);
@@ -86,12 +106,24 @@ const ResourcePage = () => {
     setSearchTerm(term);
   };
 
-  const handleBookmark = (resourceId) => {
-    setBookmarkedResources((prev) =>
-      prev.includes(resourceId)
-        ? prev.filter((id) => id !== resourceId)
-        : [...prev, resourceId]
-    );
+  const handleBookmark = async (resourceId) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API}/api/v1/toggleBookmark/${resourceId}`,
+        { userId: user._id },
+        config
+      );
+
+      if (response.data.success) {
+        setBookmarkedResources((prev) =>
+          prev.includes(resourceId)
+            ? prev.filter((id) => id !== resourceId)
+            : [...prev, resourceId]
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+    }
   };
 
   const handleOpenModal = (link) => {
@@ -202,14 +234,30 @@ const ResourcePage = () => {
                     alt={resource.title}
                     style={styles.resourceImage}
                   />
+                ) : resource.file ? (
+                  <button
+                    onClick={() =>
+                      window.open(
+                        resource.file.url,
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: "#d5edd9",
+                      color: "black",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                      fontSize: "16px",
+                    }}
+                  >
+                    View File
+                  </button>
                 ) : null}
 
-                {/* Star Ratings */}
-                <div style={styles.starRatings}>
-                  {[...Array(5)].map((_, index) => (
-                    <FaStar key={index} color="#1c5739" />
-                  ))}
-                </div>
+         
               </div>
             ))}
           </div>
@@ -224,7 +272,6 @@ const ResourcePage = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
@@ -283,12 +330,12 @@ const styles = {
     width: "60%",
     alignItems: "center",
     position: "relative",
-    margin: "0 auto", 
-    display: "flex", 
-    flexDirection: "column", 
-    textAlign: "center", 
+    margin: "0 auto",
+    display: "flex",
+    flexDirection: "column",
+    textAlign: "center",
     position: "relative",
-},
+  },
 
   resourceTitle: {
     fontSize: "18px",

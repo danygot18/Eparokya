@@ -3,6 +3,9 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Login from "../Screens/User/Login";
 import Register from "../Screens/User/Register";
 import Register2 from "../Screens/User/Register2";
+import Register3 from "../Screens/User/Register3";
+import Register4 from "../Screens/User/Register4";
+
 import UserProfile from "../Screens/User/Profile";
 import UpdateProfile from "../Screens/User/Update";
 
@@ -59,6 +62,23 @@ const UserNavigator = (props) => {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="Register3"
+        component={Register3}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="Register4"
+        component={Register4}
+        options={{
+          headerShown: false,
+        }}
+      />
+
       <Stack.Screen
         name="UserProfile"
         component={UserProfile}
