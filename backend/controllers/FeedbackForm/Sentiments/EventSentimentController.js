@@ -79,7 +79,6 @@ exports.analyzeSentiment = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Check if the AdminSelection is active for this eventTypeId
     const activeSelection = await AdminSelection.findOne({ typeId: eventTypeId, isActive: true });
 
     if (!activeSelection) {
@@ -106,7 +105,7 @@ exports.analyzeSentiment = async (req, res) => {
     const overallSentiment = determineOverallSentiment(
       commentSentiment?.basic?.score || 0,
       commentSentiment?.advanced?.score || 0,
-      commentSentiment?.advanced?.label || "Neutral", // Ensure label is correctly formatted
+      commentSentiment?.advanced?.label || "Neutral",
       emojiSentiment.score
     );
     

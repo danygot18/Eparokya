@@ -2,6 +2,11 @@ const SentimentAnalysis = require("../../models/FeedbackForm/sentimentAnalysis")
 const Sentiment = require("sentiment");
 const natural = require("natural");
 
+const ActivitySentiment = require("../../models/FeedbackForm/Sentiments/ActivitySentiment");
+const PriestSentiment = require("../../models/FeedbackForm/Sentiments/PriestSentiment");
+const EventSentiment = require("../../models/FeedbackForm/Sentiments/EventSentiment");
+
+
 // Initialize Sentiment.js and Natural
 const sentiment = new Sentiment();
 const analyzer = new natural.SentimentAnalyzer("English", natural.PorterStemmer, "afinn");
@@ -105,3 +110,53 @@ exports.getSentimentsByCategory = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch sentiment analysis results" });
   }
 };
+
+
+
+exports.getSentimentPerMonth = async (req, res) => {
+  try {
+    // Initialize counts for each sentiment category
+    const months = Array(12).fill(0);
+    let sentimentCounts = {
+      veryPositive: [...months],
+      positive: [...months],
+      neutral: [...months],
+      negative: [...months],
+      veryNegative: [...months],
+    };
+
+    const aggregateSentiments = async (Model) => {
+      const sentiments = await Model.aggregate([
+        {
+          $group: {
+            _id: {
+              month: { $month: "$createdAt" },
+              sentiment: "$overallSentiment",
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      sentiments.forEach(({ _id, count }) => {
+        const index = _id.month - 1;
+        if (_id.sentiment === "Very Positive") sentimentCounts.veryPositive[index] += count;
+        if (_id.sentiment === "Positive") sentimentCounts.positive[index] += count;
+        if (_id.sentiment === "Neutral") sentimentCounts.neutral[index] += count;
+        if (_id.sentiment === "Negative") sentimentCounts.negative[index] += count;
+        if (_id.sentiment === "Very Negative") sentimentCounts.veryNegative[index] += count;
+      });
+    };
+
+    // Aggregate for all sentiment models
+    await aggregateSentiments(ActivitySentiment);
+    await aggregateSentiments(PriestSentiment);
+    await aggregateSentiments(EventSentiment);
+
+    res.status(200).json(sentimentCounts);
+  } catch (error) {
+    console.error("Error fetching sentiment data per month:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+

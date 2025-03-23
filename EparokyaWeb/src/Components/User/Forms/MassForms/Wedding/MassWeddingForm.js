@@ -233,9 +233,9 @@ const MassWeddingForm = () => {
             <div className="weddingForm-sidebar">
                 <GuestSidebar />
             </div>
+            
             <form onSubmit={handleSubmit} encType="multipart/form-data">
                 <h2>Wedding Form</h2>
-
                 {/* Wedding Date & Time */}
                 <Form.Group>
                     <Form.Label>Wedding Date and Time</Form.Label>

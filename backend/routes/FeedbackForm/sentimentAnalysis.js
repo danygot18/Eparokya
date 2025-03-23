@@ -11,4 +11,5 @@ router.get("/getAllSentiment", sentimentController.getAllSentiments);
 // Route to get sentiment results by category
 router.get("/sentimentCategory/:category", sentimentController.getSentimentsByCategory);
 
+router.get("/sentimentPerMonth", sentimentController.getSentimentPerMonth);
 module.exports = router;

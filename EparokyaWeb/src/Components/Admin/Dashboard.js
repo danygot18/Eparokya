@@ -12,10 +12,12 @@ import {
   PieController,
   ArcElement,
   Legend,
+  LineElement,
+  PointElement,
 } from "chart.js";
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar, Pie, Line } from "react-chartjs-2";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, PieController, ArcElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, PieController, ArcElement, Title, Tooltip, Legend, LineElement, PointElement);
 
 const Dashboard = () => {
   const [registeredUsersCount, setRegisteredUsersCount] = useState(0);
@@ -26,6 +28,7 @@ const Dashboard = () => {
   const [baptismStatus, setBaptismStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
   const [funeralStatus, setFuneralStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
   const [ministryCategoryData, setMinistryCategoryData] = useState([]);
+  const [sentimentData, setSentimentData] = useState({ positive: [], negative: [] });
   const [loading, setLoading] = useState(true);
 
   const config = {
@@ -60,6 +63,8 @@ const Dashboard = () => {
         const funeralRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/funeralsPerMonth`, config);
         setFuneralData(funeralRes.data);
 
+        const sentimentRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/sentimentPerMonth`, config);
+        setSentimentData({ positive: sentimentRes.data.positive, negative: sentimentRes.data.negative });
         // Status counts
         const weddingStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/weddingStatusCount`, config);
         const baptismStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/baptismStatusCount`, config);
@@ -126,6 +131,35 @@ const Dashboard = () => {
       },
     },
   };
+
+  const generateSentimentChartData = () => ({
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    datasets: [
+      {
+        label: "Positive Sentiment",
+        data: sentimentData.positive,
+        borderColor: "green",
+        fill: false,
+      },
+      {
+        label: "Negative Sentiment",
+        data: sentimentData.negative,
+        borderColor: "red",
+        fill: false,
+      },
+    ],
+  });
+
+  // const options = {
+  //   scales: {
+  //     x: {
+  //       type: "category",
+  //     },
+  //     y: {
+  //       beginAtZero: true,
+  //     },
+  //   },
+  // };
 
   const chartCardStyle = {
     border: "1px solid #ddd",
@@ -214,6 +248,12 @@ const Dashboard = () => {
                 <Pie data={generatePieData(funeralStatus)} />
               </div>
             </div>
+
+            <div style={chartCardStyle}>
+              <h5>Sentiment Analysis Trends</h5>
+              <Line data={generateSentimentChartData()} options={options} />
+            </div>
+
           </div>
         )}
       </div>
