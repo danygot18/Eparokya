@@ -3,6 +3,8 @@ import { Form, Button, Row, Col } from 'react-bootstrap';
 import GuestSidebar from '../../../../GuestSideBar';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import MetaData from '../../../../Layout/MetaData';
+import { Box } from '@mui/material';
 
 const PrayerRequestForm = () => {
     const [formData, setFormData] = useState({
@@ -78,7 +80,7 @@ const PrayerRequestForm = () => {
         }
 
         try {
-            const submissionData = { ...formData, userId: user?._id }; 
+            const submissionData = { ...formData, userId: user?._id };
             const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/prayerRequestSubmit`,
                 submissionData,
@@ -93,82 +95,88 @@ const PrayerRequestForm = () => {
     };
 
     return (
-        <Row className="mt-4">
-            <Col md={3}>
+        <div style={{ display: "flex" }}>
+            <MetaData title="Prayer Request Form" />
+            <div style={{ display: "flex", backgroundColor: "#f9f9f9", width: "100%" }}>
                 <GuestSidebar />
-            </Col>
-            <Col md={9}>
-                <Form onSubmit={handleSubmit}>
-                    <h4 className="mt-4">Prayer Request Information</h4>
+                <div style={{ marginLeft: "20px", padding: "20px", width: "calc(100% - 270px)" }}>
+                    <Box sx={{ display: "flex", minHeight: "100vh", alignContent: "center", justifyContent: "center", width: "100%" }}>
 
-                    <Form.Group>
-                        <Form.Label>Offeror's Name</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.offerrorsName}
-                            onChange={(e) => handleChange(e, 'offerrorsName')}
-                        />
-                    </Form.Group>
+                        <Col md={9}>
+                            <Form onSubmit={handleSubmit}>
+                                <h4 className="mt-4">Prayer Request Information</h4>
 
-                    <Form.Group>
-                        <Form.Label>Prayer Type</Form.Label>
-                        <Form.Control
-                            as="select"
-                            value={formData.prayerType}
-                            onChange={(e) => handleChange(e, 'prayerType')}
-                        >
-                            <option value="">Select Prayer Type</option>
-                            <option value="Eternal Repose(Patay)">Eternal Repose (Patay)</option>
-                            <option value="Thanks Giving(Pasasalamat)">Thanks Giving (Pasasalamat)</option>
-                            <option value="Special Intentions(Natatanging Kahilingan)">
-                                Special Intentions (Natatanging Kahilingan)
-                            </option>
-                        </Form.Control>
-                    </Form.Group>
+                                <Form.Group>
+                                    <Form.Label>Offeror's Name</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={formData.offerrorsName}
+                                        onChange={(e) => handleChange(e, 'offerrorsName')}
+                                    />
+                                </Form.Group>
 
-                    <Form.Group>
-                        <Form.Label>Prayer Request Date</Form.Label>
-                        <Form.Control
-                            type="date"
-                            value={formData.prayerRequestDate}
-                            onChange={(e) => handleChange(e, 'prayerRequestDate')}
-                        />
-                    </Form.Group>
+                                <Form.Group>
+                                    <Form.Label>Prayer Type</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={formData.prayerType}
+                                        onChange={(e) => handleChange(e, 'prayerType')}
+                                    >
+                                        <option value="">Select Prayer Type</option>
+                                        <option value="Eternal Repose(Patay)">Eternal Repose (Patay)</option>
+                                        <option value="Thanks Giving(Pasasalamat)">Thanks Giving (Pasasalamat)</option>
+                                        <option value="Special Intentions(Natatanging Kahilingan)">
+                                            Special Intentions (Natatanging Kahilingan)
+                                        </option>
+                                    </Form.Control>
+                                </Form.Group>
 
-                    <h4 className="mt-4">Intentions</h4>
-                    {formData.Intentions.map((intention, index) => (
-                        <Form.Group key={index} className="d-flex align-items-center">
-                            <Form.Control
-                                type="text"
-                                value={intention.name}
-                                onChange={(e) => handleIntentionChange(e, index)}
-                                placeholder="Enter Intention"
-                            />
-                            <Button
-                                variant="danger"
-                                className="ms-2"
-                                onClick={() => handleRemoveIntention(index)}
-                                disabled={formData.Intentions.length === 1}
-                            >
-                                Remove
-                            </Button>
-                        </Form.Group>
-                    ))}
-                    <Button variant="secondary" className="mt-2" onClick={handleAddIntention}>
-                        Add Intention
-                    </Button>
+                                <Form.Group>
+                                    <Form.Label>Prayer Request Date</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={formData.prayerRequestDate}
+                                        onChange={(e) => handleChange(e, 'prayerRequestDate')}
+                                    />
+                                </Form.Group>
 
-                    <div className="d-flex justify-content-end mt-4">
-                        <Button variant="secondary" className="me-2" onClick={handleClear}>
-                            Clear All Fields
-                        </Button>
-                        <Button variant="primary" type="submit">
-                            Submit
-                        </Button>
-                    </div>
-                </Form>
-            </Col>
-        </Row>
+                                <h4 className="mt-4">Intentions</h4>
+                                {formData.Intentions.map((intention, index) => (
+                                    <Form.Group key={index} className="d-flex align-items-center">
+                                        <Form.Control
+                                            type="text"
+                                            value={intention.name}
+                                            onChange={(e) => handleIntentionChange(e, index)}
+                                            placeholder="Enter Intention"
+                                        />
+                                        <Button
+                                            variant="danger"
+                                            className="ms-2"
+                                            onClick={() => handleRemoveIntention(index)}
+                                            disabled={formData.Intentions.length === 1}
+                                        >
+                                            Remove
+                                        </Button>
+                                    </Form.Group>
+                                ))}
+                                <Button variant="secondary" className="mt-2" onClick={handleAddIntention}>
+                                    Add Intention
+                                </Button>
+
+                                <div className="d-flex justify-content-end mt-4">
+                                    <Button variant="secondary" className="me-2" onClick={handleClear}>
+                                        Clear All Fields
+                                    </Button>
+                                    <Button variant="primary" type="submit">
+                                        Submit
+                                    </Button>
+                                </div>
+                            </Form>
+                        </Col>
+                    </Box>
+                </div>
+            </div>
+        </div>
     );
 };
 

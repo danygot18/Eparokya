@@ -5,7 +5,7 @@ import { Modal, Form, Row, Col } from 'react-bootstrap';
 import GuestSidebar from '../../../../GuestSideBar';
 import TermsModal from "../../../../TermsModal";
 import termsAndConditionsText from "../../../../TermsAndConditionText";
-import { Button, TextField, Typography, Stack, Paper, Box, Container, InputLabel, Select, MenuItem,  } from '@mui/material';
+import { Button, TextField, Typography, Stack, Paper, Box, Container, InputLabel, Select, MenuItem, } from '@mui/material';
 import MetaData from '../../../../Layout/MetaData';
 const FuneralForm = () => {
     const [filePreview, setFilePreview] = useState(null);
@@ -276,309 +276,317 @@ const FuneralForm = () => {
 
 
     return (
-        <Box sx={{ display: "flex", minHeight: "100vh" }}>
-            <MetaData title={'Funeral Form'} />
+        <div style={{ display: "flex" }}>
 
-            <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center", p: 3 }}>
-                <Paper elevation={3} sx={{ padding: 3, width: "100%", maxWidth: 900 }}>
-                    <Typography variant="h4" gutterBottom>Funeral Request Form</Typography>
-                    <form onSubmit={handleSubmit}>
-                        <Stack spacing={2}>
-                            <TextField
-                                label="Pangalan ng Patay"
-                                value={formData.name}
-                                onChange={(e) => handleChange(e, 'name')}
-                                required
-                                fullWidth
-                            />
-                            <TextField
-                                label="Araw ng Kamatayan"
-                                type="date"
-                                value={formData.dateOfDeath}
-                                onChange={(e) => handleChange(e, 'dateOfDeath')}
-                                required
-                                fullWidth
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <InputLabel>Kalagayan sa Buhay</InputLabel>
-                            <Select
-                                value={formData.personStatus}
-                                onChange={(e) => handleChange(e, 'personStatus')}
-                                required
-                                fullWidth
-                                SelectProps={{ native: true }}
-                            >
-                                <MenuItem value="">Select</MenuItem>
-                                <MenuItem value="Dalaga/Binata">Dalaga/Binata</MenuItem>
-                                <MenuItem value="May Asawa, Biyuda">May Asawa</MenuItem>
-                                <MenuItem value="Biyuda">Biyuda</MenuItem>
-                            </Select>
-                            <TextField
-                                label="Edad"
-                                type="number"
-                                value={formData.age}
-                                onChange={(e) => handleChange(e, 'age')}
-                                required
-                                fullWidth
-                            />
-                            <TextField
-                                label="Pangalan ng Magulang, Asawa o Anak"
-                                value={formData.contactPerson}
-                                onChange={(e) => handleChange(e, 'contactPerson')}
-                                required
-                                fullWidth
-                            />
-                            <InputLabel>Relasyon ng Namatayan</InputLabel>
-                            <Select
-                    
-                                select
-                                value={formData.relationship}
-                                onChange={(e) => handleChange(e, 'relationship')}
-                                required
-                                fullWidth
-                                SelectProps={{ native: true }}
-                            >
-                                
-                                <MenuItem value="Mother/Nanay">Mother/Nanay</MenuItem>
-                                <MenuItem value="Father/Tatay">Father/Tatay</MenuItem>
-                                <MenuItem value="Sibling/Kapatid">Sibling/Kapatid</MenuItem>
-                                <MenuItem value="Child/Anak">Child/Anak</MenuItem>
-                                <MenuItem value="Spouse/Asawa">Spouse/Asawa</MenuItem>
-                                <MenuItem value="Stepparent">Stepparent</MenuItem>
-                                <MenuItem value="Stepchild">Stepchild</MenuItem>
-                                <MenuItem value="In-law">In-law</MenuItem>
-                                <MenuItem value="Godparent">Godparent</MenuItem>
-                                <MenuItem value="Godchild">Godchild</MenuItem>
-                                <MenuItem value="Relative/Kamag-anak">Relative/Kamag-anak</MenuItem>
-                                <MenuItem value="Guardian">Guardian</MenuItem>
-                                <MenuItem value="Friend/Kaibigan">Friend/Kaibigan</MenuItem>
-                            </Select>
-                            <TextField
-                                label="Contact Number"
-                                value={formData.phone}
-                                onChange={(e) => handleChange(e, 'phone')}
-                                required
-                                fullWidth
-                            />
-                            <InputLabel>Priest Visit</InputLabel>
-                            <Select
-                                value={formData.priestVisit}
-                                onChange={(e) => handleChange(e, 'priestVisit')}
-                            >
-                                <MenuItem value="">Select</MenuItem>
-                                <MenuItem value="Oo/Yes">Oo/Yes</MenuItem>
-                                <MenuItem value="Hindi/No">Hindi/No</MenuItem>
-                            </Select>
-                            <InputLabel>Address</InputLabel>
-                            <TextField
-                                label="Building Name/Tower"
-                                value={formData.address.BldgNameTower}
-                                onChange={(e) => handleChange(e, 'address.BldgNameTower')}
-                                fullWidth
-                            />
-                            
-                            <TextField
-                                label="Lot/Block/Phase/House No."
-                                value={formData.address.LotBlockPhaseHouseNo}
-                                onChange={(e) => handleChange(e, 'address.LotBlockPhaseHouseNo')}
-                                fullWidth
-                            />
-                            <TextField
-                                label="Subdivision/Village/Zone"
-                                value={formData.address.SubdivisionVillageZone}
-                                onChange={(e) => handleChange(e, 'address.SubdivisionVillageZone')}
-                                fullWidth
-                            />
-                            <TextField
-                                label="Street"
-                                value={formData.address.Street}
-                                onChange={(e) => handleChange(e, 'address.Street')}
-                                required
-                                fullWidth
-                            />
-                            <TextField
+            <div style={{ display: "flex", backgroundColor: "#f9f9f9", width: "100%" }}>
 
-                                select
-                                value={formData.address.barangay}
-                                onChange={(e) => handleBarangayChange(e, 'address.barangay')}
-                                required
-                                fullWidth
-                                SelectProps={{ native: true }}
-                            >
-                                <MenuItem value="">Select Barangay</MenuItem>
-                                {barangays.map((barangay, index) => (
-                                    <option key={index} value={barangay}>{barangay}</option>
-                                ))}
-                            </TextField>
-                            {formData.address.barangay === "Others" && (
-                                <TextField
-                                    label="Custom Barangay"
-                                    value={customBarangay}
-                                    onChange={(e) => setCustomBarangay(e.target.value)}
-                                    required
-                                    fullWidth
+                <GuestSidebar />
+                <div style={{ marginLeft: "20px", padding: "20px", width: "calc(100% - 270px)" }}>
+                    <Box sx={{ display: "flex", minHeight: "100vh", alignContent: "center", justifyContent: "center", width: "100%" }}>
+                        <MetaData title="Funeral Form" />
+                        <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center", p: 3 }}>
+                            <Paper elevation={3} sx={{ padding: 3, width: "100%", maxWidth: 900 }}>
+                                <Typography variant="h4" gutterBottom>Funeral Request Form</Typography>
+                                <form onSubmit={handleSubmit}>
+                                    <Stack spacing={2}>
+                                        <TextField
+                                            label="Pangalan ng Patay"
+                                            value={formData.name}
+                                            onChange={(e) => handleChange(e, 'name')}
+                                            required
+                                            fullWidth
+                                        />
+                                        <TextField
+                                            label="Araw ng Kamatayan"
+                                            type="date"
+                                            value={formData.dateOfDeath}
+                                            onChange={(e) => handleChange(e, 'dateOfDeath')}
+                                            required
+                                            fullWidth
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                        <InputLabel>Kalagayan sa Buhay</InputLabel>
+                                        <Select
+                                            value={formData.personStatus}
+                                            onChange={(e) => handleChange(e, 'personStatus')}
+                                            required
+                                            fullWidth
+                                            SelectProps={{ native: true }}
+                                        >
+                                            <MenuItem value="">Select</MenuItem>
+                                            <MenuItem value="Dalaga/Binata">Dalaga/Binata</MenuItem>
+                                            <MenuItem value="May Asawa, Biyuda">May Asawa</MenuItem>
+                                            <MenuItem value="Biyuda">Biyuda</MenuItem>
+                                        </Select>
+                                        <TextField
+                                            label="Edad"
+                                            type="number"
+                                            value={formData.age}
+                                            onChange={(e) => handleChange(e, 'age')}
+                                            required
+                                            fullWidth
+                                        />
+                                        <TextField
+                                            label="Pangalan ng Magulang, Asawa o Anak"
+                                            value={formData.contactPerson}
+                                            onChange={(e) => handleChange(e, 'contactPerson')}
+                                            required
+                                            fullWidth
+                                        />
+                                        <InputLabel>Relasyon ng Namatayan</InputLabel>
+                                        <Select
+
+                                            select
+                                            value={formData.relationship}
+                                            onChange={(e) => handleChange(e, 'relationship')}
+                                            required
+                                            fullWidth
+                                            SelectProps={{ native: true }}
+                                        >
+
+                                            <MenuItem value="Mother/Nanay">Mother/Nanay</MenuItem>
+                                            <MenuItem value="Father/Tatay">Father/Tatay</MenuItem>
+                                            <MenuItem value="Sibling/Kapatid">Sibling/Kapatid</MenuItem>
+                                            <MenuItem value="Child/Anak">Child/Anak</MenuItem>
+                                            <MenuItem value="Spouse/Asawa">Spouse/Asawa</MenuItem>
+                                            <MenuItem value="Stepparent">Stepparent</MenuItem>
+                                            <MenuItem value="Stepchild">Stepchild</MenuItem>
+                                            <MenuItem value="In-law">In-law</MenuItem>
+                                            <MenuItem value="Godparent">Godparent</MenuItem>
+                                            <MenuItem value="Godchild">Godchild</MenuItem>
+                                            <MenuItem value="Relative/Kamag-anak">Relative/Kamag-anak</MenuItem>
+                                            <MenuItem value="Guardian">Guardian</MenuItem>
+                                            <MenuItem value="Friend/Kaibigan">Friend/Kaibigan</MenuItem>
+                                        </Select>
+                                        <TextField
+                                            label="Contact Number"
+                                            value={formData.phone}
+                                            onChange={(e) => handleChange(e, 'phone')}
+                                            required
+                                            fullWidth
+                                        />
+                                        <InputLabel>Priest Visit</InputLabel>
+                                        <Select
+                                            value={formData.priestVisit}
+                                            onChange={(e) => handleChange(e, 'priestVisit')}
+                                        >
+                                            <MenuItem value="">Select</MenuItem>
+                                            <MenuItem value="Oo/Yes">Oo/Yes</MenuItem>
+                                            <MenuItem value="Hindi/No">Hindi/No</MenuItem>
+                                        </Select>
+                                        <InputLabel>Address</InputLabel>
+                                        <TextField
+                                            label="Building Name/Tower"
+                                            value={formData.address.BldgNameTower}
+                                            onChange={(e) => handleChange(e, 'address.BldgNameTower')}
+                                            fullWidth
+                                        />
+
+                                        <TextField
+                                            label="Lot/Block/Phase/House No."
+                                            value={formData.address.LotBlockPhaseHouseNo}
+                                            onChange={(e) => handleChange(e, 'address.LotBlockPhaseHouseNo')}
+                                            fullWidth
+                                        />
+                                        <TextField
+                                            label="Subdivision/Village/Zone"
+                                            value={formData.address.SubdivisionVillageZone}
+                                            onChange={(e) => handleChange(e, 'address.SubdivisionVillageZone')}
+                                            fullWidth
+                                        />
+                                        <TextField
+                                            label="Street"
+                                            value={formData.address.Street}
+                                            onChange={(e) => handleChange(e, 'address.Street')}
+                                            required
+                                            fullWidth
+                                        />
+                                        <TextField
+
+                                            select
+                                            value={formData.address.barangay}
+                                            onChange={(e) => handleBarangayChange(e, 'address.barangay')}
+                                            required
+                                            fullWidth
+                                            SelectProps={{ native: true }}
+                                        >
+                                            <MenuItem value="">Select Barangay</MenuItem>
+                                            {barangays.map((barangay, index) => (
+                                                <option key={index} value={barangay}>{barangay}</option>
+                                            ))}
+                                        </TextField>
+                                        {formData.address.barangay === "Others" && (
+                                            <TextField
+                                                label="Custom Barangay"
+                                                value={customBarangay}
+                                                onChange={(e) => setCustomBarangay(e.target.value)}
+                                                required
+                                                fullWidth
+                                            />
+                                        )}
+                                        <TextField
+                                            label="District"
+                                            value={formData.address.District}
+                                            onChange={(e) => handleChange(e, 'address.District')}
+                                            required
+                                            fullWidth
+                                        />
+                                        <TextField
+
+                                            select
+                                            value={formData.address.city}
+                                            onChange={(e) => handleCityChange(e, 'address.city')}
+                                            required
+                                            fullWidth
+                                            SelectProps={{ native: true }}
+                                        >
+                                            <option value="">Select City</option>
+                                            <option value="Taguig City">Taguig City</option>
+                                            <option value="Others">Others</option>
+                                        </TextField>
+                                        {formData.address.city === "Others" && (
+                                            <TextField
+                                                label="Add City"
+                                                value={customCity}
+                                                onChange={(e) => setCustomCity(e.target.value)}
+                                                required
+                                                fullWidth
+                                            />
+                                        )}
+                                        <TextField
+                                            label="Dahilan ng Pagkamatay"
+                                            value={formData.reasonOfDeath}
+                                            onChange={(e) => handleChange(e, 'reasonOfDeath')}
+                                            required
+                                            fullWidth
+                                        />
+                                        <TextField
+                                            label="Araw ng Libing"
+                                            type="date"
+                                            value={formData.funeralDate}
+                                            onChange={(e) => handleChange(e, 'funeralDate')}
+                                            required
+                                            fullWidth
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                        <TextField
+                                            label="Oras ng Libing"
+                                            type="time"
+                                            value={formData.funeraltime}
+                                            onChange={(e) => handleChange(e, 'funeraltime')}
+                                            required
+                                            fullWidth
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                        <TextField
+                                            label="Saan ililibing"
+                                            value={formData.placeOfDeath}
+                                            onChange={(e) => handleChange(e, 'placeOfDeath')}
+                                            required
+                                            fullWidth
+                                        />
+                                        <InputLabel>Rito na igagawad sa namatay</InputLabel>
+                                        <Select
+
+                                            select
+                                            value={formData.serviceType}
+                                            onChange={(e) => handleChange(e, 'serviceType')}
+                                            required
+                                            fullWidth
+                                            SelectProps={{ native: true }}
+                                        >
+                                            <MenuItem value="Misa">Misa</MenuItem>
+                                            <MenuItem value="Blessing">Blessing</MenuItem>
+                                        </Select>
+                                        <InputLabel>Placing of Pall By</InputLabel>
+                                        <Select
+
+                                            select
+                                            value={formData.placingOfPall.by}
+                                            onChange={(e) => handleChange(e, 'placingOfPall.by')}
+                                            required
+                                            fullWidth
+                                            SelectProps={{ native: true }}
+                                        >
+                                            <MenuItem value="">Placing of Pall By</MenuItem>
+                                            <MenuItem value="Priest">Pari</MenuItem>
+                                            <MenuItem value="Family Member">Family Member</MenuItem>
+                                        </Select>
+                                        {formData.placingOfPall.by === 'Family Member' && (
+                                            <TextField
+                                                label="Family Members"
+                                                value={formData.placingOfPall.familyMembers.join(', ')}
+                                                onChange={(e) =>
+                                                    handleChange(
+                                                        { target: { value: e.target.value.split(', ') } },
+                                                        'placingOfPall.familyMembers'
+                                                    )
+                                                }
+                                                placeholder="Enter family members, separated by commas"
+                                                required
+                                                fullWidth
+                                            />
+                                        )}
+                                        <TextField
+                                            label="Araw ng Paggawad"
+                                            type="date"
+                                            value={formData.funeralMassDate}
+                                            onChange={(e) => handleChange(e, 'funeralMassDate')}
+                                            required
+                                            fullWidth
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                        <TextField
+                                            label="Oras ng Paggawad"
+                                            type="time"
+                                            value={formData.funeralMasstime}
+                                            onChange={(e) => handleChange(e, 'funeralMasstime')}
+                                            required
+                                            fullWidth
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                        <TextField
+                                            label="Saan gaganapin"
+                                            value={formData.funeralMass}
+                                            onChange={(e) => handleChange(e, 'funeralMass')}
+                                            required
+                                            fullWidth
+                                        />
+                                        <TextField
+
+                                            type="file"
+                                            inputProps={{ accept: "image/*,application/pdf" }}
+                                            onChange={(e) => handleFileChange(e, 'deathCertificate')}
+                                            required
+                                            fullWidth
+                                        />
+                                        <Box>
+                                            <input
+                                                type="checkbox"
+                                                checked={isAgreed}
+                                                onChange={() => setIsAgreed(!isAgreed)}
+                                            />
+                                            <label>
+                                                Before submitting, click this to open the <span style={{ color: 'blue', cursor: 'pointer' }} onClick={() => setIsModalOpen(true)}>Terms and Conditions</span>
+                                            </label>
+                                        </Box>
+                                        <Button type="submit" variant="contained" color="primary" disabled={!isAgreed}>
+                                            Submit
+                                        </Button>
+                                    </Stack>
+                                </form>
+                                <TermsModal
+                                    isOpen={isModalOpen}
+                                    onClose={() => setIsModalOpen(false)}
+                                    onAccept={() => { setIsAgreed(true); setIsModalOpen(false); }}
+                                    termsText={termsAndConditionsText}
                                 />
-                            )}
-                            <TextField
-                                label="District"
-                                value={formData.address.District}
-                                onChange={(e) => handleChange(e, 'address.District')}
-                                required
-                                fullWidth
-                            />
-                            <TextField
-
-                                select
-                                value={formData.address.city}
-                                onChange={(e) => handleCityChange(e, 'address.city')}
-                                required
-                                fullWidth
-                                SelectProps={{ native: true }}
-                            >
-                                <option value="">Select City</option>
-                                <option value="Taguig City">Taguig City</option>
-                                <option value="Others">Others</option>
-                            </TextField>
-                            {formData.address.city === "Others" && (
-                                <TextField
-                                    label="Add City"
-                                    value={customCity}
-                                    onChange={(e) => setCustomCity(e.target.value)}
-                                    required
-                                    fullWidth
-                                />
-                            )}
-                            <TextField
-                                label="Dahilan ng Pagkamatay"
-                                value={formData.reasonOfDeath}
-                                onChange={(e) => handleChange(e, 'reasonOfDeath')}
-                                required
-                                fullWidth
-                            />
-                            <TextField
-                                label="Araw ng Libing"
-                                type="date"
-                                value={formData.funeralDate}
-                                onChange={(e) => handleChange(e, 'funeralDate')}
-                                required
-                                fullWidth
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                label="Oras ng Libing"
-                                type="time"
-                                value={formData.funeraltime}
-                                onChange={(e) => handleChange(e, 'funeraltime')}
-                                required
-                                fullWidth
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                label="Saan ililibing"
-                                value={formData.placeOfDeath}
-                                onChange={(e) => handleChange(e, 'placeOfDeath')}
-                                required
-                                fullWidth
-                            />
-                            <InputLabel>Rito na igagawad sa namatay</InputLabel>
-                            <Select
-
-                                select
-                                value={formData.serviceType}
-                                onChange={(e) => handleChange(e, 'serviceType')}
-                                required
-                                fullWidth
-                                SelectProps={{ native: true }}
-                            >                               
-                                <MenuItem value="Misa">Misa</MenuItem>
-                                <MenuItem value="Blessing">Blessing</MenuItem>
-                            </Select>
-                            <InputLabel>Placing of Pall By</InputLabel>
-                            <Select
-
-                                select
-                                value={formData.placingOfPall.by}
-                                onChange={(e) => handleChange(e, 'placingOfPall.by')}
-                                required
-                                fullWidth
-                                SelectProps={{ native: true }}
-                            >
-                                <MenuItem value="">Placing of Pall By</MenuItem>
-                                <MenuItem value="Priest">Pari</MenuItem>
-                                <MenuItem value="Family Member">Family Member</MenuItem>
-                            </Select>
-                            {formData.placingOfPall.by === 'Family Member' && (
-                                <TextField
-                                    label="Family Members"
-                                    value={formData.placingOfPall.familyMembers.join(', ')}
-                                    onChange={(e) =>
-                                        handleChange(
-                                            { target: { value: e.target.value.split(', ') } },
-                                            'placingOfPall.familyMembers'
-                                        )
-                                    }
-                                    placeholder="Enter family members, separated by commas"
-                                    required
-                                    fullWidth
-                                />
-                            )}
-                            <TextField
-                                label="Araw ng Paggawad"
-                                type="date"
-                                value={formData.funeralMassDate}
-                                onChange={(e) => handleChange(e, 'funeralMassDate')}
-                                required
-                                fullWidth
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                label="Oras ng Paggawad"
-                                type="time"
-                                value={formData.funeralMasstime}
-                                onChange={(e) => handleChange(e, 'funeralMasstime')}
-                                required
-                                fullWidth
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                label="Saan gaganapin"
-                                value={formData.funeralMass}
-                                onChange={(e) => handleChange(e, 'funeralMass')}
-                                required
-                                fullWidth
-                            />
-                            <TextField
-
-                                type="file"
-                                inputProps={{ accept: "image/*,application/pdf" }}
-                                onChange={(e) => handleFileChange(e, 'deathCertificate')}
-                                required
-                                fullWidth
-                            />
-                            <Box>
-                                <input
-                                    type="checkbox"
-                                    checked={isAgreed}
-                                    onChange={() => setIsAgreed(!isAgreed)}
-                                />
-                                <label>
-                                    Before submitting, click this to open the <span style={{ color: 'blue', cursor: 'pointer' }} onClick={() => setIsModalOpen(true)}>Terms and Conditions</span>
-                                </label>
-                            </Box>
-                            <Button type="submit" variant="contained" color="primary" disabled={!isAgreed}>
-                                Submit
-                            </Button>
-                        </Stack>
-                    </form>
-                    <TermsModal
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                        onAccept={() => { setIsAgreed(true); setIsModalOpen(false); }}
-                        termsText={termsAndConditionsText}
-                    />
-                </Paper>
-            </Box>
-        </Box>
+                            </Paper>
+                        </Box>
+                    </Box>
+                </div>
+            </div>
+        </div>
     );
 
 };

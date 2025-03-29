@@ -4,7 +4,6 @@ import MetaData from "./Layout/MetaData";
 import axios from "axios";
 import { FaHeart, FaComment } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { Modal, Button } from "react-bootstrap";
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -47,9 +46,6 @@ export const Home = () => {
   const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [showModal, setShowModal] = useState(false); // State to control modal visibility
-  const [activeFeedback, setActiveFeedback] = useState(null); // State to store active feedback form
-  const [modalLoading, setModalLoading] = useState(true);
   const navigate = useNavigate();
 
   const bannerImages = [
@@ -71,7 +67,6 @@ export const Home = () => {
   useEffect(() => {
     fetchAnnouncements();
     fetchCategories();
-    checkForActiveFeedbackForm(); // Check for active feedback form on component mount
   }, []);
 
   const fetchAnnouncements = async () => {
@@ -101,66 +96,6 @@ export const Home = () => {
       setCategories([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-const checkForActiveFeedbackForm = async () => {
-  setModalLoading(true);
-  try {
-    console.log("Function checkForActiveFeedbackForm is being called");
-
-    const response = await axios.get(
-      `${process.env.REACT_APP_API}/api/v1/admin-selections/active`
-    );
-
-    console.log("API Response:", response.data);
-
-    if (response.data && response.data.isActive) {
-      setActiveFeedback(response.data);
-      console.log("Active feedback found:", response.data);
-
-      // TEMP FIX: Force show modal for debugging
-      console.log("Forcing modal to open...");
-      setTimeout(() => {
-        setShowModal(true);
-        console.log("Modal state should now be true!");
-      }, 100);
-    }
-  } catch (error) {
-    console.error("Error fetching active feedback form:", error);
-  } finally {
-    setModalLoading(false);
-  }
-};
-  
-  
-  
-  
-  useEffect(() => {
-    console.log("showModal state changed:", showModal);
-  }, [showModal]);
-  
-  
-  
-  const handleNavigateToSentiment = () => {
-    console.log("Navigating with activeFeedback:", activeFeedback);
-    if (activeFeedback) {
-      let path = "";
-      switch (activeFeedback.category) {
-        case "priest":
-          path = "/user/PriestSentiment";
-          break;
-        case "event":
-          path = "/user/EventSentiment";
-          break;
-        case "activity":
-          path = "/user/ActivitySentiment";
-          break;
-        default:
-          console.error("Invalid feedback category:", activeFeedback.category);
-          return;
-      }
-      navigate(path, { state: { activeFeedback } });
     }
   };
 
@@ -334,52 +269,6 @@ const checkForActiveFeedbackForm = async () => {
           </div>
         </div>
       </div>
-
-      {/* Modal for Active Feedback Form */}
-      <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        centered
-        backdrop="static" // Prevent closing on backdrop click
-        keyboard={false} // Prevent closing on pressing the Esc key
-        style={styles.modal} // Apply z-index to the modal
-        backdropClassName="custom-backdrop" // Optional: Add a custom class for the backdrop
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Active Feedback Form</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={styles.modalBody}>
-          {modalLoading ? (
-            <p>Loading feedback details...</p> // Show a loading message or spinner
-          ) : activeFeedback ? (
-            <>
-              <p>
-                <strong>Category:</strong> {activeFeedback.category || "N/A"}
-              </p>
-              <p>
-                <strong>Date:</strong> {activeFeedback.date || "N/A"}
-              </p>
-              <p>
-                <strong>Time:</strong> {activeFeedback.time || "N/A"}
-              </p>
-              <Button
-                variant="primary"
-                onClick={handleNavigateToSentiment}
-                style={styles.modalButton}
-              >
-                Go to Feedback Form
-              </Button>
-            </>
-          ) : (
-            <p>No active feedback form available.</p>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };
@@ -565,20 +454,7 @@ const styles = {
     alignItems: "center",
     gap: "5px",
     fontSize: "14px",
-  },
-  modalBody: {
-    padding: "20px",
-    textAlign: "center",
-  },
-  modalButton: {
-    marginTop: "10px",
-  },
-  modal: {
-    zIndex: 1050, // Ensure the modal is above the backdrop
-  },
-  backdrop: {
-    zIndex: 1040, // Ensure the backdrop is below the modal
-  },
+  }
 };
 
 export default Home;

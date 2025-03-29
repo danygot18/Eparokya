@@ -16,6 +16,7 @@ import {
   Icon,
   Avatar,
   Center,
+  Badge,
 } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutAction } from "../Redux/Actions/userActions";
@@ -31,6 +32,9 @@ import Forms from "../Screens/User/UserForms";
 import Profile from "../Screens/User/Profile";
 import PrayerWall from "../Screens/Prayers/PrayerWall";
 import ResourcePage from "../Screens/Resource/ResourcePage";
+import UserLive from "../Screens/User/UserLive";
+import { useState } from "react";
+import NotificationUser from "../service/notificationUser";
 
 const Drawer = createDrawerNavigator();
 
@@ -50,6 +54,8 @@ const getIcon = (screenName) => {
       return "monitor-dashboard";
     case "Profile":
       return "account";
+    case "Live":
+      return "video";
 
     default:
       return undefined;
@@ -59,6 +65,7 @@ const getIcon = (screenName) => {
 function CustomDrawerContent(props) {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+
 
   return (
     <DrawerContentScrollView {...props} safeArea>
@@ -139,7 +146,7 @@ function CustomDrawerContent(props) {
 
 const DrawerNavigator = () => {
   const { user } = useSelector((state) => state.auth);
-
+  const [unreadCount, setUnreadCount] = useState("");
   return (
     <Box safeArea flex={1} bg="#154314" paddingTop={StatusBar.currentHeight || 0}>
       <StatusBar backgroundColor="#154314" style="light" />
@@ -148,9 +155,36 @@ const DrawerNavigator = () => {
         screenOptions={({ navigation }) => ({
           headerShown: true,
           header: () => (
-            <Pressable onPress={() => navigation.toggleDrawer()} p="2">
-              <MaterialCommunityIcons name="menu-open" size={30} color="green" />
-            </Pressable>),
+            <Box flexDirection="row" alignItems="center" justifyContent="space-between" p="2" bg="#154314">
+              {/* Menu Button */}
+              <Pressable onPress={() => navigation.toggleDrawer()} p="2">
+                <MaterialCommunityIcons name="menu-open" size={30} color="green" />
+              </Pressable>
+
+              {/* Notification Bell */}
+              {/* <Pressable onPress={() => console.log("Open notifications")}>
+                <Box position="relative">
+                  <MaterialCommunityIcons name="bell" size={28} color="white" />
+                  {unreadCount > 0 && (
+                    <Badge
+                      colorScheme="danger"
+                      rounded="full"
+                      position="absolute"
+                      top={-2}
+                      right={-2}
+                      px={1.5}
+                      py={0.5}
+                    >
+                      <Text fontSize="xs" color="white">
+                        {unreadCount}
+                      </Text>
+                    </Badge>
+                  )}
+                </Box>
+              </Pressable> */}
+              <NotificationUser />
+            </Box>
+          ),
           // headerLeft: () => (
           //   <Pressable onPress={() => navigation.toggleDrawer()} p="2">
           //     <MaterialCommunityIcons name="menu-open" size={24} color="white" />
@@ -167,6 +201,7 @@ const DrawerNavigator = () => {
         <Drawer.Screen name="Calendar" component={CalendarComponent} />
         <Drawer.Screen name="Forms" component={Forms} />
         <Drawer.Screen name="Prayer Wall" component={PrayerWall} />
+        <Drawer.Screen name="Live" component={UserLive} />
 
         {user?.isAdmin && (
           <Drawer.Screen name="Admin Dashboard" component={AdminNavigator} />

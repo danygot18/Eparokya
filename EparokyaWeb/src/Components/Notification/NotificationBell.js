@@ -7,20 +7,20 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const NotificationBell = () => {
-  const [notifications, setNotifications] = useState([]); // Stores notifications
-  const [unreadCount, setUnreadCount] = useState(0); // Stores unread count
-  const [open, setOpen] = useState(false); // Controls dropdown visibility
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const config = { withCredentials: true };
 
-  // ✅ Fetch Notifications & Unread Count
+  // Fetch all notifications from server at once
   const fetchNotifications = useCallback(async () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/notifications`,
         config
       );
-      console.log("Notifications:", response.data);
+      
       setNotifications(response.data || []);
       setUnreadCount(response.data.unreadCount || 0);
     } catch (error) {
@@ -28,7 +28,7 @@ const NotificationBell = () => {
     }
   }, []);
 
-  // ✅ Mark All as Read (Only Clears the Count, Doesn't Remove Notifications)
+  // Mark all as read
   const markAllAsRead = async () => {
     try {
       await axios.put(
@@ -36,80 +36,99 @@ const NotificationBell = () => {
         {},
         config
       );
-      setUnreadCount(0); // Only reset the unread count
+      setUnreadCount(0);
     } catch (error) {
       console.error("Error marking notifications as read:", error);
     }
   };
 
-  // ✅ Handle Notification Click (Navigate but Keep Notifications)
-  const handleNotificationClick = (prayerRequestId) => {
-    navigate(`/admin/prayerIntention/details/${prayerRequestId}`);
-    setOpen(false); // Close the dropdown
-    window.location.reload(); // ✅ Force reload
-  };
-  
+  // Handle new real-time notification
+  const handleNewNotification = useCallback((data) => {
+    toast.success(`New Notification: ${data.message}`);
+    
+    setNotifications(prev => [
+      {
+        N_id: data.N_id,
+        message: data.message,
+        link: data.link || "#",
+        createdAt: new Date().toISOString()
+      },
+      ...prev
+    ]);
+    
+    setUnreadCount(prev => prev + 1);
+  }, []);
 
-  // ✅ Listen for Real-time Notifications
+  // Initialize component
   useEffect(() => {
+    fetchNotifications();
+    
+    // Setup socket connection
     socket.connect();
-    fetchNotifications(); // Load notifications initially
-
-    socket.on("push-notification", (data) => {
-      toast.success(`New Notification: ${data.message}`);
-
-      setNotifications((prev) => [
-        {
-          N_id: data.N_id, // Ensure the ID is stored
-          message: data.message,
-          link: data.link || "#",
-        },
-        ...prev,
-      ]);
-
-      setUnreadCount((prev) => (typeof prev === "number" ? prev + 1 : 1));
-    });
-
+    socket.on("push-notification", handleNewNotification);
+    
     return () => {
-      socket.off("push-notification");
+      socket.off("push-notification", handleNewNotification);
       socket.disconnect();
     };
-  }, [fetchNotifications]);
+  }, [fetchNotifications, handleNewNotification]);
+
+  const handleNotificationClick = (prayerRequestId) => {
+    navigate(`/admin/prayerIntention/details/${prayerRequestId}`);
+    setOpen(false);
+  };
 
   return (
     <div className="position-relative">
-      {/* Notification Bell */}
       <button
         className="btn btn-secondary position-relative"
         type="button"
         onClick={() => {
           setOpen(!open);
-          markAllAsRead(); // ✅ Resets count but keeps notifications
+          if (open && unreadCount > 0) {
+            markAllAsRead();
+          }
         }}
+        aria-label="Notifications"
       >
         <FaBell className="text-2xl text-gray-700" />
         {unreadCount > 0 && (
           <span className="badge bg-danger position-absolute top-0 start-100 translate-middle">
-            {unreadCount}
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
-      {/* Dropdown Menu */}
       {open && (
         <div
           className="dropdown-menu dropdown-menu-end show position-absolute mt-2 p-2 shadow-lg"
-          style={{ minWidth: "250px", zIndex: 1050 }}
+          style={{ minWidth: "250px", maxHeight: "400px", overflowY: "auto", zIndex: 1050 }}
         >
-          <div className="dropdown-header fw-bold">Notifications</div>
+          <div className="d-flex justify-content-between align-items-center dropdown-header">
+            <span className="fw-bold">Notifications</span>
+            {unreadCount > 0 && (
+              <button 
+                className="btn btn-sm btn-link"
+                onClick={markAllAsRead}
+              >
+                Mark all as read
+              </button>
+            )}
+          </div>
+          
           {notifications.length > 0 ? (
-            notifications.map((notif, index) => (
+            notifications.map((notif) => (
               <button
-                key={index}
+                key={notif.N_id}
                 className="dropdown-item text-start"
                 onClick={() => handleNotificationClick(notif.N_id)}
               >
-                {notif.message}
+                <div className="d-flex flex-column">
+                  <span>{notif.message}</span>
+                  <small className="text-muted">
+                    {new Date(notif.createdAt).toLocaleString()}
+                  </small>
+                </div>
               </button>
             ))
           ) : (

@@ -30,7 +30,7 @@ const UserProfile = ({ navigation }) => {
   const { user, token } = useSelector(state => state.auth);
 
   const defaultImage = "https://rb.gy/hnb4yc";
-  
+
   const getProfile = async () => {
     console.log(token)
     if (!token) {
@@ -48,6 +48,7 @@ const UserProfile = ({ navigation }) => {
       const { data } = await axios.get(`${baseURL}/profile`, config);
       setUserProfile(data?.user);
       console.log(data?.user)
+      console.log(data?.user.ministryRoles)
     } catch (error) {
       console.error(error);
       // setIsAuthenticated(false);
@@ -73,85 +74,96 @@ const UserProfile = ({ navigation }) => {
   };
 
   return (
-    
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.profileSection}>
-          {selectedImage ? (
-            <Image
-              source={{ uri: selectedImage }}
-              style={styles.profileImage}
-            />
-          ) : (
-            <Image
-              source={{ uri: userProfile?.avatar?.url || defaultImage }}
-              style={styles.profileImage}
-            />
-          )}
-          <View style={styles.nameContainer}>
-            <Text style={styles.profileName}>{userProfile?.name}</Text>
-            <Text style={styles.joinedLabel}>
-              Joined: {userProfile?.createdAt?.slice(0, 10)}
-            </Text>
-          </View>
-        </View>
-  
-        {/* User Info */}
-        <View style={styles.infoContainer}>
-          <MaterialIcons name="email" size={24} color="#333" />
-          <Text style={styles.infoText}>{userProfile?.email}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <MaterialIcons name="phone" size={24} color="#333" />
-          <Text style={styles.infoText}>{userProfile?.phone}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <MaterialIcons name="info" size={24} color="#333" />
-          <Text style={styles.infoText}>{userProfile?.age}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <MaterialIcons name="info" size={24} color="#333" />
-          <Text style={styles.infoText}>{userProfile?.preference}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <MaterialIcons name="home" size={24} color="#333" />
-          <Text style={styles.infoText}>
-            {userProfile?.city}, {userProfile?.barangay}, {userProfile?.zip},{" "}
-            {userProfile?.country}
+
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.profileSection}>
+        {selectedImage ? (
+          <Image
+            source={{ uri: selectedImage }}
+            style={styles.profileImage}
+          />
+        ) : (
+          <Image
+            source={{ uri: userProfile?.avatar?.url || defaultImage }}
+            style={styles.profileImage}
+          />
+        )}
+        <View style={styles.nameContainer}>
+          <Text style={styles.profileName}>{userProfile?.name}</Text>
+          <Text style={styles.joinedLabel}>
+            Joined: {userProfile?.createdAt?.slice(0, 10)}
           </Text>
         </View>
-  
-        {/* Display Ministry Category */}
-        <View style={styles.infoContainer}>
-          <MaterialIcons name="group" size={24} color="#333" />
-          <Text style={styles.infoText}>
-            {userProfile?.ministryCategory?.map(category => category.name).join(', ') || "No ministry category assigned"}
-          </Text>
+      </View>
+
+      {/* User Info */}
+      <View style={styles.infoContainer}>
+        <MaterialIcons name="email" size={24} color="#333" />
+        <Text style={styles.infoText}>{userProfile?.email}</Text>
+      </View>
+      <View style={styles.infoContainer}>
+        <MaterialIcons name="phone" size={24} color="#333" />
+        <Text style={styles.infoText}>{userProfile?.phone}</Text>
+      </View>
+      <View style={styles.infoContainer}>
+        <MaterialIcons name="info" size={24} color="#333" />
+        <Text style={styles.infoText}>{userProfile?.birthDate}</Text>
+      </View>
+      <View style={styles.infoContainer}>
+        <MaterialIcons name="info" size={24} color="#333" />
+        <Text style={styles.infoText}>{userProfile?.preference}</Text>
+      </View>
+      <View style={styles.infoContainer}>
+        <MaterialIcons name="home" size={24} color="#333" />
+        <Text style={styles.infoText}>
+          {userProfile?.address?.city || "No city"},
+          {userProfile?.address?.barangay || "No barangay"},
+          {userProfile?.address?.zip || "No zip"},
+          {userProfile?.country || "No country"}
+        </Text>
+      </View>
+
+      {/* Display Ministry Category */}
+      <View style={styles.infoContainer}>
+        <MaterialIcons name="group" size={24} color="#333" />
+        <View style={{ marginLeft: 10 }}>
+          {userProfile?.ministryRoles?.length > 0
+            ? userProfile.ministryRoles.map((role, index) => (
+              <Text key={index} style={styles.infoText}>
+                {`Ministry: ${role.ministry.name}\n`}
+                {`Role: ${role.role}\n`}
+                {`Start Year: ${role.startYear}\n`}
+                {`End Year: ${role.endYear}\n`}
+              </Text>
+            ))
+            : <Text style={styles.infoText}>No ministry roles assigned</Text>}
         </View>
-  
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("UpdateProfile")}
-            style={styles.actionButton}
-          >
-            <MaterialIcons name="app-registration" size={24} color="white" />
-          </TouchableOpacity>
-  
-          <TouchableOpacity
-            onPress={() => navigation.navigate("SubmittedForms")}
-            style={styles.actionButton}
-          >
-           <MaterialIcons name="summarize" size={24} color="white" />
-          </TouchableOpacity>
-  
-          <TouchableOpacity
-            onPress={handleLogout}
-            style={styles.actionButton}
-          >
-            <MaterialIcons name="logout" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-   
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("UpdateProfile")}
+          style={styles.actionButton}
+        >
+          <MaterialIcons name="app-registration" size={24} color="white" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate("SubmittedForms")}
+          style={styles.actionButton}
+        >
+          <MaterialIcons name="summarize" size={24} color="white" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleLogout}
+          style={styles.actionButton}
+        >
+          <MaterialIcons name="logout" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+
   );
 };
 

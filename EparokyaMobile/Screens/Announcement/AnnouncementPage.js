@@ -42,7 +42,7 @@ const AnnouncementPage = ({ navigation }) => {
     const fetchAnnouncements = async () => {
       try {
         const response = await axios.get(`${baseURL}/getAllAnnouncements`);
-        console.log("Announcements:", response.data.announcements);
+        // console.log("Announcements:", response.data.announcements);
         const sortedAnnouncements = response.data.announcements.sort(
           (a, b) => new Date(b.dateCreated) - new Date(a.dateCreated)
         );

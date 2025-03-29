@@ -3,13 +3,15 @@ import { Form, Button, Row, Col } from 'react-bootstrap';
 import GuestSidebar from '../../../../GuestSideBar';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import MetaData from '../../../../Layout/MetaData';
+import { Box } from '@mui/material';
 // import phLocations from 'philippines';
 // import { municipalities, searchBaranggay } from 'ph-geo-admin-divisions';
 
 const HouseBlessingForm = () => {
     const [formData, setFormData] = useState({
         fullName: '',
-        contactNumber: '', 
+        contactNumber: '',
         blessingDate: '',
         blessingTime: '',
         address: {
@@ -130,12 +132,12 @@ const HouseBlessingForm = () => {
             const submissionData = {
                 ...formData,
                 address: {
-                  ...formData.address,
-                  customCity: formData.address.city === 'Others' ? customCity : undefined,
-                  customBarangay: formData.address.baranggay === 'Others' ? customBarangay : undefined,
+                    ...formData.address,
+                    customCity: formData.address.city === 'Others' ? customCity : undefined,
+                    customBarangay: formData.address.baranggay === 'Others' ? customBarangay : undefined,
                 },
                 userId: user?._id,
-              };
+            };
             const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/houseBlessingSubmit`,
                 submissionData,
@@ -182,124 +184,126 @@ const HouseBlessingForm = () => {
 
 
     return (
-        <Row className="mt-4">
-            <Col md={3}>
+        <div style={{ display: "flex" }}>
+            <MetaData title="House Blessing Form" />
+            <div style={{ display: "flex", backgroundColor: "#f9f9f9", width: "100%" }}>
                 <GuestSidebar />
-            </Col>
-            <Col md={9}>
-                <Form onSubmit={handleSubmit}>
-                    <h4 className="mt-4">House Blessing Information</h4>
 
-                    <Form.Group>
-                        <Form.Label>Full Name</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.fullName}
-                            onChange={(e) => handleChange(e, 'fullName')}
-                        />
-                    </Form.Group>
+                <Col>
+                    <Form onSubmit={handleSubmit}>
+                        <h4 className="mt-4">House Blessing Information</h4>
 
-                    <Form.Group>
-                        <Form.Label>Contact Number</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.contactNumber}
-                            onChange={(e) => handleChange(e, 'contactNumber')}
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>House Blessing Date</Form.Label>
-                        <Form.Control
-                            type="date"
-                            value={formData.blessingDate}
-                            onChange={(e) => handleChange(e, 'blessingDate')}
-                        />
-                        <Form.Label>House Blessing Time (Format: 7:00AM)</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.blessingTime}
-                            onChange={(e) => handleChange(e, 'blessingTime')}
-                        />
-                    </Form.Group>
-
-
-                    {/* Address */}
-                    <h4 className="mt-4">Address</h4>
-
-                    {['BldgNameTower', 'LotBlockPhaseHouseNo', 'SubdivisionVillageZone', 'Street', 'District'].map((field) => (
-                        <Form.Group key={field}>
-                            <Form.Label>{field.charAt(0).toUpperCase() + field.slice(1)}</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={formData.address[field] || ''}
-                                onChange={(e) => handleChange(e, `address.${field}`)}
-                            />
-                        </Form.Group>
-                    ))}
-
-                    <Form.Group>
-                        <Form.Label>City</Form.Label>
-                        <Form.Select value={formData.address.city} onChange={handleCityChange}>
-                            <option value="">Select a city</option>
-                            {cities.map((city, index) => (
-                                <option key={index} value={city}>
-                                    {city}
-                                </option>
-                            ))}
-                        </Form.Select>
-                    </Form.Group>
-
-                     {/* Custom City Input */}
-                     {formData.address.city === 'Others' && (
                         <Form.Group>
-                            <Form.Label>Add City</Form.Label>
+                            <Form.Label>Full Name</Form.Label>
                             <Form.Control
                                 type="text"
-                                value={customCity}
-                                onChange={(e) => setCustomCity(e.target.value)}
+                                value={formData.fullName}
+                                onChange={(e) => handleChange(e, 'fullName')}
                             />
                         </Form.Group>
-                    )}
 
-
-                    {/* Barangay Dropdown */}
-                    <Form.Group>
-                        <Form.Label>Barangay</Form.Label>
-                        <Form.Select value={formData.address.baranggay} onChange={handleBarangayChange}>
-                            <option value="">Select a barangay</option>
-                            {barangays.map((barangay, index) => (
-                                <option key={index} value={barangay}>
-                                    {barangay}
-                                </option>
-                            ))}
-                        </Form.Select>
-                    </Form.Group>
-
-                    {/* Custom Barangay Input */}
-                    {formData.address.baranggay === 'Others' && (
                         <Form.Group>
-                            <Form.Label>Add Barangay</Form.Label>
+                            <Form.Label>Contact Number</Form.Label>
                             <Form.Control
                                 type="text"
-                                value={customBarangay}
-                                onChange={(e) => setCustomBarangay(e.target.value)}
+                                value={formData.contactNumber}
+                                onChange={(e) => handleChange(e, 'contactNumber')}
                             />
                         </Form.Group>
-                    )}
+
+                        <Form.Group>
+                            <Form.Label>House Blessing Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={formData.blessingDate}
+                                onChange={(e) => handleChange(e, 'blessingDate')}
+                            />
+                            <Form.Label>House Blessing Time (Format: 7:00AM)</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.blessingTime}
+                                onChange={(e) => handleChange(e, 'blessingTime')}
+                            />
+                        </Form.Group>
 
 
-                    <div className="d-flex justify-content-end mt-4">
-                        <Button variant="secondary" className="me-2" onClick={handleClear}>
-                            Clear All Fields
-                        </Button>
-                        <Button variant="primary" type="submit">
-                            Submit
-                        </Button>
-                    </div>
-                </Form>
-            </Col>
-        </Row>
+                        {/* Address */}
+                        <h4 className="mt-4">Address</h4>
+
+                        {['BldgNameTower', 'LotBlockPhaseHouseNo', 'SubdivisionVillageZone', 'Street', 'District'].map((field) => (
+                            <Form.Group key={field}>
+                                <Form.Label>{field.charAt(0).toUpperCase() + field.slice(1)}</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={formData.address[field] || ''}
+                                    onChange={(e) => handleChange(e, `address.${field}`)}
+                                />
+                            </Form.Group>
+                        ))}
+
+                        <Form.Group>
+                            <Form.Label>City</Form.Label>
+                            <Form.Select value={formData.address.city} onChange={handleCityChange}>
+                                <option value="">Select a city</option>
+                                {cities.map((city, index) => (
+                                    <option key={index} value={city}>
+                                        {city}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+
+                        {/* Custom City Input */}
+                        {formData.address.city === 'Others' && (
+                            <Form.Group>
+                                <Form.Label>Add City</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={customCity}
+                                    onChange={(e) => setCustomCity(e.target.value)}
+                                />
+                            </Form.Group>
+                        )}
+
+
+                        {/* Barangay Dropdown */}
+                        <Form.Group>
+                            <Form.Label>Barangay</Form.Label>
+                            <Form.Select value={formData.address.baranggay} onChange={handleBarangayChange}>
+                                <option value="">Select a barangay</option>
+                                {barangays.map((barangay, index) => (
+                                    <option key={index} value={barangay}>
+                                        {barangay}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+
+                        {/* Custom Barangay Input */}
+                        {formData.address.baranggay === 'Others' && (
+                            <Form.Group>
+                                <Form.Label>Add Barangay</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={customBarangay}
+                                    onChange={(e) => setCustomBarangay(e.target.value)}
+                                />
+                            </Form.Group>
+                        )}
+
+
+                        <div className="d-flex justify-content-end mt-4">
+                            <Button variant="secondary" className="me-2" onClick={handleClear}>
+                                Clear All Fields
+                            </Button>
+                            <Button variant="primary" type="submit">
+                                Submit
+                            </Button>
+                        </div>
+                    </Form>
+                </Col>
+            </div>
+        </div>
     );
 };
 

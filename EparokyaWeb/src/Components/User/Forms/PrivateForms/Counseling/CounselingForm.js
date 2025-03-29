@@ -4,6 +4,7 @@ import GuestSidebar from '../../../../GuestSideBar';
 import './counselingLayouts/counselingForm.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import MetaData from '../../../../Layout/MetaData';
 
 const CounselingForm = () => {
     const [formData, setFormData] = useState({
@@ -212,66 +213,67 @@ const CounselingForm = () => {
     };
 
     return (
-        <div className="counselingForm-container">
-            <div className="counselingForm-sidebar">
+        <div style={{ display: "flex" }}>
+            <MetaData title="Counseling Form" />
+            <div style={{ display: "flex", backgroundColor: "#f9f9f9", width: "100%" }}>
                 <GuestSidebar />
-            </div>
-            <div className="counselingForm-content">
-                <Form onSubmit={handleSubmit}>
-                    <h4 className="mt-4">Personal Information</h4>
-                    <Form.Group>
-                        <Form.Label>Buong Pangalan</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.person.fullName}
-                            onChange={(e) => handleChange(e, 'person.fullName')}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Araw ng Kapanganakan</Form.Label>
-                        <Form.Control
-                            type="date"
-                            value={formData.person.dateOfBirth}
-                            onChange={(e) => handleChange(e, 'person.dateOfBirth')}
-                        />
-                    </Form.Group>
 
-                    <h4 className="mt-4">Counseling Details</h4>
-                    <Form.Group>
-                        <Form.Label>Purpose</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.purpose}
-                            onChange={(e) => handleChange(e, 'purpose')}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Contact Number</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.contactNumber}
-                            onChange={(e) => handleChange(e, 'contactNumber')}
-                        />
-                    </Form.Group>
+                <div style={{ marginLeft: "20px", padding: "20px", width: "calc(100% - 270px)" }}>
+                    <Form onSubmit={handleSubmit}>
+                        <h4 className="mt-4">Personal Information</h4>
+                        <Form.Group>
+                            <Form.Label>Buong Pangalan</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.person.fullName}
+                                onChange={(e) => handleChange(e, 'person.fullName')}
+                            />
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Label>Araw ng Kapanganakan</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={formData.person.dateOfBirth}
+                                onChange={(e) => handleChange(e, 'person.dateOfBirth')}
+                            />
+                        </Form.Group>
 
-                    <h4 className="mt-4">Contact Person</h4>
-                    <Form.Group>
-                        <Form.Label>Buong Pangalan</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.contactPerson.fullName}
-                            onChange={(e) => handleChange(e, 'contactPerson.fullName')}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Contact Number</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.contactPerson.contactNumber}
-                            onChange={(e) => handleChange(e, 'contactPerson.contactNumber')}
-                        />
-                    </Form.Group>
-                    {/* <Form.Group>
+                        <h4 className="mt-4">Counseling Details</h4>
+                        <Form.Group>
+                            <Form.Label>Purpose</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.purpose}
+                                onChange={(e) => handleChange(e, 'purpose')}
+                            />
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Label>Contact Number</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.contactNumber}
+                                onChange={(e) => handleChange(e, 'contactNumber')}
+                            />
+                        </Form.Group>
+
+                        <h4 className="mt-4">Contact Person</h4>
+                        <Form.Group>
+                            <Form.Label>Buong Pangalan</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.contactPerson.fullName}
+                                onChange={(e) => handleChange(e, 'contactPerson.fullName')}
+                            />
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Label>Contact Number</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.contactPerson.contactNumber}
+                                onChange={(e) => handleChange(e, 'contactPerson.contactNumber')}
+                            />
+                        </Form.Group>
+                        {/* <Form.Group>
                         <Form.Label>Relationship</Form.Label>
                         <Form.Control
                             type="text"
@@ -280,158 +282,159 @@ const CounselingForm = () => {
                         />
                     </Form.Group> */}
 
-                    <Form.Group controlId="relationship">
-                        <Form.Label>Relationship</Form.Label>
-                        <Form.Select
-                            value={formData.contactPerson.relationship}
-                            onChange={(e) => handleChange(e, 'contactPerson.relationship')}
-                            required
-                        >
-                            <option value="">Select</option>
-                            <option value="Mother/Nanay">Mother/Nanay</option>
-                            <option value="Father/Tatay">Father/Tatay</option>
-                            <option value="Sibling/Kapatid">Sibling/Kapatid</option>
-                            <option value="Child/Anak">Child/Anak</option>
-                            <option value="Spouse/Asawa">Spouse/Asawa</option>
-                            <option value="Stepparent">Stepparent</option>
-                            <option value="Stepchild">Stepchild</option>
-                            <option value="In-law">In-law</option>
-                            <option value="Godparent">Godparent</option>
-                            <option value="Godchild">Godchild</option>
-                            <option value="Relative/Kamag-anak">Relative/Kamag-anak</option>
-                            <option value="Guardian">Guardian</option>
-                            <option value="Friend/Kaibigan">Friend/Kaibigan</option>
+                        <Form.Group controlId="relationship">
+                            <Form.Label>Relationship</Form.Label>
+                            <Form.Select
+                                value={formData.contactPerson.relationship}
+                                onChange={(e) => handleChange(e, 'contactPerson.relationship')}
+                                required
+                            >
+                                <option value="">Select</option>
+                                <option value="Mother/Nanay">Mother/Nanay</option>
+                                <option value="Father/Tatay">Father/Tatay</option>
+                                <option value="Sibling/Kapatid">Sibling/Kapatid</option>
+                                <option value="Child/Anak">Child/Anak</option>
+                                <option value="Spouse/Asawa">Spouse/Asawa</option>
+                                <option value="Stepparent">Stepparent</option>
+                                <option value="Stepchild">Stepchild</option>
+                                <option value="In-law">In-law</option>
+                                <option value="Godparent">Godparent</option>
+                                <option value="Godchild">Godchild</option>
+                                <option value="Relative/Kamag-anak">Relative/Kamag-anak</option>
+                                <option value="Guardian">Guardian</option>
+                                <option value="Friend/Kaibigan">Friend/Kaibigan</option>
 
-                        </Form.Select>
-                    </Form.Group>
+                            </Form.Select>
+                        </Form.Group>
 
-                    <h4 className="mt-4">Tirahan</h4>
-                    <Form.Group>
-                        <Form.Label>Building Name/Tower</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.address.BldgNameTower}
-                            onChange={(e) => handleChange(e, 'address.BldgNameTower')}
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Lot/Block/Phase/House No.</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.address.LotBlockPhaseHouseNo}
-                            onChange={(e) => handleChange(e, 'address.LotBlockPhaseHouseNo')}
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Subdivision/Village/Zone</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.address.SubdivisionVillageZone}
-                            onChange={(e) => handleChange(e, 'address.SubdivisionVillageZone')}
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Street</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.address.Street}
-                            onChange={(e) => handleChange(e, 'address.Street')}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Barangay</Form.Label>
-                        <Form.Control
-                            as="select"
-                            value={formData.address.barangay}
-                            onChange={(e) => handleBarangayChange(e, 'address.barangay')}
-                            required
-                        >
-                            {barangays.map((barangay, index) => (
-                                <option key={index} value={barangay}>{barangay}</option>
-                            ))}
-                        </Form.Control>
-                    </Form.Group>
-
-                    {formData.address.barangay === 'Others' && (
+                        <h4 className="mt-4">Tirahan</h4>
                         <Form.Group>
-                            <Form.Label>Specify Barangay</Form.Label>
+                            <Form.Label>Building Name/Tower</Form.Label>
                             <Form.Control
                                 type="text"
-                                value={customBarangay}
-                                onChange={(e) => setCustomBarangay(e.target.value)}
+                                value={formData.address.BldgNameTower}
+                                onChange={(e) => handleChange(e, 'address.BldgNameTower')}
+                            />
+                        </Form.Group>
+
+                        <Form.Group>
+                            <Form.Label>Lot/Block/Phase/House No.</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.address.LotBlockPhaseHouseNo}
+                                onChange={(e) => handleChange(e, 'address.LotBlockPhaseHouseNo')}
+                            />
+                        </Form.Group>
+
+                        <Form.Group>
+                            <Form.Label>Subdivision/Village/Zone</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.address.SubdivisionVillageZone}
+                                onChange={(e) => handleChange(e, 'address.SubdivisionVillageZone')}
+                            />
+                        </Form.Group>
+
+                        <Form.Group>
+                            <Form.Label>Street</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.address.Street}
+                                onChange={(e) => handleChange(e, 'address.Street')}
                                 required
                             />
                         </Form.Group>
-                    )}
 
-                    <Form.Group>
-                        <Form.Label>District</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={formData.address.District}
-                            onChange={(e) => handleChange(e, 'address.District')}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>City</Form.Label>
-                        <Form.Control
-                            as="select"
-                            value={formData.address.city}
-                            onChange={(e) => handleCityChange(e, 'address.city')}
-                            required
-                        >
-                            {cities.map((city, index) => (
-                                <option key={index} value={city}>{city}</option>
-                            ))}
-                        </Form.Control>
-                    </Form.Group>
-
-                    {formData.address.city === 'Others' && (
                         <Form.Group>
-                            <Form.Label>Specify City</Form.Label>
+                            <Form.Label>Barangay</Form.Label>
+                            <Form.Control
+                                as="select"
+                                value={formData.address.barangay}
+                                onChange={(e) => handleBarangayChange(e, 'address.barangay')}
+                                required
+                            >
+                                {barangays.map((barangay, index) => (
+                                    <option key={index} value={barangay}>{barangay}</option>
+                                ))}
+                            </Form.Control>
+                        </Form.Group>
+
+                        {formData.address.barangay === 'Others' && (
+                            <Form.Group>
+                                <Form.Label>Specify Barangay</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={customBarangay}
+                                    onChange={(e) => setCustomBarangay(e.target.value)}
+                                    required
+                                />
+                            </Form.Group>
+                        )}
+
+                        <Form.Group>
+                            <Form.Label>District</Form.Label>
                             <Form.Control
                                 type="text"
-                                value={customCity}
-                                onChange={(e) => setCustomCity(e.target.value)}
+                                value={formData.address.District}
+                                onChange={(e) => handleChange(e, 'address.District')}
                                 required
                             />
                         </Form.Group>
-                    )}
 
-                    <h4 className="mt-4">Schedule</h4>
-                    <Form.Group>
-                        <Form.Label>Araw</Form.Label>
-                        <Form.Control
-                            type="date"
-                            value={formData.counselingDate}
-                            onChange={(e) => handleChange(e, 'counselingDate')}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Oras</Form.Label>
-                        <Form.Control
-                            type="time"
-                            value={formData.counselingTime}
-                            onChange={(e) => handleChange(e, 'counselingTime')}
-                        />
-                    </Form.Group>
+                        <Form.Group>
+                            <Form.Label>City</Form.Label>
+                            <Form.Control
+                                as="select"
+                                value={formData.address.city}
+                                onChange={(e) => handleCityChange(e, 'address.city')}
+                                required
+                            >
+                                {cities.map((city, index) => (
+                                    <option key={index} value={city}>{city}</option>
+                                ))}
+                            </Form.Control>
+                        </Form.Group>
 
-                    <div className="d-flex justify-content-end mt-4">
-                        <Button variant="secondary" className="me-2" onClick={handleClear}>
-                            Clear All Fields
-                        </Button>
-                        <Button variant="primary" type="submit">
-                            Submit
-                        </Button>
-                    </div>
-                </Form>
+                        {formData.address.city === 'Others' && (
+                            <Form.Group>
+                                <Form.Label>Specify City</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={customCity}
+                                    onChange={(e) => setCustomCity(e.target.value)}
+                                    required
+                                />
+                            </Form.Group>
+                        )}
+
+                        <h4 className="mt-4">Schedule</h4>
+                        <Form.Group>
+                            <Form.Label>Araw</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={formData.counselingDate}
+                                onChange={(e) => handleChange(e, 'counselingDate')}
+                            />
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Label>Oras</Form.Label>
+                            <Form.Control
+                                type="time"
+                                value={formData.counselingTime}
+                                onChange={(e) => handleChange(e, 'counselingTime')}
+                            />
+                        </Form.Group>
+
+                        <div className="d-flex justify-content-end mt-4">
+                            <Button variant="secondary" className="me-2" onClick={handleClear}>
+                                Clear All Fields
+                            </Button>
+                            <Button variant="primary" type="submit">
+                                Submit
+                            </Button>
+                        </div>
+                    </Form>
+                </div>
             </div>
         </div>
     );

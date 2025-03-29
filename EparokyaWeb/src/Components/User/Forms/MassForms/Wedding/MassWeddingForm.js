@@ -3,6 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 import GuestSidebar from '../../../../GuestSideBar';
+import MetaData from '../../../../Layout/MetaData';
 
 const MassWeddingForm = () => {
     const [formData, setFormData] = useState({
@@ -229,386 +230,389 @@ const MassWeddingForm = () => {
     };
 
     return (
-        <div className="weddingForm-container mt-4">
-            <div className="weddingForm-sidebar">
+        <div style={{ display: "flex" }}>
+            <MetaData title="Mass Wedding Form" />
+            <div style={{ display: "flex", backgroundColor: "#f9f9f9", width: "100%" }}>
                 <GuestSidebar />
+
+                <div style={{marginLeft: "20px", padding: "20px", width: "calc(100% - 270px)"}}>
+                    <form onSubmit={handleSubmit} encType="multipart/form-data" style={{ paddingLeft: "30px" }}>
+                        <h2>Wedding Form</h2>
+                        {/* Wedding Date & Time */}
+                        <Form.Group>
+                            <Form.Label>Wedding Date and Time</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={
+                                    formData.weddingDateTime
+                                        ? `${new Date(formData.weddingDateTime).toLocaleDateString()} - ${new Date(formData.weddingDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                                        : ""
+                                }
+                                disabled
+                            />
+                        </Form.Group>
+                        {/* Groom's Information */}
+                        <fieldset className="form-group">
+                            <legend>Groom's Info</legend>
+
+                            <Form.Group>
+                                <Form.Label>Full Name</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="groomName"
+                                    value={formData.groomName}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Address</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Street"
+                                    value={formData.groomAddress.street}
+                                    onChange={(e) => handleNestedChange(e, "groomAddress", null, "street")}
+                                />
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Zip"
+                                    value={formData.groomAddress.zip}
+                                    onChange={(e) => handleNestedChange(e, "groomAddress", null, "zip")}
+                                />
+                                <Form.Control
+                                    type="text"
+                                    placeholder="City"
+                                    value={formData.groomAddress.city}
+                                    onChange={(e) => handleNestedChange(e, "groomAddress", null, "city")}
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Phone Number</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="groomPhone"
+                                    value={formData.groomPhone}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Birthday</Form.Label>
+                                <Form.Control
+                                    type="date"
+                                    name="groomBirthDate"
+                                    value={formData.groomBirthDate}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Occupation</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="groomOccupation"
+                                    value={formData.groomOccupation}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Religion</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="groomReligion"
+                                    value={formData.groomReligion}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Father</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="GroomFather"
+                                    value={formData.GroomFather}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Mother</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="GroomMother"
+                                    value={formData.GroomMother}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+                        </fieldset>
+
+                        {/* Bride's Information */}
+                        <fieldset className="form-group">
+                            <legend>Bride's Info</legend>
+
+                            <Form.Group>
+                                <Form.Label>Full Name</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="brideName"
+                                    value={formData.brideName}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Address</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Street"
+                                    value={formData.brideAddress.street}
+                                    onChange={(e) => handleNestedChange(e, "brideAddress", null, "street")}
+                                />
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Zip"
+                                    value={formData.brideAddress.zip}
+                                    onChange={(e) => handleNestedChange(e, "brideAddress", null, "zip")}
+                                />
+                                <Form.Control
+                                    type="text"
+                                    placeholder="City"
+                                    value={formData.brideAddress.city}
+                                    onChange={(e) => handleNestedChange(e, "brideAddress", null, "city")}
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Phone Number</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="bridePhone"
+                                    value={formData.bridePhone}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Birthday</Form.Label>
+                                <Form.Control
+                                    type="date"
+                                    name="brideBirthDate"
+                                    value={formData.brideBirthDate}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Occupation</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="brideOccupation"
+                                    value={formData.brideOccupation}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Religion</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="brideReligion"
+                                    value={formData.brideReligion}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Father</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="BrideFather"
+                                    value={formData.BrideFather}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group>
+                                <Form.Label>Mother</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="BrideMother"
+                                    value={formData.BrideMother}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+                        </fieldset>
+
+                        {/* Ninong Section */}
+                        <fieldset className="form-group">
+                            <legend>Ninong</legend>
+                            {formData.Ninong.map((ninong, index) => (
+                                <div key={index}>
+                                    <Form.Group>
+                                        <Form.Label>Full Name</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Full Name"
+                                            value={ninong.name}
+                                            onChange={(e) => handleNestedChange(e, "Ninong", index)}
+                                            required
+                                        />
+                                    </Form.Group>
+                                    <Form.Group>
+                                        <Form.Label>Address</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Street"
+                                            value={ninong.address.street}
+                                            onChange={(e) => handleNestedChange(e, "Ninong", index, "street")}
+                                            required
+                                        />
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Zip"
+                                            value={ninong.address.zip}
+                                            onChange={(e) => handleNestedChange(e, "Ninong", index, "zip")}
+                                            required
+                                        />
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="City"
+                                            value={ninong.address.city}
+                                            onChange={(e) => handleNestedChange(e, "Ninong", index, "city")}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </div>
+                            ))}
+                            <button type="button" onClick={addNinong}>Add Ninong</button>
+                        </fieldset>
+
+                        {/* Ninang Section */}
+                        <fieldset className="form-group">
+                            <legend>Ninang</legend>
+                            {formData.Ninang.map((ninang, index) => (
+                                <div key={index}>
+                                    <Form.Group>
+                                        <Form.Label>Full Name</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Full Name"
+                                            value={ninang.name}
+                                            onChange={(e) => handleNestedChange(e, "Ninang", index)}
+                                            required
+                                        />
+                                    </Form.Group>
+                                    <Form.Group>
+                                        <Form.Label>Address</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Street"
+                                            value={ninang.address.street}
+                                            onChange={(e) => handleNestedChange(e, "Ninang", index, "street")}
+                                            required
+                                        />
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Zip"
+                                            value={ninang.address.zip}
+                                            onChange={(e) => handleNestedChange(e, "Ninang", index, "zip")}
+                                            required
+                                        />
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="City"
+                                            value={ninang.address.city}
+                                            onChange={(e) => handleNestedChange(e, "Ninang", index, "city")}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </div>
+                            ))}
+                            <button type="button" onClick={addNinang}>Add Ninang</button>
+                        </fieldset>
+
+                        {/* File Uploads */}
+                        <fieldset className="form-group">
+                            <legend>Upload Documents</legend>
+                            <Form.Group>
+                                <Form.Label>Groom's Baptismal Certificate</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    name="GroomNewBaptismalCertificate"
+                                    onChange={handleFileChange}
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Groom's Confirmation Certificate</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    name="GroomNewConfirmationCertificate"
+                                    onChange={handleFileChange}
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Groom's Marriage License</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    name="GroomMarriageLicense"
+                                    onChange={handleFileChange}
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Bride's Baptismal Certificate</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    name="BrideNewBaptismalCertificate"
+                                    onChange={handleFileChange}
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Bride's Confirmation Certificate</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    name="BrideNewConfirmationCertificate"
+                                    onChange={handleFileChange}
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Bride's Marriage License</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    name="BrideMarriageLicense"
+                                    onChange={handleFileChange}
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Child's Birth Certificate</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    name="ChildBirthCertificate"
+                                    onChange={handleFileChange}
+                                />
+                            </Form.Group>
+                        </fieldset>
+
+                        <button type="submit">Submit</button>
+                        <button type="button" onClick={handleClearFields}>Clear All Fields</button>
+                    </form>
+                </div>
             </div>
-            
-            <form onSubmit={handleSubmit} encType="multipart/form-data">
-                <h2>Wedding Form</h2>
-                {/* Wedding Date & Time */}
-                <Form.Group>
-                    <Form.Label>Wedding Date and Time</Form.Label>
-                    <Form.Control
-                        type="text"
-                        value={
-                            formData.weddingDateTime
-                                ? `${new Date(formData.weddingDateTime).toLocaleDateString()} - ${new Date(formData.weddingDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                                : ""
-                        }
-                        disabled
-                    />
-                </Form.Group>
-                {/* Groom's Information */}
-                <fieldset className="form-group">
-                    <legend>Groom's Info</legend>
-
-                    <Form.Group>
-                        <Form.Label>Full Name</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="groomName"
-                            value={formData.groomName}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Address</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Street"
-                            value={formData.groomAddress.street}
-                            onChange={(e) => handleNestedChange(e, "groomAddress", null, "street")}
-                        />
-                        <Form.Control
-                            type="text"
-                            placeholder="Zip"
-                            value={formData.groomAddress.zip}
-                            onChange={(e) => handleNestedChange(e, "groomAddress", null, "zip")}
-                        />
-                        <Form.Control
-                            type="text"
-                            placeholder="City"
-                            value={formData.groomAddress.city}
-                            onChange={(e) => handleNestedChange(e, "groomAddress", null, "city")}
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Phone Number</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="groomPhone"
-                            value={formData.groomPhone}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Birthday</Form.Label>
-                        <Form.Control
-                            type="date"
-                            name="groomBirthDate"
-                            value={formData.groomBirthDate}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Occupation</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="groomOccupation"
-                            value={formData.groomOccupation}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Religion</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="groomReligion"
-                            value={formData.groomReligion}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Father</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="GroomFather"
-                            value={formData.GroomFather}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Mother</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="GroomMother"
-                            value={formData.GroomMother}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-                </fieldset>
-
-                {/* Bride's Information */}
-                <fieldset className="form-group">
-                    <legend>Bride's Info</legend>
-
-                    <Form.Group>
-                        <Form.Label>Full Name</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="brideName"
-                            value={formData.brideName}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Address</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Street"
-                            value={formData.brideAddress.street}
-                            onChange={(e) => handleNestedChange(e, "brideAddress", null, "street")}
-                        />
-                        <Form.Control
-                            type="text"
-                            placeholder="Zip"
-                            value={formData.brideAddress.zip}
-                            onChange={(e) => handleNestedChange(e, "brideAddress", null, "zip")}
-                        />
-                        <Form.Control
-                            type="text"
-                            placeholder="City"
-                            value={formData.brideAddress.city}
-                            onChange={(e) => handleNestedChange(e, "brideAddress", null, "city")}
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Phone Number</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="bridePhone"
-                            value={formData.bridePhone}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Birthday</Form.Label>
-                        <Form.Control
-                            type="date"
-                            name="brideBirthDate"
-                            value={formData.brideBirthDate}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Occupation</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="brideOccupation"
-                            value={formData.brideOccupation}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Religion</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="brideReligion"
-                            value={formData.brideReligion}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Father</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="BrideFather"
-                            value={formData.BrideFather}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group>
-                        <Form.Label>Mother</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="BrideMother"
-                            value={formData.BrideMother}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-                </fieldset>
-
-                {/* Ninong Section */}
-                <fieldset className="form-group">
-                    <legend>Ninong</legend>
-                    {formData.Ninong.map((ninong, index) => (
-                        <div key={index}>
-                            <Form.Group>
-                                <Form.Label>Full Name</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Full Name"
-                                    value={ninong.name}
-                                    onChange={(e) => handleNestedChange(e, "Ninong", index)}
-                                    required
-                                />
-                            </Form.Group>
-                            <Form.Group>
-                                <Form.Label>Address</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Street"
-                                    value={ninong.address.street}
-                                    onChange={(e) => handleNestedChange(e, "Ninong", index, "street")}
-                                    required
-                                />
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Zip"
-                                    value={ninong.address.zip}
-                                    onChange={(e) => handleNestedChange(e, "Ninong", index, "zip")}
-                                    required
-                                />
-                                <Form.Control
-                                    type="text"
-                                    placeholder="City"
-                                    value={ninong.address.city}
-                                    onChange={(e) => handleNestedChange(e, "Ninong", index, "city")}
-                                    required
-                                />
-                            </Form.Group>
-                        </div>
-                    ))}
-                    <button type="button" onClick={addNinong}>Add Ninong</button>
-                </fieldset>
-
-                {/* Ninang Section */}
-                <fieldset className="form-group">
-                    <legend>Ninang</legend>
-                    {formData.Ninang.map((ninang, index) => (
-                        <div key={index}>
-                            <Form.Group>
-                                <Form.Label>Full Name</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Full Name"
-                                    value={ninang.name}
-                                    onChange={(e) => handleNestedChange(e, "Ninang", index)}
-                                    required
-                                />
-                            </Form.Group>
-                            <Form.Group>
-                                <Form.Label>Address</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Street"
-                                    value={ninang.address.street}
-                                    onChange={(e) => handleNestedChange(e, "Ninang", index, "street")}
-                                    required
-                                />
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Zip"
-                                    value={ninang.address.zip}
-                                    onChange={(e) => handleNestedChange(e, "Ninang", index, "zip")}
-                                    required
-                                />
-                                <Form.Control
-                                    type="text"
-                                    placeholder="City"
-                                    value={ninang.address.city}
-                                    onChange={(e) => handleNestedChange(e, "Ninang", index, "city")}
-                                    required
-                                />
-                            </Form.Group>
-                        </div>
-                    ))}
-                    <button type="button" onClick={addNinang}>Add Ninang</button>
-                </fieldset>
-
-                {/* File Uploads */}
-                <fieldset className="form-group">
-                    <legend>Upload Documents</legend>
-                    <Form.Group>
-                        <Form.Label>Groom's Baptismal Certificate</Form.Label>
-                        <Form.Control
-                            type="file"
-                            name="GroomNewBaptismalCertificate"
-                            onChange={handleFileChange}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Groom's Confirmation Certificate</Form.Label>
-                        <Form.Control
-                            type="file"
-                            name="GroomNewConfirmationCertificate"
-                            onChange={handleFileChange}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Groom's Marriage License</Form.Label>
-                        <Form.Control
-                            type="file"
-                            name="GroomMarriageLicense"
-                            onChange={handleFileChange}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Bride's Baptismal Certificate</Form.Label>
-                        <Form.Control
-                            type="file"
-                            name="BrideNewBaptismalCertificate"
-                            onChange={handleFileChange}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Bride's Confirmation Certificate</Form.Label>
-                        <Form.Control
-                            type="file"
-                            name="BrideNewConfirmationCertificate"
-                            onChange={handleFileChange}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Bride's Marriage License</Form.Label>
-                        <Form.Control
-                            type="file"
-                            name="BrideMarriageLicense"
-                            onChange={handleFileChange}
-                        />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Child's Birth Certificate</Form.Label>
-                        <Form.Control
-                            type="file"
-                            name="ChildBirthCertificate"
-                            onChange={handleFileChange}
-                        />
-                    </Form.Group>
-                </fieldset>
-
-                <button type="submit">Submit</button>
-                <button type="button" onClick={handleClearFields}>Clear All Fields</button>
-            </form>
         </div>
     );
 

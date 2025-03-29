@@ -19,8 +19,9 @@ import { setTheme } from "./State/preferenceSlice";
 import { PersistGate } from 'redux-persist/integration/react';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
-
-
+import { socket } from './socket';
+import { registerForPushNotificationsAsync, setupNotificationListener } from './service/notification';
+import { useEffect } from 'react';
 
 const theme = extendTheme({ colors: newColorTheme });
 const newColorTheme = {
@@ -34,6 +35,18 @@ const newColorTheme = {
 
 
 export default function App() {
+  useEffect(() => {
+    // Get Push Notification Token and Register with Socket.IO
+    registerForPushNotificationsAsync().then((token) => {
+      if (token) {
+        socket.emit("register_push_token", { token });
+      }
+    });
+
+    // Setup Push Notification Listener
+    setupNotificationListener();
+  }, []);
+
   return (
 
     <Provider store={store}>

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Eparokya",
+    "slug": "Eparokya",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,6 +13,19 @@
     },
     "assetBundlePatterns": [
       "*/"
+    ],
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "mode": "production",
+          "ios": {
+            "allowAlert": true,
+            "allowSound": true,
+            "allowBadge": true
+          }
+        }
+      ]
     ],
     "ios": {
       "supportsTablet": true

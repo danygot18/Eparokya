@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import GuestSideBar from '../../GuestSideBar';
 import "./SubmittedFormsNavigation.css";
 
+
 const SubmittedFormsNavigation = () => {
     const formCategories = [
         {
@@ -27,30 +28,31 @@ const SubmittedFormsNavigation = () => {
     ];
 
     return (
-        <div className="forms-container">
+        <div style={{ display: "flex" }}>
             {/* Sidebar */}
-            <div className="forms-sidebar">
+            <div style={{ display: "flex", backgroundColor: "#f9f9f9", width: "100%" }}>
                 <GuestSideBar />
-            </div>
 
-            {/* Main Content */}
-            <div className="forms-content">
-                <div className="forms-box">
-                    <h2 className="forms-title">Submitted Forms</h2>
-                    {formCategories.map((category, index) => (
-                        <div key={index} className="forms-category">
-                            <h3>{category.title}</h3>
-                            <div className="forms-list">
-                                {category.forms.map((form, formIndex) => (
-                                    <Link key={formIndex} to={form.path} className="form-card">
-                                        {form.name}
-                                    </Link>
-                                ))}
+                {/* Main Content */}
+                <div className="forms-content">
+                    <div className="forms-box">
+                        <h2 className="forms-title">Submitted Forms</h2>
+                        {formCategories.map((category, index) => (
+                            <div key={index} className="forms-category">
+                                <h3>{category.title}</h3>
+                                <div className="forms-list">
+                                    {category.forms.map((form, formIndex) => (
+                                        <Link key={formIndex} to={form.path} className="form-card" style={{ textDecoration: 'none', color: 'green' }}>
+                                            {form.name}
+                                        </Link>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
+
         </div>
 
     );

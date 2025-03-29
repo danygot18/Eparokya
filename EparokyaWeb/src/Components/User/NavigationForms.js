@@ -54,6 +54,7 @@ const NavigationForm = () => {
                                                 to={form.path}
                                                 variant="contained"
                                                 fullWidth
+                                                color="success"
                                             >
                                                 Go to {form.name}
                                             </Button>

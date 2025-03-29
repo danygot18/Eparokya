@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaCalendarAlt, FaPray, FaBook, FaCog, FaRegFileAlt, FaWpforms } from 'react-icons/fa';
+import { FaHome, FaCalendarAlt, FaPray, FaBook, FaCog, FaRegFileAlt, FaWpforms, MdFeedback } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from "react-router-dom";
+import {
+  Modal, Box, Button, Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+
+} from '@mui/material';
+import CloseIcon from "@mui/icons-material/Close";
+import axios from 'axios';
+import RateReviewIcon from '@mui/icons-material/RateReview';
+import { ModalTitle } from 'react-bootstrap';
 
 const GuestSideBar = () => {
   // const [users, setUser] = useState({
@@ -10,6 +24,60 @@ const GuestSideBar = () => {
   // });
   const { user } = useSelector(state => state.auth);
   const location = useLocation();
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [activeFeedback, setActiveFeedback] = useState(null);
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    checkForActiveFeedbackForm();
+  }, []);
+
+  const checkForActiveFeedbackForm = async () => {
+
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/admin-selections/active`
+      );
+
+      console.log("API Response:", response.data);
+
+      if (response.data && response.data.isActive) {
+        setActiveFeedback(response.data);
+        console.log("Active feedback found:", response.data);
+
+        // TEMP FIX: Force show modal for debugging
+        console.log("Forcing modal to open...");
+
+      }
+    } catch (error) {
+      console.error("Error fetching active feedback form:", error);
+    }
+  };
+
+  const handleNavigateToSentiment = () => {
+    console.log("Navigating with activeFeedback:", activeFeedback);
+    if (activeFeedback) {
+      let path = "";
+      switch (activeFeedback.category) {
+        case "priest":
+          path = "/user/PriestSentiment";
+          break;
+        case "event":
+          path = "/user/EventSentiment";
+          break;
+        case "activity":
+          path = "/user/ActivitySentiment";
+          break;
+        default:
+          console.error("Invalid feedback category:", activeFeedback.category);
+          return;
+      }
+      navigate(path, { state: { activeFeedback } });
+    }
+  };
 
   // useEffect(() => {
   //   const fetchUserData = async (token) => {
@@ -143,7 +211,7 @@ const GuestSideBar = () => {
           </Link>
         </li>
 
-      
+
         <li style={styles.menuItem}>
           <Link
             to="/user/calendar"
@@ -192,6 +260,7 @@ const GuestSideBar = () => {
             <FaRegFileAlt style={styles.icon} /> Form Guide
           </Link>
         </li>
+
         {/* <li style={styles.menuItem}>
           <Link
             to="/user/live"
@@ -207,6 +276,57 @@ const GuestSideBar = () => {
       </ul>
 
       <ul style={styles.settingsList}>
+        <li style={styles.menuItem}>
+          <Button
+            color='success'
+            onClick={handleOpen}
+
+          > <RateReviewIcon style={styles.icon} />
+            Open Feedback
+          </Button>
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={styles.modal}>
+              <Typography id="modal-modal-title" variant="h6" component="h2" align='center' marginBottom={2} fontWeight="bold" color='success'>
+                Active Feedback Form
+              </Typography>
+              {activeFeedback ? (
+                <>
+                  <Typography style={styles.modalText}>
+                    <strong>Category:</strong> {activeFeedback.category || "N/A"}
+                  </Typography>
+                  <Typography style={styles.modalText}>
+                    <strong>Date:</strong> {activeFeedback.date || "N/A"}
+                  </Typography>
+                  <Typography style={styles.modalText}>
+                    <strong>Time:</strong> {activeFeedback.time || "N/A"}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<FaRegFileAlt />}
+                    onClick={handleNavigateToSentiment}
+                    sx={{
+                      mt: 2,
+                      px: 3,
+                      py: 1,
+                      fontWeight: "bold",
+                      textTransform: "none",
+                    }}
+                  >
+                    Go to Feedback Form
+                  </Button>
+                </>
+              ) : (
+                <Typography>No active feedback form available.</Typography>
+              )}
+            </Box>
+          </Modal>
+        </li>
         <li style={styles.menuItem}>
           <Link
             to="/settings"
@@ -237,6 +357,24 @@ const styles = {
     padding: '20px',
     boxSizing: 'border-box',
   },
+  modal: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    height: 350,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+  },
+  modalText: {
+    marginBottom: '10px', 
+
+  },
+
+
   profileContainer: {
     display: 'flex',
     flexDirection: 'column',
