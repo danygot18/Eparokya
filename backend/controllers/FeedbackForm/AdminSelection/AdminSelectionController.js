@@ -53,38 +53,79 @@ exports.getSelections = async (req, res) => {
   }
 };
 
+// exports.getActiveSelection = async (req, res) => {
+//   try {
+//     const activeSelection = await AdminSelection.findOne({ isActive: true });
+
+//     if (!activeSelection) {
+//       return res.status(404).json({ error: "No active selection found" });
+//     }
+
+//     console.log("Active selection category:", activeSelection.category);
+//     console.log("Available modelMap keys:", Object.keys(modelMap));
+
+//     const categoryKey = activeSelection.category === "priest"
+//       ? "Priest" 
+//       : activeSelection.category.charAt(0).toUpperCase() + activeSelection.category.slice(1) + "Type";
+
+//     console.log("Resolved categoryKey:", categoryKey); 
+
+//     const Model = modelMap[categoryKey];
+
+//     if (!Model) {
+//       console.error("Invalid category:", categoryKey);
+//       return res.status(500).json({ error: "Invalid typeModel" });
+//     }
+
+//     console.log("Fetching TypeId:", activeSelection.typeId);
+//     const populatedType = await Model.findById(activeSelection.typeId).select("name");
+
+//     if (!populatedType) {
+//       console.error("Invalid typeId:", activeSelection.typeId);
+//       return res.status(500).json({ error: "Type ID not found" });
+//     }
+
+//     res.json({ ...activeSelection.toObject(), typeId: populatedType });
+//   } catch (error) {
+//     console.error("Error fetching active selection:", error);
+//     res.status(500).json({ error: "Failed to fetch active selection" });
+//   }
+// };
+
+
 exports.getActiveSelection = async (req, res) => {
   try {
+    // Fetch the active selection
     const activeSelection = await AdminSelection.findOne({ isActive: true });
 
     if (!activeSelection) {
       return res.status(404).json({ error: "No active selection found" });
     }
 
-    console.log("Active selection category:", activeSelection.category);
-    console.log("Available modelMap keys:", Object.keys(modelMap));
-
-    const categoryKey = activeSelection.category === "priest"
-      ? "Priest" 
-      : activeSelection.category.charAt(0).toUpperCase() + activeSelection.category.slice(1) + "Type";
-
-    console.log("Resolved categoryKey:", categoryKey); 
-
+    // Resolve the category key for the model map
+    const categoryKey =
+  activeSelection.category === "priest"
+    ? "Priest"
+    : activeSelection.category === "activities"
+    ? "ActivityType"
+    : activeSelection.category.charAt(0).toUpperCase() + activeSelection.category.slice(1) + "Type";
+   
     const Model = modelMap[categoryKey];
 
     if (!Model) {
-      console.error("Invalid category:", categoryKey);
+      console.error(`Invalid category: ${categoryKey}`);
       return res.status(500).json({ error: "Invalid typeModel" });
     }
 
-    console.log("Fetching TypeId:", activeSelection.typeId);
+    // Populate the typeId field
     const populatedType = await Model.findById(activeSelection.typeId).select("name");
 
     if (!populatedType) {
-      console.error("Invalid typeId:", activeSelection.typeId);
+      console.error(`Type ID not found: ${activeSelection.typeId}`);
       return res.status(500).json({ error: "Type ID not found" });
     }
 
+    // Return the active selection with the populated typeId
     res.json({ ...activeSelection.toObject(), typeId: populatedType });
   } catch (error) {
     console.error("Error fetching active selection:", error);

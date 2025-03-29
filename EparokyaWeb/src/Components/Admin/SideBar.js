@@ -127,8 +127,18 @@ const SideBar = () => {
                   </Link>
                 </Dropdown.Item>
                 <Dropdown.Item>
-                  <Link to="/admin/SentimentResults" className="sidebar-link" style={styles.sidebarLink}>
-                    Sentiment Lists
+                  <Link to="/admin/EventSentimentList" className="sidebar-link" style={styles.sidebarLink}>
+                    Event Sentiment Lists
+                  </Link>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <Link to="/admin/ActivitySentimentList" className="sidebar-link" style={styles.sidebarLink}>
+                   Activity Sentiment Lists
+                  </Link>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <Link to="/admin/PriestSentimentList" className="sidebar-link" style={styles.sidebarLink}>
+                    Priest Sentiment Lists
                   </Link>
                 </Dropdown.Item>
               </Dropdown.Menu>

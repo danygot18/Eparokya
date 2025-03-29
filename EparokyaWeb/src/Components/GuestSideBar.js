@@ -68,8 +68,8 @@ const GuestSideBar = () => {
         case "event":
           path = "/user/EventSentiment";
           break;
-        case "activity":
-          path = "/user/ActivitySentiment";
+        case "activities":
+          path = "/user/ActivitySentiment"; 
           break;
         default:
           console.error("Invalid feedback category:", activeFeedback.category);

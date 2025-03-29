@@ -16,14 +16,19 @@ router.post(
     { name: 'GroomMarriageBans', maxCount: 1 },
     { name: 'GroomOrigCeNoMar', maxCount: 1 },
     { name: 'GroomOrigPSA', maxCount: 1 },
+    { name: 'GroomChildBirthCertificate', maxCount: 1 },
+    { name: 'GroomPermitFromtheParishOftheBride', maxCount: 1 },
+    { name: 'GroomOneByOne', maxCount: 1 },
+
     { name: 'BrideNewBaptismalCertificate', maxCount: 1 },
     { name: 'BrideNewConfirmationCertificate', maxCount: 1 },
     { name: 'BrideMarriageLicense', maxCount: 1 },
     { name: 'BrideMarriageBans', maxCount: 1 },
     { name: 'BrideOrigCeNoMar', maxCount: 1 },
     { name: 'BrideOrigPSA', maxCount: 1 },
-    { name: 'PermitFromtheParishOftheBride', maxCount: 1 },
-    { name: 'ChildBirthCertificate', maxCount: 1 } 
+    { name: 'BrideChildBirthCertificate', maxCount: 1 },
+    { name: 'BridePermitFromtheParishOftheBride', maxCount: 1 },
+    { name: 'BrideOneByOne', maxCount: 1 },
   ]),
   isAuthenticatedUser, WeddingFormController.submitWeddingForm
 );

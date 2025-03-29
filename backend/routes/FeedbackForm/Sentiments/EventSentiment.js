@@ -8,5 +8,5 @@ router.post("/analyzeEventSentiment", isAuthenticatedUser, eventSentimentControl
 router.get("/getAllEventSentiment", eventSentimentController.getAllSentiments);
 
 router.get("/sentimentEventType/:eventSentimentId", eventSentimentController.getSentimentsByEventType);
-
+router.get("/getEventSentimentById/:eventSentimentId", eventSentimentController.getSentimentById);
 module.exports = router;

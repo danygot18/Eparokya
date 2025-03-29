@@ -7,10 +7,10 @@ import SideBar from "../SideBar";
 import WeddingChecklist from "./WeddingChecklist";
 
 import { useParams, useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from 'react-toastify';
-import Modal from 'react-modal';
+import { toast, ToastContainer } from "react-toastify";
+import Modal from "react-modal";
 
-Modal.setAppElement('#root');
+Modal.setAppElement("#root");
 
 const WeddingDetails = () => {
   const { weddingId } = useParams();
@@ -26,8 +26,9 @@ const WeddingDetails = () => {
 
   const [newDate, setNewDate] = useState("");
   const [reason, setReason] = useState("");
-  const [updatedWeddingDate, setUpdatedWeddingDate] = useState(weddingDetails?.weddingDate || "");
-
+  const [updatedWeddingDate, setUpdatedWeddingDate] = useState(
+    weddingDetails?.weddingDate || ""
+  );
 
   const [preMarriageSeminarDate, setPreMarriageSeminarDate] = useState("");
   const [preMarriageSeminarTime, setPreMarriageSeminarTime] = useState("");
@@ -38,7 +39,6 @@ const WeddingDetails = () => {
   const [confessionDate, setConfessionDate] = useState("");
   const [confessionTime, setConfessionTime] = useState("");
 
-
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -48,6 +48,8 @@ const WeddingDetails = () => {
 
   const [comments, setComments] = useState([]);
 
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
@@ -59,14 +61,8 @@ const WeddingDetails = () => {
           `${process.env.REACT_APP_API}/api/v1/getWeddingById/${weddingId}`,
           { withCredentials: true }
         );
-
-        console.log("API Response:", response.data);
         setWeddingDetails(response.data);
-        setComments(response.data.comments || []);
-
-        if (response.data.weddingDate) {
-          setUpdatedWeddingDate(response.data.weddingDate);
-        }
+        setIsConfirmed(response.data.weddingStatus === "Confirmed");
       } catch (err) {
         console.error("API Error:", err);
         setError("Failed to fetch wedding details.");
@@ -77,7 +73,6 @@ const WeddingDetails = () => {
 
     fetchWeddingDetails();
   }, [weddingId]);
-
 
   const openModal = (image) => {
     setSelectedImage(image);
@@ -91,7 +86,6 @@ const WeddingDetails = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-
 
   const handleMouseDown = (e) => {
     e.preventDefault();
@@ -115,7 +109,7 @@ const WeddingDetails = () => {
     "Confirmed",
     "Pending Confirmation",
     "Rescheduled",
-    "Cancelled"
+    "Cancelled",
   ];
 
   const handleSubmitComment = async () => {
@@ -129,7 +123,7 @@ const WeddingDetails = () => {
       additionalComment: additionalComment || "",
     };
 
-    // console.log("Sending comment:", commentData); 
+    // console.log("Sending comment:", commentData);
 
     try {
       const response = await fetch(
@@ -145,7 +139,7 @@ const WeddingDetails = () => {
 
       const data = await response.json();
 
-      // console.log("Response from server:", data); 
+      // console.log("Response from server:", data);
 
       if (!response.ok) {
         throw new Error(data.message || "Failed to submit comment.");
@@ -189,22 +183,27 @@ const WeddingDetails = () => {
     }
   };
 
-
-  const handleConfirm = async (weddingId) => {
+  const handleConfirm = async () => {
     try {
-
+      setLoading(true);
       const response = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/${weddingId}/confirmWedding`,
-        { withCredentials: true },
-
+        { withCredentials: true }
       );
-      console.log("Confirmation response:", response.data);
       toast.success("Wedding confirmed successfully!", {
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 3000,
       });
+      setIsConfirmed(true);
+      setWeddingDetails((prevDetails) => ({
+        ...prevDetails,
+        weddingStatus: "Confirmed",
+      }));
     } catch (error) {
-      console.error("Error confirming wedding:", error.response || error.message);
+      console.error(
+        "Error confirming wedding:",
+        error.response || error.message
+      );
       toast.error(
         error.response?.data?.message || "Failed to confirm the wedding.",
         {
@@ -212,12 +211,17 @@ const WeddingDetails = () => {
           autoClose: 3000,
         }
       );
+    } finally {
+      setLoading(false);
+      setIsConfirmModalOpen(false);
     }
   };
 
   const handleCancel = async () => {
     if (!cancelReason.trim()) {
-      toast.error("Please provide a cancellation reason.", { position: toast.POSITION.TOP_RIGHT });
+      toast.error("Please provide a cancellation reason.", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
       return;
     }
     try {
@@ -227,12 +231,17 @@ const WeddingDetails = () => {
         { withCredentials: true }
       );
 
-      toast.success("Wedding cancelled successfully!", { position: toast.POSITION.TOP_RIGHT });
-      setShowCancelModal(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to cancel the wedding.", {
+      toast.success("Wedding cancelled successfully!", {
         position: toast.POSITION.TOP_RIGHT,
       });
+      setShowCancelModal(false);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to cancel the wedding.",
+        {
+          position: toast.POSITION.TOP_RIGHT,
+        }
+      );
     }
   };
 
@@ -259,9 +268,15 @@ const WeddingDetails = () => {
     }
   };
 
+  const openConfirmModal = () => {
+    setIsConfirmModalOpen(true);
+  };
+
+  const closeConfirmModal = () => {
+    setIsConfirmModalOpen(false);
+  };
 
   if (loading) return <div>Loading...</div>;
-
   if (error) return <div>Error: {error}</div>;
 
   return (
@@ -276,60 +291,180 @@ const WeddingDetails = () => {
             <div className="wedding-details-box">
               <h3>Wedding Details</h3>
               <div className="wedding-details-box">
-                <p><strong>Date of Application:</strong> {weddingDetails?.dateOfApplication ? new Date(weddingDetails.dateOfApplication).toLocaleDateString() : "N/A"}</p>
-                <p><strong>Wedding Date:</strong> {weddingDetails?.weddingDate ? new Date(weddingDetails.weddingDate).toLocaleDateString() : "N/A"}</p>
-                <p><strong>Wedding Time:</strong> {weddingDetails?.weddingTime || "N/A"}</p>
-
+                <p>
+                  <strong>Date of Application:</strong>{" "}
+                  {weddingDetails?.dateOfApplication
+                    ? new Date(
+                        weddingDetails.dateOfApplication
+                      ).toLocaleDateString()
+                    : "N/A"}
+                </p>
+                <p>
+                  <strong>Wedding Date:</strong>{" "}
+                  {weddingDetails?.weddingDate
+                    ? new Date(weddingDetails.weddingDate).toLocaleDateString()
+                    : "N/A"}
+                </p>
+                <p>
+                  <strong>Wedding Time:</strong>{" "}
+                  {weddingDetails?.weddingTime || "N/A"}
+                </p>
                 {/* Bride Details */}
-                <p><strong>Bride Name:</strong> {weddingDetails?.brideName || "N/A"}</p>
+                <p>
+                  <strong>Bride Name:</strong>{" "}
+                  {weddingDetails?.brideName || "N/A"}
+                </p>
                 {/* Bride Address */}
                 <h3>Bride Address</h3>
-                <p><strong>Bldg Name/Tower:</strong> {weddingDetails?.brideAddress?.BldgNameTower || "N/A"}</p>
-                <p><strong>Lot/Block/Phase/House No.:</strong> {weddingDetails?.brideAddress?.LotBlockPhaseHouseNo || "N/A"}</p>
-                <p><strong>Subdivision/Village/Zone:</strong> {weddingDetails?.brideAddress?.SubdivisionVillageZone || "N/A"}</p>
-                <p><strong>Street:</strong> {weddingDetails?.brideAddress?.Street || "N/A"}</p>
-                <p><strong>Barangay:</strong> {weddingDetails?.brideAddress?.barangay === 'Others' ? weddingDetails?.brideAddress?.customBarangay || "N/A" : weddingDetails?.brideAddress?.barangay || "N/A"}</p>
-                <p><strong>District:</strong> {weddingDetails?.brideAddress?.District || "N/A"}</p>
-                <p><strong>City:</strong> {weddingDetails?.brideAddress?.city === 'Others' ? weddingDetails?.brideAddress?.customCity || "N/A" : weddingDetails?.brideAddress?.city || "N/A"}</p>
-                <p><strong>Bride Birth Date:</strong> {weddingDetails?.brideBirthDate ? new Date(weddingDetails.brideBirthDate).toLocaleDateString() : "N/A"}</p>
-                <p><strong>Bride Occupation:</strong> {weddingDetails?.brideOccupation || "N/A"}</p>
-                <p><strong>Bride Religion:</strong> {weddingDetails?.brideReligion || "N/A"}</p>
-                <p><strong>Bride Phone:</strong> {weddingDetails?.bridePhone || "N/A"}</p>
-
+                <p>
+                  <strong>Bldg Name/Tower:</strong>{" "}
+                  {weddingDetails?.brideAddress?.BldgNameTower || "N/A"}
+                </p>
+                <p>
+                  <strong>Lot/Block/Phase/House No.:</strong>{" "}
+                  {weddingDetails?.brideAddress?.LotBlockPhaseHouseNo || "N/A"}
+                </p>
+                <p>
+                  <strong>Subdivision/Village/Zone:</strong>{" "}
+                  {weddingDetails?.brideAddress?.SubdivisionVillageZone ||
+                    "N/A"}
+                </p>
+                <p>
+                  <strong>Street:</strong>{" "}
+                  {weddingDetails?.brideAddress?.Street || "N/A"}
+                </p>
+                <p>
+                  <strong>Barangay:</strong>{" "}
+                  {weddingDetails?.brideAddress?.barangay === "Others"
+                    ? weddingDetails?.brideAddress?.customBarangay || "N/A"
+                    : weddingDetails?.brideAddress?.barangay || "N/A"}
+                </p>
+                <p>
+                  <strong>District:</strong>{" "}
+                  {weddingDetails?.brideAddress?.District || "N/A"}
+                </p>
+                <p>
+                  <strong>City:</strong>{" "}
+                  {weddingDetails?.brideAddress?.city === "Others"
+                    ? weddingDetails?.brideAddress?.customCity || "N/A"
+                    : weddingDetails?.brideAddress?.city || "N/A"}
+                </p>
+                <p>
+                  <strong>Bride Birth Date:</strong>{" "}
+                  {weddingDetails?.brideBirthDate
+                    ? new Date(
+                        weddingDetails.brideBirthDate
+                      ).toLocaleDateString()
+                    : "N/A"}
+                </p>
+                <p>
+                  <strong>Bride Occupation:</strong>{" "}
+                  {weddingDetails?.brideOccupation || "N/A"}
+                </p>
+                <p>
+                  <strong>Bride Religion:</strong>{" "}
+                  {weddingDetails?.brideReligion || "N/A"}
+                </p>
+                <p>
+                  <strong>Bride Phone:</strong>{" "}
+                  {weddingDetails?.bridePhone || "N/A"}
+                </p>
                 {/* Groom Details */}
-                <p><strong>Groom Name:</strong> {weddingDetails?.groomName || "N/A"}</p>
+                <p>
+                  <strong>Groom Name:</strong>{" "}
+                  {weddingDetails?.groomName || "N/A"}
+                </p>
                 {/* Groom Address */}
                 <h3>Groom Address</h3>
-                <p><strong>Bldg Name/Tower:</strong> {weddingDetails?.groomAddress?.BldgNameTower || "N/A"}</p>
-                <p><strong>Lot/Block/Phase/House No.:</strong> {weddingDetails?.groomAddress?.LotBlockPhaseHouseNo || "N/A"}</p>
-                <p><strong>Subdivision/Village/Zone:</strong> {weddingDetails?.groomAddress?.SubdivisionVillageZone || "N/A"}</p>
-                <p><strong>Street:</strong> {weddingDetails?.groomAddress?.Street || "N/A"}</p>
-                <p><strong>Barangay:</strong> {weddingDetails?.groomAddress?.barangay === 'Others' ? weddingDetails?.groomAddress?.customBarangay || "N/A" : weddingDetails?.groomAddress?.barangay || "N/A"}</p>
-                <p><strong>District:</strong> {weddingDetails?.groomAddress?.District || "N/A"}</p>
-                <p><strong>City:</strong> {weddingDetails?.groomAddress?.city === 'Others' ? weddingDetails?.groomAddress?.customCity || "N/A" : weddingDetails?.groomAddress?.city || "N/A"}</p>                <p><strong>Groom Phone:</strong> {weddingDetails?.groomPhone || "N/A"}</p>
-                <p><strong>Groom Birth Date:</strong> {weddingDetails?.groomBirthDate ? new Date(weddingDetails.groomBirthDate).toLocaleDateString() : "N/A"}</p>
-                <p><strong>Groom Occupation:</strong> {weddingDetails?.groomOccupation || "N/A"}</p>
-                <p><strong>Groom Religion:</strong> {weddingDetails?.groomReligion || "N/A"}</p>
+                <p>
+                  <strong>Bldg Name/Tower:</strong>{" "}
+                  {weddingDetails?.groomAddress?.BldgNameTower || "N/A"}
+                </p>
+                <p>
+                  <strong>Lot/Block/Phase/House No.:</strong>{" "}
+                  {weddingDetails?.groomAddress?.LotBlockPhaseHouseNo || "N/A"}
+                </p>
+                <p>
+                  <strong>Subdivision/Village/Zone:</strong>{" "}
+                  {weddingDetails?.groomAddress?.SubdivisionVillageZone ||
+                    "N/A"}
+                </p>
+                <p>
+                  <strong>Street:</strong>{" "}
+                  {weddingDetails?.groomAddress?.Street || "N/A"}
+                </p>
+                <p>
+                  <strong>Barangay:</strong>{" "}
+                  {weddingDetails?.groomAddress?.barangay === "Others"
+                    ? weddingDetails?.groomAddress?.customBarangay || "N/A"
+                    : weddingDetails?.groomAddress?.barangay || "N/A"}
+                </p>
+                <p>
+                  <strong>District:</strong>{" "}
+                  {weddingDetails?.groomAddress?.District || "N/A"}
+                </p>
+                <p>
+                  <strong>City:</strong>{" "}
+                  {weddingDetails?.groomAddress?.city === "Others"
+                    ? weddingDetails?.groomAddress?.customCity || "N/A"
+                    : weddingDetails?.groomAddress?.city || "N/A"}
+                </p>{" "}
+                <p>
+                  <strong>Groom Phone:</strong>{" "}
+                  {weddingDetails?.groomPhone || "N/A"}
+                </p>
+                <p>
+                  <strong>Groom Birth Date:</strong>{" "}
+                  {weddingDetails?.groomBirthDate
+                    ? new Date(
+                        weddingDetails.groomBirthDate
+                      ).toLocaleDateString()
+                    : "N/A"}
+                </p>
+                <p>
+                  <strong>Groom Occupation:</strong>{" "}
+                  {weddingDetails?.groomOccupation || "N/A"}
+                </p>
+                <p>
+                  <strong>Groom Religion:</strong>{" "}
+                  {weddingDetails?.groomReligion || "N/A"}
+                </p>
               </div>
               <div className="wedding-details-box">
                 <h3>Parents</h3>
                 <div className="grid-row">
-                  <p><strong>Bride Father:</strong> {weddingDetails?.brideFather || "N/A"}</p>
-                  <p className="details-item"><strong>Bride Mother:</strong> {weddingDetails?.brideMother || "N/A"}</p>
+                  <p>
+                    <strong>Bride Father:</strong>{" "}
+                    {weddingDetails?.brideFather || "N/A"}
+                  </p>
+                  <p className="details-item">
+                    <strong>Bride Mother:</strong>{" "}
+                    {weddingDetails?.brideMother || "N/A"}
+                  </p>
                 </div>
                 <div className="grid-row">
-                  <p className="details-item"><strong>Groom Father:</strong> {weddingDetails?.groomFather || "N/A"}</p>
-                  <p className="details-item"><strong>Groom Mother:</strong> {weddingDetails?.groomMother || "N/A"}</p>
+                  <p className="details-item">
+                    <strong>Groom Father:</strong>{" "}
+                    {weddingDetails?.groomFather || "N/A"}
+                  </p>
+                  <p className="details-item">
+                    <strong>Groom Mother:</strong>{" "}
+                    {weddingDetails?.groomMother || "N/A"}
+                  </p>
                 </div>
               </div>
               <div className="wedding-details-box">
-
                 <h3>Ninong</h3>
                 {weddingDetails?.Ninong?.length > 0 ? (
                   weddingDetails.Ninong.map((ninong, index) => (
                     <div key={index} className="grid-row">
-                      <p><strong>Name:</strong> {ninong.name}</p>
-                      <p><strong>Address:</strong> {ninong.address.street}, {ninong.address.city}, {ninong.address.zip}</p>
+                      <p>
+                        <strong>Name:</strong> {ninong.name}
+                      </p>
+                      <p>
+                        <strong>Address:</strong> {ninong.address.street},{" "}
+                        {ninong.address.city}, {ninong.address.zip}
+                      </p>
                     </div>
                   ))
                 ) : (
@@ -342,8 +477,13 @@ const WeddingDetails = () => {
                 {weddingDetails?.Ninang?.length > 0 ? (
                   weddingDetails.Ninang.map((ninang, index) => (
                     <div key={index} className="grid-row">
-                      <p><strong>Name:</strong> {ninang.name}</p>
-                      <p><strong>Address:</strong> {ninang.address.street}, {ninang.address.city}, {ninang.address.zip}</p>
+                      <p>
+                        <strong>Name:</strong> {ninang.name}
+                      </p>
+                      <p>
+                        <strong>Address:</strong> {ninang.address.street},{" "}
+                        {ninang.address.city}, {ninang.address.zip}
+                      </p>
                     </div>
                   ))
                 ) : (
@@ -354,16 +494,27 @@ const WeddingDetails = () => {
           </div>
           <div className="Wedding-right-container">
             <div className="wedding-details-box">
-
               <h3>Groom Documents</h3>
-              {['GroomNewBaptismalCertificate', 'GroomNewConfirmationCertificate', 'GroomMarriageLicense', 'GroomMarriageBans', 'GroomOrigCeNoMar', 'GroomOrigPSA'].map((doc, index) => (
+              {[
+                "GroomNewBaptismalCertificate",
+                "GroomNewConfirmationCertificate",
+                "GroomMarriageLicense",
+                "GroomMarriageBans",
+                "GroomOrigCeNoMar",
+                "GroomOrigPSA",
+              ].map((doc, index) => (
                 <div key={index} className="wedding-grid-row">
-                  <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
+                  <p>{doc.replace(/([A-Z])/g, " $1").trim()}:</p>
                   {weddingDetails?.[doc]?.url ? (
                     <img
                       src={weddingDetails[doc].url}
                       alt={doc}
-                      style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
+                      style={{
+                        maxWidth: "100px",
+                        maxHeight: "100px",
+                        objectFit: "contain",
+                        cursor: "pointer",
+                      }}
                       onClick={() => openModal(weddingDetails[doc].url)}
                     />
                   ) : (
@@ -373,14 +524,28 @@ const WeddingDetails = () => {
               ))}
 
               <h3>Bride Documents</h3>
-              {['BrideNewBaptismalCertificate', 'BrideNewConfirmationCertificate', 'BrideMarriageLicense', 'BrideMarriageBans', 'BrideOrigCeNoMar', 'BrideOrigPSA', 'PermitFromtheParishOftheBride', 'ChildBirthCertificate'].map((doc, index) => (
+              {[
+                "BrideNewBaptismalCertificate",
+                "BrideNewConfirmationCertificate",
+                "BrideMarriageLicense",
+                "BrideMarriageBans",
+                "BrideOrigCeNoMar",
+                "BrideOrigPSA",
+                "PermitFromtheParishOftheBride",
+                "ChildBirthCertificate",
+              ].map((doc, index) => (
                 <div key={index} className="grid-row">
-                  <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
+                  <p>{doc.replace(/([A-Z])/g, " $1").trim()}:</p>
                   {weddingDetails?.[doc]?.url ? (
                     <img
                       src={weddingDetails[doc].url}
                       alt={doc}
-                      style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
+                      style={{
+                        maxWidth: "100px",
+                        maxHeight: "100px",
+                        objectFit: "contain",
+                        cursor: "pointer",
+                      }}
                       onClick={() => openModal(weddingDetails[doc].url)}
                     />
                   ) : (
@@ -388,7 +553,6 @@ const WeddingDetails = () => {
                   )}
                 </div>
               ))}
-
             </div>
           </div>
 
@@ -410,20 +574,41 @@ const WeddingDetails = () => {
               },
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <button onClick={closeModal} style={{ cursor: "pointer", padding: "5px 10px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <button
+                onClick={closeModal}
+                style={{ cursor: "pointer", padding: "5px 10px" }}
+              >
                 Close
               </button>
               <div>
                 <button
-                  onClick={() => setZoom((prevZoom) => Math.min(prevZoom + 0.1, 3))}
-                  style={{ margin: "0 5px", cursor: "pointer", padding: "5px 10px" }}
+                  onClick={() =>
+                    setZoom((prevZoom) => Math.min(prevZoom + 0.1, 3))
+                  }
+                  style={{
+                    margin: "0 5px",
+                    cursor: "pointer",
+                    padding: "5px 10px",
+                  }}
                 >
                   Zoom In
                 </button>
                 <button
-                  onClick={() => setZoom((prevZoom) => Math.max(prevZoom - 0.1, 1))}
-                  style={{ margin: "0 5px", cursor: "pointer", padding: "5px 10px" }}
+                  onClick={() =>
+                    setZoom((prevZoom) => Math.max(prevZoom - 0.1, 1))
+                  }
+                  style={{
+                    margin: "0 5px",
+                    cursor: "pointer",
+                    padding: "5px 10px",
+                  }}
                 >
                   Zoom Out
                 </button>
@@ -461,7 +646,6 @@ const WeddingDetails = () => {
             </div>
           </Modal>
           <div className="Wedding-third-container">
-
             <WeddingChecklist weddingId={weddingId} />
           </div>
         </div>
@@ -525,16 +709,13 @@ const WeddingDetails = () => {
                 </div>
               </div>
 
-              <button onClick={updateAdditionalReq}>Submit Additional Requirements</button>
+              <button onClick={updateAdditionalReq}>
+                Submit Additional Requirements
+              </button>
             </div>
           </div>
 
-
-
-
-
           <div className="Down-right-container">
-
             {/* Comments of the Admin Display */}
             <div className="admin-comments-section">
               <h3>Admin Comments</h3>
@@ -544,8 +725,14 @@ const WeddingDetails = () => {
                     <p className="comment-date">
                       {new Date(comment?.createdAt).toLocaleDateString()}
                     </p>
-                    <p><strong>Comment:</strong> {comment?.selectedComment || "N/A"}</p>
-                    <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
+                    <p>
+                      <strong>Comment:</strong>{" "}
+                      {comment?.selectedComment || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Additional Comment:</strong>{" "}
+                      {comment?.additionalComment || "N/A"}
+                    </p>
                   </div>
                 ))
               ) : (
@@ -557,7 +744,9 @@ const WeddingDetails = () => {
             <div className="wedding-date-box">
               <h3>Updated Wedding Date</h3>
               <p className="date">
-                {updatedWeddingDate ? new Date(updatedWeddingDate).toLocaleDateString() : "N/A"}
+                {updatedWeddingDate
+                  ? new Date(updatedWeddingDate).toLocaleDateString()
+                  : "N/A"}
               </p>
 
               {weddingDetails?.adminRescheduled?.reason && (
@@ -577,10 +766,13 @@ const WeddingDetails = () => {
                     <p>
                       <strong>Pre Marriage Seminar 1 Date and Time:</strong>{" "}
                       {weddingDetails.additionalReq.PreMarriageSeminar?.date
-                        ? new Date(weddingDetails.additionalReq.PreMarriageSeminar.date).toLocaleDateString()
+                        ? new Date(
+                            weddingDetails.additionalReq.PreMarriageSeminar.date
+                          ).toLocaleDateString()
                         : "N/A"}{" "}
                       at{" "}
-                      {weddingDetails.additionalReq.PreMarriageSeminar?.time || "N/A"}
+                      {weddingDetails.additionalReq.PreMarriageSeminar?.time ||
+                        "N/A"}
                     </p>
                   </div>
 
@@ -588,10 +780,13 @@ const WeddingDetails = () => {
                     <p>
                       <strong>Canonical Interview Date and Time:</strong>{" "}
                       {weddingDetails.additionalReq.CanonicalInterview?.date
-                        ? new Date(weddingDetails.additionalReq.CanonicalInterview.date).toLocaleDateString()
+                        ? new Date(
+                            weddingDetails.additionalReq.CanonicalInterview.date
+                          ).toLocaleDateString()
                         : "N/A"}{" "}
                       at{" "}
-                      {weddingDetails.additionalReq.CanonicalInterview?.time || "N/A"}
+                      {weddingDetails.additionalReq.CanonicalInterview?.time ||
+                        "N/A"}
                     </p>
                   </div>
 
@@ -599,7 +794,9 @@ const WeddingDetails = () => {
                     <p>
                       <strong>Confession Date and Time:</strong>{" "}
                       {weddingDetails.additionalReq.Confession?.date
-                        ? new Date(weddingDetails.additionalReq.Confession.date).toLocaleDateString()
+                        ? new Date(
+                            weddingDetails.additionalReq.Confession.date
+                          ).toLocaleDateString()
                         : "N/A"}{" "}
                       at{" "}
                       {weddingDetails.additionalReq.Confession?.time || "N/A"}
@@ -609,7 +806,9 @@ const WeddingDetails = () => {
                   <p className="req-updated">
                     <strong>Last Updated:</strong>{" "}
                     {weddingDetails.additionalReq?.createdAt
-                      ? new Date(weddingDetails.additionalReq.createdAt).toLocaleDateString()
+                      ? new Date(
+                          weddingDetails.additionalReq.createdAt
+                        ).toLocaleDateString()
                       : "N/A"}
                   </p>
                 </div>
@@ -645,28 +844,47 @@ const WeddingDetails = () => {
             {/* Admin wedding Date  */}
             <div className="admin-section">
               <h2>Select Updated Wedding Date:</h2>
-              <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
+              <input
+                type="date"
+                value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
+              />
               <label>Reason:</label>
-              <textarea value={reason} onChange={(e) => setReason(e.target.value)} />
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
               <button onClick={handleUpdate} disabled={loading}>
                 {loading ? "Updating..." : "Update Wedding Date"}
               </button>
             </div>
 
             {/* Cancelling Reason Section */}
-            {weddingDetails?.weddingStatus === "Cancelled" && weddingDetails?.cancellingReason ? (
+            {weddingDetails?.weddingStatus === "Cancelled" &&
+            weddingDetails?.cancellingReason ? (
               <div className="house-comments-section">
                 <h2>Cancellation Details</h2>
                 <div className="admin-comment">
-                  <p><strong>Cancelled By:</strong> {weddingDetails.cancellingReason.user === "Admin" ? "Admin" : weddingDetails.cancellingReason.user}</p>
-                  <p><strong>Reason:</strong> {weddingDetails.cancellingReason.reason || "No reason provided."}</p>
+                  <p>
+                    <strong>Cancelled By:</strong>{" "}
+                    {weddingDetails.cancellingReason.user === "Admin"
+                      ? "Admin"
+                      : weddingDetails.cancellingReason.user}
+                  </p>
+                  <p>
+                    <strong>Reason:</strong>{" "}
+                    {weddingDetails.cancellingReason.reason ||
+                      "No reason provided."}
+                  </p>
                 </div>
               </div>
             ) : null}
 
             {/* Cancel Button */}
             <div className="button-container">
-              <button onClick={() => setShowCancelModal(true)}>Cancel Wedding</button>
+              <button onClick={() => setShowCancelModal(true)}>
+                Cancel Wedding
+              </button>
             </div>
 
             {/* Cancellation Modal */}
@@ -683,32 +901,95 @@ const WeddingDetails = () => {
                   />
                   <div className="modal-buttons">
                     <button onClick={handleCancel}>Confirm Cancel</button>
-                    <button onClick={() => setShowCancelModal(false)}>Back</button>
+                    <button onClick={() => setShowCancelModal(false)}>
+                      Back
+                    </button>
                   </div>
                 </div>
               </div>
             )}
-
           </div>
-          <div style={{ justifyContent: "center", marginTop: "20px", borderRadius: "10px" }}>
-            <button onClick={() => handleConfirm(weddingId)}>Confirm Wedding</button>
-            <button onClick={handleUpdate} disabled={loading}>
-              {loading ? "Updating..." : "Update Wedding Date"}
+          <div style={{ marginTop: "20px", textAlign: "center" }}>
+            <button
+              onClick={openConfirmModal}
+              disabled={isConfirmed}
+              style={{
+                cursor: isConfirmed ? "not-allowed" : "pointer",
+                backgroundColor: isConfirmed ? "#ccc" : "#28a745",
+                color: "#fff",
+                padding: "10px 20px",
+                border: "none",
+                borderRadius: "5px",
+              }}
+            >
+              {isConfirmed ? "Wedding Confirmed" : "Confirm Wedding"}
             </button>
           </div>
 
+          {/* Confirmation Modal */}
+          <Modal
+            isOpen={isConfirmModalOpen}
+            onRequestClose={closeConfirmModal}
+            contentLabel="Confirm Wedding Modal"
+            style={{
+              overlay: {
+                backgroundColor: "rgba(0, 0, 0, 0.75)",
+              },
+              content: {
+                maxWidth: "400px",
+                margin: "auto",
+                padding: "20px",
+                textAlign: "center",
+                borderRadius: "10px",
+              },
+            }}
+          >
+            <h3>Are you sure you want to confirm the wedding?</h3>
+            <div style={{ marginTop: "20px" }}>
+              <button
+                onClick={handleConfirm}
+                style={{
+                  marginRight: "10px",
+                  padding: "10px 20px",
+                  backgroundColor: "#28a745",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Confirm
+              </button>
+              <button
+                onClick={closeConfirmModal}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: "#dc3545",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </Modal>
+
           <div className="button-container">
-            <button onClick={() => navigate(`/adminChat/${weddingDetails?.userId?._id}/${weddingDetails?.userId?.email}`)}>
+            <button
+              onClick={() =>
+                navigate(
+                  `/adminChat/${weddingDetails?.userId?._id}/${weddingDetails?.userId?.email}`
+                )
+              }
+            >
               Go to Admin Chat
             </button>
           </div>
-
         </div>
-
       </div>
     </div>
-
-
   );
 };
 

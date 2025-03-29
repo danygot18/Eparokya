@@ -109,11 +109,11 @@ exports.createPrayerRequestIntention = async (req, res) => {
 
         await newPrayerRequest.save();
 
-        // ✅ Find all Admins
+        // Find all Admins
         const admins = await User.find({ isAdmin: true }, '_id');
         const adminIds = admins.map(admin => admin._id.toString());
 
-        // ✅ Save Notification for Each Admin
+        // Save Notification for Each Admin
         const notifications = admins.map(admin => ({
             user: admin._id, // Admin who will receive it
             type: "prayer request",
@@ -135,7 +135,7 @@ exports.createPrayerRequestIntention = async (req, res) => {
                 adminIds
             });
         } else {
-            console.error("❌ Socket.io is not initialized");
+            console.error("Socket.io is not initialized");
         }
 
         res.status(201).json({
@@ -143,7 +143,7 @@ exports.createPrayerRequestIntention = async (req, res) => {
             data: newPrayerRequest,
         });
     } catch (err) {
-        console.error("❌ Server Error:", err.message);
+        console.error("Server Error:", err.message);
         res.status(500).json({ message: err.message });
     }
 };
@@ -193,6 +193,7 @@ exports.updatePrayerRequestIntention = async (req, res) => {
 //         res.status(500).json({ message: err.message });
 //     }
 // };
+
 exports.markPrayerRequestIntentionAsDone = async (req, res) => {
     try {
         const updatedPrayerRequest = await PrayerRequestIntention.findByIdAndUpdate(
@@ -207,13 +208,11 @@ exports.markPrayerRequestIntentionAsDone = async (req, res) => {
             return res.status(404).json({ message: "Prayer request not found" });
         }
 
-        // ✅ Find the user who created this prayer request
         const userId = updatedPrayerRequest.userId;
 
         if (userId) {
             console.log("User ID for Notification:", userId);
             
-            // ✅ Create and Save Notification for the User
             const newNotification = new Notification({
                 user: userId,
                 message: "Your prayer request has been marked as done by the admin.",
@@ -226,7 +225,6 @@ exports.markPrayerRequestIntentionAsDone = async (req, res) => {
             await newNotification.save();
             console.log("Notification saved successfully!");
 
-            // ✅ Emit Notification to the Specific User Only (Socket.io)
             if (req.app.get("io")) {
                 req.app.get("io").to(userId.toString()).emit("push-notification-user", {
                     userId: userId.toString(),
@@ -236,13 +234,13 @@ exports.markPrayerRequestIntentionAsDone = async (req, res) => {
                 });
                 console.log("Notification emitted to user:", userId.toString());
             } else {
-                console.error("❌ Socket.io is not initialized");
+                console.error("Socket.io is not initialized");
             }
         }
 
         res.status(200).json(updatedPrayerRequest);
     } catch (err) {
-        console.error("❌ Error marking prayer request as done:", err);
+        console.error("Error marking prayer request as done:", err);
         res.status(500).json({ message: err.message });
     }
 };
