@@ -1,10 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import "../../Layout/styles/style.css";
-import SideBar from '../SideBar';
-
 const AdminAnnouncementList = () => {
     const [announcements, setAnnouncements] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -12,7 +5,7 @@ const AdminAnnouncementList = () => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [previewImage, setPreviewImage] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const announcementsPerPage = 10; // Adjust the number of items per page
+    const announcementsPerPage = 10;
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -23,9 +16,13 @@ const AdminAnnouncementList = () => {
     const fetchAnnouncements = async () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllAnnouncements`);
-            const sortedAnnouncements = response.data.announcements.sort(
-                (a, b) => new Date(b.dateCreated) - new Date(a.dateCreated) // Sort latest first
-            );
+            const sortedAnnouncements = response.data.announcements.sort((a, b) => {
+                // Featured announcements first, then sort by creation date
+                if (a.isFeatured === b.isFeatured) {
+                    return new Date(b.dateCreated) - new Date(a.dateCreated);
+                }
+                return a.isFeatured ? -1 : 1;
+            });
             setAnnouncements(sortedAnnouncements || []);
         } catch (error) {
             console.error('Error fetching announcements:', error);
@@ -58,20 +55,19 @@ const AdminAnnouncementList = () => {
         }
     };
 
-    const toggleFeatured = async (id, isFeatured) => {
+    const toggleFeatured = async (announcementId) => {
         try {
-            await axios.put(`${process.env.REACT_APP_API}/api/v1/update/announcement/${id}`, { isFeatured: !isFeatured });
-            setAnnouncements(
-                announcements.map((a) =>
-                    a._id === id ? { ...a, isFeatured: !isFeatured } : a
-                )
-            );
+            const response = await axios.put(`${process.env.REACT_APP_API}/api/v1/${announcementId}/toggleFeatured`);
+            if (response.status === 200) {
+                console.log(response.data.message);
+                // Update the announcements list after toggling
+                fetchAnnouncements();
+            }
         } catch (error) {
-            console.error('Error updating announcement feature status:', error);
+            console.error('Failed to toggle featured status:', error);
         }
     };
 
-    // Apply filtering and pagination
     const filteredAnnouncements = announcements
         .filter((a) =>
             selectedCategory ? a.announcementCategory?._id === selectedCategory : true
@@ -82,7 +78,6 @@ const AdminAnnouncementList = () => {
                 a.tags.some((tag) => tag.toLowerCase().includes(searchQuery))
         );
 
-    // Pagination logic
     const indexOfLastAnnouncement = currentPage * announcementsPerPage;
     const indexOfFirstAnnouncement = indexOfLastAnnouncement - announcementsPerPage;
     const currentAnnouncements = filteredAnnouncements.slice(indexOfFirstAnnouncement, indexOfLastAnnouncement);
@@ -152,12 +147,13 @@ const AdminAnnouncementList = () => {
                                     <input
                                         type="checkbox"
                                         checked={announcement.isFeatured}
-                                        onChange={() =>
-                                            toggleFeatured(announcement._id, announcement.isFeatured)
-                                        }
+                                        onChange={() => toggleFeatured(announcement._id)}
                                     />
                                     Featured
                                 </label>
+                                {announcement.isFeatured && (
+                                    <span className="featured-indicator">🌟 Featured</span>
+                                )}
                                 <p>Tags: {announcement.tags.join(", ")}</p>
                                 <p>
                                     Category: {announcement.announcementCategory?.name || "N/A"}

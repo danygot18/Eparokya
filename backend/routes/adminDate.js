@@ -10,8 +10,9 @@ router.get('/getActiveDatesByCategory/:category', adminDateController.getActiveD
 router.put('/:adminDateId/update', adminDateController.updateSubmitted);
 router.put('/:adminDateId/editMax', adminDateController.editMaxParticipants);
 
-router.patch('/:adminDateId/toggle', adminDateController.toggleDate);
 router.post('/:adminDateId/confirm', adminDateController.confirmParticipant);
+router.put('/:adminDateId/switchDate', adminDateController.toggleDate);
+
 router.delete('/:adminDateId/delete', adminDateController.deleteDate);
 
 

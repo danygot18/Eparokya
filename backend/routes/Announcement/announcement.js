@@ -21,6 +21,8 @@ router.get('/getAnnouncement/:announcementId', announcementController.getAnnounc
 router.put('/updateAnnouncement/:announcementId', announcementController.updateAnnouncement );
 router.delete('/deleteAnnouncement/:announcementId', announcementController.deleteAnnouncement);
 
+router.put('/:announcementId/toggleFeatured', announcementController.toggleFeatured);
+
 router.put('/likeAnnouncement/:announcementId', isAuthenticatedUser, announcementController.likeAnnouncement);
 router.put('/unlikeAnnouncement/announcementId', isAuthenticatedUser, announcementController.unlikeAnnouncement);
 

@@ -52,11 +52,13 @@ const AdminDates = () => {
 
     const handleToggleDate = async (adminDateId) => {
         try {
-            const toggleUrl = `${process.env.REACT_APP_API}/api/v1/${adminDateId}/toggle`;
-            const response = await axios.patch(toggleUrl);
+            const toggleUrl = `${process.env.REACT_APP_API}/api/v1/${adminDateId}/switchDate`; 
+            const response = await axios.put(toggleUrl);
+    
             if (response.status === 200) {
+                const updatedAdminDate = response.data.adminDate; 
                 const updatedDates = dates.map(date =>
-                    date._id === adminDateId ? { ...date, isEnabled: !date.isEnabled } : date
+                    date._id === adminDateId ? updatedAdminDate : date
                 );
                 setDates(updatedDates);
             }
@@ -67,7 +69,7 @@ const AdminDates = () => {
 
     const handleDeleteDate = async (adminDateId) => {
         try {
-            await axios.delete(`${process.env.REACT_APP_API}/api/v1/delete/${adminDateId}`);
+            await axios.delete(`${process.env.REACT_APP_API}/api/v1/${adminDateId}/delete`);
             fetchDates();
         } catch (error) {
             console.error('Failed to delete date', error);
@@ -140,14 +142,26 @@ const AdminDates = () => {
                         placeholder="Search by category..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                        style={{
+                            flex: 1,
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: '1px solid #ccc',
+                        }}
                     />
-                    <select value={filter} onChange={(e) => setFilter(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}>
+                    <select
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                        style={{
+                            flex: 1,
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: '1px solid #ccc',
+                        }}
+                    >
                         <option value="">Filter by Category</option>
                         <option value="Wedding">Wedding</option>
-                        <option value="Funeral">Funeral</option>
-                        <option value="Christening">Christening</option>
-                        <option value="Counseling">Counseling</option>
+                        <option value="Baptism">Baptism</option>
                     </select>
                 </div>
 
@@ -166,62 +180,66 @@ const AdminDates = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredDates.map((date) => (
-                            <tr key={date._id} style={{ borderBottom: '1px solid #ddd' }}>
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{date.category}</td>
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{new Date(date.date).toLocaleDateString()}</td>
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{date.time}</td>
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-                                    {editingDate === date._id ? (
-                                        <input
-                                            type="number"
-                                            value={date.maxParticipants}
-                                            onChange={(e) => handleEditDate(date._id, e.target.value)}
-                                            style={{ width: '50px' }}
-                                        />
-                                    ) : (
-                                        date.maxParticipants
-                                    )}
-                                </td>
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{date.confirmedParticipants}</td>
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{date.submittedParticipants || 0}</td>
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-                                    {date.maxParticipants - (date.confirmedParticipants || 0) - (date.submittedParticipants || 0)}
-                                </td>
-                                <td style={{ border: '1px solid #ddd', padding: '8px' }}>{date.isEnabled ? 'Enabled' : 'Disabled'}</td>
-                                <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>
-                                    <button
-                                        onClick={() => handleToggleDate(date._id)}
-                                        style={{
-                                            backgroundColor: date.isEnabled ? '#4CAF50' : '#ff4d4d',
-                                            color: 'white',
-                                            border: 'none',
-                                            padding: '5px 10px',
-                                            marginRight: '5px',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        {date.isEnabled ? 'Disable' : 'Enable'}
-                                    </button>
+                        {filteredDates
+                            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort by creation time (descending)
+                            .map((date) => (
+                                <tr key={date._id} style={{ borderBottom: '1px solid #ddd' }}>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{date.category}</td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{new Date(date.date).toLocaleDateString()}</td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                        {new Date(`1970-01-01T${date.time}Z`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                    </td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                        {editingDate === date._id ? (
+                                            <input
+                                                type="number"
+                                                value={date.maxParticipants}
+                                                onChange={(e) => handleEditDate(date._id, e.target.value)}
+                                                style={{ width: '50px' }}
+                                            />
+                                        ) : (
+                                            date.maxParticipants
+                                        )}
+                                    </td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{date.confirmedParticipants}</td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{date.submittedParticipants || 0}</td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                                        {date.maxParticipants - (date.confirmedParticipants || 0) - (date.submittedParticipants || 0)}
+                                    </td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{date.isEnabled ? 'Enabled' : 'Disabled'}</td>
+                                    <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center' }}>
+                                        <button
+                                            onClick={() => handleToggleDate(date._id)}
+                                            style={{
+                                                backgroundColor: date.isEnabled ? '#4CAF50' : '#ff4d4d',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '5px 10px',
+                                                marginRight: '5px',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            {date.isEnabled ? 'Disable' : 'Enable'}
+                                        </button>
 
-                                    <button
-                                        onClick={() => handleDeleteDate(date._id)}
-                                        style={{
-                                            backgroundColor: '#d9534f',
-                                            color: 'white',
-                                            border: 'none',
-                                            padding: '5px 10px',
-                                            marginRight: '5px',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                                        <button
+                                            onClick={() => handleDeleteDate(date._id)}
+                                            style={{
+                                                backgroundColor: '#d9534f',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '5px 10px',
+                                                marginRight: '5px',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
                     </tbody>
                 </table>
             </div>
