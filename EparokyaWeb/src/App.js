@@ -81,6 +81,14 @@ import ProtectedRoute from './Components/Route/protectedRoute';
 import Dashboard from './Components/Admin/Dashboard';
 
 import SentimentResult from './Components/Admin/FeedbackForm/SentimentResults/SentimentResult';
+import EventSentimentList from './Components/Admin/FeedbackForm/SentimentResults/EventSentimentList';
+import EventSentimentDetails from './Components/Admin/FeedbackForm/SentimentResults/EventSentimentDetails';
+
+import PriestSentimentList from './Components/Admin/FeedbackForm/SentimentResults/PriestSentimentList';
+import PriestSentimentDetails from './Components/Admin/FeedbackForm/SentimentResults/PriestSentimentDetails';
+
+import ActivitySentimentList from './Components/Admin/FeedbackForm/SentimentResults/ActivitySentimentList';
+import ActivitySentimentDetails from './Components/Admin/FeedbackForm/SentimentResults/ActivitySentimentDetails';
 
 //User
 import UsersList from './Components/Admin/User/UserList';
@@ -304,6 +312,16 @@ function App() {
         <Route path="/admin/calendar" element={<ProtectedRoute isAdmin={true}><Calendar /></ProtectedRoute>} />
      
         <Route path="/admin/SentimentResults" element={<ProtectedRoute isAdmin={true}><SentimentResult /></ProtectedRoute>} />
+       
+        <Route path="/admin/EventSentimentList" element={<ProtectedRoute isAdmin={true}><EventSentimentList /></ProtectedRoute>} />
+        <Route path="/admin/EventSentimentDetails/:id" element={<ProtectedRoute isAdmin={true}><EventSentimentDetails /></ProtectedRoute>} />
+
+        <Route path="/admin/PriestSentimentList" element={<ProtectedRoute isAdmin={true}><PriestSentimentList /></ProtectedRoute>} />
+        <Route path="/admin/PriestSentimentDetails/:id" element={<ProtectedRoute isAdmin={true}><PriestSentimentDetails /></ProtectedRoute>} />
+
+        <Route path="/admin/ActivitytSentimentList" element={<ProtectedRoute isAdmin={true}><ActivitySentimentList /></ProtectedRoute>} />
+        <Route path="/admin/ActivitytSentimentDetail/:id" element={<ProtectedRoute isAdmin={true}><ActivitySentimentDetails /></ProtectedRoute>} />
+
 
         {/* ministry */}
         <Route path="/admin/ministryCategory/create" element={<ProtectedRoute isAdmin={true}><MinistryCategory /></ProtectedRoute>} />
@@ -312,7 +330,6 @@ function App() {
         <Route path="/admin/prayerReview" element={<ProtectedRoute isAdmin={true}><AdminPrayerReview /></ProtectedRoute>} />
 
         <Route path="/admin/formCounts" element={<ProtectedRoute isAdmin={true}><FormCounts /></ProtectedRoute>} />
-
 
         {/* announcement - update */}
         <Route path="/admin/announcementCategory/create" element={<ProtectedRoute isAdmin={true}><AnnouncementCategory /></ProtectedRoute>} />
@@ -339,7 +356,6 @@ function App() {
         {/* Types */}
         <Route path="/admin/EventType" element={<ProtectedRoute isAdmin={true}><EventType /></ProtectedRoute>} />
         <Route path="/admin/ActivityType" element={<ProtectedRoute isAdmin={true}><ActivityType /></ProtectedRoute>} />
-
 
         {/* <Route path="/admin/AdminSelection" element={<ProtectedRoute isAdmin={true}><AdminSelection /></ProtectedRoute>} /> */}
 

@@ -1,4 +1,4 @@
-const { ActivityType } = require("../../../models/FeedbackForm/Types/ActivityType");
+const ActivityType  = require("../../../models/FeedbackForm/Types/ActivityType");
 
 // Create ActivityType
 exports.createActivityType = async (req, res) => {

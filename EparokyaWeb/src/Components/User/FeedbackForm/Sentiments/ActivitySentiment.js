@@ -21,6 +21,7 @@ const ActivitySentiment = () => {
 
   const config = useMemo(() => ({ withCredentials: true }), []);
 
+  // Fetch active admin selection
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_API}/api/v1/admin-selections/active`, config)
@@ -28,24 +29,27 @@ const ActivitySentiment = () => {
       .catch((err) => console.error("Error fetching admin selection:", err));
   }, [config]);
 
+  // Fetch user ID
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config);
         setUserId(response.data.user._id);
       } catch (error) {
-        console.error('Error fetching user:', error.response ? error.response.data : error.message);
+        console.error("Error fetching user:", error.response?.data || error.message);
       }
     };
     fetchUser();
   }, [config]);
 
+  // Handle emoji selection
   const handleSelectEmoji = (index, emoji) => {
     const updatedResponses = [...responses];
     updatedResponses[index] = emoji;
     setResponses(updatedResponses);
   };
 
+  // Handle form submission
   const handleSubmit = async () => {
     if (!adminSelection?.typeId?._id) {
       alert("Activity Type ID is missing. Please try again.");
@@ -98,10 +102,11 @@ const ActivitySentiment = () => {
             Date: {adminSelection.date} | Time: {adminSelection.time}
           </Typography>
           <Typography variant="h5" sx={{ mt: 2 }}>
-            Activity Type: {adminSelection.typeId?.name}
+            Activity Type: {adminSelection.typeId?.name || "N/A"}
           </Typography>
           <Typography variant="h6" sx={{ mt: 1 }}>
-            Active Form Type: {adminSelection.category.charAt(0).toUpperCase() + adminSelection.category.slice(1)}
+            Active Form Type:{" "}
+            {adminSelection.category.charAt(0).toUpperCase() + adminSelection.category.slice(1)}
           </Typography>
         </>
       ) : (
@@ -109,7 +114,7 @@ const ActivitySentiment = () => {
           No active activity found.
         </Typography>
       )}
-  
+
       <Typography variant="h6" sx={{ mt: 3 }}>
         Feedback Form
       </Typography>
@@ -130,7 +135,7 @@ const ActivitySentiment = () => {
           </Grid>
         </Box>
       ))}
-  
+
       <TextField
         label="Other Comments/Suggestions"
         fullWidth
@@ -140,11 +145,11 @@ const ActivitySentiment = () => {
         onChange={(e) => setComment(e.target.value)}
         sx={{ mt: 2 }}
       />
-  
+
       <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 3 }}>
         Submit Feedback
       </Button>
-  
+
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box
           sx={{
@@ -168,7 +173,7 @@ const ActivitySentiment = () => {
         </Box>
       </Modal>
     </Container>
-  );  
+  );
 };
 
 export default ActivitySentiment;

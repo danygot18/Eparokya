@@ -436,20 +436,35 @@ exports.submitWeddingForm = async (req, res) => {
       }
     }
 
-    const groomAddressObject = typeof groomAddress === 'string' ? JSON.parse(groomAddress) : groomAddress;
-    const brideAddressObject = typeof brideAddress === 'string' ? JSON.parse(brideAddress) : brideAddress;
-
-    if (groomAddressObject.baranggay === "Others" && !groomAddressObject.customBarangay) {
-      return res.status(400).json({ message: "Please provide a custom barangay for the groom." });
+    const groomAddressObject = typeof groomAddress === "string" ? JSON.parse(groomAddress) : groomAddress;
+    const brideAddressObject = typeof brideAddress === "string" ? JSON.parse(brideAddress) : brideAddress;
+    
+    // Validate groom's address
+    if (!groomAddressObject.city) {
+      return res.status(400).json({ message: "Groom's city is required." });
     }
-    if (brideAddressObject.baranggay === "Others" && !brideAddressObject.customBarangay) {
-      return res.status(400).json({ message: "Please provide a custom barangay for the bride." });
+    if (!groomAddressObject.barangay) {
+      return res.status(400).json({ message: "Groom's barangay is required." });
     }
     if (groomAddressObject.city === "Others" && !groomAddressObject.customCity) {
       return res.status(400).json({ message: "Please provide a custom city for the groom." });
     }
+    if (groomAddressObject.barangay === "Others" && !groomAddressObject.customBarangay) {
+      return res.status(400).json({ message: "Please provide a custom barangay for the groom." });
+    }
+    
+    // Validate bride's address
+    if (!brideAddressObject.city) {
+      return res.status(400).json({ message: "Bride's city is required." });
+    }
+    if (!brideAddressObject.barangay) {
+      return res.status(400).json({ message: "Bride's barangay is required." });
+    }
     if (brideAddressObject.city === "Others" && !brideAddressObject.customCity) {
       return res.status(400).json({ message: "Please provide a custom city for the bride." });
+    }
+    if (brideAddressObject.barangay === "Others" && !brideAddressObject.customBarangay) {
+      return res.status(400).json({ message: "Please provide a custom barangay for the bride." });
     }
 
     const ninongArray = Ninong ? JSON.parse(Ninong) : [];

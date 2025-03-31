@@ -1,12 +1,12 @@
 const adminDate = require('../models/adminDate');
+const mongoose = require('mongoose');
 
 exports.getAllDates = async (req, res) => {
     try {
         const dates = await adminDate.find();
-        //calculateAvailable sa model
         const updatedDates = dates.map(date => ({
-            ...date.toObject(), // Convert Mongoose to plain JavaScript 
-            availableParticipants: date.calculateAvailable(), // Call 
+            ...date.toObject(),
+            availableParticipants: date.calculateAvailable(), 
         }));
 
         res.status(200).json(updatedDates);
@@ -60,24 +60,29 @@ exports.createDate = async (req, res) => {
 
 exports.toggleDate = async (req, res) => {
     const { adminDateId } = req.params;
-    console.log('adminDateId from params:', adminDateId);
+    console.log("adminDateId from params:", adminDateId);
+
+    // Validate the ID
+    if (!mongoose.Types.ObjectId.isValid(adminDateId)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+    }
 
     try {
-        const adminDateDoc = await adminDate.findById(adminDateId);  
+        const adminDateDoc = await adminDate.findById(adminDateId);
 
         if (!adminDateDoc) {
-            return res.status(404).json({ message: 'Date not found' });
+            return res.status(404).json({ message: "Date not found" });
         }
 
-        console.log('Before toggle:', adminDateDoc.isEnabled);
+        console.log("Before toggle:", adminDateDoc.isEnabled);
         adminDateDoc.isEnabled = !adminDateDoc.isEnabled;
-        console.log('After toggle:', adminDateDoc.isEnabled);
+        console.log("After toggle:", adminDateDoc.isEnabled);
 
         await adminDateDoc.save();
-        res.status(200).json({ message: 'Status updated', adminDate: adminDateDoc });
+        res.status(200).json({ message: "Status updated", adminDate: adminDateDoc });
     } catch (error) {
-        console.error('Error:', error); 
-        res.status(500).json({ message: 'Failed to update status', error });
+        console.error("Error:", error);
+        res.status(500).json({ message: "Failed to update status", error });
     }
 };
 

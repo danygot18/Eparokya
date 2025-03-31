@@ -105,6 +105,9 @@ app.use("/api/v1", prayerRequestRoutes);
 app.use("/api/v1", require("./routes/Announcement/announcement"));
 app.use("/api/v1", require("./routes/Announcement/announcementCategory"));
 
+// may conflict sa counseling kaya inangat muna
+app.use("/api/v1", require("./routes/adminDate"));
+
 // Priest
 app.use("/api/v1", require("./routes/Priest/priest"));
 
@@ -123,7 +126,7 @@ app.use("/api/v1", require("./routes/Announcement/ministryAnnouncement"));
 app.use("/api/v1", require("./routes/post"));
 
 // Events & Scheduling
-app.use("/api/v1", require("./routes/adminDate"));
+
 app.use("/api/v1", require("./routes/customEvent"));
 app.use("/api/v1", require("./routes/PrivateScheduling/houseBlessing"));
 

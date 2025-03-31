@@ -16,9 +16,6 @@ const weddingSchema = mongoose.Schema({
 
   groomName: { type: String, required: true },
   groomAddress: {
-    // street: { type: String, required: true },
-    // zip: { type: String, required: true },
-    // city: { type: String, required: true },
     BldgNameTower: { type: String, required: false },
         LotBlockPhaseHouseNo: { type: String, required: false },
         SubdivisionVillageZone: { type: String, required: false },
@@ -41,14 +38,14 @@ const weddingSchema = mongoose.Schema({
       customBarangay: {
           type: String,
           required: function() {
-              return this.address.baranggay === 'Others'; 
+              return this.barangay === 'Others'; 
           }
       },
       city: { type: String, enum:['Taguig City', 'Others'],  required: true },
       customCity: {
           type: String,
           required: function() {
-              return this.address.city === 'Others'; 
+              return this.city === 'Others'; 
           }
       },
 
@@ -85,14 +82,14 @@ const weddingSchema = mongoose.Schema({
       customBarangay: {
           type: String,
           required: function() {
-              return this.address.baranggay === 'Others'; 
+              return this.barangay === 'Others'; 
           }
       },
       city: { type: String, enum:['Taguig City', 'Others'],  required: true },
       customCity: {
           type: String,
           required: function() {
-              return this.address.city === 'Others'; 
+              return this.city === 'Others'; 
           }
       },
   },

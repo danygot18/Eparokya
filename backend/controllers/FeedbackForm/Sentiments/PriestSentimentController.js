@@ -177,3 +177,34 @@ exports.getSentimentsByPriest = async (req, res) => {
     res.status(500).json({ message: "Error fetching priest sentiments", error });
   }
 };
+
+exports.getAllPriestSentiments = async (req, res) => {
+  try {
+    const sentiments = await PriestSentiment.find()
+      .populate("userId", "name")
+      .populate("priestId", "fullName"); 
+
+    res.status(200).json(sentiments);
+  } catch (error) {
+    console.error("Error fetching all priest sentiments:", error);
+    res.status(500).json({ message: "Error fetching priest sentiments", error });
+  }
+};
+
+exports.getPriestSentimentById = async (req, res) => {
+  try {
+    const { priestSentimentId } = req.params; 
+    const sentiment = await PriestSentiment.findById(priestSentimentId)
+      .populate("userId", "name") 
+      .populate("priestId", "fullName"); 
+
+    if (!sentiment) {
+      return res.status(404).json({ message: "Priest sentiment not found" });
+    }
+
+    res.status(200).json(sentiment);
+  } catch (error) {
+    console.error("Error fetching priest sentiment by ID:", error);
+    res.status(500).json({ message: "Error fetching priest sentiment", error });
+  }
+};

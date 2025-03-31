@@ -9,4 +9,7 @@ router.get("/getAllPriestSentiment", PriestSentimentController.getAllPriestSenti
 
 router.get("/sentimentPriestType/:priestSentimentId", PriestSentimentController.getSentimentsByPriest);
 
+router.get("/getAllPriestSentiment", PriestSentimentController.getAllPriestSentiments);
+router.get("/getPriestSentimentById/:priestSentimentId", PriestSentimentController.getPriestSentimentById);
+
 module.exports = router;

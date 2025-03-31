@@ -3,13 +3,11 @@ const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;  
 const { Announcement, Comment, Reply } = require('../../models/Announcement/announcement');
 
-// Create a new event post
 exports.createAnnouncement = async (req, res) => {
     try {
         let imagesLinks = [];
         let videoLink = '';
 
-        // Handle image upload (multiple images or single image)
         if (req.files && req.files.images) {
             for (let file of req.files.images) {
                 const result = await cloudinary.uploader.upload(file.path, {
@@ -24,12 +22,11 @@ exports.createAnnouncement = async (req, res) => {
             }
         }
 
-        // Handle video upload (if any)
         if (req.files && req.files.video) {
             if (Array.isArray(req.files.video) && req.files.video.length > 0) {
                 const result = await cloudinary.uploader.upload(req.files.video[0].path, {
                     folder: "eparokya/announcement",
-                    resource_type: "video", // Video upload
+                    resource_type: "video", 
                 });
                 videoLink = result.secure_url;
             } else if (req.files.video) {
@@ -62,7 +59,6 @@ exports.createAnnouncement = async (req, res) => {
     }
 };
 
-// Get all announcements
 exports.getAllAnnouncements = async (req, res) => {
     try {
         const announcements = await Announcement.find()
@@ -85,10 +81,9 @@ exports.getAllAnnouncements = async (req, res) => {
     }
 };
 
-// Delete announcement
 exports.deleteAnnouncement = async (req, res) => {
     try {
-        const announcement = await Announcement.findById(req.params.id);
+        const announcement = await Announcement.findById(req.params.announcementId);
         if (!announcement) {
             return res.status(404).json({
                 success: false,
@@ -96,14 +91,13 @@ exports.deleteAnnouncement = async (req, res) => {
             });
         }
 
-        // Delete images from Cloudinary
         if (announcement.images && announcement.images.length > 0) {
             for (const image of announcement.images) {
                 await cloudinary.uploader.destroy(image.public_id);
             }
         }
 
-        await Announcement.findByIdAndDelete(req.params.id);
+        await Announcement.findByIdAndDelete(req.params.announcementId);
 
         res.status(200).json({
             success: true,
@@ -118,7 +112,6 @@ exports.deleteAnnouncement = async (req, res) => {
     }
 };
 
-// Update announcement
 exports.updateAnnouncement = async (req, res) => {
     try {
         const announcementId = req.params.id;
@@ -133,10 +126,8 @@ exports.updateAnnouncement = async (req, res) => {
 
         let imagesLinks = [];
 
-        // Handling image update
         if (req.files || req.file || req.body.images) {
 
-            // Delete existing images from Cloudinary
             if (announcement.images && announcement.images.length > 0) {
                 for (const image of announcement.images) {
                     await cloudinary.uploader.destroy(image.public_id);
@@ -215,7 +206,6 @@ exports.updateAnnouncement = async (req, res) => {
     }
 };
 
-// Get announcement by ID
 exports.getAnnouncementById = async (req, res) => {
     try {
         const announcementId = req.params.announcementId;
@@ -236,7 +226,7 @@ exports.getAnnouncementById = async (req, res) => {
 
 exports.likeAnnouncement = async (req, res) => {
     const { announcementId } = req.params;
-    const userId = req.user.id;  // This should now be available from middleware
+    const userId = req.user.id;  
 
     try {
         const announcement = await Announcement.findById(announcementId);
@@ -352,5 +342,27 @@ exports.replyToComment = async (req, res) => {
         res.status(201).json({ success: true, reply: savedReply });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to reply to comment', error: error.message });
+    }
+};
+
+exports.toggleFeatured = async (req, res) => {
+    try {
+        const { announcementId } = req.params;
+
+        const announcement = await Announcement.findById(announcementId);
+        if (!announcement) {
+            return res.status(404).json({ success: false, message: 'Announcement not found' });
+        }
+        announcement.isFeatured = !announcement.isFeatured;
+        await announcement.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Announcement is now ${announcement.isFeatured ? 'featured' : 'not featured'}`,
+            announcement,
+        });
+    } catch (error) {
+        console.error('Error toggling featured status:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
 };

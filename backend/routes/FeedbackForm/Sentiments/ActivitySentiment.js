@@ -9,4 +9,6 @@ router.get("/getAllActivitySentiment", ActivitySentimentController.getAllSentime
 
 router.get("/sentimentActivityType/:activitySentimentId", ActivitySentimentController.getSentimentsByActivityType);
 
+router.get("/getActivitySentimentById/:activitySentimentId", ActivitySentimentController.getSentimentById);
+
 module.exports = router;
