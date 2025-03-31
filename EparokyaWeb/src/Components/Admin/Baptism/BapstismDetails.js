@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import SideBar from "../SideBar";
-import Modal from 'react-modal';
+
 import BaptismChecklist from "./BaptismChecklist";
 import { toast, ToastContainer } from 'react-toastify';
 import "./baptism.css";
+import { Card, CardContent, Typography, Divider, Box, Button, Modal } from "@mui/material";
 
-Modal.setAppElement('#root');
 
 
 const BaptismDetails = () => {
@@ -31,13 +31,6 @@ const BaptismDetails = () => {
     const [bookNumber, setbookNumber] = useState("");
     const [pageNumber, setpageNumber] = useState("");
     const [lineNumber, setlineNumber] = useState("");
-
-    const [newDate, setNewDate] = useState("");
-    const [reason, setReason] = useState("");
-    const [updatedBaptismDate, setUpdatedBaptismDate] = useState(baptismDetails?.baptismDate || "");
-
-    const [zoom, setZoom] = useState(1);
-    const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,6 +38,16 @@ const BaptismDetails = () => {
     const [birthCertificateImage, setbirthCertificateImage] = useState("");
     const [marriageCertificateImage, setmarriageCertificateImage] = useState("");
     const [baptismPermitImage, setbaptismPermitImage] = useState("");
+
+    const [newDate, setNewDate] = useState("");
+    const [reason, setReason] = useState("");
+    const [updatedBaptismDate, setUpdatedBaptismDate] = useState(baptismDetails?.baptismDate || "");
+
+    const [zoom, setZoom] = useState(1);
+    const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.1, 3));
+    const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.1, 1));
+    const [offset, setOffset] = useState({ x: 0, y: 0 });
+
 
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancelReason, setCancelReason] = useState("");
@@ -260,145 +263,161 @@ const BaptismDetails = () => {
     return (
         <div className="baptism-details-page">
             <SideBar />
-            <div className="baptism-details">
+            <div className="baptism-details-box">
                 <h2>Baptism Details</h2>
-                <div>
-                    <p>User: {baptismDetails?.userId?.name || "N/A"}</p>
 
-                    <p>
-                        Baptism Date:{" "}
-                        {baptismDetails?.baptismDate
-                            ? new Date(baptismDetails.baptismDate).toLocaleDateString()
-                            : "N/A"}
-                    </p>
-                    <p>Baptism Time: {baptismDetails?.baptismTime || "N/A"}</p>
-                    <p>Contact Number: {baptismDetails?.phone || "N/A"}</p>
+                <CardContent>
 
-                    <p>Child Name: {baptismDetails?.child?.fullName || "N/A"}</p>
-                    <p>
-                        Birthdate:{" "}
-                        {baptismDetails?.child?.dateOfBirth
-                            ? new Date(baptismDetails.child.dateOfBirth).toLocaleDateString()
-                            : "N/A"}
-                    </p>
-                    <p>Sex: {baptismDetails?.child?.gender || "N/A"}</p>
+                    {/* <Divider sx={{ marginBottom: 2 }} /> */}
+                    <Box >
+                        <Card sx={{ flex: 1, marginBottom: 2 }}>
+                            <CardContent>
+                                <Typography variant="h6" mt={2}>
+                                    User Details
+                                </Typography>
+                                <Typography><strong>User:</strong> {baptismDetails?.userId?.name || "N/A"}</Typography>
+                                <Typography><strong>Baptism Date:</strong> {baptismDetails?.baptismDate ? new Date(baptismDetails.baptismDate).toLocaleDateString() : "N/A"}</Typography>
+                                <Typography><strong>Baptism Time:</strong> {baptismDetails?.baptismTime || "N/A"}</Typography>
+                                <Typography><strong>Contact Number:</strong> {baptismDetails?.phone || "N/A"}</Typography>
+                            </CardContent>
 
-                    <p>Father: {baptismDetails?.parents?.fatherFullName || "N/A"}</p>
-                    <p>Father's Place of Birth: {baptismDetails?.parents?.placeOfFathersBirth || "N/A"}</p>
+                        </Card>
+                        <Card sx={{ flex: 1, marginBottom: 2 }}>
+                            <CardContent>
+                                <Typography variant="h6" mt={2}>Child Details</Typography>
+                                <Typography><strong>Name:</strong> {baptismDetails?.child?.fullName || "N/A"}</Typography>
+                                <Typography><strong>Birthdate:</strong> {baptismDetails?.child?.dateOfBirth ? new Date(baptismDetails.child.dateOfBirth).toLocaleDateString() : "N/A"}</Typography>
+                                <Typography><strong>Sex:</strong> {baptismDetails?.child?.gender || "N/A"}</Typography>
+                            </CardContent>
+                        </Card>
 
-                    <p>Mother: {baptismDetails?.parents?.motherFullName || "N/A"}</p>
-                    <p>Mother's Place of Birth: {baptismDetails?.parents?.placeOfMothersBirth || "N/A"}</p>
+                    </Box>
+                    <Box>
+                        <Card sx={{ flex: 1, marginBottom: 2 }}>
+                            <CardContent>
+                                <Typography variant="h6" mt={2}>Parents</Typography>
+                                <Typography><strong>Father:</strong> {baptismDetails?.parents?.fatherFullName || "N/A"}</Typography>
+                                <Typography><strong>Father's Place of Birth:</strong> {baptismDetails?.parents?.placeOfFathersBirth || "N/A"}</Typography>
+                                <Typography><strong>Mother:</strong> {baptismDetails?.parents?.motherFullName || "N/A"}</Typography>
+                                <Typography><strong>Mother's Place of Birth:</strong> {baptismDetails?.parents?.placeOfMothersBirth || "N/A"}</Typography>
+                                <Typography><strong>Address:</strong> {baptismDetails?.parents?.address || "N/A"}</Typography>
+                                <Typography><strong>Marriage Status:</strong> {baptismDetails?.parents?.marriageStatus || "N/A"}</Typography>
+                            </CardContent>
+                        </Card>
+                        <Card sx={{ flex: 1, marginBottom: 2 }}>
+                            <CardContent>
+                                <Typography variant="h6" mt={2}>Primary Sponsors</Typography>
+                                <Typography><strong>Primary Ninong:</strong> {baptismDetails?.ninong?.name || "N/A"}</Typography>
+                                <Typography><strong>Primary Ninong Address:</strong> {baptismDetails?.ninong?.address || "N/A"}</Typography>
+                                <Typography><strong>Primary Ninong Religion:</strong> {baptismDetails?.ninong?.religion || "N/A"}</Typography>
+                                <Typography><strong>Primary Ninang:</strong> {baptismDetails?.ninang?.name || "N/A"}</Typography>
+                                <Typography><strong>Primary Ninang Address:</strong> {baptismDetails?.ninang?.address || "N/A"}</Typography>
+                                <Typography><strong>Primary Ninang Religion:</strong> {baptismDetails?.ninang?.religion || "N/A"}</Typography>
+                                <Typography><strong>Additional Ninongs:</strong> {baptismDetails?.NinongGodparents?.map((gp) => gp.name).join(", ") || "N/A"}</Typography>
+                                <Typography><strong>Additional Ninangs:</strong> {baptismDetails?.NinangGodparents?.map((gp) => gp.name).join(", ") || "N/A"}</Typography>
+                            </CardContent>
+                        </Card>
+                    </Box>
 
-
-                    <p>Address: {baptismDetails?.parents?.address || "N/A"}</p>
-                    <p>Marriage Status: {baptismDetails?.parents?.marriageStatus || "N/A"}</p>
-
-                    <p>Primary Ninong: {baptismDetails?.ninong?.name || "N/A"}</p>
-                    <p>Primary Ninong Address: {baptismDetails?.ninong?.address || "N/A"}</p>
-                    <p>Primary Ninong Religion: {baptismDetails?.ninong?.religion || "N/A"}</p>
-
-                    <p>Primary Ninang: {baptismDetails?.ninang?.name || "N/A"}</p>
-                    <p>Primary Ninang Address: {baptismDetails?.ninang?.address || "N/A"}</p>
-                    <p>Primary Ninang Religion: {baptismDetails?.ninang?.religion || "N/A"}</p>
-
-                    <p>
-                        Ninong:{" "}
-                        {baptismDetails?.NinongGodparents?.map((gp) => gp.name).join(", ") || "N/A"}
-                    </p>
-                    <p>
-                        Ninang:{" "}
-                        {baptismDetails?.NinangGodparents?.map((gp) => gp.name).join(", ") || "N/A"}
-                    </p>
-
-                    <div className="details-box">
-                        <h3>Baptismal Documents</h3>
-                        {['birthCertificate', 'marriageCertificate'].map((doc, index) => (
-                            <div key={index} className="grid-row">
-                                <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
-                                {baptismDetails?.Docs?.[doc]?.url ? (
-                                    <img
-                                        src={baptismDetails.Docs[doc].url}
-                                        alt={doc}
-                                        style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
-                                        onClick={() => openModal(baptismDetails.Docs[doc].url)}
-                                    />
-                                ) : (
-                                    "N/A"
-                                )}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Modal with Zoom and Drag Functionality */}
-                    <Modal
-                        isOpen={isModalOpen}
-                        onRequestClose={closeModal}
-                        contentLabel="Image Modal"
-                        style={{
-                            overlay: {
-                                backgroundColor: "rgba(0, 0, 0, 0.75)",
-                            },
-                            content: {
-                                maxWidth: "500px",
-                                margin: "auto",
-                                padding: "20px",
-                                textAlign: "center",
-                            },
-                        }}
-                    >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <button onClick={closeModal} style={{ cursor: "pointer", padding: "5px 10px" }}>
-                                Close
-                            </button>
-                            <div>
-                                <button
-                                    onClick={() => setZoom((prevZoom) => Math.min(prevZoom + 0.1, 3))}
-                                    style={{ margin: "0 5px", cursor: "pointer", padding: "5px 10px" }}
-                                >
-                                    Zoom In
-                                </button>
-                                <button
-                                    onClick={() => setZoom((prevZoom) => Math.max(prevZoom - 0.1, 1))}
-                                    style={{ margin: "0 5px", cursor: "pointer", padding: "5px 10px" }}
-                                >
-                                    Zoom Out
-                                </button>
-                            </div>
-                        </div>
-                        <div
-                            style={{
-                                overflow: "hidden",
-                                position: "relative",
+                </CardContent>
+                <Card sx={{ maxWidth: 600, margin: "auto", padding: 2, boxShadow: 3 }}>
+                    <CardContent>
+                        <Typography variant="h5" gutterBottom>
+                            Baptism Details
+                        </Typography>
+                        <Divider sx={{ marginBottom: 2 }} />
+                        <Box>
+                            <Typography variant="h6" mt={2}>Baptismal Documents</Typography>
+                            <Divider sx={{ marginBottom: 2 }} />
+                            {['birthCertificate', 'marriageCertificate'].map((doc, index) => (
+                                <Box key={index} sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}>
+                                    <Typography sx={{ flex: 1 }}><strong>{doc.replace(/([A-Z])/g, ' $1').trim()}:</strong></Typography>
+                                    {baptismDetails?.Docs?.[doc]?.url ? (
+                                        <img
+                                            src={baptismDetails.Docs[doc].url}
+                                            alt={doc}
+                                            style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer", borderRadius: 8, boxShadow: 1 }}
+                                            onClick={() => openModal(baptismDetails.Docs[doc].url)}
+                                        />
+                                    ) : (
+                                        <Typography>N/A</Typography>
+                                    )}
+                                </Box>
+                            ))}
+                        </Box>
+                    </CardContent>
+                    <Modal open={isModalOpen} onClose={closeModal}>
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                bgcolor: "background.paper",
+                                boxShadow: 24,
+                                p: 3,
+                                maxWidth: "90vw",
+                                maxHeight: "90vh",
                                 display: "flex",
-                                justifyContent: "center",
+                                flexDirection: "column",
                                 alignItems: "center",
-                                width: "100%",
-                                height: "80vh",
-                                cursor: isDragging ? "grabbing" : "grab",
+                                borderRadius: 2,
                             }}
-                            onMouseDown={(e) => handleMouseDown(e)}
-                            onMouseMove={(e) => handleMouseMove(e)}
-                            onMouseUp={handleMouseUp}
-                            onMouseLeave={handleMouseUp}
                         >
-                            <img
-                                src={selectedImage}
-                                alt="Certificate Preview"
-                                style={{
-                                    transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
-                                    transition: isDragging ? "none" : "transform 0.3s ease",
-                                    maxWidth: "100%",
-                                    maxHeight: "100%",
-                                    objectFit: "contain",
+                            <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mb: 2 }}>
+                                <Button onClick={closeModal} variant="contained" sx={{ mx: 1 }} size="small">
+                                    Close
+                                </Button>
+                                <Box>
+                                    <Button onClick={handleZoomIn} variant="outlined" sx={{ mx: 1 }}>
+                                        Zoom In
+                                    </Button>
+                                    <Button onClick={handleZoomOut} variant="outlined" sx={{ mx: 1 }}>
+                                        Zoom Out
+                                    </Button>
+                                </Box>
+                            </Box>
+
+                            <Box
+                                sx={{
+                                    overflow: "hidden",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    width: "100%",
+                                    height: "80vh",
                                     cursor: isDragging ? "grabbing" : "grab",
+                                    border: "1px solid #ddd",
+                                    position: "relative",
                                 }}
-                                draggable={false}
-                            />
-                        </div>
+                                onMouseDown={handleMouseDown}
+                                onMouseMove={handleMouseMove}
+                                onMouseUp={handleMouseUp}
+                                onMouseLeave={handleMouseUp}
+                            >
+                                <img
+                                    src={selectedImage}
+                                    alt="Certificate Preview"
+                                    style={{
+                                        transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
+                                        transition: isDragging ? "none" : "transform 0.3s ease",
+                                        maxWidth: "100%",
+                                        maxHeight: "100%",
+                                        objectFit: "contain",
+                                        cursor: isDragging ? "grabbing" : "grab",
+                                    }}
+                                    draggable={false}
+                                />
+                            </Box>
+                        </Box>
                     </Modal>
-                </div>
+                </Card>
 
                 {/* Display Updated Date  */}
+
+
+            </div>
+            <div className="baptism-details-box">
                 <div className="wedding-date-box">
                     <h3>Updated Baptism Date</h3>
                     <p className="date">
@@ -538,56 +557,53 @@ const BaptismDetails = () => {
                     </div>
                 </div>
 
-                 {/* Cancelling Reason Section */}
-                 {baptismDetails?.binyagStatus === "Cancelled" && baptismDetails?.cancellingReason ? (
-                        <div className="house-comments-section">
-                            <h2>Cancellation Details</h2>
-                            <div className="admin-comment">
-                                <p><strong>Cancelled By:</strong> {baptismDetails.cancellingReason.user === "Admin" ? "Admin" : baptismDetails.cancellingReason.user}</p>
-                                <p><strong>Reason:</strong> {baptismDetails.cancellingReason.reason || "No reason provided."}</p>
-                            </div>
+                {/* Cancelling Reason Section */}
+                {baptismDetails?.binyagStatus === "Cancelled" && baptismDetails?.cancellingReason ? (
+                    <div className="house-comments-section">
+                        <h2>Cancellation Details</h2>
+                        <div className="admin-comment">
+                            <p><strong>Cancelled By:</strong> {baptismDetails.cancellingReason.user === "Admin" ? "Admin" : baptismDetails.cancellingReason.user}</p>
+                            <p><strong>Reason:</strong> {baptismDetails.cancellingReason.reason || "No reason provided."}</p>
                         </div>
-                    ) : null}
-
-                    {/* Cancel Button */}
-                    <div className="button-container">
-                        <button onClick={() => setShowCancelModal(true)}>Cancel Baptism</button>
                     </div>
+                ) : null}
 
-                     {/* Cancellation Modal */}
-                     {showCancelModal && (
-                        <div className="modal-overlay">
-                            <div className="modal">
-                                <h3>Cancel Baptism</h3>
-                                <p>Please provide a reason for cancellation:</p>
-                                <textarea
-                                    value={cancelReason}
-                                    onChange={(e) => setCancelReason(e.target.value)}
-                                    placeholder="Enter reason..."
-                                    className="modal-textarea"
-                                />
-                                <div className="modal-buttons">
-                                    <button onClick={handleCancel}>Confirm Cancel</button>
-                                    <button onClick={() => setShowCancelModal(false)}>Back</button>
-                                </div>
+                {/* Cancel Button */}
+                <div className="button-container">
+                    <button onClick={() => setShowCancelModal(true)}>Cancel Baptism</button>
+                </div>
+
+                {/* Cancellation Modal */}
+                {showCancelModal && (
+                    <div className="modal-overlay">
+                        <div className="modal">
+                            <h3>Cancel Baptism</h3>
+                            <p>Please provide a reason for cancellation:</p>
+                            <textarea
+                                value={cancelReason}
+                                onChange={(e) => setCancelReason(e.target.value)}
+                                placeholder="Enter reason..."
+                                className="modal-textarea"
+                            />
+                            <div className="modal-buttons">
+                                <button onClick={handleCancel}>Confirm Cancel</button>
+                                <button onClick={() => setShowCancelModal(false)}>Back</button>
                             </div>
                         </div>
-                    )}
+                    </div>
+                )}
 
                 <div className="button-container">
                     <button onClick={handleConfirm}>Confirm</button>
                 </div>
-
             </div>
             <div className="wedding-checklist-container">
                 <BaptismChecklist baptismId={baptismId} />
-
-            </div>
-            <div className="button-container">
                 <button onClick={() => navigate(`/adminChat/${baptismDetails?.userId?._id}/${baptismDetails?.userId?.email}`)}>
                     Go to Admin Chat
                 </button>
             </div>
+
         </div>
     );
 };

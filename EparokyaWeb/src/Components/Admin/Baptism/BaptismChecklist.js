@@ -1,5 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  List,
+  ListItem,
+  ListItemText,
+  Modal,
+  Paper,
+  Typography,
+  styled,
+  Chip
+} from '@mui/material';
+import { CheckCircleOutline, HighlightOff } from '@mui/icons-material';
+
+const StyledButton = styled(Button)(({ theme, verified }) => ({
+  backgroundColor: verified ? theme.palette.success.main : theme.palette.grey[500],
+  color: theme.palette.common.white,
+  minWidth: 120,
+  height: 40,
+  '&:hover': {
+    backgroundColor: verified ? theme.palette.success.dark : theme.palette.grey[600],
+  },
+  pointerEvents: 'none'
+}));
+
+const SectionCard = styled(Card)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+  boxShadow: theme.shadows[3]
+}));
+
+const VerificationChip = ({ verified }) => (
+  <Chip
+    icon={verified ? <CheckCircleOutline /> : <HighlightOff />}
+    label={verified ? "Verified" : "Unverified"}
+    color={verified ? "success" : "error"}
+    variant="outlined"
+    sx={{ 
+      minWidth: 120,
+      borderWidth: 2,
+      borderStyle: 'solid'
+    }}
+  />
+);
 
 const BaptismChecklist = ({ baptismId }) => {
   const [checklist, setChecklist] = useState({
@@ -10,7 +58,8 @@ const BaptismChecklist = ({ baptismId }) => {
     PreBaptismSeminar1: false,
     PreBaptismSeminar2: false,
   });
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   useEffect(() => {
     if (baptismId) {
       axios
@@ -37,6 +86,10 @@ const BaptismChecklist = ({ baptismId }) => {
   };
 
   const handleSave = async () => {
+    setIsModalOpen(true);
+  };
+
+  const confirmSave = async () => {
     try {
       await axios.put(
         `${process.env.REACT_APP_API}/api/v1/updateBaptismChecklist/${baptismId}`,
@@ -44,106 +97,238 @@ const BaptismChecklist = ({ baptismId }) => {
         { withCredentials: true }
       );
       alert('Checklist updated successfully!');
+      setIsModalOpen(false);
     } catch (err) {
       console.error('Error updating checklist:', err);
       alert('Failed to update checklist.');
     }
   };
 
-  return (                                                                        
-    <div className="baptism-checklist-container">
-      <h2>Baptism Checklist</h2>
+  const verifiedItems = Object.keys(checklist).filter(key => checklist[key]);
+  const unverifiedItems = Object.keys(checklist).filter(key => !checklist[key]);
 
-      <div className="baptism-checklist-item">
-        <span>Photocopy of Birth Certificate</span>
-        <button
-          className={checklist.PhotocopyOfBirthCertificate ? "checked-btn" : "unchecked-btn"}
-          onClick={() => handleCheckboxChange('PhotocopyOfBirthCertificate')}
+  const formatLabel = (str) => {
+    return str.replace(/([A-Z])/g, ' $1').trim();
+  };
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        Baptism Checklist
+      </Typography>
+
+      <SectionCard>
+        <CardContent>
+          <Typography variant="h5" gutterBottom>
+            Required Documents
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <List>
+            {Object.entries(checklist)
+              .filter(([key]) => 
+                key === 'PhotocopyOfBirthCertificate' || 
+                key === 'PhotocopyOfMarriageCertificate'
+              )
+              .map(([key, value]) => (
+                <ListItem key={key} sx={{ py: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={value}
+                        onChange={() => handleCheckboxChange(key)}
+                        color="primary"
+                      />
+                    }
+                    label={formatLabel(key)}
+                    sx={{ flexGrow: 1 }}
+                  />
+                  <VerificationChip verified={value} />
+                </ListItem>
+              ))}
+          </List>
+        </CardContent>
+      </SectionCard>
+
+      <SectionCard>
+        <CardContent>
+          <Typography variant="h5" gutterBottom>
+            Additional Documents
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <List>
+            {Object.entries(checklist)
+              .filter(([key]) => 
+                key === 'BaptismalPermit' || 
+                key === 'CertificateOfNoRecordBaptism'
+              )
+              .map(([key, value]) => (
+                <ListItem key={key} sx={{ py: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={value}
+                        onChange={() => handleCheckboxChange(key)}
+                        color="primary"
+                      />
+                    }
+                    label={formatLabel(key)}
+                    sx={{ flexGrow: 1 }}
+                  />
+                  <VerificationChip verified={value} />
+                </ListItem>
+              ))}
+          </List>
+        </CardContent>
+      </SectionCard>
+
+      <SectionCard>
+        <CardContent>
+          <Typography variant="h5" gutterBottom>
+            Seminars
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <List>
+            {Object.entries(checklist)
+              .filter(([key]) => 
+                key === 'PreBaptismSeminar1' || 
+                key === 'PreBaptismSeminar2'
+              )
+              .map(([key, value]) => (
+                <ListItem key={key} sx={{ py: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={value}
+                        onChange={() => handleCheckboxChange(key)}
+                        color="primary"
+                      />
+                    }
+                    label={formatLabel(key)}
+                    sx={{ flexGrow: 1 }}
+                  />
+                  <VerificationChip verified={value} />
+                </ListItem>
+              ))}
+          </List>
+        </CardContent>
+      </SectionCard>
+
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleSave}
+          size="large"
+          sx={{ minWidth: 200, height: 50 }}
         >
-          {checklist.PhotocopyOfBirthCertificate ? "Verified" : "Unverified"}
-        </button>
-      </div>
+          Save Checklist
+        </Button>
+      </Box>
 
-      <div className="baptism-checklist-item">
-        <span>Photocopy of Marriage Certificate</span>
-        <button
-          className={checklist.PhotocopyOfMarriageCertificate ? "checked-btn" : "unchecked-btn"}
-          onClick={() => handleCheckboxChange('PhotocopyOfMarriageCertificate')}
-        >
-          {checklist.PhotocopyOfMarriageCertificate ? "Verified" : "Unverified"}
-        </button>
-      </div>
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        aria-labelledby="baptism-checklist-confirmation-modal"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: { xs: '90%', sm: 500 },
+          maxHeight: '80vh',
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          borderRadius: 1,
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="h6" component="h2">
+              Baptism Checklist Confirmation
+            </Typography>
+          </Box>
+          
+          <Box sx={{ overflow: 'auto', flex: 1, p: 3 }}>
+            <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'grey.100' }}>
+              <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                Verified Documents
+                <Chip 
+                  label={`${verifiedItems.length} items`} 
+                  size="small" 
+                  color="success" 
+                  sx={{ ml: 1 }} 
+                />
+              </Typography>
+              <List dense sx={{ maxHeight: 200, overflow: 'auto' }}>
+                {verifiedItems.map((item) => (
+                  <ListItem key={item} sx={{ py: 0.5 }}>
+                    <ListItemText 
+                      primary={formatLabel(item)} 
+                      primaryTypographyProps={{ sx: { display: 'flex', alignItems: 'center' } }}
+                    />
+                    <CheckCircleOutline color="success" sx={{ ml: 1 }} />
+                  </ListItem>
+                ))}
+                {verifiedItems.length === 0 && (
+                  <ListItem>
+                    <ListItemText primary="No documents verified yet" />
+                  </ListItem>
+                )}
+              </List>
+            </Paper>
 
-      <h3>Additional Documents</h3>
-      <div className="baptism-checklist-item">
-        <span>Baptismal Permit</span>
-        <button
-          className={checklist.BaptismalPermit ? "checked-btn" : "unchecked-btn"}
-          onClick={() => handleCheckboxChange('BaptismalPermit')}
-        >
-          {checklist.BaptismalPermit ? "Verified" : "Unverified"}
-        </button>
-      </div>
+            <Paper elevation={0} sx={{ p: 2, bgcolor: 'grey.100' }}>
+              <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                Pending Documents
+                <Chip 
+                  label={`${unverifiedItems.length} items`} 
+                  size="small" 
+                  color="error" 
+                  sx={{ ml: 1 }} 
+                />
+              </Typography>
+              <List dense sx={{ maxHeight: 200, overflow: 'auto' }}>
+                {unverifiedItems.map((item) => (
+                  <ListItem key={item} sx={{ py: 0.5 }}>
+                    <ListItemText 
+                      primary={formatLabel(item)} 
+                      primaryTypographyProps={{ sx: { display: 'flex', alignItems: 'center' } }}
+                    />
+                    <HighlightOff color="error" sx={{ ml: 1 }} />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Box>
 
-      <div className="baptism-checklist-item">
-        <span>Certificate of No Record of Baptism</span>
-        <button
-          className={checklist.CertificateOfNoRecordBaptism ? "checked-btn" : "unchecked-btn"}
-          onClick={() => handleCheckboxChange('CertificateOfNoRecordBaptism')}
-        >
-          {checklist.CertificateOfNoRecordBaptism ? "Verified" : "Unverified"}
-        </button>
-      </div>
-
-      <h3>Seminars</h3>
-      <div className="baptism-checklist-item">
-        <span>Pre-Baptism Seminar 1</span>
-        <button
-          className={checklist.PreBaptismSeminar1 ? "checked-btn" : "unchecked-btn"}
-          onClick={() => handleCheckboxChange('PreBaptismSeminar1')}
-        >
-          {checklist.PreBaptismSeminar1 ? "Verified" : "Unverified"}
-        </button>
-      </div>
-
-      <div className="baptism-checklist-item">
-        <span>Pre-Baptism Seminar 2</span>
-        <button
-          className={checklist.PreBaptismSeminar2 ? "checked-btn" : "unchecked-btn"}
-          onClick={() => handleCheckboxChange('PreBaptismSeminar2')}
-        >
-          {checklist.PreBaptismSeminar2 ? "Verified" : "Unverified"}
-        </button>
-      </div>
-
-      <button onClick={handleSave}>Save Checklist</button>
-      <style>
-        {`
-          .checked-btn {
-            background-color: green;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: not-allowed;
-          }
-          .unchecked-btn {
-            background-color: gray;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: not-allowed;
-          }
-          .baptism-checklist-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-          }
-        `}
-      </style>
-    </div>
+          <Box sx={{ 
+            p: 2, 
+            borderTop: '1px solid', 
+            borderColor: 'divider',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: 2
+          }}>
+            <Button 
+              variant="outlined" 
+              onClick={() => setIsModalOpen(false)}
+              sx={{ minWidth: 100 }}
+            >
+              Back
+            </Button>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={confirmSave}
+              sx={{ minWidth: 150 }}
+            >
+              Confirm Save
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    </Box>
   );
 };
 

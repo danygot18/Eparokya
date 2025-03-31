@@ -5,6 +5,7 @@ import axios from "axios";
 import { IoSend } from "react-icons/io5";
 import { socket } from "../../socket/index";
 import "./../../Components/Chat/Chat.css";
+import SideBar from "./SideBar";
 
 
 const AdminChat = () => {
@@ -99,7 +100,7 @@ const AdminChat = () => {
 
   return (
     <div className="chat-containers">
-     
+     <SideBar />
       <div className="chat-box">
         <div className="chat-header">{email || "Chat"}</div>
         <div className="chat-messages">

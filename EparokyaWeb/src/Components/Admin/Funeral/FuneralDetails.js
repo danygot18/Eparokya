@@ -6,13 +6,15 @@ import "../../Layout/styles/style.css";
 import "./funeral.css";
 
 import { useParams, useNavigate } from "react-router-dom";
-import Modal from "react-modal";
+
 import DateTimePicker from "react-datetime-picker";
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import { toast, ToastContainer } from 'react-toastify';
 // import { useFocusEffect } from '@react-navigation/native';
 
-Modal.setAppElement("#root");
+import { Box, Paper, Typography, Stack, Divider, Modal, Button, TextField } from "@mui/material";
+
+
 
 const FuneralDetails = () => {
     const { funeralId } = useParams();
@@ -34,16 +36,21 @@ const FuneralDetails = () => {
     const [reason, setReason] = useState("");
     const [updatedFuneralDate, setUpdatedFuneralDate] = useState(funeralDetails?.funeralDate || "");
 
-    const [zoom, setZoom] = useState(1);
-    const [offset, setOffset] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
+
+
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedImage, setSelectedImage] = useState("");
+
     const [deathCertificateImage, setDeathCertificateImage] = useState("");
 
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancelReason, setCancelReason] = useState("");
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [zoom, setZoom] = useState(1);
+    const [isDragging, setIsDragging] = useState(false);
+    const [offset, setOffset] = useState({ x: 0, y: 0 });
+    const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
 
     const predefinedComments = [
@@ -74,7 +81,7 @@ const FuneralDetails = () => {
             }
         };
 
-         const fetchPriests = async () => {
+        const fetchPriests = async () => {
             try {
                 const response = await axios.get(
                     `${process.env.REACT_APP_API}/api/v1/getAvailablePriest`,
@@ -263,6 +270,10 @@ const FuneralDetails = () => {
         setSelectedImage("");
         setIsModalOpen(false);
     };
+
+    const handleZoomIn = () => setZoom((prev) => prev + 0.2);
+    const handleZoomOut = () => setZoom((prev) => Math.max(0.5, prev - 0.2));
+
     const handleMouseDown = (e) => {
         e.preventDefault();
         setIsDragging(true);
@@ -285,119 +296,170 @@ const FuneralDetails = () => {
     if (error) return <div>Error: {error}</div>;
 
     return (
-        <div className="wedding-details-page">
+        <div className="funeral-details-page">
             <SideBar />
-            <div className="house-details-content">
 
-                <div className="house-details-grid">
-                    {/* Funeral Details Box */}
-                    <div className="house-details-box">
-                        <h3>Funeral Details</h3>
-                        <div className="house-details-item">
-                            <p><strong>Name:</strong> {funeralDetails?.name || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Age:</strong> {funeralDetails?.age || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Contact Person:</strong> {funeralDetails?.contactPerson || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Relationship:</strong> {funeralDetails?.relationship || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Phone:</strong> {funeralDetails?.phone || "N/A"}</p>
-                        </div>
 
-                        <div className="house-details-item">
-                            <p><strong>Bldg Name/Tower:</strong> {funeralDetails?.address?.BldgNameTower || "N/A"}</p>
-                            <p><strong>Lot/Block/Phase/House No.:</strong> {funeralDetails?.address?.LotBlockPhaseHouseNo || "N/A"}</p>
-                            <p><strong>Subdivision/Village/Zone:</strong> {funeralDetails?.address?.SubdivisionVillageZone || "N/A"}</p>
-                            <p><strong>Street:</strong> {funeralDetails?.address?.Street || "N/A"}</p>
-                            <p><strong>Barangay:</strong> {funeralDetails?.address?.barangay === 'Others' ? funeralDetails?.address?.customBarangay || "N/A" : funeralDetails?.address?.barangay || "N/A"}</p>
-                            <p><strong>District:</strong> {funeralDetails?.address?.District || "N/A"}</p>
-                            <p><strong>City:</strong> {funeralDetails?.address?.city === 'Others' ? funeralDetails?.address?.customCity || "N/A" : funeralDetails?.address?.city || "N/A"}</p>                        
-                        </div>
-                        
-                        <div className="house-details-item">
-                            <p><strong>Place of Death:</strong> {funeralDetails?.placeOfDeath || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Funeral Date:</strong> {funeralDetails?.funeralDate ? new Date(funeralDetails.funeralDate).toLocaleDateString() : "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Time:</strong> {funeralDetails?.funeraltime || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Service Type:</strong> {funeralDetails?.serviceType || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Priest Visit:</strong> {funeralDetails?.priestVisit || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Reason of Death:</strong> {funeralDetails?.reasonOfDeath || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Funeral Mass Date:</strong> {funeralDetails?.funeralMassDate ? new Date(funeralDetails.funeralMassDate).toLocaleDateString() : "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Funeral Mass Time:</strong> {funeralDetails?.funeralMasstime || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Funeral Mass:</strong> {funeralDetails?.funeralMass || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Funeral Status:</strong> {funeralDetails?.funeralStatus || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Confirmed At:</strong> {funeralDetails?.confirmedAt ? new Date(funeralDetails.confirmedAt).toLocaleDateString() : "N/A"}</p>
-                        </div>
+            <div className="funeral-details-box">
+                {/* Funeral Details Box */}
+                <Paper elevation={3} sx={{ p: 3, borderRadius: 2, marginBottom: 2 }}>
+                    <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+                        Funeral Details
+                    </Typography>
+
+                    <Stack spacing={1.5}>
+                        <Typography><strong>Name:</strong> {funeralDetails?.name || "N/A"}</Typography>
+                        <Typography><strong>Age:</strong> {funeralDetails?.age || "N/A"}</Typography>
+                        <Typography><strong>Contact Person:</strong> {funeralDetails?.contactPerson || "N/A"}</Typography>
+                        <Typography><strong>Relationship:</strong> {funeralDetails?.relationship || "N/A"}</Typography>
+                        <Typography><strong>Phone:</strong> {funeralDetails?.phone || "N/A"}</Typography>
+
+                        <Divider />
+
+                        <Typography variant="h6" sx={{ fontWeight: "bold", mt: 2 }}>
+                            Address
+                        </Typography>
+                        <Typography><strong>Bldg Name/Tower:</strong> {funeralDetails?.address?.BldgNameTower || "N/A"}</Typography>
+                        <Typography><strong>Lot/Block/Phase/House No.:</strong> {funeralDetails?.address?.LotBlockPhaseHouseNo || "N/A"}</Typography>
+                        <Typography><strong>Subdivision/Village/Zone:</strong> {funeralDetails?.address?.SubdivisionVillageZone || "N/A"}</Typography>
+                        <Typography><strong>Street:</strong> {funeralDetails?.address?.Street || "N/A"}</Typography>
+                        <Typography><strong>Barangay:</strong> {funeralDetails?.address?.barangay === "Others" ? funeralDetails?.address?.customBarangay || "N/A" : funeralDetails?.address?.barangay || "N/A"}</Typography>
+                        <Typography><strong>District:</strong> {funeralDetails?.address?.District || "N/A"}</Typography>
+                        <Typography><strong>City:</strong> {funeralDetails?.address?.city === "Others" ? funeralDetails?.address?.customCity || "N/A" : funeralDetails?.address?.city || "N/A"}</Typography>
+
+                        <Divider />
+
+                        <Typography variant="h6" sx={{ fontWeight: "bold", mt: 2 }}>
+                            Funeral Information
+                        </Typography>
+                        <Typography><strong>Place of Death:</strong> {funeralDetails?.placeOfDeath || "N/A"}</Typography>
+                        <Typography><strong>Funeral Date:</strong> {funeralDetails?.funeralDate ? new Date(funeralDetails.funeralDate).toLocaleDateString() : "N/A"}</Typography>
+                        <Typography><strong>Time:</strong> {funeralDetails?.funeraltime || "N/A"}</Typography>
+                        <Typography><strong>Service Type:</strong> {funeralDetails?.serviceType || "N/A"}</Typography>
+                        <Typography><strong>Priest Visit:</strong> {funeralDetails?.priestVisit || "N/A"}</Typography>
+                        <Typography><strong>Reason of Death:</strong> {funeralDetails?.reasonOfDeath || "N/A"}</Typography>
+
+                        <Divider />
+
+                        <Typography variant="h6" sx={{ fontWeight: "bold", mt: 2 }}>
+                            Funeral Mass Details
+                        </Typography>
+                        <Typography><strong>Funeral Mass Date:</strong> {funeralDetails?.funeralMassDate ? new Date(funeralDetails.funeralMassDate).toLocaleDateString() : "N/A"}</Typography>
+                        <Typography><strong>Funeral Mass Time:</strong> {funeralDetails?.funeralMasstime || "N/A"}</Typography>
+                        <Typography><strong>Funeral Mass:</strong> {funeralDetails?.funeralMass || "N/A"}</Typography>
+                        <Typography><strong>Funeral Status:</strong> {funeralDetails?.funeralStatus || "N/A"}</Typography>
+                        <Typography><strong>Confirmed At:</strong> {funeralDetails?.confirmedAt ? new Date(funeralDetails.confirmedAt).toLocaleDateString() : "N/A"}</Typography>
+
                         {funeralDetails?.placingOfPall?.by && (
-                            <div className="house-details-item">
-                                <p><strong>Placing of Pall by:</strong> {funeralDetails.placingOfPall.by}</p>
-                            </div>
+                            <Typography><strong>Placing of Pall by:</strong> {funeralDetails.placingOfPall.by}</Typography>
                         )}
                         {funeralDetails?.placingOfPall?.familyMembers?.length > 0 && (
-                            <div className="house-details-item">
-                                <p><strong>Family Members Placing Pall:</strong> {funeralDetails.placingOfPall.familyMembers.join(", ")}</p>
-                            </div>
+                            <Typography>
+                                <strong>Family Members Placing Pall:</strong> {funeralDetails.placingOfPall.familyMembers.join(", ")}
+                            </Typography>
                         )}
-                    </div>
+                    </Stack>
+                </Paper>
 
-                    {/* Death Certificate Section */}
-                    <div className="house-details-box">
-                        <h3>Death Certificate</h3>
-                        {['deathCertificate'].map((doc, index) => (
-                            <div key={index} className="house-details-item">
-                                <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
-                                {funeralDetails?.[doc]?.url ? (
-                                    <img
-                                        src={funeralDetails[doc].url}
-                                        alt={doc}
-                                        style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
-                                        onClick={() => openModal(funeralDetails[doc].url)}
-                                    />
-                                ) : (
-                                    "N/A"
-                                )}
+                {/* Death Certificate Section */}
+                <div className="house-details-box">
+                    <h3>Death Certificate</h3>
+                    {['deathCertificate'].map((doc, index) => (
+                        <div key={index} className="house-details-item">
+                            <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
+                            {funeralDetails?.[doc]?.url ? (
+                                <img
+                                    src={funeralDetails[doc].url}
+                                    alt={doc}
+                                    style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
+                                    onClick={() => openModal(funeralDetails[doc].url)}
+                                />
+                            ) : (
+                                "N/A"
+                            )}
+                        </div>
+                    ))}
+
+                    {/* Modal */}
+                    <Modal open={isModalOpen} onClose={closeModal}>
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                bgcolor: "background.paper",
+                                boxShadow: 24,
+                                p: 3,
+                                maxWidth: "90vw",
+                                maxHeight: "90vh",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                borderRadius: 2,
+                            }}
+                        >
+                            {/* Header with Close and Zoom Buttons */}
+                            <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mb: 2 }}>
+                                <Button onClick={closeModal} variant="contained" size="small">Close</Button>
+                                <Box>
+                                    <Button onClick={handleZoomIn} variant="outlined" sx={{ mx: 1 }}>Zoom In</Button>
+                                    <Button onClick={handleZoomOut} variant="outlined" sx={{ mx: 1 }}>Zoom Out</Button>
+                                </Box>
+                            </Box>
+
+                            {/* Image Container */}
+                            <Box
+                                sx={{
+                                    overflow: "hidden",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    width: "100%",
+                                    height: "80vh",
+                                    cursor: isDragging ? "grabbing" : "grab",
+                                    border: "1px solid #ddd",
+                                    position: "relative",
+                                }}
+                                onMouseDown={handleMouseDown}
+                                onMouseMove={handleMouseMove}
+                                onMouseUp={handleMouseUp}
+                                onMouseLeave={handleMouseUp}
+                            >
+                                <img
+                                    src={selectedImage}
+                                    alt="Certificate Preview"
+                                    style={{
+                                        transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
+                                        transition: isDragging ? "none" : "transform 0.3s ease",
+                                        maxWidth: "100%",
+                                        maxHeight: "100%",
+                                        objectFit: "contain",
+                                        cursor: isDragging ? "grabbing" : "grab",
+                                    }}
+                                    draggable={false}
+                                />
+                            </Box>
+                        </Box>
+                    </Modal>
+                </div>
+            </div>
+            {/* Admin Comments Section */}
+
+            <div className="funeral-details-box">
+                <Paper elevation={3} sx={{ p: 3, borderRadius: 2, marginBottom: 2 }}>
+                    <h2>Admin Comments</h2>
+                    {comments.length > 0 ? (
+                        comments.map((comment, index) => (
+                            <div key={index} className="admin-comment">
+                                <p><strong>Selected Comment:</strong> {comment?.selectedComment || "N/A"}</p>
+                                <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
                             </div>
-                        ))}
-                    </div>
+                        ))
+                    ) : (
+                        <p>No admin comments yet.</p>
+                    )}
 
-                    {/* Admin Comments Section */}
-                    <div className="house-comments-section">
-                        <h2>Admin Comments</h2>
-                        {comments.length > 0 ? (
-                            comments.map((comment, index) => (
-                                <div key={index} className="admin-comment">
-                                    <p><strong>Selected Comment:</strong> {comment?.selectedComment || "N/A"}</p>
-                                    <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No admin comments yet.</p>
-                        )}
-                    </div>
 
                     {/* Updated Funeral Date Section */}
                     <div className="blessing-date-box">
@@ -429,7 +491,7 @@ const FuneralDetails = () => {
                     <div className="house-section">
                         <h2>Select Updated Funeral Date:</h2>
                         <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
-                        <label>Reason:</label>
+                        <Typography>Reason:</Typography>
                         <textarea value={reason} onChange={(e) => setReason(e.target.value)} />
                         <div className="button-container">
                             <button onClick={handleUpdate} disabled={loading}>
@@ -485,54 +547,71 @@ const FuneralDetails = () => {
                             <button onClick={handleAddPriest}>Assign Priest</button>
                         </div>
                     </div>
-
-                    {/* Cancelling Reason Section */}
-                    {funeralDetails?.funeralStatus === "Cancelled" && funeralDetails?.cancellingReason ? (
-                        <div className="house-comments-section">
-                            <h2>Cancellation Details</h2>
-                            <div className="admin-comment">
-                                <p><strong>Cancelled By:</strong> {funeralDetails.cancellingReason.user === "Admin" ? "Admin" : funeralDetails.cancellingReason.user}</p>
-                                <p><strong>Reason:</strong> {funeralDetails.cancellingReason.reason || "No reason provided."}</p>
-                            </div>
+                </Paper>
+                {/* Cancelling Reason Section */}
+                {funeralDetails?.funeralStatus === "Cancelled" && funeralDetails?.cancellingReason ? (
+                    <div className="house-comments-section">
+                        <h2>Cancellation Details</h2>
+                        <div className="admin-comment">
+                            <p><strong>Cancelled By:</strong> {funeralDetails.cancellingReason.user === "Admin" ? "Admin" : funeralDetails.cancellingReason.user}</p>
+                            <p><strong>Reason:</strong> {funeralDetails.cancellingReason.reason || "No reason provided."}</p>
                         </div>
-                    ) : null}
-
-                    {/* Cancel Button */}
-                    <div className="button-container">
-                        <button onClick={() => setShowCancelModal(true)}>Cancel Funeral</button>
                     </div>
+                ) : null}
 
-                     {/* Cancellation Modal */}
-                     {showCancelModal && (
-                        <div className="modal-overlay">
-                            <div className="modal">
-                                <h3>Cancel Funeral</h3>
-                                <p>Please provide a reason for cancellation:</p>
-                                <textarea
-                                    value={cancelReason}
-                                    onChange={(e) => setCancelReason(e.target.value)}
-                                    placeholder="Enter reason..."
-                                    className="modal-textarea"
-                                />
-                                <div className="modal-buttons">
-                                    <button onClick={handleCancel}>Confirm Cancel</button>
-                                    <button onClick={() => setShowCancelModal(false)}>Back</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Confirmation and Decline Buttons */}
-                    <div className="button-container">
-                        <button onClick={() => handleConfirm(funeralId)}>Confirm Funeral</button>
-                    </div>
+                {/* Cancel Button */}
+                <div className="button-container" style={{ marginBottom: "10px" }}>
+                    <Button variant="contained" color="error" size="small" onClick={() => setShowCancelModal(true)}>Cancel Funeral</Button>
                 </div>
+
+                {/* Cancellation Modal */}
+                <Modal open={showCancelModal} onClose={() => setShowCancelModal(false)}>
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            bgcolor: "background.paper",
+                            boxShadow: 24,
+                            p: 3,
+                            borderRadius: 2,
+                            width: 400,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 2,
+                        }}
+                    >
+                        <Typography variant="h6">Cancel Funeral</Typography>
+                        <Typography variant="body2">Please provide a reason for cancellation:</Typography>
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={3}
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                            placeholder="Enter reason..."
+                            variant="outlined"
+                        />
+                        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+                            <Button variant="contained" color="error" style={{ marginRight: "10px" }} onClick={handleCancel}>Confirm Cancel</Button>
+                            <Button variant="outlined" onClick={() => setShowCancelModal(false)}>Back</Button>
+                        </Box>
+                    </Box>
+                </Modal>
+
+                {/* Confirmation and Decline Buttons */}
+                <div className="button-container" style={{ marginBottom: "10px" }}>
+                    <Button variant="contained" size="small" onClick={() => handleConfirm(funeralId)}>Confirm Funeral</Button>
+                </div>
+
                 <div className="button-container">
-                    <button onClick={() => navigate(`/adminChat/${funeralDetails?.userId?._id}/${funeralDetails?.userId?.email}`)}>
+                    <Button variant="contained" size="small" onClick={() => navigate(`/adminChat/${funeralDetails?.userId?._id}/${funeralDetails?.userId?.email}`)}>
                         Go to Admin Chat
-                    </button>
+                    </Button>
                 </div>
             </div>
+
         </div>
     );
 };

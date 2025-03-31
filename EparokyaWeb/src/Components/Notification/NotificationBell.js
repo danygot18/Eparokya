@@ -76,6 +76,7 @@ const NotificationBell = () => {
   const handleNotificationClick = (prayerRequestId) => {
     navigate(`/admin/prayerIntention/details/${prayerRequestId}`);
     setOpen(false);
+    window.location.reload();
   };
 
   return (

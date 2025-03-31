@@ -22,7 +22,7 @@ module.exports = (socket) => {
         }
     });
 
-    // notiff
+    // notiff-admin
     socket.on("send-notification", (data) => {
         const { adminIds, message, link } = data;
 

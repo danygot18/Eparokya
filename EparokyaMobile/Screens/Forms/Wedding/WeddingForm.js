@@ -15,9 +15,11 @@ const WeddingForm = ({ navigation }) => {
 
   const { user, token } = useSelector(state => state.auth);
 
-  const onDateChange = (setter) => (event, selectedDate) => {
-    const currentDate = selectedDate || new Date();
-    setter(currentDate);
+  const onDateChange = (setter, setShowPicker) => (event, selectedDate) => {
+    setShowPicker(false); // Hide the picker after selection
+    if (selectedDate) {
+      setter(selectedDate);
+    }
   };
 
   const goToNextPage = () => {
@@ -47,7 +49,12 @@ const WeddingForm = ({ navigation }) => {
           <Text style={styles.buttonText}>Select Date of Application</Text>
         </TouchableOpacity>
         {showDateOfApplicationPicker && (
-          <DateTimePicker value={dateOfApplication} mode="date" display="default" onChange={onDateChange(setDateOfApplication)} />
+          <DateTimePicker
+            value={dateOfApplication}
+            mode="date"
+            display="default"
+            onChange={onDateChange(setDateOfApplication, setShowDateOfApplicationPicker)}
+          />
         )}
         <Text style={styles.selectedDate}>{dateOfApplication.toDateString()}</Text>
       </View>
@@ -57,7 +64,12 @@ const WeddingForm = ({ navigation }) => {
           <Text style={styles.buttonText}>Select Wedding Date</Text>
         </TouchableOpacity>
         {showWeddingDatePicker && (
-          <DateTimePicker value={weddingDate} mode="date" display="default" onChange={onDateChange(setWeddingDate)} />
+          <DateTimePicker
+            value={weddingDate}
+            mode="date"
+            display="default"
+            onChange={onDateChange(setWeddingDate, setShowWeddingDatePicker)}
+          />
         )}
         <Text style={styles.selectedDate}>{weddingDate.toDateString()}</Text>
       </View>
@@ -67,7 +79,12 @@ const WeddingForm = ({ navigation }) => {
           <Text style={styles.buttonText}>Select Wedding Time</Text>
         </TouchableOpacity>
         {showWeddingTimePicker && (
-          <DateTimePicker value={weddingTime} mode="time" display="default" onChange={onDateChange(setWeddingTime)} />
+          <DateTimePicker
+            value={weddingTime}
+            mode="time"
+            display="default"
+            onChange={onDateChange(setWeddingTime, setShowWeddingTimePicker)}
+          />
         )}
         <Text style={styles.selectedDate}>{formattedWeddingTime}</Text>
       </View>

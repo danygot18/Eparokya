@@ -1,3 +1,48 @@
+.baptism-details-page {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+}
+
+.baptism-details-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+}
+
+.baptism-details-box {
+    flex: 1;
+    min-width: 320px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    gap: 20px;
+}
+
+.Baptism-three-container-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* Three equal columns */
+    gap: 20px;
+    width: 100%;
+}
+
+.Baptism-left-container,
+.Baptism-right-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -8,8 +53,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000; 
+    z-index: 1000;
 }
+
+
 
 .modal {
     background: white;
@@ -19,7 +66,7 @@
     width: 400px;
     max-width: 90%;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-    z-index: 1001; 
+    z-index: 1001;
     display: flex;
     flex-direction: column;
     gap: 10px;

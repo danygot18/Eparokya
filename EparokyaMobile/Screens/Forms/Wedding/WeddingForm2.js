@@ -14,6 +14,7 @@ const WeddingForm2 = ({ navigation, route }) => {
     weddingDate,
     weddingTime,
   } = route.params;
+  console.log(route.params);
 
   const [groomName, setGroomName] = useState("");
   const [groomStreet, setGroomStreet] = useState("");

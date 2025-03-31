@@ -16,7 +16,7 @@
 
 .Wedding-three-container-layout {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Three equal columns */
+    grid-template-columns: repeat(2, 1fr); /* Three equal columns */
     gap: 20px;
     width: 100%;
 }

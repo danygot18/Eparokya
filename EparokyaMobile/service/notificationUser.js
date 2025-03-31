@@ -17,7 +17,7 @@ const NotificationUser = ({ user }) => {
     const [open, setOpen] = useState(false);
     const navigation = useNavigation();
 
-    // ✅ Fetch Notifications from API
+    //  Fetch Notifications from API
     const fetchNotifications = useCallback(async () => {
         try {
             const response = await axios.get(`${baseURL}/notifications`, {
@@ -30,7 +30,7 @@ const NotificationUser = ({ user }) => {
         }
     }, []);
 
-    // ✅ Mark Notifications as Read
+    //  Mark Notifications as Read
     const markAllAsRead = async () => {
         try {
             await axios.put(`${baseURL}/notifications/mark-read`, {}, {
@@ -42,13 +42,13 @@ const NotificationUser = ({ user }) => {
         }
     };
 
-    // ✅ Handle Notification Click
+    // Handle Notification Click
     const handleNotificationClick = (prayerRequestId) => {
         navigation.navigate("PrayerDetails", { id: prayerRequestId });
         setOpen(false);
     };
 
-    // ✅ Listen for Real-time Notifications
+    //Listen for Real-time Notifications
     useEffect(() => {
         socket.connect();
         fetchNotifications();
@@ -82,7 +82,7 @@ const NotificationUser = ({ user }) => {
 
     return (
         <View style={styles.container}>
-            {/* 🔔 Notification Bell Button */}
+
             <TouchableOpacity
                 style={styles.bellButton}
                 onPress={() => {
@@ -98,7 +98,7 @@ const NotificationUser = ({ user }) => {
                 )}
             </TouchableOpacity>
 
-            {/* 📜 Notification List */}
+
             {open && (
                 <View style={styles.dropdown}>
                     <Text style={styles.header}>Notifications</Text>
