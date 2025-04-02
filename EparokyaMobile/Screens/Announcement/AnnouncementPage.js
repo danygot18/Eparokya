@@ -6,8 +6,8 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  ScrollView,
   TextInput,
+  ScrollView,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -27,7 +27,7 @@ const AnnouncementPage = ({ navigation }) => {
 
   const { user, token } = useSelector((state) => state.auth);
 
-  const POSTS_PER_PAGE = 5; // Number of posts per page
+  const POSTS_PER_PAGE = 5;
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -42,7 +42,6 @@ const AnnouncementPage = ({ navigation }) => {
     const fetchAnnouncements = async () => {
       try {
         const response = await axios.get(`${baseURL}/getAllAnnouncements`);
-        // console.log("Announcements:", response.data.announcements);
         const sortedAnnouncements = response.data.announcements.sort(
           (a, b) => new Date(b.dateCreated) - new Date(a.dateCreated)
         );
@@ -77,7 +76,7 @@ const AnnouncementPage = ({ navigation }) => {
 
     setFilteredAnnouncements(filtered);
     setTotalPages(Math.ceil(filtered.length / POSTS_PER_PAGE));
-    setCurrentPage(1); // Reset to the first page when filtering
+    setCurrentPage(1);
   }, [searchTerm, selectedCategory, announcements]);
 
   const handleSearch = (term) => {
@@ -151,8 +150,8 @@ const AnnouncementPage = ({ navigation }) => {
     return filteredAnnouncements.slice(startIndex, endIndex);
   };
 
-  return (
-    <ScrollView style={styles.container}>
+  const renderHeader = () => (
+    <View>
       <View style={styles.header}>
         <Image
           source={require("../../assets/WelcomeHomePage_EParokya.png")}
@@ -201,75 +200,79 @@ const AnnouncementPage = ({ navigation }) => {
           </TouchableOpacity>
         ))}
       </ScrollView>
+    </View>
+  );
 
+  const renderFooter = () => (
+    <View style={styles.paginationContainer}>
+      <TouchableOpacity
+        style={styles.paginationButton}
+        onPress={handlePreviousPage}
+        disabled={currentPage === 1}
+      >
+        <Text style={styles.paginationText}>Previous</Text>
+      </TouchableOpacity>
+      <Text style={styles.paginationText}>
+        Page {currentPage} of {totalPages}
+      </Text>
+      <TouchableOpacity
+        style={styles.paginationButton}
+        onPress={handleNextPage}
+        disabled={currentPage === totalPages}
+      >
+        <Text style={styles.paginationText}>Next</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => handleCardPress(item)}
+    >
+      <Text style={styles.title}>{item.name || "No Title Available"}</Text>
+      <Text>{item.description || "No Description Available"}</Text>
+      {item.image && (
+        <Image source={{ uri: item.image }} style={styles.media} />
+      )}
+      {item.images &&
+        item.images.map((img, index) => (
+          <Image
+            key={index}
+            source={{ uri: img.url }}
+            style={styles.media}
+          />
+        ))}
+
+      <View style={styles.interactionContainer}>
+        <LikedCount
+          handleLike={() => handleLike(item._id)}
+          item={item}
+          user={user}
+        />
+        <TouchableOpacity onPress={() => handleCardPress(item)}>
+          <MaterialIcons name="comment" size={24} color="gray" />
+        </TouchableOpacity>
+        <Text style={styles.countText}>{item.comments?.length || 0}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  return (
+    <View style={styles.container}>
       <FlatList
         data={getPaginatedData()}
         keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => handleCardPress(item)}
-          >
-            <Text style={styles.title}>
-              {item.name || "No Title Available"}
-            </Text>
-            <Text>{item.description || "No Description Available"}</Text>
-            {item.image && (
-              <Image source={{ uri: item.image }} style={styles.media} />
-            )}
-            {item.images &&
-              item.images.map((img, index) => (
-                <Image
-                  key={index}
-                  source={{ uri: img.url }}
-                  style={styles.media}
-                />
-              ))}
-
-            <View style={styles.interactionContainer}>
-              <LikedCount
-                handleLike={() => handleLike(item._id)}
-                item={item}
-                user={user}
-              />
-              <TouchableOpacity
-                onPress={() => handleCardPress(item)}
-              >
-                <MaterialIcons name="comment" size={24} color="gray" />
-              </TouchableOpacity>
-              <Text style={styles.countText}>{item.comments?.length || 0}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
+        renderItem={renderItem}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
+        contentContainerStyle={styles.flatListContent}
       />
-
-      {/* Pagination Controls */}
-      <View style={styles.paginationContainer}>
-        <TouchableOpacity
-          style={styles.paginationButton}
-          onPress={handlePreviousPage}
-          disabled={currentPage === 1}
-        >
-          <Text style={styles.paginationText}>Previous</Text>
-        </TouchableOpacity>
-        <Text style={styles.paginationText}>
-          Page {currentPage} of {totalPages}
-        </Text>
-        <TouchableOpacity
-          style={styles.paginationButton}
-          onPress={handleNextPage}
-          disabled={currentPage === totalPages}
-        >
-          <Text style={styles.paginationText}>Next</Text>
-        </TouchableOpacity>
-      </View>
-
       <Toast />
-    </ScrollView>
+    </View>
   );
 };
 
-// Liked Component
 const LikedCount = ({ handleLike, item, user }) => {
   const [likeCount, setLikeCount] = useState(item.likedBy?.length || 0);
   const [isLiked, setIsLiked] = useState(item.likedBy?.includes(user?._id));
@@ -298,6 +301,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f8f8",
+  },
+  flatListContent: {
+    paddingBottom: 20,
   },
   header: {
     height: 200,
@@ -336,6 +342,7 @@ const styles = StyleSheet.create({
   categoryContainer: {
     flexDirection: "row",
     marginHorizontal: 10,
+    paddingVertical: 10,
   },
   categoryBox: {
     justifyContent: "center",

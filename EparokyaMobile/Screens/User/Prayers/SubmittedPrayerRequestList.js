@@ -81,7 +81,7 @@ const SubmittedPrayerRequestList = () => {
                     style={{ padding: 10, borderWidth: 1, borderRadius: 5 }}
                 />
                 
-                {error && <Text style={{ color: "red" }}>{error}</Text>}
+                {/* {error && <Text style={{ color: "red" }}>{error}</Text>} */}
                 
                 {loading ? (
                     <ActivityIndicator size="large" color="#0000ff" />

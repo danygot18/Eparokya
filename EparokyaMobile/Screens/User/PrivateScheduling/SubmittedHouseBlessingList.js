@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, ScrollView, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
-import { Box, VStack, HStack, Button, Badge } from "native-base";
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  FlatList, 
+  ActivityIndicator, 
+  TouchableOpacity,
+  StyleSheet,
+   
+} from "react-native";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import baseURL from "../../../assets/common/baseUrl";
-
+import { HStack, Pressable } from "native-base";
 const SubmittedHouseBlessingList = () => {
     const [houseBlessingForms, setHouseBlessingForms] = useState([]);
     const [filteredForms, setFilteredForms] = useState([]);
@@ -21,7 +29,11 @@ const SubmittedHouseBlessingList = () => {
     const fetchMySubmittedForms = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${baseURL}/getAllUserSubmittedHouseBlessing`, { withCredentials: true });
+            const response = await axios.get(
+                `${baseURL}/getAllUserSubmittedHouseBlessing`, 
+                { withCredentials: true }
+            );
+            
             if (response.data && Array.isArray(response.data.forms)) {
                 setHouseBlessingForms(response.data.forms);
                 setFilteredForms(response.data.forms);
@@ -30,6 +42,7 @@ const SubmittedHouseBlessingList = () => {
                 setFilteredForms([]);
             }
         } catch (error) {
+            console.error("Error fetching house blessing forms:", error);
             setError("Unable to fetch house blessing forms.");
         } finally {
             setLoading(false);
@@ -38,70 +51,208 @@ const SubmittedHouseBlessingList = () => {
 
     useEffect(() => {
         let filtered = houseBlessingForms;
+        
         if (activeFilter !== "All") {
-            filtered = filtered.filter((form) => form.blessingStatus === activeFilter);
-        }
-        if (searchTerm) {
-            filtered = filtered.filter((form) =>
-                form.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
+            filtered = filtered.filter(
+                (form) => form.blessingStatus === activeFilter
             );
         }
+        
+        if (searchTerm) {
+            filtered = filtered.filter((form) =>
+                form.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                form.address?.street?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                form.address?.baranggay?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+        
         setFilteredForms(filtered);
     }, [activeFilter, searchTerm, houseBlessingForms]);
 
     const handleCardPress = (formId) => {
-        navigation.navigate("SubmittedHouseBlessingForm", { formId: formId  });
+        navigation.navigate("SubmittedHouseBlessingForm", { formId });
     };
 
-    if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
-    if (error) return <Text>Error: {error}</Text>;
+
+
+
 
     return (
-        <ScrollView p={5}>
-            <Text style={{ fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 10 }}>
-                My Submitted House Blessing Records
-            </Text>
-            
-            <HStack space={2} justifyContent="center" mb={4}>
+        <View style={styles.container}>
+            <Text style={styles.title}>My Submitted House Blessing Forms</Text>
+
+            {/* Search Input */}
+            <TextInput
+                placeholder="Search by Name, Street or Baranggay"
+                value={searchTerm}
+                onChangeText={setSearchTerm}
+                style={styles.searchInput}
+            />
+
+            {/* Filter Buttons */}
+            <HStack justifyContent="space-around" mb={4}>
                 {["All", "Pending", "Confirmed", "Cancelled"].map((status) => (
-                    <Button
+                    <TouchableOpacity
                         key={status}
-                        variant={activeFilter === status ? "solid" : "outline"}
+                        style={[
+                            styles.filterButton,
+                            activeFilter === status && styles.activeFilterButton
+                        ]}
                         onPress={() => setActiveFilter(status)}
                     >
-                        {status}
-                    </Button>
+                        <Text style={[
+                            styles.filterText,
+                            activeFilter === status && styles.activeFilterText
+                        ]}>
+                            {status}
+                        </Text>
+                    </TouchableOpacity>
                 ))}
             </HStack>
 
-            <TextInput
-                placeholder="Search by Full Name"
-                value={searchTerm}
-                onChangeText={setSearchTerm}
-                style={{ borderWidth: 1, padding: 10, marginBottom: 20, borderRadius: 5 }}
-            />
-
+            {/* Forms List */}
             {filteredForms.length === 0 ? (
-                <Text style={{ textAlign: "center", marginTop: 20 }}>No house blessings forms submitted by you.</Text>
+                <Text style={styles.noRecords}>No submitted house blessing forms found.</Text>
             ) : (
-                filteredForms.map((item, index) => (
-                    <TouchableOpacity key={item._id} onPress={() => navigation.navigate("SubmittedHouseBlessingForm", { formId: item._id })}>
-                        <Box p={4} borderWidth={1} borderRadius={8} mb={3}>
-                            <Badge colorScheme={item.blessingStatus === "Confirmed" ? "success" : item.blessingStatus === "Cancelled" ? "danger" : "warning"} alignSelf="flex-start">{item.blessingStatus}</Badge>
-                            <Text fontSize="lg" fontWeight="bold">Record #{index + 1}</Text>
-                            <VStack space={2} mt={2}>
-                                <Text><Text fontWeight="bold">Full Name:</Text> {item.fullName || "N/A"}</Text>
-                                <Text><Text fontWeight="bold">Contact Number:</Text> {item.contactNumber || "N/A"}</Text>
-                                <Text><Text fontWeight="bold">House Blessing Date:</Text> {item.blessingDate ? new Date(item.blessingDate).toLocaleDateString() : "N/A"}</Text>
-                                <Text><Text fontWeight="bold">House Blessing Time:</Text> {item.blessingTime || "N/A"}</Text>
-                                <Text><Text fontWeight="bold">Address:</Text> {item.address?.houseDetails || "N/A"}, {item.address?.block || "N/A"}, {item.address?.lot || "N/A"}, {item.address?.phase || "N/A"}, {item.address?.street || "N/A"}, {item.address?.baranggay || "N/A"}, {item.address?.district || "N/A"}, {item.address?.city || "N/A"}</Text>
-                            </VStack>
-                        </Box>
-                    </TouchableOpacity>
-                ))
+                <FlatList
+                    data={filteredForms}
+                    keyExtractor={(item) => item._id}
+                    renderItem={({ item, index }) => {
+                        const statusColor =
+                            item.blessingStatus === "Confirmed" ? "#4caf50" :
+                            item.blessingStatus === "Cancelled" ? "#ff5722" : "#ffd700";
+
+                        return (
+                            <TouchableOpacity
+                                style={[styles.card, { borderLeftColor: statusColor }]}
+                                onPress={() => handleCardPress(item._id)}
+                            >
+                                <View style={styles.cardHeader}>
+                                    <Text style={[styles.statusBadge, { backgroundColor: statusColor }]}>
+                                        {item.blessingStatus ?? "Unknown"}
+                                    </Text>
+                                    <Text style={styles.cardTitle}>
+                                        Record #{index + 1}: {item.fullName ?? "Unknown"}
+                                    </Text>
+                                </View>
+                                <View style={styles.cardDetails}>
+                                    <Text><Text style={styles.bold}>Blessing Date:</Text> {item.blessingDate ? new Date(item.blessingDate).toLocaleDateString() : "N/A"}</Text>
+                                    <Text><Text style={styles.bold}>Blessing Time:</Text> {item.blessingTime ?? "N/A"}</Text>
+                                    <Text><Text style={styles.bold}>Contact:</Text> {item.contactNumber ?? "N/A"}</Text>
+                                    <Text><Text style={styles.bold}>Address:</Text> {[
+                                        item.address?.houseDetails,
+                                        item.address?.street,
+                                        item.address?.baranggay,
+                                        item.address?.city
+                                    ].filter(Boolean).join(", ")}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    }}
+                />
             )}
-        </ScrollView>
+        </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: "#fff",
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: "bold",
+        marginBottom: 20,
+        textAlign: "center",
+    },
+    loader: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    errorText: {
+        color: "red",
+        fontSize: 16,
+        textAlign: "center",
+    },
+    noRecords: {
+        fontSize: 16,
+        textAlign: "center",
+        marginTop: 20,
+    },
+    searchInput: {
+        height: 40,
+        borderColor: "#ddd",
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        marginBottom: 15,
+        backgroundColor: "#fff",
+    },
+    filterContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 13,
+    },
+    filterButton: {
+        padding: 10,
+        borderRadius: 5,
+        backgroundColor: "#ddd",
+    },
+    activeFilterButton: {
+        backgroundColor: "#4caf50",
+    },
+    filterText: {
+        color: "#333",
+        fontWeight: "bold",
+    },
+    activeFilterText: {
+        color: "white",
+    },
+    card: {
+        backgroundColor: "#f9f9f9",
+        padding: 15,
+        marginVertical: 8,
+        borderRadius: 8,
+        borderLeftWidth: 6,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    cardHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 10,
+    },
+    statusBadge: {
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        borderRadius: 4,
+        color: "white",
+        fontWeight: "bold",
+    },
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        flex: 1,
+        marginLeft: 10,
+    },
+    cardDetails: {
+        marginTop: 5,
+    },
+    bold: {
+        fontWeight: "bold",
+    },
+});
 
 export default SubmittedHouseBlessingList;

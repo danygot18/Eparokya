@@ -22,11 +22,11 @@ export default function Main() {
 
         if (isLogin) {
             console.log(isLogin)
-          socket.connect();
-          socket.emit("join", { userId: user._id });
+            socket.connect();
+            socket.emit("join", { userId: user._id });
         }
-    
-      }, [isLogin])
+
+    }, [isLogin])
     // const initializeData = () => {
 
     //     const user = SyncStorage.get('user') || null;
@@ -46,19 +46,23 @@ export default function Main() {
     //     initializeData()
     // }, [])
 
-    return (
+    //cHANGE CODE: 4/2/2025
+    // return (
 
-        <NavigationContainer>
+    //     //cHANGE DATE: 4/2/2025
+    //     // <NavigationContainer>
 
-            {isLogin ?
-                <>
-                    <DrawerNavigator />
-                </>
-                :
-                <UserNavigator />
-            }
-        </NavigationContainer>
+    //     //     {isLogin ?
+    //     //         <>
+    //     //             <DrawerNavigator />
+    //     //         </>
+    //     //         :
+    //     //         <UserNavigator />
+    //     //     }
+    //     // </NavigationContainer>
 
-    );
+    // );
+    //NEW
+    return isLogin ? <DrawerNavigator /> : <UserNavigator />;
 
 }

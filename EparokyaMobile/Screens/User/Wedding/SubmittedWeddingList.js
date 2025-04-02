@@ -1,13 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  TouchableOpacity, 
+  ActivityIndicator, 
+  StyleSheet, 
+  TextInput 
+} from "react-native";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import baseURL from "../../../assets/common/baseUrl";
 
 const SubmittedWeddingList = () => {
     const [weddingForms, setWeddingForms] = useState([]);
+    const [filteredForms, setFilteredForms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activeFilter, setActiveFilter] = useState("All");
+    const [searchTerm, setSearchTerm] = useState("");
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -22,24 +33,45 @@ const SubmittedWeddingList = () => {
                 { withCredentials: true }
             );
 
-            // console.log("Frontend API Response:", response.data);
-
             if (response.data && Array.isArray(response.data.forms)) {
                 setWeddingForms(response.data.forms);
+                setFilteredForms(response.data.forms);
             } else {
                 setWeddingForms([]);
+                setFilteredForms([]);
             }
         } catch (error) {
             console.error("Error fetching wedding forms:", error);
-            setError("Unable to fetch wedding forms.");
+            setError(err.response?.data?.message ||"Unable to fetch wedding forms.");
         } finally {
             setLoading(false);
         }
     };
 
+    const filterForms = (status) => {
+        setActiveFilter(status);
+        let filtered = weddingForms;
+        
+        if (status !== "All") {
+            filtered = filtered.filter((form) => form.weddingStatus === status);
+        }
+        
+        if (searchTerm) {
+            filtered = filtered.filter((form) => 
+                form.brideName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                form.groomName?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+        
+        setFilteredForms(filtered);
+    };
+
+    useEffect(() => {
+        filterForms(activeFilter);
+    }, [activeFilter, searchTerm, weddingForms]);
+
     const handleCardClick = (weddingId) => {
         navigation.navigate("SubmittedWeddingForm", { weddingId });
-        console.log("Wedding ID:", weddingId);
     };
 
     if (loading) {
@@ -53,11 +85,41 @@ const SubmittedWeddingList = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>My Submitted Wedding Forms</Text>
-            {weddingForms.length === 0 ? (
+
+            {/* Filter Buttons */}
+            <View style={styles.filterContainer}>
+                {["All", "Pending", "Confirmed", "Declined"].map((status) => (
+                    <TouchableOpacity
+                        key={status}
+                        style={[
+                            styles.filterButton,
+                            activeFilter === status && styles.activeFilterButton
+                        ]}
+                        onPress={() => filterForms(status)}
+                    >
+                        <Text style={[
+                            styles.filterText,
+                            activeFilter === status && styles.activeFilterText
+                        ]}>
+                            {status}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+
+            {/* Search Input */}
+            <TextInput
+                placeholder="Search by Bride or Groom Name"
+                value={searchTerm}
+                onChangeText={setSearchTerm}
+                style={styles.searchInput}
+            />
+
+            {filteredForms.length === 0 ? (
                 <Text style={styles.noRecords}>No submitted wedding forms found.</Text>
             ) : (
                 <FlatList
-                    data={weddingForms}
+                    data={filteredForms}
                     keyExtractor={(item) => item._id}
                     renderItem={({ item, index }) => {
                         const statusColor =
@@ -100,7 +162,8 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: "bold",
-        marginBottom: 10,
+        marginBottom: 20,
+        textAlign: "center",
     },
     loader: {
         flex: 1,
@@ -134,6 +197,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
+        marginBottom: 10,
     },
     statusBadge: {
         paddingVertical: 4,
@@ -145,13 +209,43 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 18,
         fontWeight: "bold",
-        marginTop: 5,
+        flex: 1,
+        marginLeft: 10,
     },
     cardDetails: {
-        marginTop: 10,
+        marginTop: 5,
     },
     bold: {
         fontWeight: "bold",
+    },
+    filterContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 15,
+    },
+    filterButton: {
+        padding: 10,
+        borderRadius: 5,
+        backgroundColor: "#e0e0e0",
+    },
+    activeFilterButton: {
+        backgroundColor: "#4caf50",
+    },
+    filterText: {
+        color: "#333",
+        fontWeight: "bold",
+    },
+    activeFilterText: {
+        color: "white",
+    },
+    searchInput: {
+        height: 40,
+        borderColor: "#ddd",
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        marginBottom: 15,
+        backgroundColor: "#fff",
     },
 });
 

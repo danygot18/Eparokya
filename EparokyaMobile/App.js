@@ -48,19 +48,29 @@ export default function App() {
   }, []);
 
   return (
+    //changes CODE:4/2/2025
+    // <Provider store={store}>
+    //   <PersistGate loading={null} persistor={persistor}>
+    //     {/* <Header /> */}
+    //     {/* <DrawerNavigator /> */}
+    //     <NativeBaseProvider theme={theme}>
+    //       <Main />
+    //     </NativeBaseProvider>
+    //     {/* <Main /> */}
+    //     {/* <Toast /> */}
+    //   </PersistGate>
+    // </Provider>
 
+    //New Code
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        {/* <Header /> */}
-        {/* <DrawerNavigator /> */}
         <NativeBaseProvider theme={theme}>
-          <Main />
+          <NavigationContainer>
+            <Main />
+          </NavigationContainer>
         </NativeBaseProvider>
-        {/* <Main /> */}
-        {/* <Toast /> */}
       </PersistGate>
     </Provider>
-
 
     // <Provider store={store}>
     //   <PersistGate loading={null} persistor={persistor}>

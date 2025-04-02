@@ -39,7 +39,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
         const getIconName = (routeName) => {
           switch (routeName) {
-            case "Home":
+            case "HomeTab":
               return "home-heart";
             case "Forms":
               return "file-document";
@@ -85,7 +85,7 @@ const Main = () => (
     tabBar={(props) => <CustomTabBar {...props} />}
     screenOptions={{ headerShown: false }}
   >
-    <Tab.Screen name="Home" component={Home} />
+    <Tab.Screen name="HomeTab" component={Home} />
     <Tab.Screen name="Forms" component={FormsNavigator} />
     <Tab.Screen name="Chats" component={ChatNavigator} />
     <Tab.Screen name="Profile" component={UserNavigator} />

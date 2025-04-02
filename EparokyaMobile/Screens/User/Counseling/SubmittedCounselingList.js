@@ -25,7 +25,7 @@ const SubmittedCounselingList = () => {
             setCounselingForms(response.data.forms || []);
             setFilteredForms(response.data.forms || []);
         } catch (err) {
-            setError(err.response?.data?.message || "Error fetching counseling forms.");
+            setError("No submitted Counseling forms found.");
         } finally {
             setLoading(false);
         }
@@ -59,7 +59,7 @@ const SubmittedCounselingList = () => {
 
     return (
         <Box flex={1} bg="gray.100" p={4}>
-
+            <Text style={styles.title}>My Submitted Counseling Forms</Text>
             {/* Filter Buttons */}
             <HStack justifyContent="space-around" mb={4}>
                 {["All", "Pending", "Confirmed", "Cancelled"].map((status) => (
@@ -192,6 +192,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#666",
         marginTop: 20,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: "bold",
+        marginBottom: 20,
+        textAlign: "center",
     },
 });
 
