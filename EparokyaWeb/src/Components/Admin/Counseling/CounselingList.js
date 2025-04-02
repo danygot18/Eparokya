@@ -97,8 +97,8 @@ const CounselingList = () => {
                                 className={`counseling-card ${item.counselingStatus?.toLowerCase() || ""}`}
                                 onClick={() => handleCardClick(item._id)}
                             >
-                                <div className="status-badge">{item.counselingStatus}</div>
-                                {/* <h3 className="card-title">Counseling #{index + 1}</h3> */}
+                                {/* <div className="status-badge">{item.counselingStatus}</div> */}
+                                <h3 className="card-title">Counseling #{index + 1}</h3>
                                 <h3 className="card-title">{item.purpose} </h3>
                                 <div className="card-details">
                                     <p>

@@ -103,7 +103,7 @@ const FuneralList = () => {
                                 className={`funeral-card ${item.funeralStatus?.toLowerCase() || ""}`}
                                 onClick={() => handleCardClick(item._id)}
                             >
-                                <div className="status-badge">{item.funeralStatus || "Unknown"}</div>
+                                {/* <div className="status-badge">{item.funeralStatus || "Unknown"}</div> */}
                                 <h3 className="card-title">Funeral #{index + 1}</h3>
                                 <div className="card-details">
                                     <p><strong>Name:</strong> {item.name ?? "N/A"}</p>

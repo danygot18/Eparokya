@@ -97,7 +97,7 @@ const WeddingList = () => {
                                     onClick={() => handleCardClick(item._id)}
                                     style={{ borderLeft: `6px solid ${statusColor}` }}
                                 >
-                                    <div className="status-badge">{item.weddingStatus ?? "Unknown"}</div>
+                                    {/* <div className="status-badge">{item.weddingStatus ?? "Unknown"}</div> */}
                                     <h3 className="card-title">
                                         Wedding #  {index + 1}: {item.brideName ?? "Unknown Bride"} & {item.groomName ?? "Unknown Groom"}
                                     </h3>

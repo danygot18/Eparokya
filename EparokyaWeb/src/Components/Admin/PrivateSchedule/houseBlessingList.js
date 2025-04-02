@@ -97,7 +97,7 @@ const HouseBlessingList = () => {
                                 className={`houseBlessing-card ${item.blessingStatus?.toLowerCase() || ""}`}
                                 onClick={() => handleCardClick(item._id)}
                             >
-                                <div className="status-badge">{item.blessingStatus}</div>
+                                {/* <div className="status-badge">{item.blessingStatus}</div> */}
                                 <h3 className="card-title">Record #{index + 1}</h3>
                                 <div className="card-details">
                                     <p>

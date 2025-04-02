@@ -103,7 +103,7 @@ const PrayerRequestList = () => {
                                 className={`prayerRequest-card ${item.prayerType?.toLowerCase() || ""}`}
                                 onClick={() => handleCardClick(item._id)}
                             >
-                                <div className="status-badge">{item.prayerType}</div>
+                                {/* <div className="status-badge">{item.prayerType}</div> */}
                                 <h3 className="card-title">Prayer #{index + 1}</h3>
                                 <div className="card-details">
                                     <p>

@@ -97,7 +97,7 @@ const BaptismList = () => {
                 className={`baptism-card ${item.binyagStatus?.toLowerCase() || ""}`}
                 onClick={() => handleCardClick(item._id)}
               >
-                <div className="status-badge">{item.binyagStatus}</div>
+                {/* <div className="status-badge">{item.binyagStatus}</div> */}
                 <h3 className="card-title">Baptism #{index + 1}</h3>
                 <div className="card-details">
                   <p>
