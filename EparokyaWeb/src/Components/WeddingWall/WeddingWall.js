@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./WeddingWall.css";
 import GuestSideBar from "../GuestSideBar";
+import { CircularProgress } from "@mui/material";
 
 const WeddingWall = () => {
   const [weddings, setWeddings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`)
@@ -12,8 +14,17 @@ const WeddingWall = () => {
         console.log("Fetched weddings data:", data); // Debug log
         setWeddings(data);
       })
-      .catch((error) => console.error("Error fetching weddings:", error));
+      .catch((error) => console.error("Error fetching weddings:", error))
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) {
+      return (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+          <CircularProgress />
+        </div>
+      );
+    }
 
   return (
     <div className="weddingWall-container">

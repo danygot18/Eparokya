@@ -1,6 +1,7 @@
 import React from 'react';
 import GuestSideBar from '../GuestSideBar';
 import MetaData from '../Layout/MetaData';
+import { CircularProgress } from '@mui/material';
 
 export const Prayers = () => {
   return (

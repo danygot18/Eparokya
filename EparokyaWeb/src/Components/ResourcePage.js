@@ -4,6 +4,7 @@ import MetaData from "./Layout/MetaData";
 import axios from "axios";
 import { FaStar, FaBookmark, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { CircularProgress } from "@mui/material";
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -48,6 +49,7 @@ const ResourcePage = () => {
   const [bookmarkedResources, setBookmarkedResources] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState("");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const config = { withCredentials: true };
 
@@ -99,6 +101,8 @@ const ResourcePage = () => {
     } catch (error) {
       console.error("Error fetching categories:", error);
       setCategories([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -151,6 +155,14 @@ const ResourcePage = () => {
 
     return matchesCategory && matchesSearch;
   });
+
+  if (loading) {
+      return (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+          <CircularProgress />
+        </div>
+      );
+    }
 
   return (
     <div style={styles.homeContainer}>

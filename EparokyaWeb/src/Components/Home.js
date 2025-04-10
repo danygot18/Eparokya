@@ -4,6 +4,7 @@ import MetaData from "./Layout/MetaData";
 import axios from "axios";
 import { FaHeart, FaComment } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { CircularProgress } from "@mui/material";
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -141,6 +142,14 @@ export const Home = () => {
 
     return matchesCategory && matchesSearch;
   });
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div style={styles.homeContainer}>

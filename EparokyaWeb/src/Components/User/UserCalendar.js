@@ -5,6 +5,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import GuestSideBar from '../GuestSideBar'; 
 import Metadata from '../Layout/MetaData';
+import { CircularProgress } from '@mui/material';
 
 const localizer = momentLocalizer(moment);
 
@@ -12,6 +13,7 @@ const UserCalendar = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(true);
 
 
   const fetchAllEvents = useCallback(async () => {
@@ -62,6 +64,8 @@ const UserCalendar = () => {
     } catch (error) {
       console.error('Error fetching events:', error);
       setErrorMessage('Failed to load events. Please try again.');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -82,6 +86,14 @@ const UserCalendar = () => {
       color: 'white',
     },
   });
+
+  if (loading) {
+      return (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+          <CircularProgress />
+        </div>
+      );
+    }
 
   return (
     <div style={{ display: 'flex', height: '100vh' }}>

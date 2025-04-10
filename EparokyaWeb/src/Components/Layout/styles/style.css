@@ -2584,4 +2584,38 @@ button:hover:not(:disabled) {
   border-color: #1c5739;
 }
 
+/* GuestSidebar */
 
+.sidebar-container {
+  background-color: #d6e7c6;
+  width: 220px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.sidebar-container::-webkit-scrollbar {
+  width: 8px;
+  display: none; /* Chrome/Safari/Edge */
+}
+
+.sidebar-container:hover::-webkit-scrollbar {
+  display: block;
+}
+
+.sidebar-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.sidebar-container::-webkit-scrollbar-track {
+  background-color: transparent;
+}

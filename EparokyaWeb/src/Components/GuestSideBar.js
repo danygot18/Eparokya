@@ -356,6 +356,11 @@ const styles = {
     justifyContent: 'space-between',
     padding: '20px',
     boxSizing: 'border-box',
+    overflowY: 'auto',
+    srollbarWidth: 'none',
+    scrollBarOpacity: '0',
+    scrollbarWidth: 'none',        // Firefox
+  msOverflowStyle: 'none', 
   },
   modal: {
     position: 'absolute',

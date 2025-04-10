@@ -3,6 +3,7 @@ import axios from "axios";
 import GuestSidebar from '../../GuestSideBar';
 import "../../Layout/styles/style.css";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { CircularProgress } from "@mui/material";
 
 const PrayerWall = () => {
   const [prayers, setPrayers] = useState([]);
@@ -139,6 +140,14 @@ const PrayerWall = () => {
       setLoadingPrayerId(null);
     }
   };
+
+  if (loading) {
+      return (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+          <CircularProgress />
+        </div>
+      );
+    }
   
   
 
