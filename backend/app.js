@@ -77,6 +77,7 @@ app.use("/api/v1/chat", require("./routes/chat"));
 
 // Prayer Wall
 
+
 app.use("/api/v1", require("./routes/Notification/notification"));
 
 // Sentiment Analysis
@@ -106,6 +107,8 @@ app.use("/api/v1", require("./routes/Announcement/announcement"));
 app.use("/api/v1", require("./routes/Announcement/announcementCategory"));
 
 // may conflict sa counseling kaya inangat muna
+
+app.use("/api/v1", require("./routes/Inventory"));
 app.use("/api/v1", require("./routes/adminDate"));
 
 // Priest
@@ -116,6 +119,7 @@ app.use("/api/v1", require("./routes/wedding"));
 app.use("/api/v1", require("./routes/Binyag"));
 app.use("/api/v1", require("./routes/Funeral"));
 app.use("/api/v1", require("./routes/counseling"));
+
 
 // MassForms
 app.use("/api/v1", require("./routes/MassForms/massBaptism"));
@@ -138,6 +142,7 @@ app.use("/api/v1", require("./routes/Members/memberYearBatchCategory"));
 app.use("/api/v1", require("./routes/Members/members"));
 
 app.use("/api/v1", require("./routes/liveVideo"))
+
 
 
 // Resources

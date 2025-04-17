@@ -3,7 +3,6 @@ import { thunk } from 'redux-thunk';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 import { authReducer, userReducer, forgotPasswordReducer, allUsersReducer, userDetailsReducer } from './Redux/reducers/userReducers';
-
 const persistConfig = {
     key: 'root',
     storage,
@@ -31,4 +30,4 @@ export const store = createStore(persistedReducer, applyMiddleware(...middlware)
 
 export const persistor = persistStore(store);
 
-// export default store;
+export default store;

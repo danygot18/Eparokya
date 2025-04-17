@@ -194,6 +194,11 @@ import AdminLive from './Components/Admin/AdminLive';
 import UserLive from './Components/UserLive';
 import Bible from './Components/Admin/Resources/Bible';
 
+//Inventory
+import InventoryList from './Components/Admin/Inventory/Inventory';
+import InventoryForm from './Components/Admin/Inventory/InventoryForm';
+import InventoryUpdate from './Components/Admin/Inventory/InventoryEdit';
+
 function Layout() {
   const location = useLocation(); // Now inside Router
   const isDashboard = location.pathname.startsWith("/admin");
@@ -217,6 +222,7 @@ function Layout() {
 
 function App() {
   const { user } = useSelector(state => state.auth);
+  // console.log("User in App.js:", state.auth);
 
   useEffect(() => {
 
@@ -398,6 +404,9 @@ function App() {
         <Route path="/admin/weddingChecklist/:weddingId" element={<ProtectedRoute isAdmin={true}><WeddingChecklist /></ProtectedRoute>} />
         <Route path="/admin/baptismChecklist/:baptismId" element={<ProtectedRoute isAdmin={true}><BaptismChecklist /></ProtectedRoute>} />
 
+        <Route path="/admin/inventoryList" element={<ProtectedRoute isAdmin={true}><InventoryList /></ProtectedRoute>} />
+        <Route path="/admin/inventoryForm" element={<ProtectedRoute isAdmin={true}><InventoryForm /></ProtectedRoute>} />
+        <Route path="/admin/inventory/:id" element={<ProtectedRoute isAdmin={true}><InventoryUpdate /></ProtectedRoute>} />
 
         {/* Guest View */}
         <Route path="/prayers" element={<Prayers />} exact="true" />

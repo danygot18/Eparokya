@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import SideBar from "./SideBar";
-import { Button, TextField, Typography, Stack, Paper, Box } from "@mui/material";
+import { Button, TextField, Typography, Stack, Paper, Box, Alert } from "@mui/material";
 import MetaData from "../Layout/MetaData";
 
 const AdminLive = () => {
+    const [embedCode, setEmbedCode] = useState("");
     const [liveUrl, setLiveUrl] = useState("");
     const [description, setDescription] = useState("");
     const [title, setTitle] = useState("");
     const [currentLive, setCurrentLive] = useState(null);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         fetchLiveVideo();
@@ -21,6 +23,7 @@ const AdminLive = () => {
             if (response.data) {
                 setCurrentLive(response.data);
                 setLiveUrl(response.data.url);
+                setEmbedCode(response.data.embedCode || "");
                 setTitle(response.data.title);
                 setDescription(response.data.description);
             }
@@ -29,14 +32,62 @@ const AdminLive = () => {
         }
     };
 
+    // Extract URL from embed code
+    const extractUrlFromEmbed = (code) => {
+        try {
+            const urlMatch = code.match(/src="([^"]*)"/);
+            if (!urlMatch || !urlMatch[1]) {
+                setError("Invalid embed code format");
+                return null;
+            }
+
+            const src = urlMatch[1];
+            const urlMatchInSrc = src.match(/href=([^&]*)/);
+            if (!urlMatchInSrc || !urlMatchInSrc[1]) {
+                setError("Could not extract video URL from embed code");
+                return null;
+            }
+
+            const decodedUrl = decodeURIComponent(urlMatchInSrc[1]);
+            setError("");
+            return decodedUrl;
+        } catch (err) {
+            setError("Error processing embed code");
+            return null;
+        }
+    };
+
+    const handleEmbedCodeChange = (e) => {
+        const code = e.target.value;
+        setEmbedCode(code);
+
+        if (code.includes("facebook.com/plugins/video")) {
+            const extractedUrl = extractUrlFromEmbed(code);
+            if (extractedUrl) {
+                setLiveUrl(extractedUrl);
+            }
+        }
+    };
+
     // Set or update the live video
     const handleSubmit = async () => {
+        if (!liveUrl) {
+            setError("Please provide a valid Facebook video URL");
+            return;
+        }
+
         try {
-            await axios.post(`${process.env.REACT_APP_API}/api/v1/live`, { url: liveUrl, description, title });
+            await axios.post(`${process.env.REACT_APP_API}/api/v1/live`, {
+                url: liveUrl,
+                embedCode,
+                description,
+                title
+            });
             alert("Live link updated!");
             fetchLiveVideo();
         } catch (error) {
             console.error("Error updating live link", error);
+            setError(error.response?.data?.message || "Error updating live link");
         }
     };
 
@@ -47,10 +98,12 @@ const AdminLive = () => {
             alert("Live stream stopped!");
             setCurrentLive(null);
             setLiveUrl("");
+            setEmbedCode("");
             setDescription("");
             setTitle("");
         } catch (error) {
             console.error("Error stopping live stream", error);
+            setError(error.response?.data?.message || "Error stopping live stream");
         }
     };
 
@@ -63,6 +116,8 @@ const AdminLive = () => {
                     <Typography variant="h5" gutterBottom>
                         Admin: Manage Live Video
                     </Typography>
+
+                    {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
                     <Stack spacing={2}>
                         <TextField
@@ -82,11 +137,22 @@ const AdminLive = () => {
                             onChange={(e) => setDescription(e.target.value)}
                         />
                         <TextField
-                            label="Facebook Live Link"
+                            label="Facebook Embed Code"
+                            variant="outlined"
+                            fullWidth
+                            multiline
+                            rows={4}
+                            value={embedCode}
+                            onChange={handleEmbedCodeChange}
+                            placeholder="Paste Facebook embed code here"
+                        />
+                        <TextField
+                            label="Extracted Video URL"
                             variant="outlined"
                             fullWidth
                             value={liveUrl}
                             onChange={(e) => setLiveUrl(e.target.value)}
+                            disabled
                         />
                     </Stack>
 
@@ -97,7 +163,7 @@ const AdminLive = () => {
                             onClick={handleSubmit}
                             sx={{ fontSize: "1rem", padding: "8px 16px" }}
                         >
-                            Go Live
+                            {currentLive ? "Update Live" : "Go Live"}
                         </Button>
                         {currentLive && (
                             <Button
@@ -113,21 +179,21 @@ const AdminLive = () => {
 
                     {/* Show live video preview */}
                     {currentLive && (
-                        <Box
-                            mt={3}
-                            sx={{ width: "100%",  justifyContent: "center", overflow: "hidden" }}
-                        >
+                        <Box mt={3}>
                             <Typography variant="h6">Live Preview</Typography>
                             <Typography variant="body2">{currentLive.description}</Typography>
+                            <div
+                                dangerouslySetInnerHTML={{ __html: currentLive.embedCode }}
+                                style={{ marginTop: "10px" }}
+                            />
                             <iframe
                                 src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(currentLive.url)}&width=900&show_text=false&autoplay=1`}
                                 width="100%"
-                                height="400"
-                                allow="autoplay; encrypted-media"
+                                height="415"
                                 allowFullScreen
-                                style={{ border: "none", marginTop: "10px", display: "block" }}
+                                title="Live Video Preview"
+                                style={{ marginTop: "10px" }}
                             ></iframe>
-
                         </Box>
                     )}
                 </Paper>

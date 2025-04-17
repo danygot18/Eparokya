@@ -69,7 +69,7 @@ const GuestSideBar = () => {
           path = "/user/EventSentiment";
           break;
         case "activities":
-          path = "/user/ActivitySentiment"; 
+          path = "/user/ActivitySentiment";
           break;
         default:
           console.error("Invalid feedback category:", activeFeedback.category);
@@ -360,7 +360,7 @@ const styles = {
     srollbarWidth: 'none',
     scrollBarOpacity: '0',
     scrollbarWidth: 'none',        // Firefox
-  msOverflowStyle: 'none', 
+    msOverflowStyle: 'none',
   },
   modal: {
     position: 'absolute',
@@ -375,7 +375,7 @@ const styles = {
     p: 4,
   },
   modalText: {
-    marginBottom: '10px', 
+    marginBottom: '10px',
 
   },
 

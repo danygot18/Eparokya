@@ -36,11 +36,19 @@ const PrayerRequestList = () => {
     const filterForms = () => {
         let filtered = prayerRequestForms;
 
-        if (activeFilter !== "All") {
+        if (activeFilter === "Today") {
+            const today = new Date().toISOString().split("T")[0];
+            filtered = filtered.filter((form) => {
+                if (!form.prayerRequestDate) return false;
+                const formDate = new Date(form.prayerRequestDate).toISOString().split("T")[0];
+                return formDate === today;
+            });
+        } else if (activeFilter !== "All") {
             filtered = filtered.filter((form) =>
                 form.prayerType.includes(activeFilter)
             );
         }
+
 
         if (searchTerm) {
             filtered = filtered.filter((form) =>
@@ -49,6 +57,11 @@ const PrayerRequestList = () => {
         }
 
         setFilteredForms(filtered);
+    };
+
+    const filterTodayPrayerRequests = () => {
+
+        setActiveFilter("Today");
     };
 
 
@@ -60,11 +73,14 @@ const PrayerRequestList = () => {
         filterForms();
     }, [activeFilter, searchTerm, prayerRequestForms]);
 
+
+
     return (
         <div style={{ display: "flex", height: "100vh" }}>
             <SideBar />
             <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
                 <h1 className="prayerRequest-title">Prayer Request Records</h1>
+
 
                 <div className="prayerRequest-filters">
                     {["All", "Eternal Repose(Patay)", "Thanks Giving(Pasasalamat)", "Special Intentions(Natatanging Kahilingan)"].map((prayerType) => (
@@ -76,6 +92,16 @@ const PrayerRequestList = () => {
                             {prayerType}
                         </button>
                     ))}
+
+                    <button
+                        className={`prayerRequest-filter-button ${activeFilter === "Today" ? "active" : ""}`}
+                        onClick={filterTodayPrayerRequests}
+                        style={{ backgroundColor: "#007bff", color: "#fff", marginLeft: "10px" }}
+                    >
+                        Show Today's Prayers
+                    </button>
+
+
                 </div>
 
 
@@ -104,7 +130,8 @@ const PrayerRequestList = () => {
                                 onClick={() => handleCardClick(item._id)}
                             >
                                 {/* <div className="status-badge">{item.prayerType}</div> */}
-                                <h3 className="card-title">Prayer #{index + 1}</h3>
+                                {/* <h3 className="card-title">Prayer #{index + 1}</h3> */}
+                                <h3 className="card-title">{item.prayerType}</h3>
                                 <div className="card-details">
                                     <p>
                                         <strong>Offeror's Full Name:</strong> {item.

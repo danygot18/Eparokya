@@ -626,14 +626,28 @@ const SideBar = () => {
           path: "/admin/baptismList"
         }
       ]
+    },
+    {
+      text: "Inventory",
+      icon: <InventoryIcon />,
+      subItems: [
+        {
+          text: "Inventory List",
+          path: "/admin/InventoryList"
+        },
+        {
+          text: "Inventory Form",
+          path: "/admin/InventoryForm"
+        }
+      ]
     }
   ];
 
   return (
     <StyledDrawer variant="permanent" open={drawerOpen}>
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'flex-end', 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'flex-end',
         p: 1,
         position: 'sticky',
         top: 0,
@@ -646,7 +660,7 @@ const SideBar = () => {
           {drawerOpen ? <ChevronLeft /> : <ChevronRight />}
         </IconButton>
       </Box>
-      
+
       {drawerOpen && (
         <Box sx={{ p: 2, textAlign: 'center' }}>
           <Typography variant="h6" noWrap>
@@ -654,11 +668,11 @@ const SideBar = () => {
           </Typography>
         </Box>
       )}
-      
+
       <Divider />
-      
-      <List sx={{ 
-        overflowY: 'auto', 
+
+      <List sx={{
+        overflowY: 'auto',
         overflowX: 'hidden',
         '&::-webkit-scrollbar': {
           width: '0.4em',
@@ -676,8 +690,8 @@ const SideBar = () => {
           <React.Fragment key={index}>
             {item.subItems ? (
               <>
-                <ListItem 
-                  button 
+                <ListItem
+                  button
                   onClick={() => handleDropdownToggle(index)}
                   sx={{
                     '&:hover': {
@@ -692,9 +706,9 @@ const SideBar = () => {
                   </ListItemIcon>
                   {drawerOpen && (
                     <>
-                      <ListItemText 
-                        primary={item.text} 
-                        primaryTypographyProps={{ variant: 'body2' }}
+                      <ListItemText
+                        primary={item.text}
+                        sx={{ color: 'black' }}
                       />
                       {openDropdowns[index] ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
                     </>
@@ -703,10 +717,10 @@ const SideBar = () => {
                 <Collapse in={openDropdowns[index] && drawerOpen} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
                     {item.subItems.map((subItem, subIndex) => (
-                      <ListItem 
-                        button 
-                        key={subIndex} 
-                        component={Link} 
+                      <ListItem
+                        button
+                        key={subIndex}
+                        component={Link}
                         to={subItem.path}
                         sx={{
                           pl: 4,
@@ -716,9 +730,10 @@ const SideBar = () => {
                           },
                         }}
                       >
-                        <ListItemText 
-                          primary={subItem.text} 
-                          primaryTypographyProps={{ variant: 'body2' }}
+                        <ListItemText
+                          primary={subItem.text}
+                          slotProps={{ variant: 'h1' }}
+                          sx={{ color: 'black' }}
                         />
                       </ListItem>
                     ))}
@@ -726,9 +741,9 @@ const SideBar = () => {
                 </Collapse>
               </>
             ) : (
-              <ListItem 
-                button 
-                component={Link} 
+              <ListItem
+                button
+                component={Link}
                 to={item.path}
                 sx={{
                   '&:hover': {
@@ -742,9 +757,10 @@ const SideBar = () => {
                   {item.icon}
                 </ListItemIcon>
                 {drawerOpen && (
-                  <ListItemText 
-                    primary={item.text} 
-                    primaryTypographyProps={{ variant: 'body2' }}
+                  <ListItemText
+                    primary={item.text}
+                    slotProps={{ variant: 'h1' }}
+                    sx={{ color: 'black' }}
                   />
                 )}
               </ListItem>

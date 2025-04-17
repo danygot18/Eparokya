@@ -305,27 +305,28 @@ body {
 }
 
 .counseling-title {
+  text-align: center;
   font-size: 2rem;
   font-weight: bold;
+  color: #154314;
   margin-bottom: 20px;
-  text-align: center;
 }
 
 .counseling-filters {
   display: flex;
   justify-content: center;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
 .counseling-filter-button {
-  background-color: #fff6f6;
-  border: none;
   padding: 10px 20px;
-  margin: 0 10px;
-  cursor: pointer;
+  border: none;
   border-radius: 5px;
-  font-size: 1rem;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #ddd;
+  color: #000;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .counseling-filter-button.active {
@@ -616,24 +617,37 @@ body {
   margin: 5px 0;
   font-size: 0.95rem;
 }
+.houseBlessing-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #154314;
+  margin-bottom: 20px;
+}
 
 .houseBlessing-filters {
-  margin-bottom: 20px;
   display: flex;
+  justify-content: center;
   gap: 10px;
+  margin-bottom: 20px;
 }
 
 .houseBlessing-filter-button {
-  padding: 10px 15px;
-  font-size: 0.9rem;
-  font-weight: bold;
+  padding: 10px 20px;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
+  background-color: #ddd;
+  color: #000;
   cursor: pointer;
-  background-color: #e0e0e0;
+  transition: background-color 0.3s;
 }
 
 .houseBlessing-filter-button.active {
+  background-color: #1c5739;
+  color: white;
+}
+
+.houseBlessing-filter-button:hover {
   background-color: #1c5739;
   color: white;
 }
