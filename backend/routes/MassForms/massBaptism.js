@@ -6,7 +6,7 @@ const { isAuthenticatedUser, isAuthorized } = require('../../middleware/auth');
 // const upload = multer({ dest: 'uploads/' });
 const upload = require('../../utils/multer'); 
 
-router.get('/getAllBaptism', MassBaptismController.getAllBaptisms);
+router.get('/getAllMassBaptism', MassBaptismController.getAllBaptisms);
 
 router.post(
   '/massBaptismCreate',

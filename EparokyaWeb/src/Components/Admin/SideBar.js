@@ -619,11 +619,11 @@ const SideBar = () => {
       subItems: [
         {
           text: "Mass Wedding List",
-          path: "/admin/weddingList"
+          path: "/admin/mass/weddingList"
         },
         {
           text: "Mass Baptism List",
-          path: "/admin/baptismList"
+          path: "/admin/mass/baptismList"
         }
       ]
     },

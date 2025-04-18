@@ -34,7 +34,7 @@ router.post(
 //     '/submitWeddingForm', upload.single('image'),  WeddingFormController.submitWeddingForm
 //   );
 
-router.get('/getAllWeddings', MassWeddingFormController.getAllWeddings);
+router.get('/getAllMassWeddings', MassWeddingFormController.getAllWeddings);
 // router.get('/confirmedWedding',  MassWeddingFormController.getConfirmedWeddings);
 
 // router.get('/stats/weddingsPerMonth', isAuthenticatedUser, isAuthorized("admin"), MassWeddingFormController.getWeddingsPerMonth);

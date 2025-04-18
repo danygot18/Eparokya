@@ -150,7 +150,7 @@ exports.submitWeddingForm = async (req, res) => {
 
 exports.getAllWeddings = async (req, res) => {
   try {
-    const massWeddingList = await MassWedding.find({}, 'brideName groomName bridePhone groomPhone weddingDateTime weddingStatus userId')
+    const massWeddingList = await MassWedding.find({}, 'brideName groomName bridePhone groomPhone weddingStatus userId')
       .populate('userId', 'name');
 
 

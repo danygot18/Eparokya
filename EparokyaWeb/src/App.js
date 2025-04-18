@@ -44,6 +44,7 @@ import HouseBlessingForm from './Components/User/Forms/PrivateForms/PrivateSched
 import MassBaptismForm from './Components/User/Forms/MassForms/Baptism/MassBaptismForms';
 import MassWeddingForm from './Components/User/Forms/MassForms/Wedding/MassWeddingForm';
 
+
 import MySubmittedWeddingForm from './Components/User/Forms/PrivateForms/Wedding/MySubmittedWeddingForm';
 import SubmittedWeddingList from './Components/User/Forms/PrivateForms/Wedding/SubmittedWeddingList';
 // import UserWeddingChecklist from './Components/User/Forms/PrivateForms/Wedding/UserWeddingChecklist';
@@ -162,6 +163,9 @@ import HouseBlessingList from './Components/Admin/PrivateSchedule/houseBlessingL
 
 import CounselingDetails from './Components/Admin/Counseling/CounselingDetails';
 import HouseBlessingDetails from './Components/Admin/PrivateSchedule/HouseBlessingDetails';
+
+import MassWeddingList from './Components/Admin/MassForms/MassWeddingList';
+import MassBaptismList from './Components/Admin/MassForms/MassBaptismList';
 
 
 //Admin
@@ -403,6 +407,9 @@ function App() {
 
         <Route path="/admin/weddingChecklist/:weddingId" element={<ProtectedRoute isAdmin={true}><WeddingChecklist /></ProtectedRoute>} />
         <Route path="/admin/baptismChecklist/:baptismId" element={<ProtectedRoute isAdmin={true}><BaptismChecklist /></ProtectedRoute>} />
+
+        <Route path="/admin/mass/weddingList" element={<ProtectedRoute isAdmin={true}><MassWeddingList /></ProtectedRoute>} />
+        <Route path="/admin/mass/baptismList" element={<ProtectedRoute isAdmin={true}><MassBaptismList /></ProtectedRoute>} />
 
         <Route path="/admin/inventoryList" element={<ProtectedRoute isAdmin={true}><InventoryList /></ProtectedRoute>} />
         <Route path="/admin/inventoryForm" element={<ProtectedRoute isAdmin={true}><InventoryForm /></ProtectedRoute>} />
