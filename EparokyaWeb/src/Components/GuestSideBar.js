@@ -244,7 +244,7 @@ const GuestSideBar = () => {
               ...(location.pathname === "/user/NavigationForms" ? styles.activeLink : {}),
             }}
           >
-            <FaWpforms style={styles.icon} />Forms
+            <FaWpforms style={styles.icon} />Request Form
           </Link>
         </li>
 

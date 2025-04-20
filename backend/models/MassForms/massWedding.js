@@ -298,7 +298,6 @@ const massWeddingSchema = mongoose.Schema({
         default: 'Pending',
         enum: ['Pending', 'Confirmed', 'Cancelled'],
     },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     confirmedAt: {
         type: Date,
     },
