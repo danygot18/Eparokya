@@ -1,5 +1,5 @@
 const termsAndConditionsText = `
-By submitting this form, you agree to the following terms and conditions:
+By submitting this form, you agree to the following terms and conditions: 
 - The information provided is accurate and truthful.
 - The church reserves the right to validate all documents before approval.
 - Rescheduling or cancellation of services must be communicated in advance.

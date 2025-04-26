@@ -53,14 +53,11 @@ export const Home = () => {
     `${process.env.PUBLIC_URL}/EParokya-SampleBanner.png`,
     `${process.env.PUBLIC_URL}/EParokya2-SampleBanner.png`,
   ];
-
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentBannerIndex(
-        (prevIndex) => (prevIndex + 1) % bannerImages.length
-      );
+      setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % bannerImages.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -75,8 +72,17 @@ export const Home = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/getAllAnnouncements`
       );
-      setAnnouncements(response.data.announcements || []);
-      setFilteredAnnouncements(response.data.announcements || []);
+      const fetchedAnnouncements = response.data.announcements || [];
+
+      // Sort announcements: featured first, then latest
+      const sortedAnnouncements = fetchedAnnouncements.sort((a, b) => {
+        if (a.isFeatured && !b.isFeatured) return -1;
+        if (!a.isFeatured && b.isFeatured) return 1;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+
+      setAnnouncements(sortedAnnouncements);
+      setFilteredAnnouncements(sortedAnnouncements);
     } catch (error) {
       console.error("Error fetching announcements:", error);
       setAnnouncements([]);
@@ -127,7 +133,7 @@ export const Home = () => {
     navigate(`/announcementDetails/${announcementId}`);
   };
 
-  const displayedAnnouncements = announcements.filter((announcement) => {
+  const displayedAnnouncements = filteredAnnouncements.filter((announcement) => {
     const matchesCategory = selectedCategory
       ? announcement.announcementCategory?._id === selectedCategory
       : true;
@@ -208,18 +214,17 @@ export const Home = () => {
 
           {/* Announcements */}
           <div style={styles.announcementsContainer}>
-            {loading ? (
-              <p>Loading announcements...</p>
-            ) : displayedAnnouncements.length > 0 ? (
+            {displayedAnnouncements.length > 0 ? (
               displayedAnnouncements.map((announcement) => (
                 <div
                   key={announcement._id}
-                  style={styles.announcementCard}
+                  style={{
+                    ...styles.announcementCard,
+                    border: announcement.isFeatured ? "3px solid gold" : "none",
+                  }}
                   onClick={() => handleCardClick(announcement._id)}
                 >
-                  {/* Content */}
                   <div style={styles.cardContent}>
-                    {/* User Info */}
                     <div style={styles.userInfo}>
                       <img
                         src="/public/../../../../EPAROKYA-SYST.png"
@@ -236,7 +241,6 @@ export const Home = () => {
                       {announcement.description}
                     </p>
 
-                    {/* Image / Slider */}
                     <div style={styles.imageSliderContainer}>
                       {announcement.images && announcement.images.length > 0 ? (
                         <ImageSlider images={announcement.images} />
@@ -251,14 +255,12 @@ export const Home = () => {
 
                     <p style={styles.announcementCategory}>
                       Category:{" "}
-                      {announcement.announcementCategory?.name ||
-                        "Uncategorized"}
+                      {announcement.announcementCategory?.name || "Uncategorized"}
                     </p>
                     <p style={styles.tags}>
                       Tags: {announcement.tags.join(", ")}
                     </p>
 
-                    {/* Like & Comment Section */}
                     <div style={styles.reactionsContainer}>
                       <span style={styles.reaction}>
                         <FaHeart color="red" />{" "}
@@ -283,187 +285,32 @@ export const Home = () => {
 };
 
 const styles = {
-  homeContainer: {
-    display: "flex",
-  },
-  contentContainer: {
-    display: "flex",
-    width: "100%",
-    backgroundColor: "#f9f9f9",
-  },
-  mainContent: {
-    flex: 1,
-    padding: "20px",
-  },
-  bannerContainer: {
-    display: "flex",
-    justifyContent: "center",
-    marginBottom: "20px",
-  },
-  bannerImage: {
-    width: "100%",
-    maxWidth: "1200px",
-    borderRadius: "8px",
-    objectFit: "cover",
-  },
-  searchBarContainer: {
-    display: "flex",
-    justifyContent: "center",
-    marginBottom: "20px",
-  },
-  searchInput: {
-    width: "60%",
-    padding: "10px",
-    fontSize: "16px",
-    borderRadius: "8px",
-    border: "1px solid #ddd",
-  },
-  categoriesContainer: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "10px",
-    marginBottom: "20px",
-    flexWrap: "wrap",
-  },
-  category: {
-    padding: "8px 12px",
-    backgroundColor: "#3a5a40",
-    color: "#fff",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  announcementsContainer: {
-    display: "grid",
-    gridTemplateColumns: "1fr",
-    gap: "20px",
-    alignItems: "flex-start",
-    paddingLeft: "20px",
-  },
-  announcementCard: {
-    backgroundColor: "#e9ecef",
-    borderRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    cursor: "pointer",
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    maxWidth: "800px",
-    padding: "15px",
-    textAlign: "left",
-    margin: "20px auto",
-  },
-
-  layoutContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-
-  notificationsContainer: {
-    width: "300px",
-    padding: "15px",
-    backgroundColor: "#fff",
-    borderRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-  },
-
-  imageSliderContainer: {
-    width: "100%",
-    height: "300px", // Increased for better visibility
-    position: "relative",
-    overflow: "hidden",
-    backgroundColor: "#000",
-    borderTopLeftRadius: "8px",
-    borderTopRightRadius: "8px",
-  },
-
-  sliderWrapper: {
-    width: "100%",
-    height: "100%",
-    position: "relative",
-  },
-  announcementImage: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-  },
-  sliderButtonLeft: {
-    position: "absolute",
-    top: "50%",
-    left: "10px",
-    transform: "translateY(-50%)",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    color: "#fff",
-    border: "none",
-    borderRadius: "50%",
-    width: "30px",
-    height: "30px",
-    cursor: "pointer",
-  },
-  sliderButtonRight: {
-    position: "absolute",
-    top: "50%",
-    right: "10px",
-    transform: "translateY(-50%)",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    color: "#fff",
-    border: "none",
-    borderRadius: "50%",
-    width: "30px",
-    height: "30px",
-    cursor: "pointer",
-  },
-  cardContent: {
-    padding: "15px",
-  },
-  userInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    marginBottom: "10px",
-  },
-  profileImage: {
-    width: "40px",
-    height: "40px",
-    borderRadius: "50%",
-    objectFit: "cover",
-  },
-  userName: {
-    fontWeight: "bold",
-    fontSize: "14px",
-  },
-  announcementTitle: {
-    fontSize: "18px",
-    fontWeight: "bold",
-    marginBottom: "10px",
-  },
-  announcementDescription: {
-    fontSize: "14px",
-    marginBottom: "10px",
-  },
-  announcementCategory: {
-    fontSize: "12px",
-    marginBottom: "5px",
-    fontStyle: "italic",
-  },
-  tags: {
-    fontSize: "12px",
-    color: "#555",
-  },
-  reactionsContainer: {
-    display: "flex",
-    gap: "15px",
-    alignItems: "center",
-    marginTop: "10px",
-  },
-  reaction: {
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
-    fontSize: "14px",
-  }
+  homeContainer: { display: "flex" },
+  contentContainer: { display: "flex", width: "100%", backgroundColor: "#f9f9f9" },
+  mainContent: { flex: 1, padding: "20px" },
+  bannerContainer: { display: "flex", justifyContent: "center", marginBottom: "20px" },
+  bannerImage: { width: "100%", maxWidth: "1200px", borderRadius: "8px", objectFit: "cover" },
+  searchBarContainer: { display: "flex", justifyContent: "center", marginBottom: "20px" },
+  searchInput: { width: "60%", padding: "10px", fontSize: "16px", borderRadius: "8px", border: "1px solid #ddd" },
+  categoriesContainer: { display: "flex", justifyContent: "center", gap: "10px", marginBottom: "20px", flexWrap: "wrap" },
+  category: { padding: "8px 12px", backgroundColor: "#3a5a40", color: "#fff", borderRadius: "8px", cursor: "pointer", fontSize: "14px" },
+  announcementsContainer: { display: "grid", gridTemplateColumns: "1fr", gap: "20px", alignItems: "flex-start", paddingLeft: "20px" },
+  announcementCard: { backgroundColor: "#e9ecef", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)", cursor: "pointer", overflow: "hidden", display: "flex", flexDirection: "column", width: "100%", maxWidth: "800px", padding: "15px", textAlign: "left", margin: "20px auto" },
+  cardContent: {},
+  userInfo: { display: "flex", alignItems: "center", marginBottom: "10px" },
+  profileImage: { width: "40px", height: "40px", borderRadius: "50%", marginRight: "10px" },
+  userName: { fontWeight: "bold" },
+  announcementTitle: { margin: "10px 0", fontSize: "24px" },
+  announcementDescription: { margin: "10px 0", fontSize: "16px" },
+  imageSliderContainer: { width: "100%", height: "300px", position: "relative", overflow: "hidden", backgroundColor: "#000", borderTopLeftRadius: "8px", borderTopRightRadius: "8px" },
+  sliderWrapper: { width: "100%", height: "100%", position: "relative" },
+  announcementImage: { width: "100%", height: "100%", objectFit: "cover" },
+  announcementCategory: { marginTop: "10px", fontWeight: "bold" },
+  tags: { color: "#666", fontSize: "14px" },
+  reactionsContainer: { display: "flex", gap: "10px", marginTop: "10px" },
+  reaction: { display: "flex", alignItems: "center", gap: "5px" },
+  sliderButtonLeft: { position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", backgroundColor: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: "50%", width: "30px", height: "30px", cursor: "pointer" },
+  sliderButtonRight: { position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", backgroundColor: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: "50%", width: "30px", height: "30px", cursor: "pointer" },
 };
 
 export default Home;

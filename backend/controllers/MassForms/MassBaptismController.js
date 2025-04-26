@@ -104,8 +104,6 @@ exports.createBaptism = async (req, res) => {
     }
 };
 
-
-
 exports.getAllBaptisms = async (req, res) => {
     try {
       const baptisms = await MassBaptism.find()
