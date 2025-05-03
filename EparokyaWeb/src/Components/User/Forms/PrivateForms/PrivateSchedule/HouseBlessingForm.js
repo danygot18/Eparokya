@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import { Form, Row, Col } from 'react-bootstrap';
 import GuestSidebar from '../../../../GuestSideBar';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import MetaData from '../../../../Layout/MetaData';
 import { Box } from '@mui/material';
+import { Button, TextField, MenuItem, Typography } from '@mui/material';
+
 // import phLocations from 'philippines';
 // import { municipalities, searchBaranggay } from 'ph-geo-admin-divisions';
 
@@ -180,130 +182,111 @@ const HouseBlessingForm = () => {
         }
     };
 
-
-
-
     return (
-        <div style={{ display: "flex" }}>
+        <Box display="flex">
             <MetaData title="House Blessing Form" />
-            <div style={{ display: "flex", backgroundColor: "#f9f9f9", width: "100%" }}>
+            <Box display="flex" bgcolor="#f9f9f9" width="100%">
                 <GuestSidebar />
-
-                <Col>
-                    <Form onSubmit={handleSubmit}>
-                        <h4 className="mt-4">House Blessing Information</h4>
-
-                        <Form.Group>
-                            <Form.Label>Full Name</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={formData.fullName}
-                                onChange={(e) => handleChange(e, 'fullName')}
-                            />
-                        </Form.Group>
-
-                        <Form.Group>
-                            <Form.Label>Contact Number</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={formData.contactNumber}
-                                onChange={(e) => handleChange(e, 'contactNumber')}
-                            />
-                        </Form.Group>
-
-                        <Form.Group>
-                            <Form.Label>House Blessing Date</Form.Label>
-                            <Form.Control
-                                type="date"
-                                value={formData.blessingDate}
-                                onChange={(e) => handleChange(e, 'blessingDate')}
-                            />
-                            <Form.Label>House Blessing Time (Format: 7:00AM)</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={formData.blessingTime}
-                                onChange={(e) => handleChange(e, 'blessingTime')}
-                            />
-                        </Form.Group>
-
-
-                        {/* Address */}
-                        <h4 className="mt-4">Address</h4>
-
+                <Box flex={1} p={2}>
+                    <form onSubmit={handleSubmit}>
+                        <Typography variant="h4" gutterBottom>House Blessing Information</Typography>
+                        <TextField
+                            label="Full Name"
+                            value={formData.fullName}
+                            onChange={(e) => handleChange(e, 'fullName')}
+                            fullWidth
+                            margin="normal"
+                        />
+                        <TextField
+                            label="Contact Number"
+                            value={formData.contactNumber}
+                            onChange={(e) => handleChange(e, 'contactNumber')}
+                            fullWidth
+                            margin="normal"
+                        />
+                        <TextField
+                            label="House Blessing Date"
+                            type="date"
+                            value={formData.blessingDate}
+                            onChange={(e) => handleChange(e, 'blessingDate')}
+                            fullWidth
+                            margin="normal"
+                            InputLabelProps={{ shrink: true }}
+                        />
+                        <TextField
+                            label="House Blessing Time (Format: 7:00AM)"
+                            value={formData.blessingTime}
+                            onChange={(e) => handleChange(e, 'blessingTime')}
+                            fullWidth
+                            margin="normal"
+                        />
+                        <Typography variant="h4" gutterBottom>Address</Typography>
                         {['BldgNameTower', 'LotBlockPhaseHouseNo', 'SubdivisionVillageZone', 'Street', 'District'].map((field) => (
-                            <Form.Group key={field}>
-                                <Form.Label>{field.charAt(0).toUpperCase() + field.slice(1)}</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={formData.address[field] || ''}
-                                    onChange={(e) => handleChange(e, `address.${field}`)}
-                                />
-                            </Form.Group>
+                            <TextField
+                                key={field}
+                                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                                value={formData.address[field] || ''}
+                                onChange={(e) => handleChange(e, `address.${field}`)}
+                                fullWidth
+                                margin="normal"
+                            />
                         ))}
-
-                        <Form.Group>
-                            <Form.Label>City</Form.Label>
-                            <Form.Select value={formData.address.city} onChange={handleCityChange}>
-                                <option value="">Select a city</option>
-                                {cities.map((city, index) => (
-                                    <option key={index} value={city}>
-                                        {city}
-                                    </option>
-                                ))}
-                            </Form.Select>
-                        </Form.Group>
-
-                        {/* Custom City Input */}
+                        <TextField
+                            select
+                            label="City"
+                            value={formData.address.city}
+                            onChange={handleCityChange}
+                            fullWidth
+                            margin="normal"
+                        >
+                            <MenuItem value="">Select a city</MenuItem>
+                            {cities.map((city, index) => (
+                                <MenuItem key={index} value={city}>{city}</MenuItem>
+                            ))}
+                        </TextField>
                         {formData.address.city === 'Others' && (
-                            <Form.Group>
-                                <Form.Label>Add City</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={customCity}
-                                    onChange={(e) => setCustomCity(e.target.value)}
-                                />
-                            </Form.Group>
+                            <TextField
+                                label="Add City"
+                                value={customCity}
+                                onChange={(e) => setCustomCity(e.target.value)}
+                                fullWidth
+                                margin="normal"
+                            />
                         )}
-
-
-                        {/* Barangay Dropdown */}
-                        <Form.Group>
-                            <Form.Label>Barangay</Form.Label>
-                            <Form.Select value={formData.address.baranggay} onChange={handleBarangayChange}>
-                                <option value="">Select a barangay</option>
-                                {barangays.map((barangay, index) => (
-                                    <option key={index} value={barangay}>
-                                        {barangay}
-                                    </option>
-                                ))}
-                            </Form.Select>
-                        </Form.Group>
-
-                        {/* Custom Barangay Input */}
-                        {formData.address.baranggay === 'Others' && (
-                            <Form.Group>
-                                <Form.Label>Add Barangay</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={customBarangay}
-                                    onChange={(e) => setCustomBarangay(e.target.value)}
-                                />
-                            </Form.Group>
+                        <TextField
+                            select
+                            label="Barangay"
+                            value={formData.address.barangay}
+                            onChange={handleBarangayChange}
+                            fullWidth
+                            margin="normal"
+                        >
+                            <MenuItem value="">Select a barangay</MenuItem>
+                            {barangays.map((barangay, index) => (
+                                <MenuItem key={index} value={barangay}>{barangay}</MenuItem>
+                            ))}
+                        </TextField>
+                        {formData.address.barangay === 'Others' && (
+                            <TextField
+                                label="Add Barangay"
+                                value={customBarangay}
+                                onChange={(e) => setCustomBarangay(e.target.value)}
+                                fullWidth
+                                margin="normal"
+                            />
                         )}
-
-
-                        <div className="d-flex justify-content-end mt-4">
-                            <Button variant="secondary" className="me-2" onClick={handleClear}>
+                        <Box display="flex" justifyContent="flex-end" mt={4}>
+                            <Button variant="outlined" onClick={handleClear} style={{ marginRight: '8px' }}>
                                 Clear All Fields
                             </Button>
-                            <Button variant="primary" type="submit">
+                            <Button variant="contained" type="submit">
                                 Submit
                             </Button>
-                        </div>
-                    </Form>
-                </Col>
-            </div>
-        </div>
+                        </Box>
+                    </form>
+                </Box>
+            </Box>
+        </Box>
     );
 };
 
