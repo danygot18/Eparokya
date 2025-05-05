@@ -66,7 +66,7 @@ const { server, io } = require('./app'); // Use the existing server & io instanc
 const socket = require('./socket');
 
 // dotenv.config({ path: './config/config.env' });
-dotenv.config({ path: './config/.env' });
+dotenv.config({ path: './config/config.env' });
 console.log("DB_URI:", process.env.DB_URI || "NOT FOUND");
 console.log("Hugging Face API Key:", process.env.HUGGING_FACE_API_KEY || "NOT FOUND");
 
