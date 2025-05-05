@@ -25,7 +25,7 @@ const io = new Server(server, {
 // const allowedOrigins = ["https://eparokya.vercel.app","*", null];
 
 // Load environment variables
-require("dotenv/config");
+// require("dotenv/config");
 
 // app.use(
 //   cors({
