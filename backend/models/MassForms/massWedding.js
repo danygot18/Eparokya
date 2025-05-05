@@ -26,14 +26,14 @@ const massWeddingSchema = mongoose.Schema({
         customBarangay: {
             type: String,
             required: function () {
-                return this.address.baranggay === 'Others';
+                return this.baranggay === 'Others';
             }
         },
         city: { type: String, enum: ['Taguig City', 'Others'], required: true },
         customCity: {
             type: String,
             required: function () {
-                return this.address.city === 'Others';
+                return this.city === 'Others';
             }
         },
 
@@ -64,20 +64,20 @@ const massWeddingSchema = mongoose.Schema({
                 'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
                 'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan',
                 'Others'
-            ],
+            ],  
             required: true
         },
         customBarangay: {
             type: String,
             required: function () {
-                return this.address.baranggay === 'Others';
+                return this.baranggay === 'Others';
             }
         },
         city: { type: String, enum: ['Taguig City', 'Others'], required: true },
         customCity: {
             type: String,
             required: function () {
-                return this.address.city === 'Others';
+                return this.city === 'Others';
             }
         },
     },

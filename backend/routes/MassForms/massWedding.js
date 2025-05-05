@@ -48,17 +48,17 @@ router.get('/getAllMassWeddings', MassWeddingFormController.getAllWeddings);
 router.get('/getWeddingChecklist/:massWeddingId', MassWeddingFormController.getWeddingChecklist);
 router.put('/updateWeddingChecklist/:massWeddingId', MassWeddingFormController.updateWeddingChecklist);
 
-router.post('/:massWeddingId/commentWedding',  MassWeddingFormController.addComment);
-router.post('/updateAdditionalReq/:massWeddingId',  MassWeddingFormController.updateAdditionalReq);
+router.post('/:massWeddingId/commentMassWedding',  MassWeddingFormController.addComment);
+router.post('/updateAdditionalMassReq/:massWeddingId',  MassWeddingFormController.updateAdditionalReq);
 
 router.get('/getAllUserSubmittedWedding', isAuthenticatedUser, MassWeddingFormController.getMySubmittedForms);
 // router.get('/getWeddingForm/:formId', isAuthenticatedUser, MassWeddingFormController.getWeddingFormById);
 
 // router.post('/admin/available-dates', isAuthenticatedUser, isAuthorized, MassWeddingFormController.addAvailableDate);
-router.get('/getWeddingById/:massWeddingId',  MassWeddingFormController.getWeddingById);
+router.get('/getmassWeddingById/:massWeddingId',  MassWeddingFormController.getWeddingById);
 
-router.post('/:massWeddingId/confirmWedding',  MassWeddingFormController.confirmWedding);
-router.post('/declineWedding/:massWeddingId', isAuthenticatedUser, MassWeddingFormController.declineWedding);
+router.post('/:massWeddingId/confirmMassWedding',  MassWeddingFormController.confirmWedding);
+router.post('/declineMassWedding/:massWeddingId', isAuthenticatedUser, MassWeddingFormController.declineWedding);
 
 //wedding dates
 // router.get('/weddingdates', MassWeddingFormController.getWeddingSummary)

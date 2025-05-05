@@ -6,7 +6,7 @@
   .prayerIntentionDetails-content {
     flex-grow: 1;
     padding: 20px;
-    margin-left: 250px; /* Ensures it sits beside the sidebar */
+    margin-left: 100px; /* Ensures it sits beside the sidebar */
   }
   
   .prayerIntentionDetails-card {

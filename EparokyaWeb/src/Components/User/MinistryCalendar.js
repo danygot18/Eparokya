@@ -3,7 +3,7 @@ import axios from 'axios';
 import GuestSideBar from '../GuestSideBar';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+
 
 const localizer = momentLocalizer(moment);
 
@@ -74,6 +74,7 @@ const MinistryCalendar = () => {
           endAccessor="end"
           style={{ height: 500 }}
           onSelectEvent={handleEventClick}
+         
         />
         {/* Event Details Display */}
         {selectedEvent && (

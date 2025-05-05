@@ -1,5 +1,6 @@
 const { WeddingChecklist } = require('../../models/weddingChecklist');
-const { MassWedding } = require('../../models/MassForms/massWedding');
+const { massWedding }  = require('../../models/MassForms/massWedding');
+const AdminDate = require('../../models/adminDate');
 const User = require('../../models/user');
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
@@ -10,148 +11,317 @@ const uploadToCloudinary = async (file, folder) => {
   return { public_id: result.public_id, url: result.secure_url };
 };
 
+// exports.submitWeddingForm = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.user._id);
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found." });
+//     }
+
+//     if (user.civilStatus === "Married") {
+//       return res.status(400).json({ message: "Sorry, but a 'Married' user cannot submit an application." });
+//     }
+
+//     const {
+//       weddingDateTime,
+//       groomName,
+//       groomAddress,
+//       brideName,
+//       brideAddress,
+//       Ninong,
+//       Ninang,
+//       brideReligion,
+//       brideOccupation,
+//       brideBirthDate,
+//       bridePhone,
+//       groomReligion,
+//       groomOccupation,
+//       groomBirthDate,
+//       groomPhone,
+//       groomFather,
+//       groomMother,
+//       brideFather,
+//       brideMother
+//     } = req.body;
+
+//     const requiredFields = [
+//       'groomName', 'groomAddress',
+//       'brideName', 'brideAddress', 'brideReligion', 'brideOccupation', 'brideBirthDate',
+//       'bridePhone', 'groomReligion', 'groomOccupation', 'groomBirthDate', 'groomPhone',
+//       'groomFather', 'groomMother', 'brideFather', 'brideMother'
+//     ];
+
+//     for (const field of requiredFields) {
+//       if (!req.body[field]) {
+//         return res.status(400).json({ message: `Missing required field: ${field}` });
+//       }
+//     }
+
+//     const images = {};
+//     const requiredImageFields = [
+//       "GroomNewBaptismalCertificate",
+//       "GroomNewConfirmationCertificate",
+//       "BrideNewBaptismalCertificate",
+//       "GroomMarriageLicense",
+//       "GroomMarriageBans",
+//       "GroomOrigCeNoMar",
+//       "GroomOrigPSA",
+//       "GroomPermitFromtheParishOftheBride",
+//       "GroomChildBirthCertificate",
+//       "GroomOneByOne",
+//       "BrideNewBaptismalCertificate",
+//       "BrideNewConfirmationCertificate",
+//       "BrideMarriageLicense",
+//       "BrideMarriageBans",
+//       "BrideOrigCeNoMar",
+//       "BrideOrigPSA",
+//       "BridePermitFromtheParishOftheBride",
+//       "BrideChildBirthCertificate",
+//       "BrideOneByOne",
+//     ];
+
+//     for (const field of requiredImageFields) {
+//       if (req.files[field]) {
+//         const uploadedImage = await uploadToCloudinary(req.files[field][0], "massWedding/docs");
+//         images[field] = {
+//           public_id: uploadedImage.public_id,
+//           url: uploadedImage.url,
+//         };
+//       } else {
+//         return res.status(400).json({ message: `Missing required image: ${field}` });
+//       }
+//     }
+
+//     const groomAddressObject = typeof groomAddress === 'string' ? JSON.parse(groomAddress) : groomAddress;
+//     const brideAddressObject = typeof brideAddress === 'string' ? JSON.parse(brideAddress) : brideAddress;
+
+//     if (groomAddressObject.baranggay === "Others" && !groomAddressObject.customBarangay) {
+//       return res.status(400).json({ message: "Please provide a custom barangay for the groom." });
+//     }
+//     if (brideAddressObject.baranggay === "Others" && !brideAddressObject.customBarangay) {
+//       return res.status(400).json({ message: "Please provide a custom barangay for the bride." });
+//     }
+//     if (groomAddressObject.city === "Others" && !groomAddressObject.customCity) {
+//       return res.status(400).json({ message: "Please provide a custom city for the groom." });
+//     }
+//     if (brideAddressObject.city === "Others" && !brideAddressObject.customCity) {
+//       return res.status(400).json({ message: "Please provide a custom city for the bride." });
+//     }
+
+//     const ninongArray = Ninong ? JSON.parse(Ninong) : [];
+//     const ninangArray = Ninang ? JSON.parse(Ninang) : [];
+
+//     const userId = req.user._id;
+
+//     const newWeddingForm = new massWedding({
+//       weddingDateTime,
+//       groomName,
+//       groomAddress: groomAddressObject,
+//       brideName,
+//       brideAddress: brideAddressObject,
+//       Ninong: ninongArray,
+//       Ninang: ninangArray,
+//       brideReligion,
+//       brideOccupation,
+//       brideBirthDate,
+//       bridePhone,
+//       groomReligion,
+//       groomOccupation,
+//       groomBirthDate,
+//       groomPhone,
+//       groomFather,
+//       groomMother,
+//       brideFather,
+//       brideMother,
+//       ...images,
+//       userId,
+//     });
+
+//     await newWeddingForm.save();
+
+//     res.status(201).json({
+//       message: "Wedding form submitted successfully!",
+//       weddingForm: newWeddingForm,
+//     });
+//   } catch (error) {
+//     console.error("Error submitting wedding form:", error);
+//     res.status(500).json({ message: "An error occurred during submission.", error: error.message });
+//   }
+// };
+
 exports.submitWeddingForm = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
+      console.log("Received files:", req.files);
+      console.log("Received body:", req.body);
 
-    if (user.civilStatus === "Married") {
-      return res.status(400).json({ message: "Sorry, but a 'Married' user cannot submit an application." });
-    }
-
-    const {
-      weddingDateTime,
-      groomName,
-      groomAddress,
-      brideName,
-      brideAddress,
-      Ninong,
-      Ninang,
-      brideReligion,
-      brideOccupation,
-      brideBirthDate,
-      bridePhone,
-      groomReligion,
-      groomOccupation,
-      groomBirthDate,
-      groomPhone,
-      groomFather,
-      groomMother,
-      brideFather,
-      brideMother
-    } = req.body;
-
-    const requiredFields = [
-      'groomName', 'groomAddress',
-      'brideName', 'brideAddress', 'brideReligion', 'brideOccupation', 'brideBirthDate',
-      'bridePhone', 'groomReligion', 'groomOccupation', 'groomBirthDate', 'groomPhone',
-      'groomFather', 'groomMother', 'brideFather', 'brideMother'
-    ];
-
-    for (const field of requiredFields) {
-      if (!req.body[field]) {
-        return res.status(400).json({ message: `Missing required field: ${field}` });
+      const user = await User.findById(req.user._id);
+      if (!user) {
+          return res.status(404).json({ success: false, message: "User not found." });
       }
-    }
 
-    const images = {};
-    const requiredImageFields = [
-      "GroomNewBaptismalCertificate",
-      "GroomNewConfirmationCertificate",
-      "BrideNewBaptismalCertificate",
-      "GroomMarriageLicense",
-      "GroomMarriageBans",
-      "GroomOrigCeNoMar",
-      "GroomOrigPSA",
-      "GroomPermitFromtheParishOftheBride",
-      "GroomChildBirthCertificate",
-      "GroomOneByOne",
-      "BrideNewBaptismalCertificate",
-      "BrideNewConfirmationCertificate",
-      "BrideMarriageLicense",
-      "BrideMarriageBans",
-      "BrideOrigCeNoMar",
-      "BrideOrigPSA",
-      "BridePermitFromtheParishOftheBride",
-      "BrideChildBirthCertificate",
-      "BrideOneByOne",
-    ];
-
-    for (const field of requiredImageFields) {
-      if (req.files[field]) {
-        const uploadedImage = await uploadToCloudinary(req.files[field][0], "massWedding/docs");
-        images[field] = {
-          public_id: uploadedImage.public_id,
-          url: uploadedImage.url,
-        };
-      } else {
-        return res.status(400).json({ message: `Missing required image: ${field}` });
+      if (user.civilStatus === "Married") {
+          return res.status(400).json({ success: false, message: "Sorry, but a 'Married' user cannot submit an application." });
       }
-    }
 
-    const groomAddressObject = typeof groomAddress === 'string' ? JSON.parse(groomAddress) : groomAddress;
-    const brideAddressObject = typeof brideAddress === 'string' ? JSON.parse(brideAddress) : brideAddress;
+      const {
+          weddingDateTime,
+          groomName,
+          groomAddress,
+          brideName,
+          brideAddress,
+          Ninong,
+          Ninang,
+          brideReligion,
+          brideOccupation,
+          brideBirthDate,
+          bridePhone,
+          groomReligion,
+          groomOccupation,
+          groomBirthDate,
+          groomPhone,
+          groomFather,
+          groomMother,
+          brideFather,
+          brideMother
+      } = req.body;
 
-    if (groomAddressObject.baranggay === "Others" && !groomAddressObject.customBarangay) {
-      return res.status(400).json({ message: "Please provide a custom barangay for the groom." });
-    }
-    if (brideAddressObject.baranggay === "Others" && !brideAddressObject.customBarangay) {
-      return res.status(400).json({ message: "Please provide a custom barangay for the bride." });
-    }
-    if (groomAddressObject.city === "Others" && !groomAddressObject.customCity) {
-      return res.status(400).json({ message: "Please provide a custom city for the groom." });
-    }
-    if (brideAddressObject.city === "Others" && !brideAddressObject.customCity) {
-      return res.status(400).json({ message: "Please provide a custom city for the bride." });
-    }
+      // Check required fields
+      const requiredFields = [
+          'weddingDateTime', 'groomName', 'groomAddress',
+          'brideName', 'brideAddress', 'brideReligion', 'brideOccupation', 'brideBirthDate',
+          'bridePhone', 'groomReligion', 'groomOccupation', 'groomBirthDate', 'groomPhone',
+          'groomFather', 'groomMother', 'brideFather', 'brideMother'
+      ];
 
-    const ninongArray = Ninong ? JSON.parse(Ninong) : [];
-    const ninangArray = Ninang ? JSON.parse(Ninang) : [];
+      for (const field of requiredFields) {
+          if (!req.body[field]) {
+              return res.status(400).json({ success: false, message: `Missing required field: ${field}` });
+          }
+      }
 
-    const userId = req.user._id;
+      // Check date availability (similar to baptism)
+      const selectedDate = await AdminDate.findById(weddingDateTime.trim());
+      if (!selectedDate || !selectedDate.isEnabled) {
+          return res.status(400).json({ success: false, message: 'Selected wedding date is not available or has been disabled' });
+      }
 
-    const newWeddingForm = new Wedding({
-      weddingDateTime,
-      groomName,
-      groomAddress: groomAddressObject,
-      brideName,
-      brideAddress: brideAddressObject,
-      Ninong: ninongArray,
-      Ninang: ninangArray,
-      brideReligion,
-      brideOccupation,
-      brideBirthDate,
-      bridePhone,
-      groomReligion,
-      groomOccupation,
-      groomBirthDate,
-      groomPhone,
-      groomFather,
-      groomMother,
-      brideFather,
-      brideMother,
-      ...images,
-      userId,
-    });
+      if (!selectedDate.canAcceptParticipants()) {
+          return res.status(400).json({ success: false, message: 'This wedding event is already full' });
+      }
 
-    await newWeddingForm.save();
+      // Handle file uploads
+      const uploadToCloudinary = async (file, folder) => {
+          if (!file) throw new Error('File is required for upload.');
+          const result = await cloudinary.uploader.upload(file.path, { folder });
+          return { public_id: result.public_id, url: result.secure_url };
+      };
 
-    res.status(201).json({
-      message: "Wedding form submitted successfully!",
-      weddingForm: newWeddingForm,
-    });
+      const weddingDocs = {};
+      const requiredImageFields = [
+          "GroomNewBaptismalCertificate",
+          "GroomNewConfirmationCertificate",
+          "BrideNewBaptismalCertificate",
+          "GroomMarriageLicense",
+          "GroomMarriageBans",
+          "GroomOrigCeNoMar",
+          "GroomOrigPSA",
+          "GroomPermitFromtheParishOftheBride",
+          "GroomChildBirthCertificate",
+          "GroomOneByOne",
+          "BrideNewBaptismalCertificate",
+          "BrideNewConfirmationCertificate",
+          "BrideMarriageLicense",
+          "BrideMarriageBans",
+          "BrideOrigCeNoMar",
+          "BrideOrigPSA",
+          "BridePermitFromtheParishOftheBride",
+          "BrideChildBirthCertificate",
+          "BrideOneByOne",
+      ];
+
+      try {
+          console.log("Processing file uploads...");
+          for (const field of requiredImageFields) {
+              if (req.files[field] && req.files[field][0]) {
+                  weddingDocs[field] = await uploadToCloudinary(req.files[field][0], 'eparokya/wedding/docs');
+              } else {
+                  return res.status(400).json({ success: false, message: `Missing required document: ${field}` });
+              }
+          }
+      } catch (error) {
+          console.error("File upload error:", error.message);
+          return res.status(400).json({ success: false, message: error.message });
+      }
+
+      // Parse address and validate
+      const groomAddressObject = typeof groomAddress === 'string' ? JSON.parse(groomAddress) : groomAddress;
+      const brideAddressObject = typeof brideAddress === 'string' ? JSON.parse(brideAddress) : brideAddress;
+
+      if (groomAddressObject.baranggay === "Others" && !groomAddressObject.customBarangay) {
+          return res.status(400).json({ success: false, message: "Please provide a custom barangay for the groom." });
+      }
+      if (brideAddressObject.baranggay === "Others" && !brideAddressObject.customBarangay) {
+          return res.status(400).json({ success: false, message: "Please provide a custom barangay for the bride." });
+      }
+      if (groomAddressObject.city === "Others" && !groomAddressObject.customCity) {
+          return res.status(400).json({ success: false, message: "Please provide a custom city for the groom." });
+      }
+      if (brideAddressObject.city === "Others" && !brideAddressObject.customCity) {
+          return res.status(400).json({ success: false, message: "Please provide a custom city for the bride." });
+      }
+
+      // Parse godparents
+      const ninongArray = Ninong ? JSON.parse(Ninong) : [];
+      const ninangArray = Ninang ? JSON.parse(Ninang) : [];
+
+      console.log("Creating new wedding entry...");
+      const newWedding = new massWedding({
+          weddingDateTime,
+          groomName,
+          groomAddress: groomAddressObject,
+          brideName,
+          brideAddress: brideAddressObject,
+          Ninong: ninongArray,
+          Ninang: ninangArray,
+          brideReligion,
+          brideOccupation,
+          brideBirthDate,
+          bridePhone,
+          groomReligion,
+          groomOccupation,
+          groomBirthDate,
+          groomPhone,
+          groomFather,
+          groomMother,
+          brideFather,
+          brideMother,
+          ...weddingDocs,
+          userId: req.user._id,
+          weddingStatus: 'Pending'
+      });
+
+      console.log("Saving wedding entry...");
+      await newWedding.save();
+      await AdminDate.findByIdAndUpdate(weddingDateTime, { $inc: { submittedParticipants: 1 } });
+
+      res.status(201).json({ 
+          success: true, 
+          message: 'Wedding registration created successfully', 
+          wedding: newWedding 
+      });
   } catch (error) {
-    console.error("Error submitting wedding form:", error);
-    res.status(500).json({ message: "An error occurred during submission.", error: error.message });
+      console.error('Error creating wedding registration:', error);
+      res.status(500).json({ 
+          success: false, 
+          message: 'Error creating wedding registration', 
+          error: error.message 
+      });
   }
 };
 
 exports.getAllWeddings = async (req, res) => {
   try {
-    const massWeddingList = await MassWedding.find({}, 
-      'brideName groomName bridePhone groomPhone weddingStatus userId')
+    const massWeddingList = await massWedding.find({}, 'brideName groomName bridePhone groomPhone weddingStatus userId')
       .populate('userId', 'name');
 
 
@@ -220,7 +390,7 @@ exports.declineWedding = async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
     const cancellingUser = user.isAdmin ? "Admin" : user.name;
-    const massWedding = await MassWedding.findByIdAndUpdate(
+    const massWedding = await massWedding.findByIdAndUpdate(
       req.params.massWeddingId,
       {
         weddingStatus: "Cancelled",
@@ -275,7 +445,7 @@ exports.updateAdditionalReq = async (req, res) => {
     // Expect req.body to contain the additionalReq object
     // Example: { additionalReq: { PreMarriageSeminar1: { date, time }, ... } }
     const { additionalReq } = req.body;
-    const massWedding = await MassWedding.findById(massWeddingId);
+    const massWedding = await massWedding.findById(massWeddingId);
     if (!massWedding) {
       return res.status(404).json({ message: "Wedding not found" });
     }
@@ -292,7 +462,7 @@ exports.updateAdditionalReq = async (req, res) => {
 exports.getWeddingChecklist = async (req, res) => {
   try {
     const { massWeddingId } = req.params;
-    const massWedding = await MassWedding.findById(massWeddingId).populate('checklistId');
+    const massWedding = await massWedding.findById(massWeddingId).populate('checklistId');
     if (!massWedding) {
       return res.status(404).json({ message: 'Wedding not found' });
     }
@@ -312,7 +482,7 @@ exports.updateWeddingChecklist = async (req, res) => {
     console.log("Received weddingId:", massWeddingId);
     console.log("Checklist Data:", checklistData);
 
-    const massWedding = await MassWedding.findById(massWeddingId);
+    const massWedding = await massWedding.findById(massWeddingId);
     if (!massWedding) {
       return res.status(404).json({ message: 'Wedding not found' });
     }
@@ -343,7 +513,7 @@ exports.getMySubmittedForms = async (req, res) => {
   try {
     const userId = req.user.id;
     console.log("Authenticated User ID:", userId);
-    const forms = await MassWedding.find({ userId: userId });
+    const forms = await massWedding.find({ userId: userId });
     if (!forms.length) {
       return res.status(404).json({ message: "No forms found for this user." });
     }

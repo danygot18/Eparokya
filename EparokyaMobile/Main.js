@@ -10,6 +10,7 @@ import { USER_LOGIN_SUCCESS } from './Redux/constants';
 import UserNavigator from './Navigators/UserNavigator';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
+import baseURL from './assets/common/baseUrl';
 
 import { socket } from './socket';
 
@@ -25,6 +26,7 @@ export default function Main() {
             socket.connect();
             socket.emit("join", { userId: user._id });
         }
+        console.log(baseURL)
 
     }, [isLogin])
     // const initializeData = () => {

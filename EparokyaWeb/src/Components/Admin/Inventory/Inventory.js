@@ -98,7 +98,7 @@ const InventoryList = () => {
   const deleteInventoryItem = async (id) => {
     try {
       setDeleteLoading(true);
-      
+
       await axios.delete(`${process.env.REACT_APP_API}/api/v1/inventory/${id}`, {
         withCredentials: true
       });
@@ -358,32 +358,72 @@ const InventoryList = () => {
                                 <IconButton
                                   color="primary"
                                   onClick={() => navigate(`/admin/inventory/${item._id}`)}
+                                  sx={{
+                                    borderRadius: 1, // ← make corners less rounded (1 = 4px)
+                                    padding: '6px 12px', // ← increase padding to make it less circular
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.08)', // customize as needed
+                                    },
+                                  }}
                                 >
-                                  <Edit />
+                                  <Edit
+                                    sx={{
+                                      '&:hover': {
+                                        color: 'secondary.main',
+                                      },
+                                    }}
+                                  />
                                 </IconButton>
+
                               </Tooltip>
                               <Tooltip title="Borrow">
-                                <IconButton 
+                                <IconButton
                                   color="success"
                                   onClick={() => handleBorrowOpen(item)}
                                   disabled={item.availableQuantity <= 0}
+                                  sx={{
+                                    borderRadius: 1, // ← make corners less rounded (1 = 4px)
+                                    padding: '6px 12px', // ← increase padding to make it less circular
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.08)', // customize as needed
+                                    },
+                                  }}
                                 >
-                                  <Inventory />
+                                  <Inventory
+                                    sx={{
+                                      '&:hover': {
+                                        color: 'secondary.main',
+                                      },
+                                    }} />
                                 </IconButton>
                               </Tooltip>
                               <Tooltip title="Return">
-                                <IconButton 
+                                <IconButton
                                   color="info"
                                   onClick={() => handleReturnOpen(item)}
                                   disabled={item.quantity === item.availableQuantity}
+                                  sx={{
+                                    borderRadius: 1, // ← make corners less rounded (1 = 4px)
+                                    padding: '6px 12px', // ← increase padding to make it less circular
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.08)', // customize as needed
+                                    },
+                                  }}
                                 >
                                   <Person />
                                 </IconButton>
                               </Tooltip>
                               <Tooltip title="History">
-                                <IconButton 
+                                <IconButton
                                   color="secondary"
                                   onClick={() => handleHistoryOpen(item)}
+                                  sx={{
+                                    borderRadius: 1, // ← make corners less rounded (1 = 4px)
+                                    padding: '6px 12px', // ← increase padding to make it less circular
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.08)', // customize as needed
+                                    },
+                                  }}
                                 >
                                   <History />
                                 </IconButton>
@@ -392,6 +432,13 @@ const InventoryList = () => {
                                 <IconButton
                                   color="error"
                                   onClick={() => handleDeleteClick(item._id)}
+                                  sx={{
+                                    borderRadius: 1, // ← make corners less rounded (1 = 4px)
+                                    padding: '6px 12px', // ← increase padding to make it less circular
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.08)', // customize as needed
+                                    },
+                                  }}
                                 >
                                   <Delete />
                                 </IconButton>
@@ -487,7 +534,7 @@ const InventoryList = () => {
             fullWidth
             variant="standard"
             value={returnData.borrowId}
-            onChange={(e) => setReturnData({...returnData, borrowId: e.target.value})}
+            onChange={(e) => setReturnData({ ...returnData, borrowId: e.target.value })}
           >
             {selectedItem?.borrowHistory
               ?.filter(record => record.status === 'borrowed')
@@ -504,7 +551,7 @@ const InventoryList = () => {
             fullWidth
             variant="standard"
             value={returnData.quantity}
-            onChange={(e) => setReturnData({...returnData, quantity: e.target.value})}
+            onChange={(e) => setReturnData({ ...returnData, quantity: e.target.value })}
             inputProps={{
               min: 1
             }}
@@ -519,8 +566,8 @@ const InventoryList = () => {
       </Dialog>
 
       {/* History Dialog */}
-      <Dialog 
-        open={openHistoryDialog} 
+      <Dialog
+        open={openHistoryDialog}
         onClose={handleHistoryClose}
         maxWidth="md"
         fullWidth

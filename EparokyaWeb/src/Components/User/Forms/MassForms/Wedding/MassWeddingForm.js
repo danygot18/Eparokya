@@ -6,9 +6,61 @@ import GuestSidebar from '../../../../GuestSideBar';
 import MetaData from '../../../../Layout/MetaData';
 
 const MassWeddingForm = () => {
+  const [isMarried, setIsMarried] = useState(false);
+    const [cities] = useState(["Taguig City", "Others"]);
+    const [barangays] = useState([
+        "Bagumbayan",
+        "Bambang",
+        "Calzada",
+        "Cembo",
+        "Central Bicutan",
+        "Central Signal Village",
+        "Comembo",
+        "East Rembo",
+        "Fort Bonifacio",
+        "Hagonoy",
+        "Ibayo-Tipas",
+        "Katuparan",
+        "Ligid-Tipas",
+        "Lower Bicutan",
+        "Maharlika Village",
+        "Napindan",
+        "New Lower Bicutan",
+        "North Daang Hari",
+        "North Signal Village",
+        "Palingon",
+        "Pembo",
+        "Pinagsama",
+        "Pitogo",
+        "Post Proper Northside",
+        "Post Proper Southside",
+        "Rizal",
+        "San Miguel",
+        "Santa Ana",
+        "South Cembo",
+        "South Daang Hari",
+        "South Signal Village",
+        "Tanyag",
+        "Tuktukan",
+        "Upper Bicutan",
+        "Ususan",
+        "Wawa",
+        "West Rembo",
+        "Western Bicutan",
+        "Others",
+      ]);
+    const [customCity, setCustomCity] = useState("");
+    const [customBarangay, setCustomBarangay] = useState("");
+    const [weddingDates, setWeddingDates] = useState([]);
+    const [selectedWeddingDate, setSelectedWeddingDate] = useState("");
+    const [user, setUser] = useState(null);
+
+    console.log("User:", user);
+    
+
     const [formData, setFormData] = useState({
-        weddingDateTime: "",
-        groomName: "",
+    weddingDateTime: "",
+    groomName: "",
     groomAddress: {
       BldgNameTower: "",
       LotBlockPhaseHouseNo: "",
@@ -61,53 +113,7 @@ const MassWeddingForm = () => {
     BrideChildBirthCertificate: "",
     BrideOneByOne: "",
     });
-    const [isMarried, setIsMarried] = useState(false);
-    const [cities] = useState(["Taguig City", "Others"]);
-    const [barangays] = useState([
-        "Bagumbayan",
-        "Bambang",
-        "Calzada",
-        "Cembo",
-        "Central Bicutan",
-        "Central Signal Village",
-        "Comembo",
-        "East Rembo",
-        "Fort Bonifacio",
-        "Hagonoy",
-        "Ibayo-Tipas",
-        "Katuparan",
-        "Ligid-Tipas",
-        "Lower Bicutan",
-        "Maharlika Village",
-        "Napindan",
-        "New Lower Bicutan",
-        "North Daang Hari",
-        "North Signal Village",
-        "Palingon",
-        "Pembo",
-        "Pinagsama",
-        "Pitogo",
-        "Post Proper Northside",
-        "Post Proper Southside",
-        "Rizal",
-        "San Miguel",
-        "Santa Ana",
-        "South Cembo",
-        "South Daang Hari",
-        "South Signal Village",
-        "Tanyag",
-        "Tuktukan",
-        "Upper Bicutan",
-        "Ususan",
-        "Wawa",
-        "West Rembo",
-        "Western Bicutan",
-        "Others",
-      ]);
-    const [customCity, setCustomCity] = useState("");
-    const [customBarangay, setCustomBarangay] = useState("");
-    const [weddingDates, setWeddingDates] = useState([]);
-    const [user, setUser] = useState(null);
+    
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -167,12 +173,10 @@ const MassWeddingForm = () => {
                 console.log("Fetched Wedding Dates:", response.data);
                 setWeddingDates(response.data);
                 if (response.data.length > 0) {
+                  setSelectedWeddingDate(response.data[0]);
                     setFormData((prev) => ({
                         ...prev,
-                        weddingDateTime: {
-                            date: response.data[0].date,
-                            time: response.data[0].time
-                        }
+                        weddingDateTime: response.data[0]._id,
                     }));
                 }
 
@@ -331,7 +335,7 @@ const MassWeddingForm = () => {
           imageFields.forEach((field) => {
             const file = formData.images[field];
             if (file) {
-              console.log(`Appending ${field} to FormData`, file);
+              // console.log(`Appending ${field} to FormData`, file);
               formDataObj.append(field, file);
             } else {
               console.warn(`No file found for ${field}`);
@@ -359,7 +363,7 @@ const MassWeddingForm = () => {
           const response = await axios.post(
             `${process.env.REACT_APP_API}/api/v1/submitMassWeddingForm`,
             formDataObj,
-            config
+            { withCredentials: true }
           );
     
           toast.success("Mass Wedding form submitted successfully!");
@@ -368,8 +372,7 @@ const MassWeddingForm = () => {
           // Reset form data
           setFormData({
             dateOfApplication: "",
-            weddingDate: "",
-            weddingTime: "",
+            weddingDateTime: "",
             groomName: "",
             groomAddress: {
               BldgNameTower: "",
@@ -433,30 +436,10 @@ const MassWeddingForm = () => {
                   <Form.Control
                     type="text"
                     value={
-                      formData.weddingDateTime
-                        ? (() => {
-                            const dateOnly = new Date(formData.weddingDateTime.date).toLocaleDateString('en-US', {
-                              month: 'long',
-                              day: 'numeric',
-                              year: 'numeric',
-                            });
-      
-                            // Get just the date part from the ISO string (YYYY-MM-DD)
-                            const datePart = formData.weddingDateTime.date.split('T')[0];
-                            const fullDateTime = new Date(`${datePart}T${formData.weddingDateTime.time}`);
-      
-                            const timeOnly = fullDateTime.toLocaleTimeString('en-US', {
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              hour12: true,
-                            });
-      
-                            return `${dateOnly} - ${timeOnly}`;
-                          })()
-                        : 'No active dates available'
+                      selectedWeddingDate ? `${new Date(selectedWeddingDate.date).toLocaleDateString()} - ${selectedWeddingDate.time}` : ""
                     }
                     disabled
-                  />
+                  />VBN
                 </Form.Group>
       
                 {/* Groom's Information */}

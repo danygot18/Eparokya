@@ -1,7 +1,83 @@
 import React, { useEffect, useState } from 'react';
 import GuestSideBar from "../GuestSideBar";
 import axios from 'axios';
-import './PriestLayout/priest.css';
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Divider,
+  Chip,
+  CircularProgress,
+  Avatar,
+  Paper,
+  styled
+} from '@mui/material';
+import {
+  Person as PersonIcon,
+  CalendarToday as CalendarIcon,
+  School as SchoolIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Work as WorkIcon,
+  Star as StarIcon
+} from '@mui/icons-material';
+
+const StatusChip = ({ label, value }) => (
+  <Chip
+    sx={{ m: 0.5 }}
+    label={`${label}: ${value}`}
+    color={value === 'Active' || value === 'Available' || value === 'Not Retired' ? 'success' : 'default'}
+    icon={value === 'Active' || value === 'Available' || value === 'Not Retired' ? <CheckCircleIcon /> : <CancelIcon />}
+    variant="outlined"
+  />
+);
+
+const PriestCard = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  transition: 'transform 0.3s, box-shadow 0.3s',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: theme.shadows[6]
+  },
+  [theme.breakpoints.up('md')]: {
+    flexDirection: 'row'
+  }
+}));
+
+const PriestAvatar = styled(Avatar)(({ theme }) => ({
+  width: 150,
+  height: 150,
+  margin: theme.spacing(2, 'auto'),
+  [theme.breakpoints.up('md')]: {
+    width: 200,
+    height: 200,
+    margin: theme.spacing(4)
+  }
+}));
+
+const DetailRow = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    flexDirection: 'row',
+    '& > *': {
+      width: '50%'
+    }
+  }
+}));
+
+const DetailItem = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: theme.spacing(1),
+  paddingRight: theme.spacing(2),
+  width: '100%'
+}));
 
 const ParishPriest = () => {
   const [priests, setPriests] = useState([]);
@@ -23,60 +99,98 @@ const ParishPriest = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress size={60} />
+      </Box>
+    );
   }
 
   return (
-    <div className="userParishPriest-page">
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <GuestSideBar />
-      <div className="userParishPriest-container">
-        {priests.map((priest) => (
-          <div key={priest._id} className="userParishPriest-item">
-            <div className="userParishPriest-image-container">
-              <img src={priest.image.url} alt={priest.fullName} className="userParishPriest-image" />
-            </div>
-            <div className="userParishPriest-details">
-              <h2>{priest.fullName}</h2>
-              <p className="userParishPriest-year-range">{priest.parishDurationYear}</p>
+      <Container maxWidth="lg" sx={{ py: 4, ml: { xs: 0, md: '240px' } }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ 
+          fontWeight: 'bold',
+          mb: 4,
+          color: 'primary.main',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <PersonIcon fontSize="large" /> Parish Priests
+        </Typography>
+        
+        {priests.length === 0 && (
+          <Paper sx={{ p: 3, textAlign: 'center' }}>
+            <Typography variant="h6">No priests found</Typography>
+          </Paper>
+        )}
 
-              <div className="userParishPriest-field">
-                <span>Title:</span>
-                <input className="userParishPriest-field-value" value={priest.title} readOnly />
-              </div>
-              <div className="userParishPriest-field">
-                <span>Position:</span>
-                <input className="userParishPriest-field-value" value={priest.position} readOnly />
-              </div>
-              <div className="userParishPriest-field">
-                <span>Nickname:</span>
-                <input className="userParishPriest-field-value" value={priest.nickName} readOnly />
-              </div>
-              <div className="userParishPriest-field">
-                <span>Birth Date:</span>
-                <input className="userParishPriest-field-value" value={new Date(priest.birthDate).toLocaleDateString()} readOnly />
-              </div>
-              <div className="userParishPriest-field">
-                <span>Seminary:</span>
-                <input className="userParishPriest-field-value" value={priest.Seminary} readOnly />
-              </div>
-              <div className="userParishPriest-field">
-                <span>Ordination Date:</span>
-                <input className="userParishPriest-field-value" value={new Date(priest.ordinationDate).toLocaleDateString()} readOnly />
-              </div>
-              <div className="userParishPriest-status">
-                Active: <span>{priest.isActive ? 'Active' : 'Inactive'}</span>
-              </div>
-              <div className="userParishPriest-status">
-                Available: <span>{priest.isAvailable ? 'Available' : 'Not Available'}</span>
-              </div>
-              <div className="userParishPriest-status">
-                Retired: <span>{priest.isRetired ? 'Retired' : 'Not Retired'}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {priests.map((priest) => (
+            <PriestCard key={priest._id}>
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <PriestAvatar
+                  alt={priest.fullName}
+                  src={priest.image.url}
+                  variant="rounded"
+                />
+              </Box>
+              <CardContent sx={{ flex: 1 }}>
+                <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
+                  {priest.fullName}
+                </Typography>
+                <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  <StarIcon color="primary" sx={{ verticalAlign: 'middle', mr: 1 }} />
+                  {priest.title} • {priest.position}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontStyle: 'italic' }}>
+                  {priest.parishDurationYear}
+                </Typography>
+                <Divider sx={{ my: 2 }} />
+
+                <DetailRow>
+                  <DetailItem>
+                    <WorkIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body1">
+                      <strong>Nickname:</strong> {priest.nickName}
+                    </Typography>
+                  </DetailItem>
+                  <DetailItem>
+                    <CalendarIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body1">
+                      <strong>Birth Date:</strong> {new Date(priest.birthDate).toLocaleDateString()}
+                    </Typography>
+                  </DetailItem>
+                </DetailRow>
+
+                <DetailRow>
+                  <DetailItem>
+                    <SchoolIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body1">
+                      <strong>Seminary:</strong> {priest.Seminary}
+                    </Typography>
+                  </DetailItem>
+                  <DetailItem>
+                    <CalendarIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body1">
+                      <strong>Ordination Date:</strong> {new Date(priest.ordinationDate).toLocaleDateString()}
+                    </Typography>
+                  </DetailItem>
+                </DetailRow>
+
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+                  <StatusChip label="Active" value={priest.isActive ? 'Active' : 'Inactive'} />
+                  <StatusChip label="Available" value={priest.isAvailable ? 'Available' : 'Not Available'} />
+                  <StatusChip label="Retired" value={priest.isRetired ? 'Retired' : 'Not Retired'} />
+                </Box>
+              </CardContent>
+            </PriestCard>
+          ))}
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

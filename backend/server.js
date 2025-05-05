@@ -82,9 +82,14 @@ cloudinary.config({
 // Server Port
 const port = process.env.PORT || 8080;
 
-server.listen(port, () => {
+// server.listen(port, () => {
+//     console.log(`Server started on port ${port} in ${process.env.NODE_ENV} mode`);
+// });
+
+server.listen(port, '0.0.0.0', () => {
     console.log(`Server started on port ${port} in ${process.env.NODE_ENV} mode`);
 });
+
 
 // Use the existing io instance
 io.on('connection', socket);
