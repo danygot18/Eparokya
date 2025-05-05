@@ -13,8 +13,9 @@ const http = require("http");
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["*",
-      // "https://eparokya.vercel.app", 
+    origin: [
+      // "*",
+      "https://eparokya.vercel.app", 
       "http://localhost:3000"],
     credentials: true,
   },
@@ -56,8 +57,9 @@ app.use(express.json());
 //new
 app.use(
   cors({
-    origin: ["*",
-      // "https://eparokya.vercel.app", 
+    origin: [
+      //"*",
+      "https://eparokya.vercel.app", 
       "http://localhost:3000"], // Allowed domains
     credentials: true, // Allow sending cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
