@@ -2,7 +2,7 @@ const ActivitySentiment = require("../../../models/FeedbackForm/Sentiments/Activ
 const ActivityType = require("../../../models/FeedbackForm/Types/ActivityType");
 const AdminSelection = require("../../../models/FeedbackForm/AdminSelection/adminSelection");
 const Sentiment = require("sentiment");
-const analyzeSentiment = require("../../../utils/sentimentAnalyzer");
+const analyzeSentiment = require("../../../utils/SentimentAnalyzer");
 
 const emojiSentimentMap = {
   "😡": -2, "😠": -2, "😞": -1, "😕": -1, "😐": 0,

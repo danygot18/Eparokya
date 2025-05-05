@@ -1,6 +1,6 @@
 const PriestSentiment = require("../../../models/FeedbackForm/Sentiments/PriestSentiment");
 const AdminSelection = require("../../../models/FeedbackForm/AdminSelection/adminSelection");
-const analyzeSentiment = require("../../../utils/sentimentAnalyzer");
+const analyzeSentiment = require("../../../utils/SentimentAnalyzer");
 const Sentiment = require("sentiment");
 
 const emojiSentimentMap = {
