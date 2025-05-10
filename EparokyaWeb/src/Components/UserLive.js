@@ -35,7 +35,7 @@ const UserLive = () => {
             {/* Main Content */}
             <Box sx={{ flexGrow: 1, p: 3, display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <Typography variant="h4" fontWeight="bold" gutterBottom>
-                    Live Video
+                    Live Mass
                 </Typography>
 
                 {loading ? (

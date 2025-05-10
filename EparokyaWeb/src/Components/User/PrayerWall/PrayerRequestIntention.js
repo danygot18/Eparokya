@@ -250,7 +250,7 @@ const handleSubmit = async (e) => {
             ))}
             <button
               onClick={handleAddIntention}
-              className="mt-2 bg-green-500 text-white px-4 py-2 rounded"
+              className="addIntention-button"
             >
               Add Intention
             </button>

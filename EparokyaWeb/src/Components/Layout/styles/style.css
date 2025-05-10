@@ -1933,9 +1933,7 @@ form {
 
 /* announcementDetails */
 
-body {
-  font-family: Helvetica, sans-serif;
-}
+/* Post Header */
 .post-header {
   display: flex;
   align-items: center;
@@ -1943,15 +1941,15 @@ body {
   margin-bottom: 15px;
 }
 
-/* Profile Image */
-.profile-image {
-  width: 50px;
-  height: 50px;
+/* Smaller Profile Image */
+.profile-image-small {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-/* Name & Date Styling */
+/* Parish Name and Date */
 .post-user-info {
   display: flex;
   flex-direction: column;
@@ -1964,93 +1962,232 @@ body {
 }
 
 .post-date {
-  font-size: 14px;
+  font-size: 12px;
   color: gray;
 }
 
-/* Title (Smaller & Bold) */
+/* Title */
 .announcement-title {
-  font-size: 20px; /* Smaller than default h1 */
+  font-size: 20px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin: 15px 0;
+  text-align: center;
 }
+
+/* Description */
+.announcement-description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: justify;
+}
+
+/* Rich Description */
+.announcement-rich-description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  text-align: justify;
+  margin-bottom: 20px;
+}
+
+/* Image */
 .announcement-image {
-  max-width: 600px;
   width: 100%;
-  height: auto;
-  border-radius: 10px;
-}
-
-/* Swiper Slider */
-.swiper {
   max-width: 600px;
-}
-
-.swiper-slide img {
-  max-width: 100%;
   height: auto;
   border-radius: 10px;
+  margin: 15px 0;
 }
 
-.announcement-details-container {
+/* Centered Container */
+.announcement-center-container {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 20px auto;
+  max-width: 1200px;
+  margin-left: 250px;
   gap: 20px;
-  
 }
 
-/* Left Sidebar */
+/* Sidebar */
 .guest-sidebar {
-  width: 250px;
+  flex: 1;
 }
-
-/* Announcement in the Center */
 .announcement-container {
-  flex: 2;
+  flex: 3;
   background: #fff;
   padding: 20px;
   border-radius: 10px;
-  width: 900px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+/* Justified Text */
+.announcement-description,
+.announcement-rich-description,
+.comment-text {
+  text-align: justify;
+}
 
+/* Adjusted Image Styles */
 .announcement-image {
   width: 100%;
-  max-height: 400px;
-  object-fit: cover;
+  max-width: 600px;
+  height: auto;
   border-radius: 10px;
+  margin: 10px 0;
 }
 
+/* Like Section */
 .like-section {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+/* Comments Section */
+.comments-section {
+  margin-top: 20px;
 }
 
-.like-btn {
-  background: none;
-  border: none;
+/* New: Input Row */
+.comment-input-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+/* Textarea inside the input row */
+.comment-input-container textarea {
+  flex: 1;
+  min-height: 40px;
+  max-height: 120px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.comment-input-container textarea:focus {
+  outline: none;
+  border-color: #154314;
+}
+
+/* Submit icon */
+.comment-input-container .submit-comment-icon {
   cursor: pointer;
+  color: #154314;
+  transition: color 0.2s ease;
+}
+
+.comment-input-container .submit-comment-icon:hover {
+  color: #0056b3;
+}
+
+/* Comment box */
+.comment-box {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Header with avatar and user info */
+.comment-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* New: user info (name + date stacked neatly) */
+.comment-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  padding: 0;
+  margin: 0;
+}
+
+/* Avatar image */
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
+
+/* Footer with icons */
+.comment-footer {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+/* Comment text */
+.comment-text {
+  margin: 10px 0;
+  line-height: 1.4;
+}
+
+.comment-user-info .user-name {
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Date smaller and lighter, tighter spacing */
+.comment-user-info .comment-date {
+  font-size: 12px;
+  color: #888;
+}
+
+.comment-user-info span,
+.comment-user-info p {
+  margin: 0;
+  padding: 0;
+}
+
+.reply-box {
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.reply-input-container {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 10px;
 }
 
 /* Right Side - Liked Users */
 .liked-users-container {
-  width: 250px;
+  flex: 1;
   background: white;
   padding: 15px;
   border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  height: fit-content;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  max-height: 600px;
+  overflow-y: auto;
 }
-
 .liked-users-container h3 {
-  margin-bottom: 10px;
   text-align: center;
   font-size: 18px;
   font-weight: bold;
+  margin-bottom: 15px;
 }
-
-
 .liked-users-list {
   display: flex;
   flex-direction: column;
@@ -2072,98 +2209,6 @@ body {
   object-fit: cover;
 }
 
-/* Comment Box */
-.comment-box {
-  background: #f9f9f9;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Comment Header */
-.comment-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.comment-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.comment-user {
-  font-weight: bold;
-}
-
-.comment-date {
-  font-size: 12px;
-  color: gray;
-}
-
-/* Comment Footer */
-.comment-footer {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-top: 10px;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-/* Replies Section */
-.replies-section {
-  margin-left: 20px;
-  border-left: 2px solid #ddd;
-  padding-left: 15px;
-  margin-top: 10px;
-}
-
-.reply-box {
-  background: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  margin-top: 5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.reply-input-container {
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
-  background: #fff;
-  width: 100%;
-  justify-content: space-between;
-}
-
-.reply-input {
-  width: 80%; 
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  padding: 8px 12px;
-  outline: none;
-  font-size: 14px;
-}
-
-.submit-reply-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #154314;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  margin-left: 10px;
-}
-
 
 /* prayerWall */
 /* General layout for the prayer wall container */
@@ -2174,8 +2219,6 @@ body {
 }
 
 /* Guest Sidebar styling */
-
-
 /* Main content area for prayer wall */
 .prayer-wall {
   flex: 1;

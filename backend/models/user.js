@@ -75,7 +75,6 @@
 // }
 
 // module.exports = mongoose.model('User', userSchema);
-
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -100,14 +99,6 @@ const userSchema = new mongoose.Schema({
             required: true
         }
     },
-    // ministryCategory: [
-    //     {
-    //         type: mongoose.Schema.Types.ObjectId,
-    //         ref: 'ministryCategory',
-    //         required: true,
-    //     }
-    // ],
-
     ministryRoles: [
         {
             ministry: {
@@ -149,11 +140,6 @@ const userSchema = new mongoose.Schema({
         minLength: [8, 'Your password must be longer than 6 characters'],
         select: false
     },
-    // image: {
-    //     type: String,
-    //     default: ''
-    // },
-   
     birthDate: {
         type: Date,
         required: true, 

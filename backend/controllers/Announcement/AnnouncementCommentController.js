@@ -143,7 +143,7 @@ exports.getCommentsWithReplies = async (req, res) => {
 
 exports.likeComment = async (req, res) => {
     const { commentId } = req.params;
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
@@ -154,23 +154,32 @@ exports.likeComment = async (req, res) => {
         if (!comment) {
             return res.status(404).json({ message: 'Comment not found' });
         }
+
+        let liked;
         if (comment.likedBy.includes(userId)) {
             comment.likedBy = comment.likedBy.filter(id => id.toString() !== userId);
+            liked = false;
         } else {
             comment.likedBy.push(userId);
+            liked = true;
         }
 
         await comment.save();
 
         res.status(200).json({
-            message: comment.likedBy.includes(userId) ? 'Comment liked successfully' : 'Comment unliked successfully',
-            data: comment
+            message: liked ? 'Comment liked successfully' : 'Comment unliked successfully',
+            data: {
+                _id: comment._id,
+                likedBy: comment.likedBy,
+            },
+            liked,
         });
     } catch (error) {
         console.error('Error toggling like on comment:', error);
         res.status(500).json({ message: 'Failed to toggle like on comment', error });
     }
 };
+
 
 
 

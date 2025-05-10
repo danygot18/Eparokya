@@ -10,7 +10,7 @@ router.delete('/announcementId/comment/delete/:commentId', isAuthenticatedUser, 
 // router.get('/:announcementId/comments', AnnouncementCommentController.getCommentsWithReplies);
 router.get('/comments/:announcementId', AnnouncementCommentController.getCommentsWithReplies);
 
-router.put('/anouncementCommentLike/:commentId', isAuthenticatedUser, AnnouncementCommentController.likeComment);
+router.put('/announcementCommentLike/:commentId', isAuthenticatedUser, AnnouncementCommentController.likeComment);
 router.put('/announcementCommentUnlike/:commentId', isAuthenticatedUser, AnnouncementCommentController.unlikeComment);
 router.post('/announcementReply/:commentId', isAuthenticatedUser, AnnouncementCommentController.addReply);
 

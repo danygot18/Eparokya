@@ -62,7 +62,7 @@
 const dotenv = require('dotenv');
 const cloudinary = require('cloudinary');
 const connectDatabase = require('./config/database');
-const { server, io } = require('./app'); // Use the existing server & io instance
+const { server, io } = require('./app'); 
 const socket = require('./socket');
 
 // dotenv.config({ path: './config/config.env' });
@@ -70,17 +70,13 @@ dotenv.config({ path: './config/config.env' });
 console.log("DB_URI:", process.env.DB_URI || "NOT FOUND");
 console.log("Hugging Face API Key:", process.env.HUGGING_FACE_API_KEY || "NOT FOUND");
 
-// Connect to Database
 connectDatabase();
-
-// Cloudinary Config
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Server Port
 const port = process.env.PORT || 8080;
 
 // server.listen(port, () => {
@@ -91,8 +87,6 @@ server.listen(port, '0.0.0.0', () => {
     console.log(`Server started on port ${port} in ${process.env.NODE_ENV} mode`);
 });
 
-
-// Use the existing io instance
 io.on('connection', socket);
 
 // ---------------------- SENTIMENT ANALYSIS ---------------------- //
@@ -100,11 +94,11 @@ let sentimentAnalyzer;
 
 (async () => {
     try {
-        const { pipeline } = await import('@xenova/transformers'); // ✅ Dynamic Import
+        const { pipeline } = await import('@xenova/transformers'); 
         sentimentAnalyzer = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
-        console.log('✅ Sentiment model loaded successfully!');
+        console.log('Sentiment model loaded successfully!');
     } catch (error) {
-        console.error("❌ Error loading sentiment model:", error);
+        console.error("Error loading sentiment model:", error);
     }
 })();
 
