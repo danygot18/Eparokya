@@ -38,32 +38,35 @@ const UserLive = () => {
                     Live Mass
                 </Typography>
 
+
                 {loading ? (
                     <CircularProgress />
                 ) : liveData ? (
-                    <Paper elevation={3} sx={{ p: 3, textAlign: "center", borderRadius: 2, width: "100%", maxWidth: 900 }}>
+                    <Paper elevation={3} sx={{ p: 3, textAlign: "center", borderRadius: 2, width: "100%", maxWidth: 1200, height: 830 }}>
                         <Typography variant="h6" fontWeight="600" gutterBottom>
                             {liveData.description}
                         </Typography>
-                        <Box mt={3}
-                            sx={{ width: "100%", justifyContent: "center", overflow: "hidden" }}
-                        >
-                            <iframe
-                                src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(liveData.url)}&show_text=false`}
-                                width="100%"
-                                height="400"
-                                allow="autoplay; encrypted-media"
-                                allowFullScreen
-                                style={{ border: "none", marginTop: "10px", display: "block" }}
-                            ></iframe>
-                        </Box>
-
-                        <Typography padding={2}>
+                        <Typography>
                             For better experience, watch on Facebook:
                             <a href={liveData.url} target="_blank" rel="noopener noreferrer">
                                 {liveData.url}
                             </a>
                         </Typography>
+                        <Box mt={3}
+                            sx={{ width: "100%", height: "100%", justifyContent: "center", overflow: "hidden" }}
+                        >
+                            <iframe
+                                src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(liveData.url)}&show_text=false`}
+                                width="100%"
+                                height="100%"
+                                allow="autoplay; encrypted-media"
+                                allowFullScreen
+                                style={{ border: "none", marginTop: "10px", display: "block" }}
+                            ></iframe>
+
+                        </Box>
+
+
                     </Paper>
                 ) : (
                     <Typography color="gray">No live video available</Typography>

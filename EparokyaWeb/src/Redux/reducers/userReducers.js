@@ -57,9 +57,14 @@ export const authReducer = (state = { user: {} }, action) => {
             return {
                 ...state,
                 loading: false,
-                isAuthenticated: true,
+                isAuthenticated: true,              
                 user: action.payload.user,
                 token: action.payload.token
+            }
+        case "AUTH_UPDATE":
+            return {
+                ...state,
+                user: action.payload,
             }
         case REGISTER_USER_FAIL:
         case LOGIN_FAIL:
@@ -77,7 +82,8 @@ export const authReducer = (state = { user: {} }, action) => {
                 ...state,
                 loading: false,
                 isAuthenticated: false,
-                user: null
+                user: null,
+                token: null
             }
         case LOGOUT_FAIL:
             return {
@@ -96,6 +102,7 @@ export const authReducer = (state = { user: {} }, action) => {
 }
 
 export const userReducer = (state = {}, action) => {
+    console.log("User Reducer Action:", action);
     switch (action.type) {
         case UPDATE_PROFILE_REQUEST:
         case UPDATE_PASSWORD_REQUEST:
@@ -111,8 +118,9 @@ export const userReducer = (state = {}, action) => {
             return {
                 ...state,
                 loading: false,
-                isUpdated: action.payload
-            }
+                isUpdated: true,
+                user: action.payload
+            };
         case UPDATE_PROFILE_RESET:
         case UPDATE_PASSWORD_RESET:
         case UPDATE_USER_RESET:

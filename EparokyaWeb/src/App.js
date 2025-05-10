@@ -17,6 +17,7 @@ import Register from './Components/User/Register'
 import Profile from './Components/User/Profile';
 import UserCalendar from './Components/User/UserCalendar';
 import NavigationForms from './Components/User/NavigationForms';
+import UpdateProfile from './Components/User/UpdateProfile';
 
 // User Forms
 
@@ -253,6 +254,7 @@ function App() {
         <Route path="/login" element={<Login />} exact="true" />
         <Route path="/register" element={<Register />} exact="true" />
         <Route path="/profile" element={<Profile />} exact="true" />
+        <Route path="/UpdateProfile" element={<UpdateProfile />} exact="true" />
         <Route path="/announcementDetails/:id" element={<AnnouncementDetails />} exact="true" />
 
         <Route path="/resourcePage" element={<ResourcePage />} exact="true" />

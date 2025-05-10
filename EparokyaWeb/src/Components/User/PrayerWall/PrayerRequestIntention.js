@@ -2,8 +2,23 @@ import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import GuestSidebar from "../../GuestSideBar";
-import "./PrayerStyles/prayerIntention.css";
-import { socket } from "../../../socket/index.js"; 
+import { socket } from "../../../socket/index.js";
+import {
+  Box,
+  Typography,
+  TextField,
+  MenuItem,
+  Button,
+  Stack,
+  Paper,
+  Divider,
+  IconButton,
+  InputAdornment
+} from "@mui/material";
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import ClearIcon from '@mui/icons-material/Clear';
+import SendIcon from '@mui/icons-material/Send';
 
 const PrayerRequestIntention = () => {
   const [formData, setFormData] = useState({
@@ -45,110 +60,67 @@ const PrayerRequestIntention = () => {
   const handleIntentionChange = (index, value) => {
     setFormData((prev) => {
       const newIntentions = [...prev.intentions];
-      newIntentions[index].name = value; 
+      newIntentions[index].name = value;
       return { ...prev, intentions: newIntentions };
     });
   };
-  
+
   const handleAddIntention = () => {
     setFormData((prev) => ({
       ...prev,
-      intentions: [...prev.intentions, { name: "" }], 
+      intentions: [...prev.intentions, { name: "" }],
     }));
   };
-  
+
   const handleRemoveIntention = (index) => {
     setFormData((prev) => ({
       ...prev,
-      intentions: prev.intentions.filter((_, i) => i !== index), 
+      intentions: prev.intentions.filter((_, i) => i !== index),
     }));
   };
-  
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  
-  //   if (formData.prayerType === "Others (Iba pa)" && !formData.addPrayer) {
-  //     toast.error("Please specify your prayer when selecting Others.");
-  //     return;
-  //   }
-  
-  //   try {
-  //     const payload = {
-  //       ...formData,
-  //       Intentions: formData.intentions.map((intention) => ({ name: intention.name })), 
-  //     };
-  
-  //     console.log("Submitting payload:", payload); 
-  
-  //     await axios.post(
-  //       `${process.env.REACT_APP_API}/api/v1/prayerRequestIntention/submit`,
-  //       payload,
-  //       config
-  //     );
-  
-  //     toast.success("Prayer submitted. This will be reviewed shortly.");
-  //     setFormData({
-  //       offerorsName: "",
-  //       prayerType: "",
-  //       addPrayer: "",
-  //       prayerDescription: "",
-  //       prayerRequestDate: "",
-  //       prayerRequestTime: "",
-  //       intentions: [], 
-  //     });
-  //   } catch (error) {
-  //     console.error("Submission error:", error.response?.data); 
-  //     toast.error(error.response?.data?.message || "Something went wrong");
-  //   }
-  // };
-  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+    if (formData.prayerType === "Others (Iba pa)" && !formData.addPrayer) {
+      toast.error("Please specify your prayer when selecting Others.");
+      return;
+    }
 
-  if (formData.prayerType === "Others (Iba pa)" && !formData.addPrayer) {
-    toast.error("Please specify your prayer when selecting Others.");
-    return;
-  }
+    try {
+      const payload = {
+        ...formData,
+        Intentions: formData.intentions.map((intention) => ({ name: intention.name })),
+      };
 
-  try {
-    const payload = {
-      ...formData,
-      Intentions: formData.intentions.map((intention) => ({ name: intention.name })),
-    };
+      console.log("Submitting payload:", payload);
 
-    console.log("Submitting payload:", payload);
+      await axios.post(
+        `${process.env.REACT_APP_API}/api/v1/prayerRequestIntention/submit`,
+        payload,
+        config
+      );
 
-    await axios.post(
-      `${process.env.REACT_APP_API}/api/v1/prayerRequestIntention/submit`,
-      payload,
-      config
-    );
+      socket.emit("prayerRequestSubmitted", {
+        message: `New prayer request submitted by ${formData.offerrorsName || "a user"}.`,
+        timestamp: new Date(),
+      });
 
-    // Emit WebSocket notification for admins
-    socket.emit("prayerRequestSubmitted", {
-      message: `New prayer request submitted by ${formData.offerrorsName || "a user"}.`,
-      timestamp: new Date(),
-    });
-
-    toast.success("Prayer submitted. This will be reviewed shortly.");
-    setFormData({
-      offerrorsName: "",
-      prayerType: "",
-      addPrayer: "",
-      prayerDescription: "",
-      prayerRequestDate: "",
-      prayerRequestTime: "",
-      intentions: [],
-    });
-  } catch (error) {
-    console.error("Submission error:", error.response?.data);
-    toast.error(error.response?.data?.message || "Something went wrong");
-  }
-};
-
-  
+      toast.success("Prayer submitted. This will be reviewed shortly.");
+      setFormData({
+        offerrorsName: "",
+        prayerType: "",
+        addPrayer: "",
+        prayerDescription: "",
+        prayerRequestDate: "",
+        prayerRequestTime: "",
+        intentions: [],
+      });
+    } catch (error) {
+      console.error("Submission error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  };
 
   const handleClear = () => {
     setFormData({
@@ -163,110 +135,205 @@ const handleSubmit = async (e) => {
   };
 
   return (
-    <div className="prayerRequestIntention-container">
-      <GuestSidebar 
-      // className="prayerRequestIntention-sidebar" 
-      />
-      <div className="prayerRequestIntention-box">
-        <h2 className="prayerRequestIntention-title">Prayer Request</h2>
-        <p className="prayerRequestIntention-subtext">
-          Kung nais magpadasal, fill-upan lamang ang nasa baba. Ang inyong mga
-          dasal ay mababasa ni padre.
-        </p>
-        <div className="mt-4">
-          <select
-            name="prayerType"
-            value={formData.prayerType}
-            onChange={handleChange}
-            required
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <GuestSidebar />
+      
+      <Box 
+        component="main" 
+        sx={{ 
+          flexGrow: 1, 
+          p: 3,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          mt: 4
+        }}
+      >
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: 4, 
+            width: '100%', 
+            maxWidth: '800px',
+            borderRadius: 2
+          }}
+        >
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            gutterBottom 
+            sx={{ 
+              fontWeight: 'bold',
+              textAlign: 'center',
+              color: 'success.main'
+            }}
           >
-            <option value="">Select Prayer Type</option>
-            {prayerTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-          {formData.prayerType === "Others (Iba pa)" && (
-            <input
-              type="text"
-              name="addPrayer"
-              value={formData.addPrayer}
-              onChange={handleChange}
-              placeholder="Specify your prayer"
-              required
-            />
-          )}
-
-          <textarea
-            name="offerrorsName"
-            value={formData.offerrorsName}
-            onChange={handleChange}
-            placeholder="Name"
-          />
-          <textarea
-            name="prayerDescription"
-            value={formData.prayerDescription}
-            onChange={handleChange}
-            placeholder="Prayer Description (Optional)"
-          />
-          <input
-            type="date"
-            name="prayerRequestDate"
-            value={formData.prayerRequestDate}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="time"
-            name="prayerRequestTime"
-            value={formData.prayerRequestTime}
-            onChange={handleChange}
-            required
-          />
-
-          {/* Intentions Section */}
-          <div className="intentions-container">
-            <h3 className="text-lg font-semibold mt-4">Intentions</h3>
-            {formData.intentions.map((intention, index) => (
-              <div
-                key={index}
-                className="intention-item flex items-center gap-2"
+            Prayer Request
+          </Typography>
+          
+          <Typography 
+            variant="body1" 
+            paragraph 
+            sx={{ 
+              textAlign: 'center',
+              mb: 4,
+              color: 'text.secondary'
+            }}
+          >
+            Kung nais magpadasal, fill-upan lamang ang nasa baba. Ang inyong mga
+            dasal ay mababasa ni padre.
+          </Typography>
+          
+          <Box component="form" onSubmit={handleSubmit}>
+            <Stack spacing={3}>
+              <TextField
+                select
+                fullWidth
+                label="Prayer Type"
+                name="prayerType"
+                value={formData.prayerType}
+                onChange={handleChange}
+                required
+                variant="outlined"
+                size="medium"
               >
-                <input
-                  type="text"
-                  value={intention.name}
-                  onChange={(e) => handleIntentionChange(index, e.target.value)}
-                  placeholder="Enter name to include in your intentions"
-                  className="w-full p-2 border rounded"
+                <MenuItem value="">
+                  <em>Select Prayer Type</em>
+                </MenuItem>
+                {prayerTypes.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </TextField>
+              
+              {formData.prayerType === "Others (Iba pa)" && (
+                <TextField
+                  fullWidth
+                  label="Specify your prayer"
+                  name="addPrayer"
+                  value={formData.addPrayer}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
                 />
-                <button
-                  onClick={() => handleRemoveIntention(index)}
-                  className="bg-red-500 text-white px-2 py-1 rounded"
+              )}
+              
+              <TextField
+                fullWidth
+                label="Name"
+                name="offerrorsName"
+                value={formData.offerrorsName}
+                onChange={handleChange}
+                variant="outlined"
+                multiline
+                rows={2}
+              />
+              
+              <TextField
+                fullWidth
+                label="Prayer Description (Optional)"
+                name="prayerDescription"
+                value={formData.prayerDescription}
+                onChange={handleChange}
+                variant="outlined"
+                multiline
+                rows={4}
+              />
+              
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <TextField
+                  fullWidth
+                  label="Date"
+                  type="date"
+                  name="prayerRequestDate"
+                  value={formData.prayerRequestDate}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                />
+                
+                <TextField
+                  fullWidth
+                  label="Time"
+                  type="time"
+                  name="prayerRequestTime"
+                  value={formData.prayerRequestTime}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Stack>
+              
+              <Divider sx={{ my: 2 }} />
+              
+              <Typography variant="h6" component="h3">
+                Intentions
+              </Typography>
+              
+              {formData.intentions.map((intention, index) => (
+                <Stack key={index} direction="row" spacing={1} alignItems="center">
+                  <TextField
+                    fullWidth
+                    value={intention.name}
+                    onChange={(e) => handleIntentionChange(index, e.target.value)}
+                    placeholder="Enter name to include in your intentions"
+                    variant="outlined"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => handleRemoveIntention(index)}
+                            color="error"
+                            aria-label="remove intention"
+                          >
+                            <RemoveCircleOutlineIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Stack>
+              ))}
+              
+              <Button
+                onClick={handleAddIntention}
+                startIcon={<AddCircleOutlineIcon />}
+                variant="outlined"
+                sx={{ alignSelf: 'flex-start' }}
+              >
+                Add Intention
+              </Button>
+              
+              <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 4 }}>
+                <Button
+                  onClick={handleClear}
+                  variant="outlined"
+                  color="error"
+                  startIcon={<ClearIcon />}
+                  size="large"
                 >
-                  Remove
-                </button>
-              </div>
-            ))}
-            <button
-              onClick={handleAddIntention}
-              className="addIntention-button"
-            >
-              Add Intention
-            </button>
-          </div>
-
-          <div className="prayerRequestIntention-buttons">
-            <button onClick={handleClear} className="clear-button">
-              Clear All Fields
-            </button>
-            <button onClick={handleSubmit} className="submit-button">
-              Submit
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+                  Clear All
+                </Button>
+                
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="success"
+                  endIcon={<SendIcon />}
+                  size="large"
+                >
+                  Submit Prayer
+                </Button>
+              </Stack>
+            </Stack>
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
   );
 };
 

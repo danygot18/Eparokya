@@ -17,7 +17,7 @@ const Profile = () => {
   const { user: reduxUser, loading } = useSelector((state) => state.auth);
   const [user, setUser] = useState(reduxUser);
 
-  console.log('user', user);
+  console.log('user', reduxUser);
 
   const fetchUserProfile = async () => {
     try {
@@ -97,7 +97,7 @@ const Profile = () => {
   
                 <Grid container spacing={2}>
                   {[
-                    { label: 'Edit Profile', path: '/me/update' },
+                    { label: 'Edit Profile', path: '/UpdateProfile' },
                     { label: 'Change Password', path: '/password/update' },
                     { label: 'View Forms', path: '/user/SubmittedFormsNavigation' },
                     { label: 'Prayer Wall', path: '/user/SubmittedPrayerWallList' },

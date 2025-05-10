@@ -174,7 +174,16 @@ const userSchema = new mongoose.Schema({
         BldgNameTower: { type: String, required: false },
         LotBlockPhaseHouseNo: { type: String, required: false },
         SubdivisionVillageZone: { type: String, required: false },
-        Street: { type: String, required: true },
+        Street: {
+            type: String,
+            required: [
+              function () {
+                return this.isNew; 
+              },
+              'Street is required',
+            ],
+          },
+          
         District: { type: String, required: true },
         barangay: {
             type: String,
@@ -188,19 +197,23 @@ const userSchema = new mongoose.Schema({
                 'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan',
                 'Others'
             ],
-            required: true
+            required: [ function () {
+                return this.isNew; 
+              },
+              'Barangay is required',
+            ],
         },
         customBarangay: {
             type: String,
             required: function () {
-                return this.address.baranggay === 'Others';
+                return this.isNew && this.address.barangay === 'Others';
             }
         },
         city: { type: String, enum: ['Taguig City', 'Others'], required: true },
         customCity: {
             type: String,
             required: function () {
-                return this.address.city === 'Others';
+                return this.isNew && this.address.city === 'Others';
             }
         },
     },

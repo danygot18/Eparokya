@@ -37,14 +37,21 @@ const Header = () => {
     toast.success("Log Out Success", {
       position: toast.POSITION.TOP_RIGHT,
     });
+
+    document.cookie = [
+      'token=""',
+      'expires=Thu, 01 Jan 1970 00:00:00 GMT',
+      'path=/'
+    ].join('; ');
   };
 
   const navButtonStyle = (route) => ({
     color: currentPath === route ? "green" : "white",
     fontWeight: currentPath === route ? "bold" : "normal",
     borderBottom: currentPath === route ? "2px solid green" : "none",
-    borderRadius: 2,
+    borderRadius: 3,
     textTransform: "none",
+    
     "&:hover": {
       color: "green",
       backgroundColor: "rgba(0, 128, 0, 0.1)",
@@ -87,7 +94,7 @@ const Header = () => {
           <Button
             component={Link}
             to="/user/prayerRequestIntention"
-            sx={navButtonStyle("/user/prayerRequestIntention")}
+            sx={navButtonStyle("/user/prayerRequestIntention") }
           >
             Send Prayer
           </Button>
@@ -130,6 +137,7 @@ const Header = () => {
                   color: "white",
                   textTransform: "none",
                   "&:hover": { color: "green" },
+                  size : "small",
                 }}
               >
                 {user?.name}

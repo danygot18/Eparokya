@@ -77,6 +77,7 @@ export const login = (email, password) => async (dispatch) => {
         }
 
         const { data } = await axios.post(`${process.env.REACT_APP_API}/api/v1/login`, { email, password }, config)
+
         // console.log('Login response:', data); 
         // console.log('Login response:', data); 
         // console.log('User:', data.user);
@@ -87,14 +88,14 @@ export const login = (email, password) => async (dispatch) => {
         // sessionStorage.setItem('token', data.token);
         // sessionStorage.setItem('user', JSON.stringify(data.user));
 
-        
+        window.location.reload();
         dispatch({
             type: LOGIN_SUCCESS,
             payload: {
                 user: data.user,
                 token: data.token
             }
-        })
+        }, 500)
     } catch (error) {
         console.log(error.response.data.message)
       
@@ -106,19 +107,19 @@ export const login = (email, password) => async (dispatch) => {
 }
 
 export const loadUser = () => async (dispatch) => {
+    
     try {
         const config = {
-            headers: {
-                'Content-Type': 'application/json',
-            },
+        
             withCredentials: true,
         }
         dispatch({ type: LOAD_USER_REQUEST })
-        const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`,config)
+        const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config)
         dispatch({
             type: LOAD_USER_SUCCESS,
             payload: data.user
         })
+        console.log('Load user response:', data);
     } catch (error) {
         dispatch({
             type: LOAD_USER_FAIL,
@@ -135,10 +136,13 @@ export const logout = () => async (dispatch) => {
             },
             withCredentials: false,
         }
+       
         await axios.get(`${process.env.REACT_APP_API}/api/v1/logout`,config)
+        
         dispatch({
             type: LOGOUT_SUCCESS,
         })
+        
     } catch (error) {
         dispatch({
             type: LOGOUT_FAIL,
@@ -147,28 +151,76 @@ export const logout = () => async (dispatch) => {
     }
 }
 
+// export const updateProfile = (userData) => async (dispatch) => {
+//     try {
+//         dispatch({ type: UPDATE_PROFILE_REQUEST,
+//             payload: data.user,
+//          })
+        
+//         const config = {
+//             headers: {
+//                 'Content-Type': 'multipart/form-data'
+//             },
+//             withCredentials: true,
+//         }
+//         const { data } = await axios.put(`${process.env.REACT_APP_API}/api/v1/profile/update`, userData, config)
+        
+//         dispatch({
+//             type: UPDATE_PROFILE_SUCCESS,
+//             payload: data.success
+//         })
+//     } catch (error) {
+//         const errorMessage =
+//             error?.response?.data?.message || error.message || "Something went wrong";
+//         dispatch({
+//             type: UPDATE_PROFILE_FAIL,
+//             payload: errorMessage
+//         });
+//     }
+       
+
+// }
+
 export const updateProfile = (userData) => async (dispatch) => {
     try {
-        dispatch({ type: UPDATE_PROFILE_REQUEST })
+        // Correct request dispatch (no payload needed)
+        dispatch({ type: UPDATE_PROFILE_REQUEST });
+
         const config = {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
             withCredentials: true,
-        }
-        const { data } = await axios.put(`${process.env.REACT_APP_API}/api/v1/me/update`, userData, config)
+        };
+
+        const { data } = await axios.put(
+            `${process.env.REACT_APP_API}/api/v1/profile/update`, 
+            userData, 
+            config
+        );
+        console.log('Update profile response:', data); // Log the response for debugging    
+        // Dispatch success with FULL user data
         dispatch({
             type: UPDATE_PROFILE_SUCCESS,
-            payload: data.success
-        })
+            payload: data.user
+        });
+
+        dispatch({
+            type: "AUTH_UPDATE",
+            payload: data.user
+        }) 
+        
+        // Load the updated user data
+        // // Optionally dispatch loadUser to ensure everything is fresh
+        // dispatch(loadUser());
+
     } catch (error) {
         dispatch({
             type: UPDATE_PROFILE_FAIL,
-            payload: error.response.data.message
-        })
+            payload: error.response?.data?.message || error.message,
+        });
     }
-
-}
+};
 
 export const updatePassword = (passwords) => async (dispatch) => {
     try {
