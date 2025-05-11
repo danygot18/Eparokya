@@ -6,6 +6,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import MetaData from '../../../../Layout/MetaData';
 import { Grid, TextField, Button, FormControl, InputLabel, Select, MenuItem, Box } from '@mui/material';
+import TermsModal from "../../../../TermsModal";
+import termsAndConditionsText from "../../../../TermsAndConditionText";
 
 const CounselingForm = () => {
     const [formData, setFormData] = useState({
@@ -25,6 +27,8 @@ const CounselingForm = () => {
         counselingDate: '',
         counselingTime: '',
     });
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAgreed, setIsAgreed] = useState(false);
     const [user, setUser] = useState(null);
     const [cities] = useState(['Taguig City', 'Others']);
     const [barangays] = useState([
@@ -102,11 +106,21 @@ const CounselingForm = () => {
             purpose: '',
             contactPerson: { fullName: '', contactNumber: '', relationship: '' },
             contactNumber: '',
-            address: { block: '', lot: '', street: '', phase: '', baranggay: '' },
+            address: {
+                BldgNameTower: '',
+                LotBlockPhaseHouseNo: '',
+                SubdivisionVillageZone: '',
+                Street: '',
+                District: '',
+                barangay: '',
+                city: '',
+            },
             counselingDate: '',
             counselingTime: '',
         });
+        setIsAgreed(false);
     };
+
 
     // const handleSubmit = async (e) => {
     //     e.preventDefault();
@@ -136,6 +150,11 @@ const CounselingForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!isAgreed) {
+            setIsModalOpen(true);
+            return;
+        }
 
         const { fullName, dateOfBirth } = formData.person;
         const { purpose, contactNumber, address } = formData;
@@ -218,7 +237,7 @@ const CounselingForm = () => {
             <MetaData title="Counseling Form" />
             <Box sx={{ display: "flex", backgroundColor: "#f9f9f9", width: "100%" }}>
                 <GuestSidebar />
-    
+
                 <Box sx={{ marginLeft: "20px", padding: "20px", width: "calc(100% - 270px)" }}>
                     <form onSubmit={handleSubmit}>
                         <h4>Personal Information</h4>
@@ -244,7 +263,7 @@ const CounselingForm = () => {
                                 />
                             </Grid>
                         </Grid>
-    
+
                         <h4 className="mt-4">Counseling Details</h4>
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
@@ -266,7 +285,7 @@ const CounselingForm = () => {
                                 />
                             </Grid>
                         </Grid>
-    
+
                         <h4 className="mt-4">Contact Person</h4>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
@@ -288,7 +307,7 @@ const CounselingForm = () => {
                                 />
                             </Grid>
                         </Grid>
-    
+
                         <Grid item xs={12}>
                             <FormControl fullWidth required>
                                 <InputLabel>Relationship</InputLabel>
@@ -314,7 +333,7 @@ const CounselingForm = () => {
                                 </Select>
                             </FormControl>
                         </Grid>
-    
+
                         <h4 className="mt-4">Tirahan</h4>
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
@@ -366,7 +385,7 @@ const CounselingForm = () => {
                                     </Select>
                                 </FormControl>
                             </Grid>
-    
+
                             {formData.address.barangay === 'Others' && (
                                 <Grid item xs={12}>
                                     <TextField
@@ -378,7 +397,7 @@ const CounselingForm = () => {
                                     />
                                 </Grid>
                             )}
-    
+
                             <Grid item xs={12}>
                                 <TextField
                                     label="District"
@@ -401,7 +420,7 @@ const CounselingForm = () => {
                                     </Select>
                                 </FormControl>
                             </Grid>
-    
+
                             {formData.address.city === 'Others' && (
                                 <Grid item xs={12}>
                                     <TextField
@@ -414,7 +433,7 @@ const CounselingForm = () => {
                                 </Grid>
                             )}
                         </Grid>
-    
+
                         <h4 className="mt-4">Schedule</h4>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
@@ -439,15 +458,46 @@ const CounselingForm = () => {
                                 />
                             </Grid>
                         </Grid>
-    
+
+                        <Box sx={{ marginTop: 4 }}>
+                            <input
+                                type="checkbox"
+                                checked={isAgreed}
+                                onChange={() => setIsAgreed(!isAgreed)}
+                            />
+                            <label>
+                                Before submitting, click this to open the{' '}
+                                <span
+                                    style={{ color: 'blue', cursor: 'pointer' }}
+                                    onClick={() => setIsModalOpen(true)}
+                                >
+                                    Terms and Conditions
+                                </span>
+                            </label>
+                        </Box>
                         <Box sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}>
+                            <Button variant="outlined" sx={{ marginRight: 2 }} onClick={handleClear}>
+                                Clear All Fields
+                            </Button>
+                            <Button type="submit" variant="contained" color="primary" disabled={!isAgreed}>
+                                Submit
+                            </Button>
+                        </Box>
+                        <TermsModal
+                            isOpen={isModalOpen}
+                            onClose={() => setIsModalOpen(false)}
+                            onAccept={() => { setIsAgreed(true); setIsModalOpen(false); }}
+                            termsText="Here are the terms and conditions for the Counseling Form."
+                        />
+
+                        {/* <Box sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}>
                             <Button variant="outlined" sx={{ marginRight: 2 }} onClick={handleClear}>
                                 Clear All Fields
                             </Button>
                             <Button variant="contained" type="submit">
                                 Submit
                             </Button>
-                        </Box>
+                        </Box> */}
                     </form>
                 </Box>
             </Box>

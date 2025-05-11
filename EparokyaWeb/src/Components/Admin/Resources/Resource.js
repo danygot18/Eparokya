@@ -25,7 +25,6 @@ const Resource = () => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllResourceCategory`);
-        // Expecting the endpoint to return { success: true, categories: [...] }
         setCategories(response.data.data || []);
       } catch (error) {
         console.error('Error fetching resource categories:', error);
@@ -71,28 +70,23 @@ const Resource = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Create FormData object and append text fields
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('link', link);
     formData.append('resourceCategory', resourceCategory);
 
-    // Append file if provided
     if (file) {
       formData.append('file', file);
     }
-    // Append single image if provided
     if (image) {
       formData.append('image', image);
     }
-    // Append multiple images if provided
     if (images.length > 0) {
       images.forEach((img) => {
         formData.append('images', img);
       });
     }
-    // Append multiple videos if provided
     if (videos.length > 0) {
       videos.forEach((vid) => {
         formData.append('videos', vid);

@@ -47,6 +47,7 @@ const ResourcePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [bookmarkedResources, setBookmarkedResources] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState("");
   const [loading, setLoading] = useState(true);
@@ -80,24 +81,47 @@ const ResourcePage = () => {
     }
   };
 
+  // const fetchResources = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${process.env.REACT_APP_API}/api/v1/getAllResource`
+  //     );
+  //     setResources(response.data.data || []);
+  //   } catch (error) {
+  //     console.error("Error fetching resources:", error);
+  //     setResources([]);
+  //   }
+  // };
   const fetchResources = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API}/api/v1/getAllResource`
+        `${process.env.REACT_APP_API}/api/v1/resourcesWithBookmarkCount`
       );
-      setResources(response.data.data || []);
+  
+      const fetchedResources = response.data.data || [];
+  
+      const enrichedResources = fetchedResources.map((resource) => ({
+        ...resource,
+        isBookmarked: bookmarkedResources.includes(resource._id),
+      }));
+  
+      setResources(enrichedResources);
     } catch (error) {
       console.error("Error fetching resources:", error);
       setResources([]);
     }
   };
+  
+  
+
 
   const fetchCategories = async () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/getAllResourceCategory`
       );
-      setCategories(response.data.categories || []);
+      // console.log("Categories response:", response.data); 
+      setCategories(response.data.data || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
       setCategories([]);
@@ -106,9 +130,30 @@ const ResourcePage = () => {
     }
   };
 
+
   const handleSearch = (term) => {
     setSearchTerm(term);
   };
+
+  // const handleBookmark = async (resourceId) => {
+  //   try {
+  //     const response = await axios.post(
+  //       `${process.env.REACT_APP_API}/api/v1/toggleBookmark/${resourceId}`,
+  //       { userId: user._id },
+  //       config
+  //     );
+
+  //     if (response.data.success) {
+  //       setBookmarkedResources((prev) =>
+  //         prev.includes(resourceId)
+  //           ? prev.filter((id) => id !== resourceId)
+  //           : [...prev, resourceId]
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error toggling bookmark:", error);
+  //   }
+  // };
 
   const handleBookmark = async (resourceId) => {
     try {
@@ -119,10 +164,26 @@ const ResourcePage = () => {
       );
 
       if (response.data.success) {
+        const updatedResource = response.data.resource;
+
+        // Update bookmarked resource IDs
         setBookmarkedResources((prev) =>
           prev.includes(resourceId)
             ? prev.filter((id) => id !== resourceId)
             : [...prev, resourceId]
+        );
+
+        // Update the resource in the main resource list
+        setResources((prevResources) =>
+          prevResources.map((resource) =>
+            resource._id === updatedResource._id
+              ? {
+                ...resource,
+                bookmarkCount: updatedResource.bookmarkCount,
+                isBookmarked: !resource.isBookmarked,
+              }
+              : resource
+          )
         );
       }
     } catch (error) {
@@ -157,12 +218,12 @@ const ResourcePage = () => {
   });
 
   if (loading) {
-      return (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-          <CircularProgress />
-        </div>
-      );
-    }
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div style={styles.homeContainer}>
@@ -222,20 +283,30 @@ const ResourcePage = () => {
                     position: "absolute",
                     top: "10px",
                     right: "10px",
+                    fontSize: "29px"
                   }}
                   onClick={() => handleBookmark(resource._id)}
                 />
 
-                <h2 style={styles.resourceTitle}>{resource.title}</h2>
-                <p style={styles.resourceDescription}>{resource.description}</p>
-                <p style={styles.resourceLink}>
+                <div style={{ textAlign: "left", width: "100%" }}>
+                  <h2 style={styles.resourceTitle}>{resource.title}</h2>
+                  <p style={{ fontSize: "12px", color: "gray", marginBottom: "8px" }}>
+                    Created on: {new Date(resource.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <p style={{ ...styles.resourceDescription, textAlign: "left", width: "100%" }}>
+                  {resource.description}
+                </p>
+                <p style={{ ...styles.resourceLink, textAlign: "left", width: "100%" }}>
+                  <strong>Reference Link:</strong>{" "}
                   <span
-                    style={styles.linkButton}
+                    style={{ ...styles.linkButton, marginLeft: "8px", textDecoration: "underline", color: "#0645AD", cursor: "pointer" }}
                     onClick={() => handleOpenModal(resource.link)}
                   >
-                    Link
+                    Click for the reference link
                   </span>
                 </p>
+
 
                 {/* Resource Image or Slider */}
                 {resource.images && resource.images.length > 0 ? (
@@ -247,29 +318,44 @@ const ResourcePage = () => {
                     style={styles.resourceImage}
                   />
                 ) : resource.file ? (
-                  <button
-                    onClick={() =>
-                      window.open(
-                        resource.file.url,
-                        "_blank",
-                        "noopener,noreferrer"
-                      )
-                    }
-                    style={{
-                      padding: "8px 16px",
-                      backgroundColor: "#d5edd9",
-                      color: "black",
-                      border: "none",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                    }}
-                  >
-                    View File
-                  </button>
+                  <div style={{ textAlign: "center" }}>
+                    <iframe
+                      src={`${resource.file.url}#toolbar=0&navpanes=0&scrollbar=0`}
+                      title="File Preview"
+                      style={{
+                        width: "100%",
+                        height: "300px",
+                        border: "1px solid #ccc",
+                        borderRadius: "8px",
+                        marginBottom: "10px",
+                      }}
+                    ></iframe>
+                    <button
+                      onClick={() =>
+                        window.open(
+                          resource.file.url,
+                          "_blank",
+                          "noopener,noreferrer"
+                        )
+                      }
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#d5edd9",
+                        color: "black",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                        fontSize: "16px",
+                      }}
+                    >
+                      View Full File
+                    </button>
+                  </div>
                 ) : null}
+                <p style={{ fontSize: "12px", color: "gray", marginTop: "10px", textAlign: "left", width: "100%" }}>
+                  Number of users who bookmarked this post: {resource.bookmarkCount || 0}
+                </p>
 
-         
               </div>
             ))}
           </div>
@@ -280,7 +366,18 @@ const ResourcePage = () => {
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
             <FaTimes style={styles.closeIcon} onClick={handleCloseModal} />
-            <p>{modalContent}</p>
+            <div style={{
+              border: "1px solid #ccc",
+              padding: "12px",
+              borderRadius: "6px",
+              backgroundColor: "#f5f5f5",
+              wordWrap: "break-word",
+              wordBreak: "break-word",
+              overflowWrap: "anywhere",
+            }}>
+              {modalContent}
+            </div>
+
           </div>
         </div>
       )}

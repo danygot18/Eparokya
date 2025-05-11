@@ -166,47 +166,91 @@ exports.deleteResource = async (req, res) => {
       res.status(500).json({ success: false, message: error.message });
     }
 };
+// no count 
+// exports.toggleBookmark = async (req, res) => {
+//   try {
+//       const { userId } = req.body;
+//       const { resourceId } = req.params;
 
+//       if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(resourceId)) {
+//           return res.status(400).json({ success: false, message: "Invalid user or resource ID" });
+//       }
+
+//       const resource = await Resource.findById(resourceId);
+//       if (!resource) {
+//           return res.status(404).json({ success: false, message: "Resource not found" });
+//       }
+
+//       const bookmarkIndex = resource.bookmarks.findIndex(bookmark => bookmark.userId.toString() === userId);
+
+//       let message;
+//       if (bookmarkIndex !== -1) {
+//           resource.bookmarks.splice(bookmarkIndex, 1);
+//           message = "Bookmark removed";
+//       } else {
+//           resource.bookmarks.push({ userId });
+//           message = "Bookmark added";
+//       }
+
+//       await resource.save();
+
+//       return res.status(200).json({
+//           success: true,
+//           message,
+//           resource: {
+//               _id: resource._id,
+//               bookmarks: resource.bookmarks,
+//           },
+//       });
+//   } catch (error) {
+//       res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// with count
 exports.toggleBookmark = async (req, res) => {
-  try {
+    try {
       const { userId } = req.body;
       const { resourceId } = req.params;
-
+  
       if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(resourceId)) {
-          return res.status(400).json({ success: false, message: "Invalid user or resource ID" });
+        return res.status(400).json({ success: false, message: "Invalid user or resource ID" });
       }
-
+  
       const resource = await Resource.findById(resourceId);
       if (!resource) {
-          return res.status(404).json({ success: false, message: "Resource not found" });
+        return res.status(404).json({ success: false, message: "Resource not found" });
       }
-
-      const bookmarkIndex = resource.bookmarks.findIndex(bookmark => bookmark.userId.toString() === userId);
-
+  
+      const bookmarkIndex = resource.bookmarks.findIndex(
+        (bookmark) => bookmark.userId.toString() === userId
+      );
+  
       let message;
       if (bookmarkIndex !== -1) {
-          resource.bookmarks.splice(bookmarkIndex, 1);
-          message = "Bookmark removed";
+        resource.bookmarks.splice(bookmarkIndex, 1);
+        message = "Bookmark removed";
       } else {
-          resource.bookmarks.push({ userId });
-          message = "Bookmark added";
+        resource.bookmarks.push({ userId });
+        message = "Bookmark added";
       }
-
+  
       await resource.save();
-
+  
       return res.status(200).json({
-          success: true,
-          message,
-          resource: {
-              _id: resource._id,
-              bookmarks: resource.bookmarks,
-          },
+        success: true,
+        message,
+        resource: {
+          _id: resource._id,
+          bookmarkCount: resource.bookmarks.length, 
+          bookmarks: resource.bookmarks,
+        },
       });
-  } catch (error) {
+    } catch (error) {
       res.status(500).json({ success: false, message: error.message });
-  }
-};
-
+    }
+  };
+  
 exports.getUserBookmarks = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -234,7 +278,25 @@ exports.getUserBookmarks = async (req, res) => {
     }
 };
 
-
+exports.getResourcesWithBookmarkCount = async (req, res) => {
+    try {
+      const resources = await Resource.find().populate('resourceCategory');
+  
+      const enrichedResources = resources.map((resource) => {
+        const bookmarkCount = resource.bookmarks.length;
+        return {
+          ...resource.toObject(),
+          bookmarkCount,
+        };
+      });
+  
+      res.status(200).json({ success: true, data: enrichedResources }); // ✅ Wrap in { success, data }
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch resources", error });
+    }
+  };
+  
+  
   
 
 

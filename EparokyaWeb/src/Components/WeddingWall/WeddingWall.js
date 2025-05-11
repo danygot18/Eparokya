@@ -11,7 +11,7 @@ const WeddingWall = () => {
     fetch(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`)
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched weddings data:", data); // Debug log
+        console.log("Fetched weddings data:", data);
         setWeddings(data);
       })
       .catch((error) => console.error("Error fetching weddings:", error))
@@ -19,12 +19,12 @@ const WeddingWall = () => {
   }, []);
 
   if (loading) {
-      return (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-          <CircularProgress />
-        </div>
-      );
-    }
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div className="weddingWall-container">
@@ -74,11 +74,12 @@ const WeddingWall = () => {
               </div>
               <h3>Saint Joseph Parish - Taguig</h3>
               <div className="weddingWall-body">
-                <p>{wedding.groomName} & {wedding.brideName}</p>
-                <p>Wedding Date: {formattedWeddingDate}</p>
-                <p>Wedding Time: {formattedWeddingTime}</p>
-                <p>Confirmed Date: {formattedConfirmedAt}</p>
+                <p className="weddingWall-names">{wedding.groomName} & {wedding.brideName}</p>
+                <p><strong>Wedding Date:</strong> {formattedWeddingDate}</p>
+                <p><strong>Wedding Time:</strong> {formattedWeddingTime}</p>
+                <p><strong>Confirmed Date:</strong> {formattedConfirmedAt}</p>
               </div>
+
               <div className="weddingWall-footer">
                 <p>
                   Kung may tutol man po sa mga ikakasal, maari lamang na
