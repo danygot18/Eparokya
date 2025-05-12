@@ -59,6 +59,8 @@ const PriestList = () => {
                             <h2>{priest.fullName}</h2>
                             <p className="priestList-year-range">{priest.parishDurationYear}</p>
                             
+
+                            {/* Displaying Priest Details */}
                             <div className="priestList-field">
                                 Title:
                                 <input className="priestList-field-value" value={priest.title} readOnly />
@@ -83,21 +85,53 @@ const PriestList = () => {
                                 Ordination Date:
                                 <input className="priestList-field-value" value={new Date(priest.ordinationDate).toLocaleDateString()} readOnly />
                             </div>
+
+                            {/* Status Buttons */}
                             <div>
                                 Active: 
-                                <button onClick={() => toggleStatus(priest._id, 'isActive')}>
+                                <button 
+                                    onClick={() => toggleStatus(priest._id, 'isActive')}
+                                    style={{
+                                        backgroundColor: priest.isActive ? 'darkgreen' : 'red',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '8px 16px',
+                                        cursor: 'pointer',
+                                        borderRadius: '5px',
+                                    }}
+                                >
                                     {priest.isActive ? 'Yes' : 'No'}
                                 </button>
                             </div>
                             <div>
                                 Available: 
-                                <button onClick={() => toggleStatus(priest._id, 'isAvailable')}>
+                                <button 
+                                    onClick={() => toggleStatus(priest._id, 'isAvailable')}
+                                    style={{
+                                        backgroundColor: priest.isAvailable ? 'darkgreen' : 'red',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '8px 16px',
+                                        cursor: 'pointer',
+                                        borderRadius: '5px',
+                                    }}
+                                >
                                     {priest.isAvailable ? 'Yes' : 'No'}
                                 </button>
                             </div>
                             <div>
                                 Retired: 
-                                <button onClick={() => toggleStatus(priest._id, 'isRetired')}>
+                                <button 
+                                    onClick={() => toggleStatus(priest._id, 'isRetired')}
+                                    style={{
+                                        backgroundColor: priest.isRetired ? 'darkgreen' : 'red',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '8px 16px',
+                                        cursor: 'pointer',
+                                        borderRadius: '5px',
+                                    }}
+                                >
                                     {priest.isRetired ? 'Yes' : 'No'}
                                 </button>
                             </div>
@@ -107,8 +141,6 @@ const PriestList = () => {
             </div>
         </div>
     );
-    
-    
 };
 
 export default PriestList;

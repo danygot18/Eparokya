@@ -85,6 +85,14 @@ const Header = () => {
 
           <Button
             component={Link}
+            to="/user/prayerRequestIntention"
+            sx={navButtonStyle("/user/prayerRequestIntention") }
+          >
+            Prayer
+          </Button>
+
+          <Button
+            component={Link}
             to="/user/live"
             sx={navButtonStyle("/user/live")}
           >
@@ -93,10 +101,18 @@ const Header = () => {
 
           <Button
             component={Link}
+            to="/biblePage"
+            sx={navButtonStyle("/biblePage") }
+          >
+          Readings
+          </Button>
+
+          <Button
+            component={Link}
             to="/user/prayerRequestIntention"
             sx={navButtonStyle("/user/prayerRequestIntention") }
           >
-            Send Prayer
+            Guides
           </Button>
 
           {/* Parish Dropdown */}

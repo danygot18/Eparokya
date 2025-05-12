@@ -219,14 +219,14 @@ exports.registerUser = async (req, res, next) => {
                 width: 150,
                 crop: "scale"
             });
-        } 
+        }
         else if (req.body.avatar) {
             result = await cloudinary.v2.uploader.upload(req.body.avatar, {
                 folder: 'eparokya/avatar',
                 width: 150,
                 crop: "scale"
             });
-        } 
+        }
         else {
             return res.status(400).json({ success: false, message: "No avatar provided" });
         }
@@ -677,9 +677,9 @@ exports.UpdateProfile = async (req, res, next) => {
         // Get the current user data first
         const currentUser = await User.findById(req.user.id);
         if (!currentUser) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 success: false,
-                message: 'User not found' 
+                message: 'User not found'
             });
         }
 
@@ -708,32 +708,32 @@ exports.UpdateProfile = async (req, res, next) => {
         if (req.body.address) {
             let addressData = {};
             try {
-                addressData = typeof req.body.address === 'string' 
-                    ? JSON.parse(req.body.address) 
+                addressData = typeof req.body.address === 'string'
+                    ? JSON.parse(req.body.address)
                     : req.body.address;
-                
+
                 // Update only the provided address fields
                 if (addressData.BldgNameTower !== undefined) updateData.address.BldgNameTower = addressData.BldgNameTower;
                 if (addressData.LotBlockPhaseHouseNo !== undefined) updateData.address.LotBlockPhaseHouseNo = addressData.LotBlockPhaseHouseNo;
                 if (addressData.SubdivisionVillageZone !== undefined) updateData.address.SubdivisionVillageZone = addressData.SubdivisionVillageZone;
                 if (addressData.Street !== undefined) updateData.address.Street = addressData.Street;
                 if (addressData.District !== undefined) updateData.address.District = addressData.District;
-                
+
                 // Handle barangay and customBarangay
                 if (addressData.barangay !== undefined) {
                     updateData.address.barangay = addressData.barangay;
                     // Only update customBarangay if barangay is 'Others'
-                    updateData.address.customBarangay = addressData.barangay === 'Others' 
-                        ? addressData.customBarangay 
+                    updateData.address.customBarangay = addressData.barangay === 'Others'
+                        ? addressData.customBarangay
                         : undefined;
                 }
-                
+
                 // Handle city and customCity
                 if (addressData.city !== undefined) {
                     updateData.address.city = addressData.city;
                     // Only update customCity if city is 'Others'
-                    updateData.address.customCity = addressData.city === 'Others' 
-                        ? addressData.customCity 
+                    updateData.address.customCity = addressData.city === 'Others'
+                        ? addressData.customCity
                         : undefined;
                 }
 
@@ -772,8 +772,8 @@ exports.UpdateProfile = async (req, res, next) => {
 
         // Update the user
         const updatedUser = await User.findByIdAndUpdate(
-            req.user.id, 
-            updateData, 
+            req.user.id,
+            updateData,
             {
                 new: true,
                 runValidators: true,
@@ -788,7 +788,7 @@ exports.UpdateProfile = async (req, res, next) => {
 
     } catch (error) {
         console.error("UpdateProfile error:", error);
-        
+
         // Handle specific errors
         if (error.name === 'ValidationError') {
             const errors = {};
@@ -801,7 +801,7 @@ exports.UpdateProfile = async (req, res, next) => {
                 errors: errors
             });
         }
-        
+
         if (error.name === 'CastError') {
             return res.status(400).json({
                 success: false,
@@ -819,14 +819,45 @@ exports.UpdateProfile = async (req, res, next) => {
 };
 
 
+// exports.AllUsers = async (req, res, next) => {
+//     const users = await User.find()
+//         .populate("ministryRoles.ministry", "name");
+//     res.status(200).json({
+//         success: true,
+//         users
+//     })
+// }
+
+// for searning
 exports.AllUsers = async (req, res, next) => {
-    const users = await User.find()
-        .populate("ministryRoles.ministry", "name");
-    res.status(200).json({
-        success: true,
-        users
-    })
-}
+    try {
+        const search = req.query.search || '';
+        const ministry = req.query.ministry;
+        const query = {
+            $or: [
+                { name: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } },
+            ],
+        };
+        if (ministry) {
+            query['ministryRoles.ministry'] = ministry;
+        }
+
+        const users = await User.find(query).populate("ministryRoles.ministry", "name");
+
+        res.status(200).json({
+            success: true,
+            users
+        });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch users',
+        });
+    }
+};
+
 
 
 exports.getUserDetails = async (req, res, next) => {

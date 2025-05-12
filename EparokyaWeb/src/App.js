@@ -199,7 +199,7 @@ import { useDispatch, useSelector } from 'react-redux';
 //Live Video
 import AdminLive from './Components/Admin/AdminLive';
 import UserLive from './Components/UserLive';
-import Bible from './Components/Admin/Resources/Bible';
+import Bible from './Components/Bible'
 
 //Inventory
 import InventoryList from './Components/Admin/Inventory/Inventory';
@@ -259,6 +259,7 @@ function App() {
 
         <Route path="/resourcePage" element={<ResourcePage />} exact="true" />
         <Route path="/memberHistory" element={<MemberHistory />} exact="true" />
+        <Route path="/biblePage" element={<Bible />} exact="true" />
 
         <Route path="/weddingWall" element={<WeddingWall />} exact="true" />
         <Route path="/parishPriests" element={<ParishPriest />} exact="true" />
@@ -358,8 +359,6 @@ function App() {
         {/* Resource */}
         <Route path="/admin/resource/create" element={<ProtectedRoute isAdmin={true}><Resource /></ProtectedRoute>} />
         <Route path="/admin/resourceList" element={<ProtectedRoute isAdmin={true}><ResourceList /></ProtectedRoute>} />
-
-        <Route path="/admin/bible" element={<ProtectedRoute isAdmin={true}><Bible /></ProtectedRoute>} />
 
         {/* Priest */}
         <Route path="/admin/create/priest" element={<ProtectedRoute isAdmin={true}><CreatePriest /></ProtectedRoute>} />

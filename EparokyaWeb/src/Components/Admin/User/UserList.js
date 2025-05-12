@@ -38,7 +38,7 @@ const UsersList = () => {
         `${process.env.REACT_APP_API}/api/v1/ministryCategory/getAllMinistryCategories`,
         config
       );
-      setMinistryCategories(data.ministryCategories || []);
+      setMinistryCategories(data.categories || []);
     } catch (error) {
       errMsg('Failed to fetch categories');
     }
@@ -64,6 +64,12 @@ const UsersList = () => {
     fetchMinistryCategories();
   }, [search, selectedCategory]);
 
+  const filteredUsers = allUsers.filter(user =>
+    user.name.toLowerCase().includes(search.toLowerCase()) || 
+    user.email.toLowerCase().includes(search.toLowerCase()) 
+  );
+
+
   return (
     <div >
       <MetaData title="All Users" />
@@ -80,14 +86,14 @@ const UsersList = () => {
         <div className="flex-grow-1 p-4">
           <h1 className="mb-4">All Users</h1>
 
-          {/* Search Input */}
-          <Form className="mb-3">
+        {/* Search Input */}
+        <Form className="mb-3">
             <Form.Group controlId="search">
               <Form.Control
                 type="text"
-                placeholder="Search by name or email"
+                placeholder="Search by Name or Email"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}  
               />
             </Form.Group>
           </Form>
@@ -118,8 +124,8 @@ const UsersList = () => {
             <Table bordered striped hover responsive>
               <thead>
                 <tr>
-                  <th>User ID</th>
-                  <th>Name</th>
+                  {/* <th>User ID</th> */}
+                  <th>User Name</th>
                   <th>Email</th>
                   <th>Role</th>
                   <th>Ministry Categories</th>
@@ -131,7 +137,7 @@ const UsersList = () => {
                 {allUsers.length > 0 ? (
                   allUsers.map((user) => (
                     <tr key={user._id}>
-                      <td>{user._id}</td>
+                      {/* <td>{user._id}</td> */}
                       <td>{user.name}</td>
                       <td>{user.email}</td>
                       <td>{user.isAdmin ? 'Admin' : 'User'}</td>
