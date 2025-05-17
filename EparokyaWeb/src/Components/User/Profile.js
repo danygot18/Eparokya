@@ -9,7 +9,7 @@ import LockResetIcon from '@mui/icons-material/LockReset';
 import DescriptionIcon from '@mui/icons-material/Description';
 import MetaData from '../Layout/MetaData';
 import { useSelector } from 'react-redux';
-import '../Layout/styles/style.css'; // Custom CSS for exact layout
+import '../Layout/styles/style.css'; 
 import axios from 'axios';
 import GuestSideBar from '../GuestSideBar';
 
