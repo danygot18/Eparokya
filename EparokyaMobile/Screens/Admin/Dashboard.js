@@ -9,13 +9,22 @@ const Dashboard = () => {
   const [weddingData, setWeddingData] = useState([]);
   const [confirmedWeddingData, setConfirmedWeddingData] = useState([]);
   const [batchData, setBatchData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetchWeddingForms();
-    fetchConfirmedWeddings();
-    fetchMemberCountByBatch();
+    const fetchAllData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchWeddingForms(),
+        fetchConfirmedWeddings(),
+        fetchMemberCountByBatch()
+      ]);
+      setLoading(false);
+    };
+
+    fetchAllData();
   }, []);
 
   const processWeddingData = (data) => {
@@ -85,6 +94,10 @@ const Dashboard = () => {
     ],
   };
 
+  if (loading) {
+    return <Loader />; 
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -95,7 +108,7 @@ const Dashboard = () => {
           <Text style={styles.navigationButtonText}>Navigations</Text>
         </TouchableOpacity>
       </View>
-
+    
       <Text style={styles.chartTitle}>Wedding Forms Submitted Per Month</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <BarChart

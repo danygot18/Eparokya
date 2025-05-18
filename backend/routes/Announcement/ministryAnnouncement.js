@@ -13,7 +13,7 @@ router.get('/getMinistryAnnouncements/:ministryCategoryId', ministryAnnouncement
 router.get('/pinnedMinistryAnnouncement/:ministryCategoryId', ministryAnnouncementController.getPinnedAnnouncementsByMinistryCategory);
 
 router.get('/getMinistryAnnouncementById/:ministryAnnouncementId', ministryAnnouncementController.getAnnouncementById);
-router.put('/updateMinistryAnnouncement/:ministryAnnouncementId', ministryAnnouncementController.updateAnnouncement);
+router.put('/updateMinistryAnnouncement/:ministryAnnouncementId', upload.array('images'), ministryAnnouncementController.updateAnnouncement);
 
 router.delete('/deleteMinistryAnnouncement/:ministryAnnouncementId', ministryAnnouncementController.deleteAnnouncement);
 router.post('/acknowledgeMinistryAnnouncement/:ministryAnnouncementId', isAuthenticatedUser, ministryAnnouncementController.acknowledgeAnnouncement);

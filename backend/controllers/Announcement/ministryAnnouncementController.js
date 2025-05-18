@@ -94,23 +94,25 @@ exports.createAnnouncement = async (req, res) => {
 // };
 
 exports.getAnnouncementsByMinistryCategory = async (req, res) => {
-    try {
-        const { ministryCategoryId } = req.params;
+  try {
+    const { ministryCategoryId } = req.params;
 
-        if (!ministryCategoryId || ministryCategoryId === "undefined") {
-            return res.status(400).json({ message: "Invalid or missing ministryCategoryId" });
-        }
-
-        const announcements = await AnnouncementMinistry.find({ ministryCategory: ministryCategoryId })
-            .populate('ministryCategory', 'name')
-            .sort({ createdAt: -1 });
-
-        res.status(200).json(announcements);
-    } catch (error) {
-        console.error('Error fetching announcements by ministry category:', error);
-        res.status(500).json({ message: 'Failed to retrieve announcements.' });
+    if (!ministryCategoryId || ministryCategoryId === "undefined") {
+      return res.status(400).json({ message: "Invalid or missing ministryCategoryId" });
     }
+
+    const announcements = await AnnouncementMinistry.find({ ministryCategory: ministryCategoryId })
+      .populate('ministryCategory', 'name')
+      .populate('acknowledgedBy', '_id')  
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(announcements);
+  } catch (error) {
+    console.error('Error fetching announcements by ministry category:', error);
+    res.status(500).json({ message: 'Failed to retrieve announcements.' });
+  }
 };
+
 
 
 exports.togglePinAnnouncement = async (req, res) => {
@@ -147,26 +149,28 @@ exports.togglePinAnnouncement = async (req, res) => {
 
 
 exports.getPinnedAnnouncementsByMinistryCategory = async (req, res) => {
-    try {
-        const { ministryCategoryId } = req.params;
+  try {
+    const { ministryCategoryId } = req.params;
 
-        if (!ministryCategoryId || ministryCategoryId === "undefined") {
-            return res.status(400).json({ message: "Invalid or missing ministryCategoryId" });
-        }
-
-        const pinnedAnnouncements = await AnnouncementMinistry.find({ 
-            ministryCategory: ministryCategoryId, 
-            isPinned: true 
-        })
-        .populate('ministryCategory', 'name')
-        .sort({ createdAt: -1 });
-
-        res.status(200).json(pinnedAnnouncements);
-    } catch (error) {
-        console.error("Error fetching pinned announcements by ministry category:", error);
-        res.status(500).json({ message: "Failed to retrieve pinned announcements." });
+    if (!ministryCategoryId || ministryCategoryId === "undefined") {
+      return res.status(400).json({ message: "Invalid or missing ministryCategoryId" });
     }
+
+    const pinnedAnnouncements = await AnnouncementMinistry.find({ 
+        ministryCategory: ministryCategoryId, 
+        isPinned: true 
+      })
+      .populate('ministryCategory', 'name')
+      .populate('acknowledgedBy', '_id')  // ✅ ADD THIS LINE
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(pinnedAnnouncements);
+  } catch (error) {
+    console.error("Error fetching pinned announcements by ministry category:", error);
+    res.status(500).json({ message: "Failed to retrieve pinned announcements." });
+  }
 };
+
 
 exports.getAnnouncementById = async (req, res) => {
     try {
@@ -180,20 +184,42 @@ exports.getAnnouncementById = async (req, res) => {
 };
 
 exports.updateAnnouncement = async (req, res) => {
-    try {
-        const updatedAnnouncement = await AnnouncementMinistry.findByIdAndUpdate(req.params.minsitryAnnouncementId, req.body, { new: true });
-        if (!updatedAnnouncement) return res.status(404).json({ message: 'Announcement not found.' });
-        res.status(200).json({ message: 'Announcement updated successfully.', updatedAnnouncement });
-    } catch (error) {
-        console.error('Error updating announcement:', error);
-        res.status(500).json({ message: 'Failed to update announcement.' });
+  try {
+    const updateData = {
+      title: req.body.title,
+      description: req.body.description,
+      tags: req.body.tags ? req.body.tags.split(',').map(t => t.trim()) : [],
+      notedBy: req.body.notedBy ? req.body.notedBy.split(',').map(n => n.trim()) : [],
+      isPinned: req.body.isPinned === 'true',
+    };
+
+    if (req.files && req.files.length > 0) {
+      updateData.images = req.files.map(file => file.path); // example
     }
+
+    const updatedAnnouncement = await AnnouncementMinistry.findByIdAndUpdate(
+      req.params.ministryAnnouncementId,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedAnnouncement) return res.status(404).json({ message: 'Announcement not found.' });
+
+    res.status(200).json({ message: 'Announcement updated successfully.', updatedAnnouncement });
+  } catch (error) {
+    console.error('Error updating announcement:', error);
+    res.status(500).json({ message: 'Failed to update announcement.' });
+  }
 };
+
 
 exports.deleteAnnouncement = async (req, res) => {
     try {
-        const deletedAnnouncement = await AnnouncementMinistry.findByIdAndDelete(req.params.minsitryAnnouncementId);
-        if (!deletedAnnouncement) return res.status(404).json({ message: 'Announcement not found.' });
+        const deletedAnnouncement = await AnnouncementMinistry.findByIdAndDelete(
+            req.params.ministryAnnouncementId // fixed typo here
+        );
+        if (!deletedAnnouncement)
+            return res.status(404).json({ message: 'Announcement not found.' });
         res.status(200).json({ message: 'Announcement deleted successfully.' });
     } catch (error) {
         console.error('Error deleting announcement:', error);
@@ -201,21 +227,95 @@ exports.deleteAnnouncement = async (req, res) => {
     }
 };
 
+
+const mongoose = require('mongoose');
+
+// exports.acknowledgeAnnouncement = async (req, res) => {
+//   try {
+//     const { user } = req.body;
+
+//     // Ensure userId is a valid ObjectId
+//     if (!mongoose.Types.ObjectId.isValid(user)) {
+//       return res.status(400).json({ message: 'Invalid user ID.' });
+//     }
+
+//     const announcement = await AnnouncementMinistry.findById(req.params.ministryAnnouncementId);
+
+//     if (!announcement) {
+//       return res.status(404).json({ message: 'Announcement not found.' });
+//     }
+
+//     // Convert all acknowledgedBy to string for includes check
+//    const hasAcknowledged = announcement.acknowledgedBy
+//   .filter(id => id !== null) // Filter out nulls
+//   .some(id => id.toString() === user);
+
+
+//     if (hasAcknowledged) {
+//       return res.status(400).json({ message: 'User already acknowledged this announcement.' });
+//     }
+
+//     announcement.acknowledgedBy.push(new mongoose.Types.ObjectId(user));
+//     announcement.acknowledgeCount += 1;
+
+//     await announcement.save();
+
+//     // Populate user info after saving
+//     const populatedAnnouncement = await AnnouncementMinistry.findById(announcement._id)
+//       .populate('acknowledgedBy', 'name avatar');
+
+//     res.status(200).json({
+//       message: 'Acknowledged successfully.',
+//       announcement: populatedAnnouncement
+//     });
+//   } catch (error) {
+//     console.error('Error acknowledging announcement:', error);
+//     res.status(500).json({ message: 'Failed to acknowledge announcement.' });
+//   }
+// };
+
 exports.acknowledgeAnnouncement = async (req, res) => {
-    try {
-        const { userId } = req.body;
-        const announcement = await AnnouncementMinistry.findById(req.params.minsitryAnnouncementId);
+  try {
+    const { user } = req.body;
 
-        if (!announcement) return res.status(404).json({ message: 'Announcement not found.' });
-        if (announcement.acknowledgedBy.includes(userId)) return res.status(400).json({ message: 'User already acknowledged this announcement.' });
-
-        announcement.acknowledgedBy.push(userId);
-        announcement.acknowledgeCount += 1;
-        await announcement.save();
-
-        res.status(200).json({ message: 'Acknowledged successfully.', announcement });
-    } catch (error) {
-        console.error('Error acknowledging announcement:', error);
-        res.status(500).json({ message: 'Failed to acknowledge announcement.' });
+    if (!mongoose.Types.ObjectId.isValid(user)) {
+      return res.status(400).json({ message: 'Invalid user ID.' });
     }
+
+    const announcement = await AnnouncementMinistry.findById(req.params.ministryAnnouncementId);
+
+    if (!announcement) {
+      return res.status(404).json({ message: 'Announcement not found.' });
+    }
+
+    const hasAcknowledged = announcement.acknowledgedBy
+      .filter(id => id !== null)
+      .some(id => id.toString() === user);
+
+    if (hasAcknowledged) {
+      return res.status(200).json({
+        message: 'User already acknowledged this announcement.',
+        hasAcknowledged: true,
+        announcement: await AnnouncementMinistry.findById(announcement._id)
+          .populate('acknowledgedBy', 'name avatar')
+      });
+    }
+
+    announcement.acknowledgedBy.push(new mongoose.Types.ObjectId(user));
+    announcement.acknowledgeCount += 1;
+
+    await announcement.save();
+
+    const populatedAnnouncement = await AnnouncementMinistry.findById(announcement._id)
+      .populate('acknowledgedBy', 'name avatar');
+
+    res.status(200).json({
+      message: 'Acknowledged successfully.',
+      hasAcknowledged: true,
+      announcement: populatedAnnouncement
+    });
+  } catch (error) {
+    console.error('Error acknowledging announcement:', error);
+    res.status(500).json({ message: 'Failed to acknowledge announcement.' });
+  }
 };

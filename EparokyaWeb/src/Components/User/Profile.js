@@ -101,7 +101,7 @@ const Profile = () => {
                     { label: 'Change Password', path: '/password/update' },
                     { label: 'View Forms', path: '/user/SubmittedFormsNavigation' },
                     { label: 'Prayer Wall', path: '/user/SubmittedPrayerWallList' },
-                    { label: 'Feedback', path: '/feedback-form' }
+                    { label: 'Feedback', path: '/submittedFeedback' }
                   ].map((item, index) => (
                     <Grid item xs={12} key={index}>
                       <Button

@@ -3,6 +3,7 @@ import { Scatter, Bar } from "react-chartjs-2";
 import "chart.js/auto";
 import axios from "axios";
 import { Container, Tabs, Tab, Box } from "@mui/material";
+import SideBar from "../../SideBar";
 
 const SentimentResult = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -93,21 +94,22 @@ const SentimentResult = () => {
 
   return (
     <Container>
+      <SideBar/>
       <Tabs value={tabIndex} onChange={(e, newIndex) => setTabIndex(newIndex)} centered>
         <Tab label="Event Sentiment" />
         <Tab label="Activity Sentiment" />
         <Tab label="Priest Sentiment" />
       </Tabs>
       <Box display="flex" flexDirection="column" alignItems="center" mt={3}>
-        <h3>Comment Sentiments (Scatter Plot)</h3>
+        <h3>Comment Sentiments</h3>
         <Scatter data={scatterData} options={{ responsive: true }} />
       </Box>
       <Box display="flex" flexDirection="column" alignItems="center" mt={3}>
-        <h3>Emoji Sentiments (Bar Chart)</h3>
+        <h3>Emoji Sentiments</h3>
         <Bar data={barData} options={{ responsive: true }} />
       </Box>
       <Box display="flex" flexDirection="column" alignItems="center" mt={3}>
-        <h3>Comment Sentiment Analysis (Stacked Bar Chart)</h3>
+        <h3>Comment Sentiment Analysis</h3>
         <Bar data={stackedBarData} options={{ responsive: true, scales: { x: { stacked: true }, y: { stacked: true } } }} />
       </Box>
     </Container>

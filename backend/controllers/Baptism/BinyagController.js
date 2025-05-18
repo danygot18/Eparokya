@@ -358,7 +358,7 @@ exports.addAdminNotes = async (req, res) => {
 exports.getMySubmittedForms = async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log("Authenticated User ID:", userId);
+    // console.log("Authenticated User ID:", userId);
 
     const forms = await Baptism.find({ userId: userId });
 

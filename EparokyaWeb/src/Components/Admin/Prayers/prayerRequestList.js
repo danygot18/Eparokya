@@ -3,6 +3,7 @@ import axios from "axios";
 import "../../Layout/styles/style.css";
 import SideBar from "../SideBar";
 import { useNavigate } from "react-router-dom";
+import Loader from "../../Layout/Loader";
 
 const PrayerRequestList = () => {
     const [prayerRequestForms, setprayerRequestForms] = useState([]);
@@ -118,7 +119,7 @@ const PrayerRequestList = () => {
                 {error && <p className="error-text">Error: {error}</p>}
 
                 {loading ? (
-                    <p className="loading-text">Loading submitted prayer requests...</p>
+                   <Loader/>
                 ) : filteredForms.length === 0 ? (
                     <p className="empty-text">No prayer requests available.</p>
                 ) : (

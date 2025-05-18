@@ -18,45 +18,29 @@ import {
 import GuestSideBar from "../../GuestSideBar";
 import "./MinistryAnnouncementLayout/ministryAnnouncement.css";
 import eparokyaLogo from "../../../assets/images/EPAROKYA-SYST.png";
+import { useSelector } from "react-redux";
 
 const MinistryAnnouncement = () => {
   const [ministryCategoryId, setMinistryCategoryId] = useState(null);
   const [pinnedAnnouncements, setPinnedAnnouncements] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [ministryCategory, setMinistryCategories] = useState([]);
-  const [acknowledged, setAcknowledged] = useState(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
-  const [userId, setUserId] = useState(null);
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const config = { withCredentials: true };
 
-  // useEffect(() => {
-  //   const fetchUserId = async () => {
-  //     try {
-  //       const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getUser`, config);
-  //       setUserId(response.data._id);
-  //     } catch (error) {
-  //       console.error("Error fetching user ID:", error);
-  //     }
-  //   };
-
-  //   fetchUserId();
-  // }, []);
-
-  // const fetchMinistryUsers = async (id) => {
-  //   try {
-  //     const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/${id}/getUsers`);
-  //     console.log("Fetched users:", response.data);
-  //     setUsers(Array.isArray(response.data) ? response.data : []);
-  //   } catch (error) {
-  //     console.error("Error fetching ministry users:", error);
-  //     setUsers([]); // Set to empty array in case of error
-  //   }
-  // };
+  // Helper function to check if user has acknowledged a post
+  const hasUserAcknowledged = (announcement) => {
+    if (!user || !announcement.acknowledgedBy) return false;
+    return announcement.acknowledgedBy.some(
+      (userObj) => userObj._id.toString() === user._id.toString()
+    );
+  };
 
   useEffect(() => {
     const fetchUserMinistries = async () => {
@@ -69,6 +53,7 @@ const MinistryAnnouncement = () => {
 
         if (response.data.length > 0 && response.data[0].ministryId) {
           setMinistryCategories(response.data);
+          console.log("Ministry categories:", response.data);
           setMinistryCategoryId(response.data[0].ministryId);
         } else {
           console.warn("No ministries found or invalid data:", response.data);
@@ -80,23 +65,6 @@ const MinistryAnnouncement = () => {
 
     fetchUserMinistries();
   }, []);
-
- const filteredUsers = users.filter((user) => {
-  const lowerSearch = searchTerm.toLowerCase();
-
-  const nameMatch = user.name.toLowerCase().includes(lowerSearch);
-
-  const roleMatch = user.ministryRoles?.some((ministryRole) => {
-    const role = ministryRole.role === "Others"
-      ? ministryRole.customRole || "others"
-      : ministryRole.role || "member";
-
-    return role.toLowerCase().includes(lowerSearch);
-  });
-
-  return nameMatch || roleMatch;
-});
-
 
   useEffect(() => {
     if (!ministryCategoryId || ministryCategoryId === "undefined") {
@@ -111,7 +79,7 @@ const MinistryAnnouncement = () => {
     };
 
     fetchAll();
-  }, [ministryCategoryId, userId]);
+  }, [ministryCategoryId, user]);
 
   const fetchMinistryUsers = async (id) => {
     if (!id || id === "undefined") return;
@@ -132,13 +100,6 @@ const MinistryAnnouncement = () => {
         `${process.env.REACT_APP_API}/api/v1/pinnedMinistryAnnouncement/${id}`
       );
       setPinnedAnnouncements(response.data);
-
-      const acknowledgedSet = new Set(
-        response.data
-          .filter((a) => a.acknowledgedBy.includes(userId))
-          .map((a) => a._id)
-      );
-      setAcknowledged(acknowledgedSet);
     } catch (error) {
       console.error("Error fetching pinned announcements:", error);
     }
@@ -151,32 +112,34 @@ const MinistryAnnouncement = () => {
         `${process.env.REACT_APP_API}/api/v1/getMinistryAnnouncements/${id}`
       );
       setAnnouncements(response.data.filter((ann) => !ann.isPinned));
-
-      const acknowledgedSet = new Set(
-        response.data
-          .filter((a) => a.acknowledgedBy.includes(userId))
-          .map((a) => a._id)
-      );
-      setAcknowledged(acknowledgedSet);
     } catch (error) {
       console.error("Error fetching announcements:", error);
     }
   };
 
   const handleAcknowledgeClick = (announcement) => {
+    if (hasUserAcknowledged(announcement)) return;
     setSelectedAnnouncement(announcement);
     setIsModalOpen(true);
   };
 
   const handleConfirmAcknowledge = async () => {
-    if (!selectedAnnouncement || !userId) return;
+    if (!selectedAnnouncement || !user?._id) {
+      setIsModalOpen(false);
+      return;
+    }
+
     try {
       await axios.post(
         `${process.env.REACT_APP_API}/api/v1/acknowledgeMinistryAnnouncement/${selectedAnnouncement._id}`,
-        { userId },
+        { user: user._id },
         config
       );
-      setAcknowledged((prev) => new Set(prev).add(selectedAnnouncement._id));
+
+      // Refresh the announcements to get updated data
+      await fetchPinnedAnnouncements(ministryCategoryId);
+      await fetchAnnouncements(ministryCategoryId);
+      
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error acknowledging announcement:", error);
@@ -187,8 +150,21 @@ const MinistryAnnouncement = () => {
     setMinistryCategoryId(id);
   };
 
+  const filteredUsers = users.filter((user) => {
+    const lowerSearch = searchTerm.toLowerCase();
+    const nameMatch = user.name.toLowerCase().includes(lowerSearch);
+    const roleMatch = user.ministryRoles?.some((ministryRole) => {
+      const role =
+        ministryRole.role === "Others"
+          ? ministryRole.customRole || "others"
+          : ministryRole.role || "member";
+      return role.toLowerCase().includes(lowerSearch);
+    });
+    return nameMatch || roleMatch;
+  });
+
   return (
-    <Container className="ministry-announcement">
+    <Container>
       <div className="content-container">
         {/* Left Section: Announcements and Pinned Announcements */}
         <div className="main-content">
@@ -196,162 +172,165 @@ const MinistryAnnouncement = () => {
           {pinnedAnnouncements.length > 0 && (
             <div className="pinned-container">
               <Typography variant="h6">Pinned Announcements</Typography>
-              {pinnedAnnouncements.map((announcement) => (
-                <Card key={announcement._id} className="announcement">
-                  <CardContent>
-                    {/* Announcement Title and Description */}
-                    <Typography variant="h6">{announcement.title}</Typography>
-                    <Typography variant="body2">
-                      {announcement.description}
-                    </Typography>
-
-                    {/* Images (Optional) */}
-                    {announcement.images && announcement.images.length > 0 && (
-                      <div className="announcement-images">
-                        {announcement.images.map((image, index) => (
-                          <img
-                            key={index}
-                            src={image.url}
-                            alt={`Announcement Image ${index}`}
-                            className="announcement-image-slider"
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Other Details */}
-                    {announcement.tags.length > 0 && (
-                      <Typography variant="body2" className="announcement-tags">
-                        <strong>Tags:</strong> {announcement.tags.join(", ")}
-                      </Typography>
-                    )}
-
-                    <Typography variant="body2">
-                      <strong>Ministry Category:</strong>{" "}
-                      {announcement.ministryCategory?.name || "N/A"}
-                    </Typography>
-
-                    <Typography variant="body2">
-                      <strong>Acknowledge Count:</strong>{" "}
-                      {announcement.acknowledgeCount}
-                    </Typography>
-
-                    {announcement.notedBy.length > 0 && (
+              {pinnedAnnouncements.map((announcement) => {
+                const isAcknowledged = hasUserAcknowledged(announcement);
+                return (
+                  <Card key={announcement._id} className="announcement">
+                    <CardContent>
+                      <Typography variant="h6">{announcement.title}</Typography>
                       <Typography variant="body2">
-                        <strong>Noted By:</strong>{" "}
-                        {announcement.notedBy.join(", ")}
+                        {announcement.description}
                       </Typography>
-                    )}
 
-                    <Typography variant="body2">
-                      <strong>Date Created:</strong>{" "}
-                      {new Date(announcement.createdAt).toLocaleDateString(
-                        "en-US",
-                        {
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric",
-                        }
+                      {announcement.images?.length > 0 && (
+                        <div className="announcement-images">
+                          {announcement.images.map((image, index) => (
+                            <img
+                              key={index}
+                              src={image.url}
+                              alt={`Announcement Image ${index}`}
+                              className="announcement-image-slider"
+                            />
+                          ))}
+                        </div>
                       )}
-                    </Typography>
 
-                    {/* Acknowledge Button */}
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      disabled={acknowledged.has(announcement._id)}
-                      onClick={() => handleAcknowledgeClick(announcement)}
-                      fullWidth
-                    >
-                      {acknowledged.has(announcement._id)
-                        ? "Acknowledged"
-                        : "Acknowledge"}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+                      {announcement.tags?.length > 0 && (
+                        <Typography variant="body2" className="announcement-tags">
+                          <strong>Tags:</strong> {announcement.tags.join(", ")}
+                        </Typography>
+                      )}
+
+                      <Typography variant="body2">
+                        <strong>Ministry Category:</strong>{" "}
+                        {announcement.ministryCategory?.name || "N/A"}
+                      </Typography>
+
+                      <Typography variant="body2">
+                        <strong>Acknowledge Count:</strong>{" "}
+                        {announcement.acknowledgeCount}
+                      </Typography>
+
+                      {announcement.notedBy?.length > 0 && (
+                        <Typography variant="body2">
+                          <strong>Noted By:</strong>{" "}
+                          {announcement.notedBy.join(", ")}
+                        </Typography>
+                      )}
+
+                      <Typography variant="body2">
+                        <strong>Date Created:</strong>{" "}
+                        {new Date(announcement.createdAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          }
+                        )}
+                      </Typography>
+
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        style={{
+                          backgroundColor: isAcknowledged ? "#ccc" : "#1976d2",
+                          color: isAcknowledged ? "#666" : "#fff",
+                          cursor: isAcknowledged ? "not-allowed" : "pointer",
+                        }}
+                        disabled={isAcknowledged}
+                        onClick={() => handleAcknowledgeClick(announcement)}
+                      >
+                        {isAcknowledged ? "Already Acknowledged" : "Acknowledge"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
 
           {/* Other Announcements */}
           <div className="other-announcements">
             <Typography variant="h6">Announcements</Typography>
-            {announcements.map((announcement) => (
-              <Card key={announcement._id} className="announcement">
-                <CardContent>
-                  {/* Announcement Header */}
-                  <div className="announcement-header">
-                    <img
-                      src={eparokyaLogo}
-                      alt="Saint Joseph Parish - Taguig"
-                      className="announcement-image"
-                    />
-                    <div className="announcement-title">
-                      <strong>{announcement.title}</strong>
-                    </div>
-                  </div>
-
-                  {/* Announcement Body */}
-                  <div className="announcement-body">
-                    {/* Image Slider */}
-                    <div className="announcement-images">
-                      {announcement.images.map((image, index) => (
-                        <img
-                          key={index}
-                          src={image.url}
-                          alt={`Announcement ${index}`}
-                          className="announcement-image-slider"
-                        />
-                      ))}
+            {announcements.map((announcement) => {
+              const isAcknowledged = hasUserAcknowledged(announcement);
+              return (
+                <Card key={announcement._id} className="announcement">
+                  <CardContent>
+                    <div className="announcement-header">
+                      <img
+                        src={eparokyaLogo}
+                        alt="Saint Joseph Parish - Taguig"
+                        className="announcement-image"
+                      />
+                      <div className="announcement-title">
+                        <strong>{announcement.title}</strong>
+                      </div>
                     </div>
 
-                    {/* Details */}
-                    <p>
-                      <strong>Description:</strong> {announcement.description}
-                    </p>
-                    <p className="announcement-tags">
-                      <strong>Tags:</strong> {announcement.tags.join(", ")}
-                    </p>
-                    <p>
-                      <strong>Ministry Category:</strong>{" "}
-                      {announcement.ministryCategory.name}
-                    </p>
-                    <p>
-                      <strong>Acknowledge Count:</strong>{" "}
-                      {announcement.acknowledgeCount}
-                    </p>
-                    <p>
-                      <strong>Noted By:</strong>{" "}
-                      {announcement.notedBy.join(", ")}
-                    </p>
-                    <p>
-                      <strong>Date Created:</strong>{" "}
-                      {new Date(announcement.createdAt).toLocaleDateString(
-                        "en-US",
-                        {
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric",
-                        }
+                    <div className="announcement-body">
+                      {announcement.images?.length > 0 && (
+                        <div className="announcement-images">
+                          {announcement.images.map((image, index) => (
+                            <img
+                              key={index}
+                              src={image.url}
+                              alt={`Announcement ${index}`}
+                              className="announcement-image-slider"
+                            />
+                          ))}
+                        </div>
                       )}
-                    </p>
-                  </div>
 
-                  {/* Acknowledge Button */}
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={acknowledged.has(announcement._id)}
-                    onClick={() => handleAcknowledgeClick(announcement)}
-                    fullWidth
-                  >
-                    {acknowledged.has(announcement._id)
-                      ? "Acknowledged"
-                      : "Acknowledge"}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                      <p>
+                        <strong>Description:</strong> {announcement.description}
+                      </p>
+                      {announcement.tags?.length > 0 && (
+                        <p className="announcement-tags">
+                          <strong>Tags:</strong> {announcement.tags.join(", ")}
+                        </p>
+                      )}
+                      <p>
+                        <strong>Ministry Category:</strong>{" "}
+                        {announcement.ministryCategory?.name}
+                      </p>
+                      <p>
+                        <strong>Acknowledge Count:</strong>{" "}
+                        {announcement.acknowledgeCount}
+                      </p>
+                      {announcement.notedBy?.length > 0 && (
+                        <p>
+                          <strong>Noted By:</strong>{" "}
+                          {announcement.notedBy.join(", ")}
+                        </p>
+                      )}
+                      <p>
+                        <strong>Date Created:</strong>{" "}
+                        {new Date(announcement.createdAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          }
+                        )}
+                      </p>
+
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        disabled={isAcknowledged}
+                        onClick={() => handleAcknowledgeClick(announcement)}
+                        fullWidth
+                      >
+                        {isAcknowledged ? "Acknowledged" : "Acknowledge"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
 
@@ -367,7 +346,7 @@ const MinistryAnnouncement = () => {
                   button
                   onClick={() => handleMinistryClick(ministry._id)}
                 >
-                  {ministry.name}
+                  {ministry.ministryName}
                 </ListItem>
               ))}
             </List>
@@ -377,7 +356,6 @@ const MinistryAnnouncement = () => {
           <div className="usersMinistry-container">
             <Typography variant="h6">Ministry Members</Typography>
 
-            {/* Search Bar */}
             <TextField
               fullWidth
               variant="outlined"
@@ -387,16 +365,13 @@ const MinistryAnnouncement = () => {
               style={{ marginBottom: "10px" }}
             />
 
-            {/* User List */}
             <List>
               {filteredUsers.map((user) => (
                 <ListItem key={user._id} className="userMinistry-item">
                   <Avatar src={user.avatar} alt={user.name} />
                   <div style={{ marginLeft: "10px" }}>
                     <Typography>{user.name}</Typography>
-
-                    {/* Display all roles the user has for the ministries */}
-                    {user.ministryRoles && user.ministryRoles.length > 0 ? (
+                    {user.ministryRoles?.length > 0 ? (
                       user.ministryRoles.map((ministryRole, index) => (
                         <Typography
                           key={index}
@@ -404,11 +379,9 @@ const MinistryAnnouncement = () => {
                           color="textSecondary"
                           style={{ fontSize: "0.75rem" }}
                         >
-                          {ministryRole.role
-                            ? ministryRole.role === "Others"
-                              ? ministryRole.customRole || "Others"
-                              : ministryRole.role
-                            : "Member"}
+                          {ministryRole.role === "Others"
+                            ? ministryRole.customRole || "Others"
+                            : ministryRole.role || "Member"}
                         </Typography>
                       ))
                     ) : (

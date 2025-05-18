@@ -6,6 +6,7 @@ import { FaHeart, FaComment } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
 import { useMemo } from "react";
+import Loader from "./Layout/Loader";
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -263,20 +264,10 @@ export const Home = () => {
     }
   );
 
-  if (loading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </div>
-    );
-  }
+ if (loading) {
+  return <Loader />;
+}
+
 
   return (
     <div style={styles.homeContainer}>

@@ -257,3 +257,30 @@ exports.getSentimentById = async (req, res) => {
   }
 };
 
+exports.getMySubmittedSentiments = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const mySentiments = await EventSentiment.find({ userId })
+      .populate("eventTypeId", "name") 
+      .sort({ createdAt: -1 });
+
+    if (!mySentiments || mySentiments.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No submitted sentiments found for this user.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      sentiments: mySentiments,
+    });
+  } catch (error) {
+    console.error("Error fetching user's submitted sentiments:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching submitted sentiments.",
+    });
+  }
+};
