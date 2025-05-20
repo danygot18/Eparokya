@@ -30,7 +30,7 @@ const SubmittedBaptismList = () => {
             }
         } catch (error) {
             console.error("Error fetching baptism forms:", error);
-            setError("Unable to fetch baptism forms.");
+            setError("No baptism forms have been submitted yet.");
         } finally {
             setLoading(false);
         }

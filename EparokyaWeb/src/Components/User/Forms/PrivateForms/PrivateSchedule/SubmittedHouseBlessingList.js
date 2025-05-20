@@ -96,7 +96,7 @@ const SubmittedHouseBlessingList = () => {
                     />
                 </div>
 
-                {error && <p className="error-text">Error: {error}</p>}
+                {/* {error && <p className="error-text">Error: {error}</p>} */}
 
                 {loading ? (
                     <p className="loading-text">Loading your submitted house blessings forms...</p>

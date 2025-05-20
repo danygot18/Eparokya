@@ -30,7 +30,7 @@ const SubmittedFuneralList = () => {
             }
         } catch (error) {
             console.error("Error fetching funeral forms:", error);
-            setError("Unable to fetch funeral forms.");
+            setError("No Funeral forms have been submitted yet.");
         } finally {
             setLoading(false);
         }

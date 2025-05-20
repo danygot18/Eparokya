@@ -8,6 +8,7 @@ import Metadata from '../Layout/MetaData';
 import { useTheme, useMediaQuery } from '@mui/material';
 import { CircularProgress, Box, Typography, Paper, Button, IconButton } from '@mui/material';
 import { ChevronLeft, ChevronRight, Today, ViewModule, ViewWeek, ViewDay, ViewAgenda } from '@mui/icons-material';
+import Loader from '../Layout/Loader';
 
 const localizer = momentLocalizer(moment);
 
