@@ -3,6 +3,7 @@ import axios from "axios";
 import "../../Layout/styles/style.css";
 import SideBar from "../SideBar";
 import { useNavigate } from "react-router-dom";
+import Loader from "../../Layout/Loader";
 
 const FuneralList = () => {
     const [funeralList, setFuneralList] = useState([]);
@@ -90,7 +91,7 @@ const FuneralList = () => {
                 </div>
 
                 {loading ? (
-                    <p className="loading-text">Loading funeral records...</p>
+                   <Loader/>
                 ) : error ? (
                     <p className="error-text">{error}</p>
                 ) : filteredFuneralList.length === 0 ? (

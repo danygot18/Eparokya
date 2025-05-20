@@ -3,6 +3,8 @@ import axios from "axios";
 import "../../Layout/styles/style.css";
 import SideBar from "../SideBar";
 import { useNavigate } from "react-router-dom";
+import Loader from "../../Layout/Loader";
+
 
 const HouseBlessingList = () => {
     const [houseBlessingForms, setHouseBlessingForms] = useState([]);
@@ -86,7 +88,7 @@ const HouseBlessingList = () => {
                 {error && <p className="error-text">Error: {error}</p>}
 
                 {loading ? (
-                    <p className="loading-text">Loading submitted house blessings forms...</p>
+                   <Loader/>
                 ) : filteredForms.length === 0 ? (
                     <p className="empty-text">No house blessings forms available.</p>
                 ) : (

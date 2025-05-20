@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import GuestSideBar from "../GuestSideBar";
+import Loader from "../Layout/Loader";
 
 const NavigationForm = () => {
   const [loading, setLoading] = useState(true);
@@ -37,28 +38,16 @@ const NavigationForm = () => {
     },
   ];
 
-  // Simulate loading state
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1000); // Simulate a 2-second loading delay
+    }, 1000); 
 
-    return () => clearTimeout(timer); // Cleanup the timer
+    return () => clearTimeout(timer); 
   }, []);
 
   if (loading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

@@ -154,6 +154,8 @@ app.use("/api/v1", prayerRequestRoutes);
 // Announcements & Posts
 app.use("/api/v1", require("./routes/Announcement/announcement"));
 app.use("/api/v1", require("./routes/Announcement/announcementCategory"));
+app.use("/api/v1", require("./routes/Announcement/ministryAnnouncement"));
+
 
 // may conflict sa counseling kaya inangat muna
 
@@ -175,7 +177,7 @@ app.use("/api/v1", require("./routes/MassForms/massBaptism"));
 app.use("/api/v1", require("./routes/MassForms/massWedding"));
 
 app.use("/api/v1", require("./routes/Announcement/AnnouncementComment"));
-app.use("/api/v1", require("./routes/Announcement/ministryAnnouncement"));
+// app.use("/api/v1", require("./routes/Announcement/ministryAnnouncement"));
 app.use("/api/v1", require("./routes/post"));
 
 // Events & Scheduling

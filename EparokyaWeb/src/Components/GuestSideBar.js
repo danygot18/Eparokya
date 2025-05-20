@@ -282,7 +282,7 @@ const GuestSideBar = () => {
             onClick={handleOpen}
 
           > <RateReviewIcon style={styles.icon} />
-            Open Feedback
+            Feedback
           </Button>
           <Modal
             open={open}
@@ -329,13 +329,13 @@ const GuestSideBar = () => {
         </li>
         <li style={styles.menuItem}>
           <Link
-            to="/settings"
+            to="/sentimentReports"
             style={{
               ...styles.link,
-              ...(location.pathname === '/settings' ? styles.activeLink : {}),
+              ...(location.pathname === '/sentimentReports' ? styles.activeLink : {}),
             }}
           >
-            <FaCog style={styles.icon} /> Settings
+            <FaCog style={styles.icon} /> Reports
           </Link>
         </li>
       </ul>
@@ -348,9 +348,9 @@ const styles = {
   sidebarContainer: {
     backgroundColor: '#d6e7c6',
     width: '220px',
-    height: '100vh', // Full viewport height
-    position: 'sticky', // Ensures the sidebar sticks while scrolling
-    top: '0', // Anchors the sidebar at the top
+    height: '100vh', 
+    position: 'sticky', 
+    top: '0',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -359,7 +359,7 @@ const styles = {
     overflowY: 'auto',
     srollbarWidth: 'none',
     scrollBarOpacity: '0',
-    scrollbarWidth: 'none',        // Firefox
+    scrollbarWidth: 'none',        
     msOverflowStyle: 'none',
   },
   modal: {

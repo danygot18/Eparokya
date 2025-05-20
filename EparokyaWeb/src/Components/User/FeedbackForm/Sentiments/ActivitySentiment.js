@@ -1,9 +1,28 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Container, Typography, Grid, Button, TextField, Modal, Box } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Modal,
+  Box,
+} from "@mui/material";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import axios from "axios";
 
-const emojiOptions = ["😡", "😠", "😞", "😕", "😐", "😊", "😃", "😄", "😍", "👍"];
+const emojiOptions = [
+  "😡",
+  "😠",
+  "😞",
+  "😕",
+  "😐",
+  "😊",
+  "😃",
+  "😄",
+  "😍",
+  "👍",
+];
 const questions = [
   "How was the activity's organization?",
   "How did you feel about the facilitator(s)?",
@@ -21,35 +40,40 @@ const ActivitySentiment = () => {
 
   const config = useMemo(() => ({ withCredentials: true }), []);
 
-  // Fetch active admin selection
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API}/api/v1/admin-selections/active`, config)
+      .get(
+        `${process.env.REACT_APP_API}/api/v1/admin-selections/active`,
+        config
+      )
       .then((res) => setAdminSelection(res.data))
       .catch((err) => console.error("Error fetching admin selection:", err));
   }, [config]);
 
-  // Fetch user ID
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config);
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/api/v1/profile`,
+          config
+        );
         setUserId(response.data.user._id);
       } catch (error) {
-        console.error("Error fetching user:", error.response?.data || error.message);
+        console.error(
+          "Error fetching user:",
+          error.response?.data || error.message
+        );
       }
     };
     fetchUser();
   }, [config]);
 
-  // Handle emoji selection
   const handleSelectEmoji = (index, emoji) => {
     const updatedResponses = [...responses];
     updatedResponses[index] = emoji;
     setResponses(updatedResponses);
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
     if (!adminSelection?.typeId?._id) {
       alert("Activity Type ID is missing. Please try again.");
@@ -86,7 +110,10 @@ const ActivitySentiment = () => {
       );
       setModalOpen(true);
     } catch (error) {
-      console.error("Error submitting sentiment:", error.response?.data || error);
+      console.error(
+        "Error submitting sentiment:",
+        error.response?.data || error
+      );
       alert(error.response?.data?.error || "Failed to submit feedback.");
     }
   };
@@ -104,10 +131,6 @@ const ActivitySentiment = () => {
           <Typography variant="h5" sx={{ mt: 2 }}>
             Activity Type: {adminSelection.typeId?.name || "N/A"}
           </Typography>
-          <Typography variant="h6" sx={{ mt: 1 }}>
-            Active Form Type:{" "}
-            {adminSelection.category.charAt(0).toUpperCase() + adminSelection.category.slice(1)}
-          </Typography>
         </>
       ) : (
         <Typography variant="h6" color="error">
@@ -115,9 +138,12 @@ const ActivitySentiment = () => {
         </Typography>
       )}
 
-      <Typography variant="h6" sx={{ mt: 3 }}>
-        Feedback Form
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+        Ang pagbibigay pahayag po ay para makatulong sa improvement ng ating
+        parokya, anumang suggestion/komento at review ang inyong maibibigay ay
+        lubos naming ipinagpapasalamat.
       </Typography>
+
       {questions.map((q, index) => (
         <Box key={index} sx={{ my: 2 }}>
           <Typography>{q}</Typography>
@@ -125,7 +151,9 @@ const ActivitySentiment = () => {
             {emojiOptions.map((emoji) => (
               <Grid item key={emoji}>
                 <Button
-                  variant={responses[index] === emoji ? "contained" : "outlined"}
+                  variant={
+                    responses[index] === emoji ? "contained" : "outlined"
+                  }
                   onClick={() => handleSelectEmoji(index, emoji)}
                 >
                   {emoji}
@@ -146,7 +174,12 @@ const ActivitySentiment = () => {
         sx={{ mt: 2 }}
       />
 
-      <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 3 }}>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleSubmit}
+        sx={{ mt: 3 }}
+      >
         Submit Feedback
       </Button>
 
@@ -166,8 +199,14 @@ const ActivitySentiment = () => {
           <Typography variant="h6" sx={{ mt: 2 }}>
             Thank you for your feedback!
           </Typography>
-          <Typography>This will be a great help for the Parish to improve.</Typography>
-          <Button variant="contained" sx={{ mt: 2 }} onClick={() => setModalOpen(false)}>
+          <Typography>
+            This will be a great help for the Parish to improve.
+          </Typography>
+          <Button
+            variant="contained"
+            sx={{ mt: 2 }}
+            onClick={() => setModalOpen(false)}
+          >
             Close
           </Button>
         </Box>

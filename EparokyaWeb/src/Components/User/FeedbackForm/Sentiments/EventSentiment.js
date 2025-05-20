@@ -1,9 +1,28 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Container, Typography, Grid, Button, TextField, Modal, Box } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Modal,
+  Box,
+} from "@mui/material";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import axios from "axios";
 
-const emojiOptions = ["😡", "😠", "😞", "😕", "😐", "😊", "😃", "😄", "😍", "👍"];
+const emojiOptions = [
+  "😡",
+  "😠",
+  "😞",
+  "😕",
+  "😐",
+  "😊",
+  "😃",
+  "😄",
+  "😍",
+  "👍",
+];
 const questions = [
   "How was the event's organization?",
   "How did you feel about the speaker(s)?",
@@ -22,9 +41,11 @@ const EventSentiment = () => {
   const config = useMemo(() => ({ withCredentials: true }), []);
 
   useEffect(() => {
-    // Fetch Active Admin Selection
     axios
-      .get(`${process.env.REACT_APP_API}/api/v1/admin-selections/active`, config)
+      .get(
+        `${process.env.REACT_APP_API}/api/v1/admin-selections/active`,
+        config
+      )
       .then((res) => setAdminSelection(res.data))
       .catch((err) => console.error("Error fetching admin selection:", err));
   }, [config]);
@@ -32,10 +53,16 @@ const EventSentiment = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/profile`, config);
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/api/v1/profile`,
+          config
+        );
         setUserId(response.data.user._id);
       } catch (error) {
-        console.error('Error fetching user:', error.response ? error.response.data : error.message);
+        console.error(
+          "Error fetching user:",
+          error.response ? error.response.data : error.message
+        );
       }
     };
     fetchUser();
@@ -85,7 +112,10 @@ const EventSentiment = () => {
       );
       setModalOpen(true);
     } catch (error) {
-      console.error("Error submitting sentiment:", error.response?.data || error);
+      console.error(
+        "Error submitting sentiment:",
+        error.response?.data || error
+      );
       alert(error.response?.data?.error || "Failed to submit feedback.");
     }
   };
@@ -103,18 +133,17 @@ const EventSentiment = () => {
           <Typography variant="h5" sx={{ mt: 2 }}>
             Event Type: {adminSelection.typeId?.name}
           </Typography>
-          <Typography variant="h6" sx={{ mt: 1 }}>
-            Active Form Type: {adminSelection.category.charAt(0).toUpperCase() + adminSelection.category.slice(1)}
-          </Typography>
         </>
       ) : (
         <Typography variant="h6" color="error">
           No active event found.
         </Typography>
       )}
-  
-      <Typography variant="h6" sx={{ mt: 3 }}>
-        Feedback Form
+
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+        Ang pagbibigay pahayag po ay para makatulong sa improvement ng ating
+        parokya, anumang suggestion/komento at review ang inyong maibibigay ay
+        lubos naming ipinagpapasalamat.
       </Typography>
       {questions.map((q, index) => (
         <Box key={index} sx={{ my: 2 }}>
@@ -123,7 +152,9 @@ const EventSentiment = () => {
             {emojiOptions.map((emoji) => (
               <Grid item key={emoji}>
                 <Button
-                  variant={responses[index] === emoji ? "contained" : "outlined"}
+                  variant={
+                    responses[index] === emoji ? "contained" : "outlined"
+                  }
                   onClick={() => handleSelectEmoji(index, emoji)}
                 >
                   {emoji}
@@ -133,7 +164,7 @@ const EventSentiment = () => {
           </Grid>
         </Box>
       ))}
-  
+
       <TextField
         label="Other Comments/Suggestions"
         fullWidth
@@ -143,11 +174,16 @@ const EventSentiment = () => {
         onChange={(e) => setComment(e.target.value)}
         sx={{ mt: 2 }}
       />
-  
-      <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 3 }}>
+
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleSubmit}
+        sx={{ mt: 3 }}
+      >
         Submit Feedback
       </Button>
-  
+
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box
           sx={{
@@ -164,15 +200,20 @@ const EventSentiment = () => {
           <Typography variant="h6" sx={{ mt: 2 }}>
             Thank you for your feedback!
           </Typography>
-          <Typography>This will be a great help for the Parish to improve.</Typography>
-          <Button variant="contained" sx={{ mt: 2 }} onClick={() => setModalOpen(false)}>
+          <Typography>
+            This will be a great help for the Parish to improve.
+          </Typography>
+          <Button
+            variant="contained"
+            sx={{ mt: 2 }}
+            onClick={() => setModalOpen(false)}
+          >
             Close
           </Button>
         </Box>
       </Modal>
     </Container>
   );
-  
 };
 
 export default EventSentiment;

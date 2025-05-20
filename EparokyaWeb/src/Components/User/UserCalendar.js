@@ -46,15 +46,15 @@ const CustomToolbar = ({ label, onNavigate, onView, view }) => {
         gap: 1
       }}>
         <IconButton
-          onClick={() => onNavigate('PREV')}
+          onClick={() => onNavigate("PREV")}
           color="success"
           size={isMobile ? 'medium' : 'small'}
           sx={{
             borderRadius: 1,
-            padding: '4px',
-            '&:hover': {
-              backgroundColor: 'success.light',
-            }
+            padding: "4px",
+            "&:hover": {
+              backgroundColor: "success.light",
+            },
           }}
         >
           <ChevronLeft />
@@ -65,9 +65,9 @@ const CustomToolbar = ({ label, onNavigate, onView, view }) => {
           color='success'
           size={isMobile ? 'medium' : 'small'}
           sx={{
-            textTransform: 'none',
-            fontWeight: 'bold',
-            color: 'success.main',
+            textTransform: "none",
+            fontWeight: "bold",
+            color: "success.main",
             borderRadius: 1,
             padding: isMobile ? '6px 16px' : '4px 12px',
             minHeight: isMobile ? '40px' : '32px',
@@ -80,15 +80,15 @@ const CustomToolbar = ({ label, onNavigate, onView, view }) => {
           Today
         </Button>
         <IconButton
-          onClick={() => onNavigate('NEXT')}
+          onClick={() => onNavigate("NEXT")}
           color="success"
           size={isMobile ? 'medium' : 'small'}
           sx={{
             borderRadius: 1,
-            padding: '4px',
-            '&:hover': {
-              backgroundColor: 'success.light',
-            }
+            padding: "4px",
+            "&:hover": {
+              backgroundColor: "success.light",
+            },
           }}
         >
           <ChevronRight />
@@ -131,7 +131,7 @@ const CustomToolbar = ({ label, onNavigate, onView, view }) => {
 const UserCalendar = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('month');
   const theme = useTheme();
@@ -139,12 +139,13 @@ const UserCalendar = () => {
 
   const fetchAllEvents = useCallback(async () => {
     try {
-      const [weddingEvents, baptismEvents, funeralEvents, customEvents] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`),
-        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`),
-        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`),
-        axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`),
-      ]);
+      const [weddingEvents, baptismEvents, funeralEvents, customEvents] =
+        await Promise.all([
+          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`),
+          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`),
+          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`),
+          axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`),
+        ]);
 
       const formattedEvents = [
         ...weddingEvents.data.map((event) => ({
@@ -152,7 +153,7 @@ const UserCalendar = () => {
           title: `${event.brideName} & ${event.groomName} Wedding`,
           start: new Date(event.weddingDate),
           end: new Date(event.weddingDate),
-          type: 'Wedding',
+          type: "Wedding",
           bride: event.brideName,
           groom: event.groomName,
         })),
@@ -161,7 +162,7 @@ const UserCalendar = () => {
           title: `Baptism of ${event.child.fullName || "Unknown"}`,
           start: new Date(event.baptismDate),
           end: new Date(event.baptismDate),
-          type: 'Baptism',
+          type: "Baptism",
           child: event.child,
         })),
         ...funeralEvents.data.map((event) => ({
@@ -169,7 +170,7 @@ const UserCalendar = () => {
           title: `Funeral for ${event.name || ""}`,
           start: new Date(event.funeralDate),
           end: new Date(event.funeralDate),
-          type: 'Funeral',
+          type: "Funeral",
           name: event.name,
         })),
         ...customEvents.data.map((event) => ({
@@ -177,14 +178,14 @@ const UserCalendar = () => {
           title: event.title,
           start: new Date(event.customeventDate),
           end: new Date(event.customeventDate),
-          type: 'Custom',
+          type: "Custom",
         })),
       ];
 
       setEvents(formattedEvents);
     } catch (error) {
-      console.error('Error fetching events:', error);
-      setErrorMessage('Failed to load events. Please try again.');
+      console.error("Error fetching events:", error);
+      setErrorMessage("Failed to load events. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -214,11 +215,7 @@ const UserCalendar = () => {
   });
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <Loader />;
   }
 
   return (
@@ -264,11 +261,11 @@ const UserCalendar = () => {
             defaultView={isMobile ? 'agenda' : 'month'}
             view={view}
             onView={setView}
-            views={['month', 'week', 'day', 'agenda']}
+            views={["month", "week", "day", "agenda"]}
             eventPropGetter={eventPropGetter}
             onSelectEvent={handleEventClick}
             components={{
-              toolbar: CustomToolbar
+              toolbar: CustomToolbar,
             }}
             style={{
               height: '100%',

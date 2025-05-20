@@ -1,24 +1,14 @@
-// FullPageLoader.js
-import React from "react";
-import { Box, CircularProgress } from "@mui/material";
+import React from 'react';
+import { Box, Skeleton, Stack } from '@mui/material';
 
-const Loader = () => (
-  <Box
-    sx={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      backgroundColor: "rgba(0,0,0,0.5)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 2000,
-    }}
-  >
-    <CircularProgress size={60} sx={{ color: "white" }} />
-  </Box>
-);
+const Loader = ({ lines = 3 }) => {
+  return (
+    <Stack spacing={1}>
+      {[...Array(lines)].map((_, index) => (
+        <Skeleton key={index} variant="text" animation="wave" height={30} />
+      ))}
+    </Stack>
+  );
+};
 
 export default Loader;

@@ -71,6 +71,7 @@ import SubmittedHouseBlessingList from './Components/User/Forms/PrivateForms/Pri
 // import MySubmittedPrayerWallForm from './Components/User/Forms/PrivateForms/Prayer/MySubmittedPrayerWallForm';
 import SubmittedPrayerWallList from './Components/User/PrayerWall/SubmittedPrayerWallList';
 
+import SubmittedFeedback from './Components/User/FeedbackForm/SubmittedFeedback';
 
 // User Navigations
 import PrayerWall from './Components/User/PrayerWall/PrayerWall';
@@ -180,6 +181,10 @@ import ResourceCategory from './Components/Admin/Resources/ResourceCategory';
 import FormCounts from './Components/Admin/UserFormCounts/FormCounts';
 
 //Guest View
+
+
+import UserSentimentReports from './Components/UserSentimentReports';
+
 import { Prayers } from './Components/Guest/Prayers';
 import { Events } from './Components/Guest/Events';
 import { Sermons } from './Components/Guest/Sermons';
@@ -276,6 +281,7 @@ function App() {
 
         <Route path="/user/SubmittedFormsNavigation" element={<SubmittedForms />} exact="true" />
         <Route path="/user/FormGuides" element={<UserFormGuides />} exact="true" />
+        <Route path="/sentimentReports" element={<UserSentimentReports />} exact="true" />
 
         <Route path="/user/baptismForm" element={<BaptismForm />} exact="true" />
         <Route path="/user/funeralForm" element={<FuneralForm />} exact="true" />
@@ -305,6 +311,8 @@ function App() {
         <Route path="/user/SubmittedCounselingList" element={<SubmittedCounselingList />} exact="true" />
         <Route path="/user/SubmittedHouseBlessingList" element={<SubmittedHouseBlessingList />} exact="true" />
         <Route path="/user/SubmittedPrayerWallList" element={<SubmittedPrayerWallList />} exact="true" />
+
+        <Route path="/user/submittedFeedback" element={<SubmittedFeedback />} exact="true" />
 
         {/*
         <Route path="/user/SubmittedCounselingList" element={<SubmittedCounselingList />} exact="true" />

@@ -4,6 +4,7 @@ import GuestSidebar from '../../GuestSideBar';
 import "../../Layout/styles/style.css";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { CircularProgress } from "@mui/material";
+import Loader from "../../Layout/Loader";
 
 const PrayerWall = () => {
   const [prayers, setPrayers] = useState([]);
@@ -97,7 +98,7 @@ const PrayerWall = () => {
             ? {
               ...prayer,
               likes: response.data.likes,
-              likedByUser: response.data.likedByUser, // Update state based on backend response
+              likedByUser: response.data.likedByUser, 
             }
             : prayer
         )
@@ -142,12 +143,9 @@ const PrayerWall = () => {
   };
 
   if (loading) {
-      return (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-          <CircularProgress />
-        </div>
-      );
-    }
+  return <Loader />;
+}
+
   
   
 

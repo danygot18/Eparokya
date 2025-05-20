@@ -78,7 +78,7 @@ const CreatePriest = () => {
       {/* Create Priest Form (Centered) */}
       <div className="priest-main-content">
         <div className="form-container">
-          <h2 className="form-title">Create Priest</h2>
+          <h1 className="form-title">Add Priest</h1>
           <form onSubmit={handleSubmit} className="priest-form">
             <select
               name="title"

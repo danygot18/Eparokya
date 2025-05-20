@@ -4,6 +4,7 @@ import axios from "axios";
 import SideBar from "../SideBar";
 import "./ministryCategoryDetails.css";
 import eparokyaLogo from "../../../assets/images/EPAROKYA-SYST.png";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const MinistryCategoryDetails = () => {
   const { id: ministryCategoryId } = useParams();
@@ -11,6 +12,7 @@ const MinistryCategoryDetails = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [announcements, setAnnouncements] = useState([]);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [announcementData, setAnnouncementData] = useState({
     title: "",
     description: "",
@@ -25,7 +27,7 @@ const MinistryCategoryDetails = () => {
   const config = {
     withCredentials: true,
   };
-  
+
   useEffect(() => {
     const fetchUsers = async () => {
       if (!ministryCategoryId) return;
@@ -63,42 +65,38 @@ const MinistryCategoryDetails = () => {
     setImagePreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async () => {
-    if (
-      !announcementData.title ||
-      !announcementData.description ||
-      !announcementData.tags.length ||
-      !announcementData.notedBy.length
-    ) {
-      alert("All fields are required.");
-      return;
-    }
+const handleDelete = async (announcementId) => {
+  if (!window.confirm("Are you sure you want to delete this announcement?")) return;
 
-    try {
-      const formData = new FormData();
+  try {
+    await axios.delete(
+      `${process.env.REACT_APP_API}/api/v1/deleteMinistryAnnouncement/${announcementId}`, 
+      config
+    );
 
-      Object.entries(announcementData).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          value.forEach((item) => formData.append(`${key}[]`, item));
-        } else {
-          formData.append(key, value);
-        }
-      });
+    setAnnouncements((prev) => prev.filter((a) => a._id !== announcementId));
 
-      formData.append("ministryCategory", ministryCategoryId);
-      formData.append("images", announcementData.images || []);
+  } catch (error) {
+    console.error("Error deleting announcement:", error);
+  }
+};
 
-      await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/ministryAnnouncementCreate/${ministryCategoryId}`,
-        formData,
-        { withCredentials: true }
-      );
+const handleEdit = (announcement) => {
+  setAnnouncementData({
+    title: announcement.title,
+    description: announcement.description,
+    tags: announcement.tags.join(", "),     
+    notedBy: announcement.notedBy.join(", "), 
+    isPinned: announcement.isPinned,
+    images: null,
+  });
 
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error creating announcement:", error);
-    }
-  };
+  setSelectedAnnouncement(announcement);
+  setIsEditMode(true);
+  setIsModalOpen(true);
+};
+
+
 
   const confirmPinToggle = (announcement) => {
     setSelectedAnnouncement(announcement);
@@ -128,25 +126,112 @@ const MinistryCategoryDetails = () => {
     }
   };
 
+
+   const handleSubmit = async () => {
+    if (
+      !announcementData.title ||
+      !announcementData.description ||
+      !announcementData.tags.length ||
+      !announcementData.notedBy.length
+    ) {
+      alert("All fields are required.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+
+      Object.entries(announcementData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((item) => formData.append(`${key}[]`, item));
+        } else {
+          formData.append(key, value);
+        }
+      });
+
+      formData.append("ministryCategory", ministryCategoryId);
+      if (announcementData.images) {
+        formData.append("images", announcementData.images);
+      }
+
+      if (isEditMode && selectedAnnouncement) {
+      
+        await axios.put(
+          `${process.env.REACT_APP_API}/api/v1/updateMinistryAnnouncement/${selectedAnnouncement._id}`,
+          formData,
+          { withCredentials: true }
+        );
+
+        setAnnouncements((prev) =>
+          prev.map((ann) =>
+            ann._id === selectedAnnouncement._id
+              ? {
+                  ...ann,
+                  title: announcementData.title,
+                  description: announcementData.description,
+                  tags: announcementData.tags.split(",").map((tag) => tag.trim()),
+                  notedBy: announcementData.notedBy.split(",").map((noted) => noted.trim()),
+                  isPinned: announcementData.isPinned,
+                }
+              : ann
+          )
+        );
+      } else {
+        await axios.post(
+          `${process.env.REACT_APP_API}/api/v1/ministryAnnouncementCreate/${ministryCategoryId}`,
+          formData,
+          { withCredentials: true }
+        );
+       
+      }
+
+      setIsModalOpen(false);
+      setIsEditMode(false);
+      setSelectedAnnouncement(null);
+      setAnnouncementData({
+        title: "",
+        description: "",
+        tags: "",
+        notedBy: "",
+        isPinned: false,
+        images: null,
+      });
+      setImagePreview(null);
+    } catch (error) {
+      console.error("Error submitting announcement:", error);
+    }
+  };
+
+
   const filteredUsers = users.filter((user) =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="ministry-category-details">
+     <div className="ministry-category-details">
       <SideBar />
 
       <div className="ministryCategoryDetails-middlePane">
-        <button
-          className="add-announcement-btn"
-          onClick={() => setIsModalOpen(true)}
-        >
+        <button className="add-announcement-btn" onClick={() => {
+          setIsModalOpen(true);
+          setIsEditMode(false);
+          setAnnouncementData({
+            title: "",
+            description: "",
+            tags: "",
+            notedBy: "",
+            isPinned: false,
+            images: null,
+          });
+          setImagePreview(null);
+          setSelectedAnnouncement(null);
+        }}>
           Add Announcement
         </button>
 
         {isModalOpen && (
           <div className="announcement-modal">
-            <h3>Create Announcement</h3>
+            <h3>{isEditMode ? "Edit Announcement" : "Announcement"}</h3>
             <input
               type="text"
               placeholder="Title"
@@ -207,8 +292,30 @@ const MinistryCategoryDetails = () => {
             {imagePreview && (
               <img src={imagePreview} alt="Preview" className="image-preview" />
             )}
-            <button onClick={handleSubmit}>Submit</button>
-            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <div className="modal-buttons">
+              <button className="submit-btn" onClick={handleSubmit}>
+                {isEditMode ? "Update" : "Submit"}
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setIsEditMode(false);
+                  setSelectedAnnouncement(null);
+                  setAnnouncementData({
+                    title: "",
+                    description: "",
+                    tags: "",
+                    notedBy: "",
+                    isPinned: false,
+                    images: null,
+                  });
+                  setImagePreview(null);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
 
@@ -221,7 +328,22 @@ const MinistryCategoryDetails = () => {
                 className={`announcement-item ${
                   announcement.isPinned ? "pinned" : ""
                 }`}
+                style={{ position: "relative" }}
               >
+                {/* Edit & Delete icons at upper right */}
+                <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: "8px", cursor: "pointer" }}>
+                  <FaEdit
+                    title="Edit"
+                    onClick={() => handleEdit(announcement)}
+                    style={{ fontSize: "1.1rem" }}
+                  />
+                  <FaTrash
+                    title="Delete"
+                    onClick={() => handleDelete(announcement._id)}
+                    style={{ fontSize: "1.1rem" }}
+                  />
+                </div>
+
                 <div className="announcement-header">
                   <img
                     src={eparokyaLogo}
@@ -284,6 +406,7 @@ const MinistryCategoryDetails = () => {
             ))}
         </div>
       </div>
+
       {isPinModalOpen && selectedAnnouncement && (
         <div className="pin-modal">
           <div className="pin-modal-content">

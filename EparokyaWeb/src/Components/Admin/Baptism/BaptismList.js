@@ -3,6 +3,7 @@ import axios from "axios";
 import "../../Layout/styles/style.css";
 import SideBar from "../SideBar";
 import { useNavigate } from "react-router-dom";
+import Loader from "../../Layout/Loader";
 
 const BaptismList = () => {
   const [baptismForms, setBaptismForms] = useState([]);
@@ -86,7 +87,7 @@ const BaptismList = () => {
         {error && <p className="error-text">Error: {error}</p>}
 
         {loading ? (
-          <p className="loading-text">Loading baptism forms...</p>
+         <Loader/>
         ) : filteredForms.length === 0 ? (
           <p className="empty-text">No baptism forms available.</p>
         ) : (
