@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import SideBar from '../SideBar';
 import { FaTrash } from 'react-icons/fa';
 import {
@@ -24,7 +24,6 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-
     IconButton,
     Tooltip
 } from '@mui/material';
@@ -54,46 +53,55 @@ const FileUploadContainer = styled(Box)(({ theme }) => ({
     },
 }));
 
-const PreviewItem = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: theme.spacing(1),
-    backgroundColor: theme.palette.grey[100],
-    borderRadius: theme.shape.borderRadius,
-    marginBottom: theme.spacing(1),
-}));
-
-const CreateAnnouncement = () => {
+const UpdateAnnouncement = () => {
+    const { id } = useParams();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [richDescription, setRichDescription] = useState('');
-    const [images, setImages] = useState([]);
+    const [newImages, setNewImages] = useState([]);
+    const [existingImages, setExistingImages] = useState([]);
     const [video, setVideo] = useState(null);
+    const [existingVideo, setExistingVideo] = useState(null);
     const [announcementCategory, setAnnouncementCategory] = useState('');
     const [tags, setTags] = useState([]);
     const [categories, setCategories] = useState([]);
     const [isFeatured, setIsFeatured] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [fetching, setFetching] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchCategories = async () => {
+        const fetchData = async () => {
             try {
-                const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllannouncementCategory`);
-                setCategories(response.data.categories || []);
+                const [categoriesRes, announcementRes] = await Promise.all([
+                    axios.get(`${process.env.REACT_APP_API}/api/v1/getAllannouncementCategory`),
+                    axios.get(`${process.env.REACT_APP_API}/api/v1/announcement/${id}`)
+                ]);
+
+                setCategories(categoriesRes.data.categories || []);
+                
+                const announcement = announcementRes.data.announcement;
+                setName(announcement.name);
+                setDescription(announcement.description);
+                setRichDescription(announcement.richDescription);
+                setExistingImages(announcement.images || []);
+                setExistingVideo(announcement.video || null);
+                setAnnouncementCategory(announcement.announcementCategory?._id || '');
+                setTags(announcement.tags || []);
+                setIsFeatured(announcement.isFeatured || false);
             } catch (error) {
-                console.error('Error fetching categories:', error);
-                setCategories([]);
+                console.error('Error fetching data:', error);
+            } finally {
+                setFetching(false);
             }
         };
 
-        fetchCategories();
-    }, []);
+        fetchData();
+    }, [id]);
 
     const handleImageUpload = (e) => {
         const files = Array.from(e.target.files);
-        setImages(files);
+        setNewImages(files);
     };
 
     const handleVideoUpload = (e) => {
@@ -104,6 +112,10 @@ const CreateAnnouncement = () => {
     const handleTagChange = (e) => {
         const newTags = e.target.value.split(',').map((tag) => tag.trim());
         setTags(newTags);
+    };
+
+    const handleRemoveExistingImage = (imageId) => {
+        setExistingImages(existingImages.filter(img => img._id !== imageId));
     };
 
     const handleSubmit = async (e) => {
@@ -118,8 +130,8 @@ const CreateAnnouncement = () => {
         formData.append('announcementCategory', announcementCategory);
         formData.append('isFeatured', isFeatured);
 
-        if (images.length > 0) {
-            images.forEach((image) => {
+        if (newImages.length > 0) {
+            newImages.forEach((image) => {
                 formData.append('images', image);
             });
         }
@@ -128,22 +140,36 @@ const CreateAnnouncement = () => {
             formData.append('video', video);
         }
 
+        // Include array of existing images that weren't deleted
+        formData.append('existingImages', JSON.stringify(existingImages.map(img => img._id)));
+
         try {
-            await axios.post(`${process.env.REACT_APP_API}/api/v1/create/announcement`, formData, {
+            await axios.put(`${process.env.REACT_APP_API}/api/v1/update/announcement/${id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
             navigate('/admin/announcementList');
         } catch (error) {
-            console.error('Error creating announcement:', error);
+            console.error('Error updating announcement:', error);
         } finally {
             setLoading(false);
         }
     };
 
+    if (fetching) {
+        return (
+            <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                <SideBar />
+                <Box sx={{ flexGrow: 1, p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <LinearProgress sx={{ width: '100%' }} />
+                </Box>
+            </Box>
+        );
+    }
+
     return (
-        <Box sx={{ display: 'flex', minHeight: '100vh', width: '100vh' }}>
+        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
             <SideBar
                 categories={categories}
                 selectedCategory={announcementCategory}
@@ -152,7 +178,7 @@ const CreateAnnouncement = () => {
 
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
                 <Typography variant="h4" gutterBottom>
-                    Create New Announcement
+                    Update Announcement
                 </Typography>
 
                 {loading && <LinearProgress sx={{ mb: 2 }} />}
@@ -219,16 +245,16 @@ const CreateAnnouncement = () => {
                                     />
                                     <label htmlFor="image-upload">
                                         <Button variant="outlined" component="span">
-                                            Upload Images
+                                            Upload New Images
                                         </Button>
                                     </label>
                                     <FormHelperText>You can select multiple images</FormHelperText>
                                 </FileUploadContainer>
 
-                                {images.length > 0 && (
-                                    <Box >
+                                {(existingImages.length > 0 || newImages.length > 0) && (
+                                    <Box>
                                         <Typography variant="subtitle1" gutterBottom>
-                                            Uploaded Images
+                                            {existingImages.length > 0 ? 'Existing Images' : 'Uploaded Images'}
                                         </Typography>
 
                                         <Box sx={{ width: '100%', overflow: 'hidden' }}>
@@ -243,9 +269,74 @@ const CreateAnnouncement = () => {
                                                         </TableRow>
                                                     </TableHead>
                                                     <TableBody>
-                                                        {images.map((image, index) => (
+                                                        {existingImages.map((image, index) => (
                                                             <TableRow
-                                                                key={index}
+                                                                key={image._id}
+                                                                hover
+                                                                sx={{
+                                                                    '&:last-child td': { borderBottom: 0 },
+                                                                    '& .MuiTableCell-root': { py: 1.5 }
+                                                                }}
+                                                            >
+                                                                <TableCell>
+                                                                    <Box sx={{
+                                                                        width: 40,
+                                                                        height: 40,
+                                                                        bgcolor: 'divider',
+                                                                        borderRadius: 1,
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center'
+                                                                    }}>
+                                                                        <ImageIcon />
+                                                                    </Box>
+                                                                </TableCell>
+
+                                                                <TableCell>
+                                                                    <Typography
+                                                                        component="a"
+                                                                        href={image.url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        sx={{
+                                                                            fontWeight: 500,
+                                                                            textDecoration: 'none',
+                                                                            color: 'text.primary',
+                                                                            '&:hover': { textDecoration: 'underline' }
+                                                                        }}
+                                                                    >
+                                                                        Image {index + 1}
+                                                                    </Typography>
+                                                                </TableCell>
+
+                                                                <TableCell>
+                                                                    <Typography variant="caption" color="text.secondary">
+                                                                        Existing Image
+                                                                    </Typography>
+                                                                </TableCell>
+
+                                                                <TableCell align="right">
+                                                                    <Tooltip title="Remove">
+                                                                        <IconButton
+                                                                            onClick={() => handleRemoveExistingImage(image._id)}
+                                                                            size="small"
+                                                                            color="error"
+                                                                            sx={{
+                                                                                '&:hover': {
+                                                                                    backgroundColor: (theme) => theme.palette.error.light,
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            <FaTrash fontSize={14} />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+
+                                                        {newImages.map((image, index) => (
+                                                            <TableRow
+                                                                key={`new-${index}`}
                                                                 hover
                                                                 sx={{
                                                                     '&:last-child td': { borderBottom: 0 },
@@ -279,7 +370,7 @@ const CreateAnnouncement = () => {
                                                                             '&:hover': { textDecoration: 'underline' }
                                                                         }}
                                                                     >
-                                                                        Image Preview {index + 1}
+                                                                        New Image {index + 1}
                                                                     </Typography>
                                                                 </TableCell>
 
@@ -295,7 +386,7 @@ const CreateAnnouncement = () => {
                                                                 <TableCell align="right">
                                                                     <Tooltip title="Remove">
                                                                         <IconButton
-                                                                            onClick={() => setImages(images.filter((img) => img !== image))}
+                                                                            onClick={() => setNewImages(newImages.filter((img, i) => i !== index))}
                                                                             size="small"
                                                                             color="error"
                                                                             sx={{
@@ -322,7 +413,7 @@ const CreateAnnouncement = () => {
 
                             <Box sx={{ mt: 3, width: '100%' }}>
                                 <Typography variant="subtitle1" gutterBottom sx={{ mb: 2 }}>
-                                    Video Upload
+                                    Video
                                 </Typography>
 
                                 <FileUploadContainer sx={{ mb: 3 }}>
@@ -340,7 +431,7 @@ const CreateAnnouncement = () => {
                                             startIcon={<VideoFileIcon />}
                                             sx={{ py: 1.5 }}
                                         >
-                                            Select Video File
+                                            {existingVideo ? 'Replace Video' : 'Upload Video'}
                                         </Button>
                                     </label>
                                     <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
@@ -348,7 +439,7 @@ const CreateAnnouncement = () => {
                                     </Typography>
                                 </FileUploadContainer>
 
-                                {video && (
+                                {(existingVideo || video) && (
                                     <TableContainer component={Paper} variant="outlined" sx={{ mt: 2 }}>
                                         <Table size="small">
                                             <TableHead>
@@ -360,61 +451,118 @@ const CreateAnnouncement = () => {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                <TableRow hover>
-                                                    <TableCell>
-                                                        <Box sx={{
-                                                            width: 40,
-                                                            height: 40,
-                                                            bgcolor: 'divider',
-                                                            borderRadius: 1,
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}>
-                                                            <VideocamIcon color="action" fontSize="small" />
-                                                        </Box>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Typography
-                                                            component="a"
-                                                            href={URL.createObjectURL(video)}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                textDecoration: 'none',
-                                                                color: 'text.primary',
-                                                                '&:hover': { textDecoration: 'underline' }
-                                                            }}
-                                                        >
-                                                            {video.name}
-                                                        </Typography>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            {(video.size / (1024 * 1024)).toFixed(2)} MB
-                                                        </Typography>
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            {video.type}
-                                                        </Typography>
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        <Tooltip title="Remove video">
-                                                            <IconButton
-                                                                onClick={() => setVideo(null)}
-                                                                size="small"
-                                                                color="error"
+                                                {existingVideo && !video && (
+                                                    <TableRow hover>
+                                                        <TableCell>
+                                                            <Box sx={{
+                                                                width: 40,
+                                                                height: 40,
+                                                                bgcolor: 'divider',
+                                                                borderRadius: 1,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}>
+                                                                <VideocamIcon color="action" fontSize="small" />
+                                                            </Box>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography
+                                                                component="a"
+                                                                href={existingVideo.url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
                                                                 sx={{
-                                                                    '&:hover': {
-                                                                        backgroundColor: (theme) => theme.palette.error.light,
-                                                                    }
+                                                                    fontWeight: 500,
+                                                                    textDecoration: 'none',
+                                                                    color: 'text.primary',
+                                                                    '&:hover': { textDecoration: 'underline' }
                                                                 }}
                                                             >
-                                                                <FaTrash fontSize={14} />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </TableCell>
-                                                </TableRow>
+                                                                Existing Video
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="caption" color="text.secondary">
+                                                                Current Video
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align="right">
+                                                            <Tooltip title="Remove video">
+                                                                <IconButton
+                                                                    onClick={() => setExistingVideo(null)}
+                                                                    size="small"
+                                                                    color="error"
+                                                                    sx={{
+                                                                        '&:hover': {
+                                                                            backgroundColor: (theme) => theme.palette.error.light,
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <FaTrash fontSize={14} />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+
+                                                {video && (
+                                                    <TableRow hover>
+                                                        <TableCell>
+                                                            <Box sx={{
+                                                                width: 40,
+                                                                height: 40,
+                                                                bgcolor: 'divider',
+                                                                borderRadius: 1,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}>
+                                                                <VideocamIcon color="action" fontSize="small" />
+                                                            </Box>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography
+                                                                component="a"
+                                                                href={URL.createObjectURL(video)}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    textDecoration: 'none',
+                                                                    color: 'text.primary',
+                                                                    '&:hover': { textDecoration: 'underline' }
+                                                                }}
+                                                            >
+                                                                {existingVideo ? 'New Video' : video.name}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {(video.size / (1024 * 1024)).toFixed(2)} MB
+                                                            </Typography>
+                                                            <Typography variant="caption" color="text.secondary">
+                                                                {video.type}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align="right">
+                                                            <Tooltip title="Remove video">
+                                                                <IconButton
+                                                                    onClick={() => setVideo(null)}
+                                                                    size="small"
+                                                                    color="error"
+                                                                    sx={{
+                                                                        '&:hover': {
+                                                                            backgroundColor: (theme) => theme.palette.error.light,
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <FaTrash fontSize={14} />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
                                             </TableBody>
                                         </Table>
                                     </TableContainer>
@@ -473,7 +621,14 @@ const CreateAnnouncement = () => {
                         </Stack>
                     </FormSection>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3, gap: 2 }}>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={() => navigate('/admin/announcementList')}
+                        >
+                            Cancel
+                        </Button>
                         <Button
                             type="submit"
                             variant="contained"
@@ -481,7 +636,7 @@ const CreateAnnouncement = () => {
                             size="large"
                             disabled={loading}
                         >
-                            {loading ? 'Submitting...' : 'Create Announcement'}
+                            {loading ? 'Updating...' : 'Update Announcement'}
                         </Button>
                     </Box>
                 </StyledForm>
@@ -490,4 +645,4 @@ const CreateAnnouncement = () => {
     );
 };
 
-export default CreateAnnouncement;
+export default UpdateAnnouncement;

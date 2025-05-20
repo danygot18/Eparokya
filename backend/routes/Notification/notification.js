@@ -3,7 +3,8 @@ const {
     getUserNotifications,
     getUnreadNotifications,
     markNotificationAsRead,
-    markAllNotificationsAsRead
+    markAllNotificationsAsRead,
+    deleteNotification,
 } = require("../../controllers/Notification/notificationController");
 
 const router = express.Router();
@@ -19,5 +20,7 @@ router.get("/notifications/unread", isAuthenticatedUser, getUnreadNotifications)
 // router.put("/notifications/mark-read", isAuthenticatedUser, markNotificationAsRead);
 
 router.put("/notifications/mark-read", isAuthenticatedUser, markAllNotificationsAsRead);
+
+router.delete("/notifications/:notificationId", isAuthenticatedUser, deleteNotification);
 
 module.exports = router;

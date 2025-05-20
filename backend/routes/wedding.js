@@ -55,7 +55,7 @@ router.post('/:weddingId/commentWedding',  WeddingFormController.addComment);
 router.post('/updateAdditionalReq/:weddingId',  WeddingFormController.updateAdditionalReq);
 
 router.get('/getAllUserSubmittedWedding', isAuthenticatedUser, WeddingFormController.getMySubmittedForms);
-router.get('/getWeddingForm/:formId', isAuthenticatedUser, WeddingFormController.getWeddingFormById);
+router.get('/getWeddingForm/:weddingId', isAuthenticatedUser, WeddingFormController.getWeddingFormById);
 
 
 router.post('/admin/available-dates', isAuthenticatedUser, isAuthorized, WeddingFormController.addAvailableDate);

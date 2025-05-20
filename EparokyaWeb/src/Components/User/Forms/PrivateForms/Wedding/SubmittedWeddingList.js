@@ -38,7 +38,10 @@ const SubmittedWeddingList = () => {
     };
 
     const handleCardClick = (weddingId) => {
+
+       
         navigate(`/user/mySubmittedWeddingForm/${weddingId}`);
+        console.log("Card clicked:", weddingId);    
     };
 
     return (

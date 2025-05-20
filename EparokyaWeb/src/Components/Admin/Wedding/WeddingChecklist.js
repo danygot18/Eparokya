@@ -84,6 +84,7 @@ const WeddingChecklist = ({ weddingId }) => {
         .then((res) => {
           if (res.data.checklist) {
             setChecklist(res.data.checklist);
+            // console.log(res.data)
           }
         })
         .catch((err) => {

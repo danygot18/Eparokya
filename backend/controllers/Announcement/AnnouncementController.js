@@ -12,8 +12,8 @@ exports.createAnnouncement = async (req, res) => {
             for (let file of req.files.images) {
                 const result = await cloudinary.uploader.upload(file.path, {
                     folder: "eparokya/announcement",
-                    width: 150,
-                    crop: "scale",
+                    // width: 150,
+                    // crop: "scale",
                 });
                 imagesLinks.push({
                     public_id: result.public_id,

@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Delete } from "@mui/icons-material";
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
@@ -20,7 +21,7 @@ const NotificationBell = () => {
         `${process.env.REACT_APP_API}/api/v1/notifications`,
         config
       );
-      
+
       setNotifications(response.data || []);
       setUnreadCount(response.data.unreadCount || 0);
     } catch (error) {
@@ -45,7 +46,7 @@ const NotificationBell = () => {
   // Handle new real-time notification
   const handleNewNotification = useCallback((data) => {
     toast.success(`New Notification: ${data.message}`);
-    
+
     setNotifications(prev => [
       {
         N_id: data.N_id,
@@ -55,18 +56,18 @@ const NotificationBell = () => {
       },
       ...prev
     ]);
-    
+
     setUnreadCount(prev => prev + 1);
   }, []);
 
   // Initialize component
   useEffect(() => {
     fetchNotifications();
-    
+
     // Setup socket connection
     socket.connect();
     socket.on("push-notification", handleNewNotification);
-    
+
     return () => {
       socket.off("push-notification", handleNewNotification);
       socket.disconnect();
@@ -103,12 +104,20 @@ const NotificationBell = () => {
       {open && (
         <div
           className="dropdown-menu dropdown-menu-end show position-absolute mt-2 p-2 shadow-lg"
-          style={{ minWidth: "250px", maxHeight: "400px", overflowY: "auto", zIndex: 1050 }}
+          style={{
+            minWidth: "250px",
+            maxHeight: "400px",
+            overflowY: "auto",
+            zIndex: 1050,
+            position: "absolute",  // or "fixed" if outside any relative container
+            right: -20,               // position it at the left edge
+                 // optional: position from top
+          }}
         >
           <div className="d-flex justify-content-between align-items-center dropdown-header">
             <span className="fw-bold">Notifications</span>
             {unreadCount > 0 && (
-              <button 
+              <button
                 className="btn btn-sm btn-link"
                 onClick={markAllAsRead}
               >
@@ -116,7 +125,7 @@ const NotificationBell = () => {
               </button>
             )}
           </div>
-          
+
           {notifications.length > 0 ? (
             notifications.map((notif) => (
               <button

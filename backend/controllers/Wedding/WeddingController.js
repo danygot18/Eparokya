@@ -355,6 +355,9 @@ const uploadToCloudinary = async (file, folder) => {
 
 exports.submitWeddingForm = async (req, res) => {
   try {
+    console.log("Incoming body:", req.body);
+    console.log("Incoming files:", req.files);
+
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found." });
@@ -401,8 +404,8 @@ exports.submitWeddingForm = async (req, res) => {
       }
     }
 
-    const images = {};
-    const requiredImageFields = [
+    const documents = {};
+    const requiredDocumentFields = [
       "GroomNewBaptismalCertificate",
       "GroomNewConfirmationCertificate",
       "BrideNewBaptismalCertificate",
@@ -424,22 +427,27 @@ exports.submitWeddingForm = async (req, res) => {
       "BrideOneByOne",
     ];
 
-    for (const field of requiredImageFields) {
-      if (req.files[field]) {
-        const uploadedImage = await uploadToCloudinary(req.files[field][0], "wedding/docs");
-        images[field] = {
-          public_id: uploadedImage.public_id,
-          url: uploadedImage.url,
+    // Upload all documents to Cloudinary
+    for (const field of requiredDocumentFields) {
+      if (req.files?.[field]) {
+        const file = req.files[field][0];
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "eparokya/wedding/docs",
+          resource_type: file.mimetype.startsWith('image') ? 'image' : 'raw'
+        });
+        documents[field] = {
+          public_id: result.public_id,
+          url: result.secure_url
         };
       } else {
-        return res.status(400).json({ message: `Missing required image: ${field}` });
+        return res.status(400).json({ message: `Missing required document: ${field}` });
       }
     }
 
+    // Handle address parsing and validation
     const groomAddressObject = typeof groomAddress === "string" ? JSON.parse(groomAddress) : groomAddress;
     const brideAddressObject = typeof brideAddress === "string" ? JSON.parse(brideAddress) : brideAddress;
     
-    // Validate groom's address
     if (!groomAddressObject.city) {
       return res.status(400).json({ message: "Groom's city is required." });
     }
@@ -453,7 +461,6 @@ exports.submitWeddingForm = async (req, res) => {
       return res.status(400).json({ message: "Please provide a custom barangay for the groom." });
     }
     
-    // Validate bride's address
     if (!brideAddressObject.city) {
       return res.status(400).json({ message: "Bride's city is required." });
     }
@@ -469,8 +476,6 @@ exports.submitWeddingForm = async (req, res) => {
 
     const ninongArray = Ninong ? JSON.parse(Ninong) : [];
     const ninangArray = Ninang ? JSON.parse(Ninang) : [];
-
-    const userId = req.user._id;
 
     const newWeddingForm = new Wedding({
       dateOfApplication,
@@ -494,8 +499,8 @@ exports.submitWeddingForm = async (req, res) => {
       groomMother,
       brideFather,
       brideMother,
-      ...images,
-      userId,
+      ...documents,
+      userId: req.user._id,
     });
 
     await newWeddingForm.save();
@@ -506,10 +511,12 @@ exports.submitWeddingForm = async (req, res) => {
     });
   } catch (error) {
     console.error("Error submitting wedding form:", error);
-    res.status(500).json({ message: "An error occurred during submission.", error: error.message });
+    res.status(500).json({ 
+      message: "An error occurred during submission.", 
+      error: error.message 
+    });
   }
 };
-
 
 exports.getAllWeddings = async (req, res) => {
   try {
@@ -816,9 +823,9 @@ exports.getMySubmittedForms = async (req, res) => {
 
 exports.getWeddingFormById = async (req, res) => {
   try {
-    const { formId } = req.params;
+    const { weddingId } = req.params;
 
-    const weddingForm = await Wedding.findById(formId)
+    const weddingForm = await Wedding.findById( weddingId )
       .populate('userId', 'name email')
       .lean();
 

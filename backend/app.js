@@ -123,7 +123,7 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 // User & Authentication
 app.use("/api/v1", require("./routes/user"));
 app.use("/api/v1/chat", require("./routes/chat"));
-
+app.use("/api/v1", require("./routes/Resources/resource"));
 // Prayer Wall
 
 
@@ -185,7 +185,7 @@ app.use("/api/v1", require("./routes/PrivateScheduling/houseBlessing"));
 
 // Resources
 app.use("/api/v1", require("./routes/Resources/resourceCategory"));
-app.use("/api/v1", require("./routes/Resources/resource"));
+
 
 app.use("/api/v1", require("./routes/Members/memberYearBatchCategory"));
 app.use("/api/v1", require("./routes/Members/members"));

@@ -42,14 +42,14 @@ const GuestSideBar = () => {
         `${process.env.REACT_APP_API}/api/v1/admin-selections/active`
       );
 
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
 
       if (response.data && response.data.isActive) {
         setActiveFeedback(response.data);
-        console.log("Active feedback found:", response.data);
+        // console.log("Active feedback found:", response.data);
 
         // TEMP FIX: Force show modal for debugging
-        console.log("Forcing modal to open...");
+        // console.log("Forcing modal to open...");
 
       }
     } catch (error) {
@@ -58,7 +58,7 @@ const GuestSideBar = () => {
   };
 
   const handleNavigateToSentiment = () => {
-    console.log("Navigating with activeFeedback:", activeFeedback);
+    // console.log("Navigating with activeFeedback:", activeFeedback);
     if (activeFeedback) {
       let path = "";
       switch (activeFeedback.category) {

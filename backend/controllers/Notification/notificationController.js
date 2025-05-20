@@ -94,4 +94,26 @@ exports.markAllNotificationsAsRead = async (req, res) => {
     }
 };
 
+exports.deleteNotification = async (req, res) => {
 
+    try {
+        const { notificationId } = req.params;
+        
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized. Please log in." });
+        }
+
+        const notification = await Notification.findByIdAndDelete(notificationId);
+
+        if (!notification) {
+            return res.status(404).json({ message: "Notification not found" });
+        }
+
+        res.status(200).json({ message: "Notification deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting notification:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
+//helloo

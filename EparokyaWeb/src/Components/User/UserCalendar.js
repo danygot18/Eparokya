@@ -5,44 +5,50 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import GuestSideBar from '../GuestSideBar';
 import Metadata from '../Layout/MetaData';
-
+import { useTheme, useMediaQuery } from '@mui/material';
 import { CircularProgress, Box, Typography, Paper, Button, IconButton } from '@mui/material';
 import { ChevronLeft, ChevronRight, Today, ViewModule, ViewWeek, ViewDay, ViewAgenda } from '@mui/icons-material';
 
 const localizer = momentLocalizer(moment);
 
 const CustomToolbar = ({ label, onNavigate, onView, view }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
     <Box sx={{
       display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      alignItems: isMobile ? 'flex-start' : 'center',
       mb: 2,
       p: 2,
       backgroundColor: 'background.paper',
       borderRadius: 1,
       boxShadow: 1,
-      flexWrap: 'wrap',
-      gap: 1
+      gap: isMobile ? 1 : 2
     }}>
       <Typography variant="h6" sx={{
         fontWeight: 'bold',
         color: 'success.main',
-        minWidth: '200px'
+        minWidth: isMobile ? '100%' : '200px',
+        mb: isMobile ? 1 : 0,
+        textAlign: isMobile ? 'center' : 'left'
       }}>
         {label}
       </Typography>
 
       <Box sx={{
         display: 'flex',
-       
-        order: { xs: 3, sm: 2 },
-        width: { xs: '100%', sm: 'auto' },
-        justifyContent: { xs: 'center', sm: 'flex-start' }
+        order: isMobile ? 2 : 1,
+        width: isMobile ? '100%' : 'auto',
+        justifyContent: 'center',
+        gap: 1
       }}>
         <IconButton
           onClick={() => onNavigate('PREV')}
           color="success"
+          size={isMobile ? 'medium' : 'small'}
           sx={{
             borderRadius: 1,
             padding: '4px',
@@ -57,13 +63,14 @@ const CustomToolbar = ({ label, onNavigate, onView, view }) => {
           variant="outlined"
           onClick={() => onNavigate('TODAY')}
           color='success'
+          size={isMobile ? 'medium' : 'small'}
           sx={{
             textTransform: 'none',
             fontWeight: 'bold',
             color: 'success.main',
             borderRadius: 1,
-            padding: '4px 12px',
-            minHeight: '32px',
+            padding: isMobile ? '6px 16px' : '4px 12px',
+            minHeight: isMobile ? '40px' : '32px',
             '&:hover': {
               backgroundColor: 'success.light',
               borderColor: 'success.main',
@@ -75,6 +82,7 @@ const CustomToolbar = ({ label, onNavigate, onView, view }) => {
         <IconButton
           onClick={() => onNavigate('NEXT')}
           color="success"
+          size={isMobile ? 'medium' : 'small'}
           sx={{
             borderRadius: 1,
             padding: '4px',
@@ -89,75 +97,36 @@ const CustomToolbar = ({ label, onNavigate, onView, view }) => {
 
       <Box sx={{
         display: 'flex',
-       
-        order: { xs: 2, sm: 3 },
-        justifyContent: { xs: 'center', sm: 'flex-end' }
+        order: isMobile ? 1 : 2,
+        width: isMobile ? '100%' : 'auto',
+        justifyContent: 'center',
+        gap: isMobile ? 1 : 0.5,
+        mb: isMobile ? 1 : 0
       }}>
-        <IconButton
-          onClick={() => onView('month')}
-          color={view === 'month' ? 'success' : 'default'}
-          size="small"
-          sx={{
-            borderRadius: 1,
-            padding: '4px',
-            '&:hover': {
-              backgroundColor: 'success.light',
-            }
-          }}
-        >
-          {/* <ViewModule fontSize="small" /> */}
-          Month
-        </IconButton>
-        <IconButton
-          onClick={() => onView('week')}
-          color={view === 'week' ? 'success' : 'default'}
-          size="small"
-          sx={{
-            borderRadius: 1,
-            padding: '4px',
-            '&:hover': {
-              backgroundColor: 'success.light',
-            }
-          }}
-        >
-          {/* <ViewWeek fontSize="small" /> */}
-          Week
-        </IconButton>
-        <IconButton
-          onClick={() => onView('day')}
-          color={view === 'day' ? 'success' : 'default'}
-          size="small"
-          sx={{
-            borderRadius: 1,
-            padding: '4px',
-            '&:hover': {
-              backgroundColor: 'success.light',
-            }
-          }}
-        >
-          Day
-        </IconButton>
-        <IconButton
-          onClick={() => onView('agenda')}
-          color={view === 'agenda' ? 'success' : 'default'}
-          size="small"
-          sx={{
-            borderRadius: 1,
-            padding: '4px',
-            '&:hover': {
-              backgroundColor: 'success.light',
-            }
-          }}
-        >
-          Agenda
-        </IconButton>
+        {['month', 'week', 'day', 'agenda'].map(v => (
+          <Button
+            key={v}
+            onClick={() => onView(v)}
+            variant={view === v ? 'contained' : 'outlined'}
+            color="success"
+            size={isMobile ? 'small' : 'small'}
+            sx={{
+              textTransform: 'capitalize',
+              minWidth: isMobile ? '60px' : 'auto',
+              padding: isMobile ? '6px 8px' : '4px 8px',
+              fontSize: isMobile ? '0.75rem' : '0.875rem',
+              '&:hover': {
+                backgroundColor: 'success.light',
+              }
+            }}
+          >
+            {v}
+          </Button>
+        ))}
       </Box>
-      
     </Box>
-
   );
 };
-
 
 const UserCalendar = () => {
   const [events, setEvents] = useState([]);
@@ -165,6 +134,8 @@ const UserCalendar = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('month');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const fetchAllEvents = useCallback(async () => {
     try {
@@ -231,9 +202,14 @@ const UserCalendar = () => {
     style: {
       backgroundColor:
         event.type === 'Wedding' ? '#FFD700' :
-          event.type === 'Baptism' ? '#4CAF50' :
-            event.type === 'Funeral' ? '#F44336' : '#9C27B0',
+        event.type === 'Baptism' ? '#4CAF50' :
+        event.type === 'Funeral' ? '#F44336' : '#9C27B0',
       color: 'white',
+      borderRadius: '4px',
+      border: 'none',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+      fontSize: isMobile ? '0.7rem' : '0.8rem',
+      padding: isMobile ? '1px 3px' : '2px 5px'
     },
   });
 
@@ -246,11 +222,26 @@ const UserCalendar = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      <GuestSideBar style={{ width: '20%', minWidth: '200px' }} />
-      <Box sx={{ fontFamily: 'Helvetica, sans-serif', flex: 1, p: 3 }}>
+    <Box sx={{ 
+      display: 'flex', 
+      height: '100vh',
+      flexDirection: isMobile ? 'column' : 'row'
+    }}>
+      {!isMobile && <GuestSideBar style={{ width: '20%', minWidth: '200px' }} />}
+      
+      <Box sx={{ 
+        fontFamily: 'Helvetica, sans-serif', 
+        flex: 1, 
+        p: isMobile ? 2 : 3,
+        overflow: 'auto'
+      }}>
         <Metadata title="User Calendar" />
-        <Typography variant="h4" sx={{ mb: 2, fontWeight: 'bold', color: 'success.main' }}>
+        <Typography variant="h4" sx={{ 
+          mb: 2, 
+          fontWeight: 'bold', 
+          color: 'success.main',
+          fontSize: isMobile ? '1.5rem' : '2rem'
+        }}>
           Church Events Calendar
         </Typography>
 
@@ -260,13 +251,17 @@ const UserCalendar = () => {
           </Typography>
         )}
 
-        <Paper elevation={3} sx={{ height: '700px', p: 2, borderRadius: 2 }}>
+        <Paper elevation={3} sx={{ 
+          height: isMobile ? '500px' : '700px', 
+          p: isMobile ? 1 : 2, 
+          borderRadius: 2 
+        }}>
           <Calendar
             localizer={localizer}
             events={events}
             startAccessor="start"
             endAccessor="end"
-            defaultView="month"
+            defaultView={isMobile ? 'agenda' : 'month'}
             view={view}
             onView={setView}
             views={['month', 'week', 'day', 'agenda']}
@@ -277,34 +272,54 @@ const UserCalendar = () => {
             }}
             style={{
               height: '100%',
-              minHeight: '600px'
+              minHeight: isMobile ? '400px' : '600px'
             }}
           />
         </Paper>
 
         {selectedEvent && (
-          <Paper elevation={3} sx={{ mt: 3, p: 3, borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+          <Paper elevation={3} sx={{ 
+            mt: 3, 
+            p: isMobile ? 2 : 3, 
+            borderRadius: 2 
+          }}>
+            <Typography variant="h6" sx={{ 
+              mb: 2, 
+              fontWeight: 'bold',
+              fontSize: isMobile ? '1.1rem' : '1.25rem'
+            }}>
               Event Details
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Typography><strong>Type:</strong> {selectedEvent.type}</Typography>
+              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                <strong>Type:</strong> {selectedEvent.type}
+              </Typography>
               {selectedEvent.type === 'Wedding' && (
                 <>
-                  <Typography><strong>Bride:</strong> {selectedEvent.bride || 'N/A'}</Typography>
-                  <Typography><strong>Groom:</strong> {selectedEvent.groom || 'N/A'}</Typography>
+                  <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                    <strong>Bride:</strong> {selectedEvent.bride || 'N/A'}
+                  </Typography>
+                  <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                    <strong>Groom:</strong> {selectedEvent.groom || 'N/A'}
+                  </Typography>
                 </>
               )}
               {selectedEvent.type === 'Baptism' && (
-                <Typography><strong>Child:</strong> {selectedEvent.child.fullName || 'N/A'}</Typography>
+                <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  <strong>Child:</strong> {selectedEvent.child.fullName || 'N/A'}
+                </Typography>
               )}
               {selectedEvent.type === 'Funeral' && (
-                <Typography><strong>Name:</strong> {selectedEvent.name ? `${selectedEvent.name.firstName || ''} ${selectedEvent.name.lastName || ''}` : 'N/A'}</Typography>
+                <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  <strong>Name:</strong> {selectedEvent.name ? `${selectedEvent.name.firstName || ''} ${selectedEvent.name.lastName || ''}` : 'N/A'}
+                </Typography>
               )}
               {selectedEvent.type === 'Custom' && (
-                <Typography><strong>Title:</strong> {selectedEvent.title || 'N/A'}</Typography>
+                <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  <strong>Title:</strong> {selectedEvent.title || 'N/A'}
+                </Typography>
               )}
-              <Typography>
+              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
                 <strong>Date:</strong> {moment(selectedEvent.start).format('MMMM Do YYYY')}
               </Typography>
             </Box>

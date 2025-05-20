@@ -4,6 +4,27 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import "../../Layout/styles/style.css";
 import SideBar from '../SideBar';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Checkbox,
+  Chip,
+  FormControlLabel,
+  IconButton,
+  Typography
+} from '@mui/material';
+import {
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Star as StarIcon
+} from '@mui/icons-material';
 
 const AdminAnnouncementList = () => {
     const [announcements, setAnnouncements] = useState([]);
@@ -54,7 +75,7 @@ const AdminAnnouncementList = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this announcement?')) {
             try {
-                await axios.delete(`${process.env.REACT_APP_API}/api/v1/delete/announcement/${id}`);
+                await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteAnnouncement/${id}`);
                 setAnnouncements(announcements.filter((a) => a._id !== id));
             } catch (error) {
                 console.error('Error deleting announcement:', error);
@@ -90,109 +111,199 @@ const AdminAnnouncementList = () => {
     const currentAnnouncements = filteredAnnouncements.slice(indexOfFirstAnnouncement, indexOfLastAnnouncement);
     const totalPages = Math.ceil(filteredAnnouncements.length / announcementsPerPage);
 
-    return (
-        <div className="announcement-list">
-            <SideBar />
-            <div className="announcement-container">
-                <h2 className="text-2xl font-bold mb-4 text-center">Announcements</h2>
+  return (
+  <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <SideBar />
+    
+    <Box component="main" sx={{ 
+      flexGrow: 1, 
+      p: 3,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 3
+    }}>
+      <Typography variant="h4" sx={{ 
+        textAlign: 'center', 
+        mb: 3,
+        fontWeight: 'bold',
+        color: 'text.primary'
+      }}>
+        Announcements
+      </Typography>
 
-                {/* Display Announcements */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 justify-center">
-                    {currentAnnouncements.map((announcement) => (
-                        <div className="announcement-box" key={announcement._id}>
-                            {/* Announcement Header */}
-                            <div className="announcement-header">
-                                <img
-                                    src="/public/../../../../EPAROKYA-SYST.png"
-                                    alt="Saint Joseph Parish"
-                                    className="profile-pic"
-                                />
-                                <div>
-                                    <h3>{announcement.name}</h3>
-                                    <p>
-                                        Created on:{" "}
-                                        {new Date(announcement.dateCreated).toLocaleDateString()}
-                                    </p>
-                                </div>
-                                <div className="actions">
-                                    <FaEdit
-                                        onClick={() =>
-                                            navigate(`/admin/updateAnnouncementPage/${announcement._id}`)
-                                        }
-                                    />
-                                    <FaTrash onClick={() => handleDelete(announcement._id)} />
-                                </div>
-                            </div>
+      {/* Announcements Grid */}
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+        gap: 3,
+        width: '100%',
+        maxWidth: '1800px',
+        mx: 'auto'
+      }}>
+        {currentAnnouncements.map((announcement) => (
+          <Card key={announcement._id} sx={{ 
+            borderRadius: 2,
+            boxShadow: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            transition: 'transform 0.2s',
+            '&:hover': {
+              transform: 'translateY(-4px)'
+            }
+          }}>
+            {/* Card Header */}
+            <CardHeader
+              avatar={
+                <Avatar 
+                  src="/EPAROKYA-SYST.png" 
+                  alt="Saint Joseph Parish"
+                  sx={{ width: 56, height: 56 }}
+                />
+              }
+              action={
+                <Box>
+                  <IconButton onClick={() => navigate(`/admin/updateAnnouncementPage/${announcement._id}`)}>
+                    <EditIcon color="primary" />
+                  </IconButton>
+                  <IconButton onClick={() => handleDelete(announcement._id)}>
+                    <DeleteIcon color="error" />
+                  </IconButton>
+                </Box>
+              }
+              title={announcement.name}
+              subheader={
+                <Typography variant="caption" color="text.secondary">
+                  {new Date(announcement.dateCreated).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </Typography>
+              }
+              sx={{
+                alignItems: 'flex-start',
+                '& .MuiCardHeader-content': {
+                  overflow: 'hidden'
+                }
+              }}
+            />
 
-                            {/* Announcement Body */}
-                            <div className="announcement-body">
-                                <p>{announcement.description}</p>
-                                <p className="rich-description">{announcement.richDescription}</p>
-                                {announcement.images && Array.isArray(announcement.images) && announcement.images.length > 0 ? (
-                                    <div className="image-slider">
-                                        {announcement.images.map((img, index) => (
-                                            <img
-                                                key={index}
-                                                src={img.url}
-                                                alt={`Slide ${index + 1}`}
-                                                onClick={() => setPreviewImage(img.url)}
-                                            />
-                                        ))}
-                                    </div>
-                                ) : announcement.image ? (
-                                    <img
-                                        src={announcement.image}
-                                        alt="Announcement"
-                                        className="single-image"
-                                    />
-                                ) : null}
-                            </div>
+            {/* Card Content */}
+            <CardContent sx={{ flexGrow: 1, py: 1 }}>
+              <Typography variant="body1" paragraph>
+                {announcement.description}
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" paragraph>
+                {announcement.richDescription}
+              </Typography>
 
-                            {/* Announcement Footer */}
-                            <div className="announcement-footer">
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={announcement.isFeatured}
-                                        onChange={() => toggleFeatured(announcement._id)}
-                                    />
-                                    Featured
-                                </label>
-                                {announcement.isFeatured && (
-                                    <span className="featured-indicator">🌟 Featured</span>
-                                )}
-                                <p>Tags: {announcement.tags.join(", ")}</p>
-                                <p>
-                                    Category: {announcement.announcementCategory?.name || "N/A"}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+              {announcement.images?.length > 0 && (
+                <Box sx={{
+                  display: 'flex',
+                  gap: 1,
+                  overflowX: 'auto',
+                  py: 1,
+                  '& img': {
+                    height: 120,
+                    width: 'auto',
+                    borderRadius: 1,
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s',
+                    '&:hover': {
+                      transform: 'scale(1.03)'
+                    }
+                  }
+                }}>
+                  {announcement.images.map((img, index) => (
+                    <img
+                      key={index}
+                      src={img.url}
+                      alt={`Slide ${index + 1}`}
+                      onClick={() => setPreviewImage(img.url)}
+                    />
+                  ))}
+                </Box>
+              )}
+            </CardContent>
 
-                {/* Pagination Controls */}
-                <div className="flex justify-center items-center mt-6">
-                    <button
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                        className="btn mx-2"
-                    >
-                        Previous
-                    </button>
-                    <span className="text-sm font-medium">
-                        Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        className="btn mx-2"
-                    >
-                        Next
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+            {/* Card Footer */}
+            <CardActions sx={{ 
+              p: 2,
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'action.hover',
+              justifyContent: 'space-between'
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={announcement.isFeatured}
+                      onChange={() => toggleFeatured(announcement._id)}
+                      size="small"
+                    />
+                  }
+                  label="Featured"
+                />
+                {announcement.isFeatured && (
+                  <Chip 
+                    label="Featured" 
+                    size="small" 
+                    color="primary" 
+                    icon={<StarIcon fontSize="small" />}
+                  />
+                )}
+              </Box>
+              
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Chip 
+                  label={announcement.announcementCategory?.name || "Uncategorized"} 
+                  size="small" 
+                  variant="outlined"
+                />
+              </Box>
+            </CardActions>
+          </Card>
+        ))}
+      </Box>
+
+      {/* Pagination */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        gap: 2,
+        mt: 3
+      }}>
+        <Button
+          variant="outlined"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          startIcon={<ChevronLeftIcon />}
+        >
+          Previous
+        </Button>
+        
+        <Typography variant="body1" color="text.secondary">
+          Page {currentPage} of {totalPages}
+        </Typography>
+        
+        <Button
+          variant="outlined"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          endIcon={<ChevronRightIcon />}
+        >
+          Next
+        </Button>
+      </Box>
+    </Box>
+  </Box>
+);
 };
 
 export default AdminAnnouncementList;

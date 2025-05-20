@@ -102,7 +102,7 @@ export const authReducer = (state = { user: {} }, action) => {
 }
 
 export const userReducer = (state = {}, action) => {
-    console.log("User Reducer Action:", action);
+    // console.log("User Reducer Action:", action);
     switch (action.type) {
         case UPDATE_PROFILE_REQUEST:
         case UPDATE_PASSWORD_REQUEST:

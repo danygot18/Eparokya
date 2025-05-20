@@ -169,7 +169,7 @@ const PrayerRequestIntention = () => {
               color: 'success.main'
             }}
           >
-            Prayer Request
+            Send Prayer Request
           </Typography>
           
           <Typography 

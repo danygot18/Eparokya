@@ -5,6 +5,7 @@ import axios from "axios";
 import { FaStar, FaBookmark, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
+import { useSelector } from "react-redux";  
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -40,8 +41,10 @@ const ImageSlider = ({ images }) => {
   );
 };
 
+
+
 const ResourcePage = () => {
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
   const [resources, setResources] = useState([]);
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,22 +57,18 @@ const ResourcePage = () => {
   const navigate = useNavigate();
   const config = { withCredentials: true };
 
-  useEffect(() => {
-    fetchUser();
-    fetchResources();
-    fetchCategories();
-  }, []);
-
+  const { user } = useSelector((state) => state.auth);
+  console.log("user", user._id);
   const fetchUser = async () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/profile`,
         config
       );
-      setUser(response.data.user);
+      // setUser(response.data.user._id);
+      console.log("User data:", response.data.user._id);
       const bookmarksResponse = await axios.get(
-        `${process.env.REACT_APP_API}/api/v1/userBookmarks/${response.data.user._id}`,
-        config
+        `${process.env.REACT_APP_API}/api/v1/userBookmarks/${user._id}`
       );
 
       const bookmarkedIds = bookmarksResponse.data.bookmarks.map(
@@ -95,24 +94,24 @@ const ResourcePage = () => {
   const fetchResources = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API}/api/v1/resourcesWithBookmarkCount`
+        `${process.env.REACT_APP_API}/api/v1/getResourcesWithBookmarkCount`
       );
-  
+      console.log("Fetched resources:", response.data.data);
       const fetchedResources = response.data.data || [];
-  
+
       const enrichedResources = fetchedResources.map((resource) => ({
         ...resource,
         isBookmarked: bookmarkedResources.includes(resource._id),
       }));
-  
+
       setResources(enrichedResources);
     } catch (error) {
       console.error("Error fetching resources:", error);
       setResources([]);
     }
   };
-  
-  
+
+
 
 
   const fetchCategories = async () => {
@@ -216,6 +215,13 @@ const ResourcePage = () => {
 
     return matchesCategory && matchesSearch;
   });
+
+  
+  useEffect(() => {
+    fetchUser();
+    fetchResources();
+    fetchCategories();
+  }, []);
 
   if (loading) {
     return (

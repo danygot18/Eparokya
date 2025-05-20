@@ -1,9 +1,24 @@
-import React from 'react'
+// FullPageLoader.js
+import React from "react";
+import { Box, CircularProgress } from "@mui/material";
 
-const Loader = () => {
-    return (
-        <div className="loader"> </div>
-    )
-}
+const Loader = () => (
+  <Box
+    sx={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      backgroundColor: "rgba(0,0,0,0.5)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 2000,
+    }}
+  >
+    <CircularProgress size={60} sx={{ color: "white" }} />
+  </Box>
+);
 
-export default Loader
+export default Loader;

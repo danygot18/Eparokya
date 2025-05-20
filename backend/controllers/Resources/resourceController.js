@@ -142,7 +142,7 @@ exports.updateResource = async (req, res) => {
 exports.deleteResource = async (req, res) => {
   
     try {
-      const resource = await Resource.findById(req.params.resourceById);
+      const resource = await Resource.findById(req.params.resourceId);
       if (!resource) return res.status(404).json({ success: false, message: "Resource not found" });
   
       if (resource.image) await cloudinary.uploader.destroy(resource.image.public_id);

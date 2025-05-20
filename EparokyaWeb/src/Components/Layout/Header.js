@@ -8,41 +8,49 @@ import {
   Menu,
   MenuItem,
   Typography,
+  CircularProgress
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../Redux/actions/userActions";
 import { toast } from "react-toastify";
 import NotificationUser from "../Notification/NotificationUser";
+import Loader from "../Layout/Loader";
 
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, loading, isAuthenticated } = useSelector((state) => state.auth);
 
   const location = useLocation();
   const currentPath = location.pathname;
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [userMenuEl, setUserMenuEl] = React.useState(null);
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   const handleParishMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleParishMenuClose = () => setAnchorEl(null);
 
   const handleUserMenuOpen = (event) => setUserMenuEl(event.currentTarget);
   const handleUserMenuClose = () => setUserMenuEl(null);
+  
+  const logoutHandler = async () => {
+    setIsLoggingOut(true);
+    try {
+       dispatch(logout());
+      navigate("/");
+      toast.success("Log Out Success", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
 
-  const logoutHandler = () => {
-    dispatch(logout());
-    navigate("/");
-    toast.success("Log Out Success", {
-      position: toast.POSITION.TOP_RIGHT,
-    });
-
-    document.cookie = [
-      'token=""',
-      'expires=Thu, 01 Jan 1970 00:00:00 GMT',
-      'path=/'
-    ].join('; ');
+      document.cookie = [
+        'token=""',
+        'expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'path=/'
+      ].join('; ');
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const navButtonStyle = (route) => ({
@@ -51,15 +59,17 @@ const Header = () => {
     borderBottom: currentPath === route ? "2px solid green" : "none",
     borderRadius: 3,
     textTransform: "none",
-    
     "&:hover": {
       color: "green",
       backgroundColor: "rgba(0, 128, 0, 0.1)",
     },
   });
 
+  // Show loader during initial load or during logout process
+  if (loading || isLoggingOut) return <Loader />;
+
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#1e3a3a" }}>
+    <AppBar position="static" sx={{ backgroundColor: "#1e3a3a", padding: "3px" }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         {/* Left - Logo */}
         <Typography
@@ -77,7 +87,7 @@ const Header = () => {
 
         {/* Right - Navigation */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <NotificationUser user={user} />
+          {isAuthenticated && <NotificationUser user={user} />}
 
           <Button component={Link} to="/" sx={navButtonStyle("/")}>
             Home
@@ -94,7 +104,7 @@ const Header = () => {
           <Button
             component={Link}
             to="/user/live"
-            sx={navButtonStyle("/user/live")}
+            sx={navButtonStyle("/user/live")}     
           >
             Live
           </Button>
@@ -110,7 +120,7 @@ const Header = () => {
           <Button
             component={Link}
             to="/user/prayerRequestIntention"
-            sx={navButtonStyle("/user/prayerRequestIntention") }
+            sx={navButtonStyle("/user/prayerRequestIntention")}
           >
             Guides
           </Button>
@@ -153,7 +163,7 @@ const Header = () => {
                   color: "white",
                   textTransform: "none",
                   "&:hover": { color: "green" },
-                  size : "small",
+                  size: "small",
                 }}
               >
                 {user?.name}
@@ -206,17 +216,18 @@ const Header = () => {
               <Button
                 component={Link}
                 to="/register"
-                variant="contained"
+                variant="outlined"
                 sx={{
-                  backgroundColor: "green",
                   color: "white",
+                  borderColor: "white",
                   textTransform: "none",
                   "&:hover": {
-                    backgroundColor: "darkgreen",
+                    borderColor: "green",
+                    color: "green",
                   },
                 }}
               >
-                Sign Up
+                SignUp
               </Button>
             </>
           )}

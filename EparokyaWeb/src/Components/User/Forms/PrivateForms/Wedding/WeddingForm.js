@@ -63,6 +63,7 @@ const WeddingForm = () => {
     BridePermitFromtheParishOftheBride: "",
     BrideChildBirthCertificate: "",
     BrideOneByOne: "",
+    documents: {}, // Stores File objects
     previews: {},
   });
   const [isMarried, setIsMarried] = useState(false);
@@ -117,6 +118,46 @@ const WeddingForm = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
+
+
+  const FileUploadField = ({
+    name,
+    label,
+    required,
+    value,
+    preview,
+    onChange
+  }) => (
+    <Form.Group className="mb-3">
+      <Form.Label>
+        {label} {required && <span className="text-danger">*</span>}
+      </Form.Label>
+      <Form.Control
+        type="file"
+        name={name}
+        onChange={onChange}
+        accept="image/*,.pdf,.doc,.docx"
+        required={required}
+      />
+      {preview && (
+        <div className="mt-2">
+          {value?.type?.startsWith('image/') ? (
+            <img
+              src={preview}
+              alt="Preview"
+              className="img-thumbnail"
+              style={{ maxHeight: '100px' }}
+            />
+          ) : (
+            <div className="border p-2">
+              <i className="fas fa-file me-2"></i>
+              {value?.name}
+            </div>
+          )}
+        </div>
+      )}
+    </Form.Group>
+  );
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -208,22 +249,67 @@ const WeddingForm = () => {
   //   }));
   // };
 
+  // const handleFileChange = (e) => {
+  //   const { name, files } = e.target;
+  //   const file = files[0];
+
+  //   if (!file) return;
+
+  //   // Generate a preview URL
+  //   const reader = new FileReader();
+  //   reader.onloadend = () => {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       images: { ...prev.images, [name]: file },
+  //       previews: { ...prev.previews, [name]: reader.result },
+  //     }));
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
+
+  console.log("Form data:", formData);
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     const file = files[0];
 
     if (!file) return;
 
-    // Generate a preview URL
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData((prev) => ({
-        ...prev,
-        images: { ...prev.images, [name]: file },
-        previews: { ...prev.previews, [name]: reader.result },
-      }));
-    };
-    reader.readAsDataURL(file);
+    // Validate file
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    const ALLOWED_TYPES = [
+      'image/jpeg',
+      'image/png',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+
+    if (file.size > MAX_SIZE) {
+      toast.error(`File too large (max 10MB): ${file.name}`);
+      return;
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      toast.error(`Unsupported file type: ${file.type}`);
+      return;
+    }
+
+    // Create object URL for preview (better for PDFs)
+    const fileUrl = URL.createObjectURL(file);
+
+    setFormData(prev => ({
+      ...prev,
+      documents: {
+        ...prev.documents,
+        [name]: file
+      },
+      previews: {
+        ...prev.previews,
+        [name]: file.type.startsWith('image/')
+          ? fileUrl  // Use object URL for images
+          : fileUrl  // Also use object URL for PDFs (works better in iframes)
+      }
+    }));
   };
 
   const handleClearFields = () => {
@@ -273,143 +359,215 @@ const WeddingForm = () => {
     }
   };
 
+  //submit form 5/18
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     // Prepare groomAddress and brideAddress
+  //     const groomAddress = {
+  //       ...formData.groomAddress,
+  //       customCity:
+  //         formData.groomAddress.city === "Others" ? customCity : undefined,
+  //       customBarangay:
+  //         formData.groomAddress.barangay === "Others"
+  //           ? customBarangay
+  //           : undefined,
+  //     };
+
+  //     const brideAddress = {
+  //       ...formData.brideAddress,
+  //       customCity:
+  //         formData.brideAddress.city === "Others" ? customCity : undefined,
+  //       customBarangay:
+  //         formData.brideAddress.barangay === "Others"
+  //           ? customBarangay
+  //           : undefined,
+  //     };
+
+  //     // Validate required fields
+  //     if (!groomAddress.city || !groomAddress.barangay) {
+  //       toast.error("Please complete the groom's address.");
+  //       return;
+  //     }
+  //     if (!brideAddress.city || !brideAddress.barangay) {
+  //       toast.error("Please complete the bride's address.");
+  //       return;
+  //     }
+
+  //     // Prepare FormData
+  //     const formDataObj = new FormData();
+  //     const imageFields = [
+  //       "GroomNewBaptismalCertificate",
+  //       "GroomNewConfirmationCertificate",
+  //       "GroomMarriageLicense",
+  //       "GroomMarriageBans",
+  //       "GroomOrigCeNoMar",
+  //       "GroomOrigPSA",
+  //       "GroomPermitFromtheParishOftheBride",
+  //       "GroomChildBirthCertificate",
+  //       "GroomOneByOne",
+  //       "BrideNewBaptismalCertificate",
+  //       "BrideNewConfirmationCertificate",
+  //       "BrideMarriageLicense",
+  //       "BrideMarriageBans",
+  //       "BrideOrigCeNoMar",
+  //       "BrideOrigPSA",
+  //       "BridePermitFromtheParishOftheBride",
+  //       "BrideChildBirthCertificate",
+  //       "BrideOneByOne",
+  //     ];
+
+  //     console.log("Form data before submit:", formData);
+  //     imageFields.forEach((field) => {
+  //       const file = formData.images[field];
+  //       if (file) {
+  //         console.log(`Appending ${field} to FormData`, file);
+  //         formDataObj.append(field, file);
+  //       } else {
+  //         console.warn(`⚠️ No file found for ${field}`);
+  //       }
+  //     });
+
+  //     // Append other form data
+  //     Object.entries(formData).forEach(([key, value]) => {
+  //       if (key !== "images") {
+  //         if (key === "groomAddress") {
+  //           formDataObj.append(key, JSON.stringify(groomAddress));
+  //         } else if (key === "brideAddress") {
+  //           formDataObj.append(key, JSON.stringify(brideAddress));
+  //         } else if (Array.isArray(value)) {
+  //           formDataObj.append(key, JSON.stringify(value));
+  //         } else if (typeof value === "object" && value !== null) {
+  //           formDataObj.append(key, JSON.stringify(value));
+  //         } else {
+  //           formDataObj.append(key, value);
+  //         }
+  //       }
+  //     });
+
+  //     // Submit the form
+  //     const response = await axios.post(
+  //       `${process.env.REACT_APP_API}/api/v1/submitWeddingForm`,
+  //       formDataObj,
+  //       config
+  //     );
+
+  //     toast.success("Wedding form submitted successfully!");
+  //     console.log("Response:", response.data);
+
+  //     // Reset form data
+  //     setFormData({
+  //       dateOfApplication: "",
+  //       weddingDate: "",
+  //       weddingTime: "",
+  //       groomName: "",
+  //       groomAddress: {
+  //         BldgNameTower: "",
+  //         LotBlockPhaseHouseNo: "",
+  //         SubdivisionVillageZone: "",
+  //         Street: "",
+  //         District: "",
+  //         barangay: "",
+  //         city: "",
+  //       },
+  //       brideName: "",
+  //       brideAddress: {
+  //         BldgNameTower: "",
+  //         LotBlockPhaseHouseNo: "",
+  //         SubdivisionVillageZone: "",
+  //         Street: "",
+  //         District: "",
+  //         barangay: "",
+  //         city: "",
+  //       },
+  //       groomFather: "",
+  //       groomMother: "",
+  //       brideFather: "",
+  //       brideMother: "",
+  //       Ninong: [],
+  //       Ninang: [],
+  //       images: {},
+  //     });
+
+  //     console.log("Form data after submit:", formData);
+  //   } catch (error) {
+  //     console.error(
+  //       "Error submitting wedding form:",
+  //       error.response ? error.response.data : error.message
+  //     );
+  //     toast.error("Failed to submit wedding form. Please try again.");
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Required documents list
+    const REQUIRED_DOCUMENTS = [
+      'GroomNewBaptismalCertificate',
+      'GroomNewConfirmationCertificate',
+      'GroomMarriageLicense',
+      'GroomMarriageBans',
+      'GroomOrigCeNoMar',
+      'GroomOrigPSA',
+      'GroomPermitFromtheParishOftheBride',
+      'BrideNewBaptismalCertificate',
+      'BrideNewConfirmationCertificate',
+      'BrideMarriageLicense',
+      'BrideMarriageBans',
+      'BrideOrigCeNoMar',
+      'BrideOrigPSA',
+      'BridePermitFromtheParishOftheBride'
+    ];
+
+    // Check for missing documents
+    const missingDocuments = REQUIRED_DOCUMENTS.filter(
+      field => !formData.documents[field]
+    );
+
+    if (missingDocuments.length > 0) {
+      toast.error(`Missing required documents: ${missingDocuments.join(', ')}`);
+      return;
+    }
+
+    // Prepare FormData
+    const formDataObj = new FormData();
+
+    // Append all documents
+    Object.entries(formData.documents).forEach(([fieldName, file]) => {
+      if (file) {
+        formDataObj.append(fieldName, file);
+      }
+    });
+
+    // Append other form data (excluding documents and previews)
+    const { documents, previews, ...otherData } = formData;
+    Object.entries(otherData).forEach(([key, value]) => {
+      if (typeof value === 'object' && value !== null) {
+        formDataObj.append(key, JSON.stringify(value));
+      } else {
+        formDataObj.append(key, value);
+      }
+    });
+
+    // Submit the form
     try {
-      // Prepare groomAddress and brideAddress
-      const groomAddress = {
-        ...formData.groomAddress,
-        customCity:
-          formData.groomAddress.city === "Others" ? customCity : undefined,
-        customBarangay:
-          formData.groomAddress.barangay === "Others"
-            ? customBarangay
-            : undefined,
-      };
-
-      const brideAddress = {
-        ...formData.brideAddress,
-        customCity:
-          formData.brideAddress.city === "Others" ? customCity : undefined,
-        customBarangay:
-          formData.brideAddress.barangay === "Others"
-            ? customBarangay
-            : undefined,
-      };
-
-      // Validate required fields
-      if (!groomAddress.city || !groomAddress.barangay) {
-        toast.error("Please complete the groom's address.");
-        return;
-      }
-      if (!brideAddress.city || !brideAddress.barangay) {
-        toast.error("Please complete the bride's address.");
-        return;
-      }
-
-      // Prepare FormData
-      const formDataObj = new FormData();
-      const imageFields = [
-        "GroomNewBaptismalCertificate",
-        "GroomNewConfirmationCertificate",
-        "GroomMarriageLicense",
-        "GroomMarriageBans",
-        "GroomOrigCeNoMar",
-        "GroomOrigPSA",
-        "GroomPermitFromtheParishOftheBride",
-        "GroomChildBirthCertificate",
-        "GroomOneByOne",
-        "BrideNewBaptismalCertificate",
-        "BrideNewConfirmationCertificate",
-        "BrideMarriageLicense",
-        "BrideMarriageBans",
-        "BrideOrigCeNoMar",
-        "BrideOrigPSA",
-        "BridePermitFromtheParishOftheBride",
-        "BrideChildBirthCertificate",
-        "BrideOneByOne",
-      ];
-
-      console.log("Form data before submit:", formData);
-      imageFields.forEach((field) => {
-        const file = formData.images[field];
-        if (file) {
-          console.log(`Appending ${field} to FormData`, file);
-          formDataObj.append(field, file);
-        } else {
-          console.warn(`⚠️ No file found for ${field}`);
-        }
-      });
-
-      // Append other form data
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key !== "images") {
-          if (key === "groomAddress") {
-            formDataObj.append(key, JSON.stringify(groomAddress));
-          } else if (key === "brideAddress") {
-            formDataObj.append(key, JSON.stringify(brideAddress));
-          } else if (Array.isArray(value)) {
-            formDataObj.append(key, JSON.stringify(value));
-          } else if (typeof value === "object" && value !== null) {
-            formDataObj.append(key, JSON.stringify(value));
-          } else {
-            formDataObj.append(key, value);
-          }
-        }
-      });
-
-      // Submit the form
       const response = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/submitWeddingForm`,
         formDataObj,
-        config
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          withCredentials: true,
+        }
       );
 
       toast.success("Wedding form submitted successfully!");
-      console.log("Response:", response.data);
-
-      // Reset form data
-      setFormData({
-        dateOfApplication: "",
-        weddingDate: "",
-        weddingTime: "",
-        groomName: "",
-        groomAddress: {
-          BldgNameTower: "",
-          LotBlockPhaseHouseNo: "",
-          SubdivisionVillageZone: "",
-          Street: "",
-          District: "",
-          barangay: "",
-          city: "",
-        },
-        brideName: "",
-        brideAddress: {
-          BldgNameTower: "",
-          LotBlockPhaseHouseNo: "",
-          SubdivisionVillageZone: "",
-          Street: "",
-          District: "",
-          barangay: "",
-          city: "",
-        },
-        groomFather: "",
-        groomMother: "",
-        brideFather: "",
-        brideMother: "",
-        Ninong: [],
-        Ninang: [],
-        images: {},
-      });
-
-      console.log("Form data after submit:", formData);
+      // Reset form...
     } catch (error) {
-      console.error(
-        "Error submitting wedding form:",
-        error.response ? error.response.data : error.message
-      );
-      toast.error("Failed to submit wedding form. Please try again.");
+      // Error handling...
     }
   };
 
@@ -1034,22 +1192,44 @@ const WeddingForm = () => {
             <fieldset className="form-group">
               <legend>Upload Documents</legend>
 
+              {/* Bride's Documents Section */}
               <Row className="mb-3">
-                <Col md={6}>
+                <Col md={6} sx={{ marginBottom: "20px" }}>
                   <Form.Group>
                     <Form.Label>Bride's Baptismal Certificate</Form.Label>
                     <Form.Control
                       type="file"
                       name="BrideNewBaptismalCertificate"
                       onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
                     />
                     {formData.previews?.BrideNewBaptismalCertificate && (
-                      <img
-                        src={formData.previews.BrideNewBaptismalCertificate}
-                        alt="Preview"
-                        className="img-thumbnail mt-2"
-                        style={{ maxHeight: "150px" }}
-                      />
+                      formData.documents?.BrideNewBaptismalCertificate?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.BrideNewBaptismalCertificate}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.BrideNewBaptismalCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.BrideNewBaptismalCertificate?.name || 'Document Preview'}
+                          </div>
+                        </div >
+                      )
                     )}
                   </Form.Group>
                 </Col>
@@ -1061,14 +1241,35 @@ const WeddingForm = () => {
                       type="file"
                       name="BrideNewConfirmationCertificate"
                       onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
                     />
                     {formData.previews?.BrideNewConfirmationCertificate && (
-                      <img
-                        src={formData.previews.BrideNewConfirmationCertificate}
-                        alt="Preview"
-                        className="img-thumbnail mt-2"
-                        style={{ maxHeight: "150px" }}
-                      />
+                      formData.documents?.BrideNewConfirmationCertificate?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.BrideNewConfirmationCertificate}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.BrideNewConfirmationCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.BrideNewConfirmationCertificate?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
                     )}
                   </Form.Group>
                 </Col>
@@ -1082,14 +1283,35 @@ const WeddingForm = () => {
                       type="file"
                       name="BrideMarriageLicense"
                       onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
                     />
                     {formData.previews?.BrideMarriageLicense && (
-                      <img
-                        src={formData.previews.BrideMarriageLicense}
-                        alt="Preview"
-                        className="img-thumbnail mt-2"
-                        style={{ maxHeight: "150px" }}
-                      />
+                      formData.documents?.BrideMarriageLicense?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.BrideMarriageLicense}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.BrideMarriageLicense}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.BrideMarriageLicense?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
                     )}
                   </Form.Group>
                 </Col>
@@ -1101,14 +1323,35 @@ const WeddingForm = () => {
                       type="file"
                       name="BrideMarriageBans"
                       onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
                     />
                     {formData.previews?.BrideMarriageBans && (
-                      <img
-                        src={formData.previews.BrideMarriageBans}
-                        alt="Preview"
-                        className="img-thumbnail mt-2"
-                        style={{ maxHeight: "150px" }}
-                      />
+                      formData.documents?.BrideMarriageBans?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.BrideMarriageBans}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.BrideMarriageBans}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.BrideMarriageBans?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
                     )}
                   </Form.Group>
                 </Col>
@@ -1122,14 +1365,35 @@ const WeddingForm = () => {
                       type="file"
                       name="BrideOrigCeNoMar"
                       onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
                     />
                     {formData.previews?.BrideOrigCeNoMar && (
-                      <img
-                        src={formData.previews.BrideOrigCeNoMar}
-                        alt="Preview"
-                        className="img-thumbnail mt-2"
-                        style={{ maxHeight: "150px" }}
-                      />
+                      formData.documents?.BrideOrigCeNoMar?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.BrideOrigCeNoMar}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.BrideOrigCeNoMar}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.BrideOrigCeNoMar?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
                     )}
                   </Form.Group>
                 </Col>
@@ -1141,14 +1405,35 @@ const WeddingForm = () => {
                       type="file"
                       name="BrideOrigPSA"
                       onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
                     />
                     {formData.previews?.BrideOrigPSA && (
-                      <img
-                        src={formData.previews.BrideOrigPSA}
-                        alt="Preview"
-                        className="img-thumbnail mt-2"
-                        style={{ maxHeight: "150px" }}
-                      />
+                      formData.documents?.BrideOrigPSA?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.BrideOrigPSA}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.BrideOrigPSA}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.BrideOrigPSA?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
                     )}
                   </Form.Group>
                 </Col>
@@ -1162,14 +1447,35 @@ const WeddingForm = () => {
                       type="file"
                       name="BridePermitFromtheParishOftheBride"
                       onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
                     />
                     {formData.previews?.BridePermitFromtheParishOftheBride && (
-                      <img
-                        src={formData.previews.BridePermitFromtheParishOftheBride}
-                        alt="Preview"
-                        className="img-thumbnail mt-2"
-                        style={{ maxHeight: "150px" }}
-                      />
+                      formData.documents?.BridePermitFromtheParishOftheBride?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.BridePermitFromtheParishOftheBride}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.BridePermitFromtheParishOftheBride}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.BridePermitFromtheParishOftheBride?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
                     )}
                   </Form.Group>
                 </Col>
@@ -1181,14 +1487,34 @@ const WeddingForm = () => {
                       type="file"
                       name="BrideChildBirthCertificate"
                       onChange={handleFileChange}
+                      accept="image/*,.pdf"
                     />
                     {formData.previews?.BrideChildBirthCertificate && (
-                      <img
-                        src={formData.previews.BrideChildBirthCertificate}
-                        alt="Preview"
-                        className="img-thumbnail mt-2"
-                        style={{ maxHeight: "150px" }}
-                      />
+                      formData.documents?.BrideChildBirthCertificate?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.BrideChildBirthCertificate}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.BrideChildBirthCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.BrideChildBirthCertificate?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
                     )}
                   </Form.Group>
                 </Col>
@@ -1202,6 +1528,7 @@ const WeddingForm = () => {
                       type="file"
                       name="BrideOneByOne"
                       onChange={handleFileChange}
+                      accept="image/*"
                     />
                     {formData.previews?.BrideOneByOne && (
                       <img
@@ -1214,8 +1541,360 @@ const WeddingForm = () => {
                   </Form.Group>
                 </Col>
               </Row>
+            </fieldset>
 
+             <fieldset className="form-group">
+             
 
+              {/* Bride's Documents Section */}
+              <Row className="mb-3">
+                <Col md={6} sx={{ marginBottom: "20px" }}>
+                  <Form.Group>
+                    <Form.Label>Grooms's Baptismal Certificate</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="GroomNewBaptismalCertificate"
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
+                    />
+                    {formData.previews?.GroomNewBaptismalCertificate && (
+                      formData.documents?.GroomNewBaptismalCertificate?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.GroomNewBaptismalCertificate}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.GroomNewBaptismalCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.GroomNewBaptismalCertificate?.name || 'Document Preview'}
+                          </div>
+                        </div >
+                      )
+                    )}
+                  </Form.Group>
+                </Col>
+
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Groom's Confirmation Certificate</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="GroomNewConfirmationCertificate"
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
+                    />
+                    {formData.previews?.GroomNewConfirmationCertificate && (
+                      formData.documents?.GroomNewConfirmationCertificate?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.GroomNewConfirmationCertificate}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.GroomNewConfirmationCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.GroomNewConfirmationCertificate?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row className="mb-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Groom's Marriage License</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="GroomMarriageLicense"
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
+                    />
+                    {formData.previews?.GroomMarriageLicense && (
+                      formData.documents?.GroomMarriageLicense?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.GroomMarriageLicense}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.GroomMarriageLicense}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.GroomMarriageLicense?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </Form.Group>
+                </Col>
+
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Grooms's Marriage Bans</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="GroomMarriageBans"
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
+                    />
+                    {formData.previews?.GroomMarriageBans && (
+                      formData.documents?.GroomMarriageBans?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.GroomMarriageBans}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.GroomMarriageBans}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.GroomMarriageBans?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row className="mb-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Groom's Original CeNoMar</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="GroomOrigCeNoMar"
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
+                    />
+                    {formData.previews?.GroomOrigCeNoMar && (
+                      formData.documents?.GroomOrigCeNoMar?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.GroomOrigCeNoMar}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.GroomOrigCeNoMar}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.GroomOrigCeNoMar?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </Form.Group>
+                </Col>
+
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Grooms's Original PSA</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="GroomOrigPSA"
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
+                    />
+                    {formData.previews?.GroomOrigPSA && (
+                      formData.documents?.GroomOrigPSA?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.GroomOrigPSA}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.GroomOrigPSA}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.GroomOrigPSA?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row className="mb-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Grooms's Permit From the Parish Of the Bride</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="GroomPermitFromtheParishOftheBride"
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                      required
+                    />
+                    {formData.previews?.GroomPermitFromtheParishOftheBride && (
+                      formData.documents?.GroomPermitFromtheParishOftheBride?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.GroomPermitFromtheParishOftheBride}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.GroomPermitFromtheParishOftheBride}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.GroomPermitFromtheParishOftheBride?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </Form.Group>
+                </Col>
+
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Grooms's Child Birth Certificate</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="GroomChildBirthCertificate"
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf"
+                    />
+                    {formData.previews?.GroomChildBirthCertificate && (
+                      formData.documents?.GroomChildBirthCertificate?.type?.startsWith('image/') ? (
+                        <img
+                          src={formData.previews.GroomChildBirthCertificate}
+                          alt="Preview"
+                          className="img-thumbnail mt-2"
+                          style={{ maxHeight: "150px" }}
+                        />
+                      ) : (
+                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                          <iframe
+                            src={`${formData.previews.GroomChildBirthCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
+                            title="Document Preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+
+                            }}
+                          />
+                          <div className="mt-2 text-muted small">
+                            {formData.documents?.GroomChildBirthCertificate?.name || 'PDF Document'}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row className="mb-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Groom's One By One Picture</Form.Label>
+                    <Form.Control
+                      type="file"
+                      name="GroomOneByOne"
+                      onChange={handleFileChange}
+                      accept="image/*"
+                    />
+                    {formData.previews?.GroomOneByOne && (
+                      <img
+                        src={formData.previews.GroomOneByOne}
+                        alt="Preview"
+                        className="img-thumbnail mt-2"
+                        style={{ maxHeight: "150px" }}
+                      />
+                    )}
+                  </Form.Group>
+                </Col>
+              </Row>
             </fieldset>
 
             <button type="submit">Submit</button>

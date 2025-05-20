@@ -78,6 +78,11 @@
 
 .user-wedding-date-box {
     /* Add your styles here */
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .user-additional-req-comments {
