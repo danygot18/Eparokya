@@ -1,12 +1,39 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table } from "react-bootstrap";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import SideBar from "../../SideBar";
+import {
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Container,
+  Stack,
+  CircularProgress
+} from "@mui/material";
+import { Delete } from "@mui/icons-material";
 
 const ActivityType = () => {
   const [activityTypes, setActivityTypes] = useState([]);
   const [newActivity, setNewActivity] = useState("");
-  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     fetchActivityTypes();
@@ -14,145 +41,187 @@ const ActivityType = () => {
 
   const fetchActivityTypes = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllActivityTypes`);
+      setLoading(true);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/getAllActivityTypes`,
+        { withCredentials: true }
+      );
       setActivityTypes(response.data);
     } catch (error) {
       console.error("Error fetching activity types", error);
+      toast.error("Failed to load activity types");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this activity type?")) {
-      try {
-        await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteActivityType/${id}`);
-        fetchActivityTypes();
-      } catch (error) {
-        console.error("Error deleting activity type", error);
-      }
+  const handleOpenDialog = (id) => {
+    setSelectedId(id);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedId(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    console.log("Deleting ActivityType ID:", selectedId); 
+    if (!selectedId) return;
+
+    try {
+      setDeleteLoading(true);
+      await axios.delete(
+        `${process.env.REACT_APP_API}/api/v1/deleteActivityType/${selectedId}`,
+        { withCredentials: true }
+      );
+      toast.success("Activity type deleted successfully");
+      fetchActivityTypes();
+    } catch (error) {
+      console.error("Error deleting activity type", error);
+      toast.error("Failed to delete activity type");
+    } finally {
+      setDeleteLoading(false);
+      setOpenDialog(false);
+      setSelectedId(null);
     }
   };
 
   const handleCreate = async () => {
-    if (!newActivity.trim()) return;
+    if (!newActivity.trim()) {
+      toast.error("Activity type name cannot be empty");
+      return;
+    }
+
     try {
-      await axios.post(`${process.env.REACT_APP_API}/api/v1/createActivityType`, { name: newActivity });
+      setLoading(true);
+      await axios.post(
+        `${process.env.REACT_APP_API}/api/v1/createActivityType`,
+        { name: newActivity },
+        { withCredentials: true }
+      );
+      toast.success("Activity type created successfully");
       setNewActivity("");
       fetchActivityTypes();
     } catch (error) {
       console.error("Error creating activity type", error);
+      toast.error(
+        error.response?.data?.message || "Failed to create activity type"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={styles.wrapper}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideBar />
-      <div style={styles.content}>
-        <div style={styles.leftPane}>
-          <h2 style={styles.title}>Add Activity Type</h2>
-          <input
-            type="text"
-            value={newActivity}
-            onChange={(e) => setNewActivity(e.target.value)}
-            style={styles.input}
-            placeholder="Enter activity type"
-          />
-          <button style={styles.submitButton} onClick={handleCreate}>Add Activity</button>
-        </div>
-        <div style={styles.rightPane}>
-          <h2 style={styles.title}>Activity Types</h2>
-          <Table striped bordered hover style={styles.table}>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activityTypes.map((activity) => (
-                <tr key={activity._id}>
-                  <td>{activity.name}</td>
-                  <td style={styles.actions}>
-                    <button style={styles.deleteButton} onClick={() => handleDelete(activity._id)}>Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-      </div>
-    </div>
-  );
-};
+      <Container maxWidth="xl" sx={{ p: 3 }}>
+        <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
+          {/* Left Pane - Form */}
+          <Paper elevation={3} sx={{ p: 3, flex: 1 }}>
+            <Typography variant="h5" component="h2" gutterBottom>
+              Add Activity Type
+            </Typography>
+            <Stack spacing={2}>
+              <TextField
+                label="Activity Type Name"
+                variant="outlined"
+                fullWidth
+                value={newActivity}
+                onChange={(e) => setNewActivity(e.target.value)}
+                disabled={loading}
+              />
+              <Button
+                variant="contained"
+                onClick={handleCreate}
+                disabled={loading || !newActivity.trim()}
+                sx={{ alignSelf: "flex-start" }}
+              >
+                {loading ? <CircularProgress size={24} /> : "Add Activity"}
+              </Button>
+            </Stack>
+          </Paper>
 
-const styles = {
-  wrapper: {
-    display: "flex",
-    minHeight: "100vh",
-    backgroundColor: "#e8f5e9",
-  },
-  content: {
-    display: "flex",
-    flex: 1,
-    padding: "20px",
-    gap: "40px",
-  },
-  leftPane: {
-    flex: 1,
-    backgroundColor: "#d9ead3",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-  rightPane: {
-    flex: 2,
-    backgroundColor: "#d9ead3",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: "20px",
-    color: "#333",
-    fontSize: "24px",
-    fontWeight: "bold",
-  },
-  input: {
-    padding: "10px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    fontSize: "16px",
-    width: "100%",
-    marginBottom: "10px",
-  },
-  submitButton: {
-    padding: "10px",
-    borderRadius: "6px",
-    backgroundColor: "#388e3c",
-    color: "#fff",
-    border: "none",
-    fontSize: "16px",
-    cursor: "pointer",
-    width: "100%",
-  },
-  table: {
-    width: "100%",
-    textAlign: "center",
-  },
-  actions: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "10px",
-  },
-  deleteButton: {
-    padding: "6px",
-    borderRadius: "6px",
-    border: "none",
-    backgroundColor: "#c62828",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
+          {/* Right Pane - Table */}
+          <Paper elevation={3} sx={{ p: 3, flex: 2 }}>
+            <Typography variant="h5" component="h2" gutterBottom>
+              Activity Types
+            </Typography>
+            {loading ? (
+              <Box display="flex" justifyContent="center" py={4}>
+                <CircularProgress />
+              </Box>
+            ) : activityTypes.length > 0 ? (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+                      <TableCell sx={{ fontWeight: "bold" }} align="right">
+                        Actions
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {activityTypes.map((activity) => (
+                      <TableRow key={activity._id} hover>
+                        <TableCell>{activity.name}</TableCell>
+                        <TableCell align="right">
+                          <Button
+                            aria-label="delete"
+                            onClick={() => handleOpenDialog(activity._id)}
+                            color="error"
+                            disabled={loading}
+                          >
+                            <Delete />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Typography variant="body1" color="textSecondary" py={2}>
+                No activity types found
+              </Typography>
+            )}
+          </Paper>
+        </Stack>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            Confirm Deletion
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to delete this activity type? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} disabled={deleteLoading}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmDelete}
+              color="error"
+              autoFocus
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? <CircularProgress size={24} /> : "Delete"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    </Box>
+  );
 };
 
 export default ActivityType;

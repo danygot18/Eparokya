@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Form } from 'react-bootstrap';
+import { Table, Form } from 'react-bootstrap';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import MetaData from '../../Layout/MetaData';
@@ -7,6 +7,7 @@ import Loader from '../../Layout/Loader';
 import SideBar from '../SideBar';
 import axios from 'axios';
 import { successMsg, errMsg } from '../../../Utils/helpers';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress, Button } from '@mui/material';
 
 const UsersList = () => {
   const [loading, setLoading] = useState(true);
@@ -14,6 +15,9 @@ const UsersList = () => {
   const [search, setSearch] = useState('');
   const [ministryCategories, setMinistryCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const navigate = useNavigate();
 
   const config = { withCredentials: true };
@@ -25,7 +29,6 @@ const UsersList = () => {
         config
       );
       setAllUsers(data.users || []);
-      console.log(data.users);
       setLoading(false);
     } catch (error) {
       errMsg(error.response?.data.message || 'Failed to load users');
@@ -44,18 +47,29 @@ const UsersList = () => {
     }
   };
 
-  const deleteUser = async (id) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        setLoading(true);
-        await axios.delete(`${process.env.REACT_APP_API}/api/v1/admin/user/${id}`, config);
-        successMsg("User deleted successfully");
-        listUsers(); // Refresh the user list
-      } catch (error) {
-        errMsg(error.response?.data.message || "Failed to delete user");
-      } finally {
-        setLoading(false);
-      }
+  const handleOpenDeleteDialog = (user) => {
+    setUserToDelete(user);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    setUserToDelete(null);
+  };
+
+  const deleteUser = async () => {
+    if (!userToDelete) return;
+    
+    try {
+      setDeleteLoading(true);
+      await axios.delete(`${process.env.REACT_APP_API}/api/v1/admin/user/${userToDelete._id}`, config);
+      successMsg("User deleted successfully");
+      listUsers(); // Refresh the user list
+    } catch (error) {
+      errMsg(error.response?.data.message || "Failed to delete user");
+    } finally {
+      setDeleteLoading(false);
+      handleCloseDeleteDialog();
     }
   };
 
@@ -69,16 +83,15 @@ const UsersList = () => {
     user.email.toLowerCase().includes(search.toLowerCase()) 
   );
 
-
   return (
-    <div >
+    <div>
       <MetaData title="All Users" />
 
       {/* Flexbox Layout to Align Sidebar & User List Side by Side */}
       <div className="d-flex">
 
         {/* Sidebar: Fixed width, full height */}
-        <div className="bg-light " style={{ width: '250px' }}>
+        <div className="bg-light" style={{ width: '250px' }}>
           <SideBar />
         </div>
 
@@ -86,8 +99,8 @@ const UsersList = () => {
         <div className="flex-grow-1 p-4">
           <h1 className="mb-4">All Users</h1>
 
-        {/* Search Input */}
-        <Form className="mb-3">
+          {/* Search Input */}
+          <Form className="mb-3">
             <Form.Group controlId="search">
               <Form.Control
                 type="text"
@@ -124,7 +137,6 @@ const UsersList = () => {
             <Table bordered striped hover responsive>
               <thead>
                 <tr>
-                  {/* <th>User ID</th> */}
                   <th>User Name</th>
                   <th>Email</th>
                   <th>Role</th>
@@ -137,7 +149,6 @@ const UsersList = () => {
                 {allUsers.length > 0 ? (
                   allUsers.map((user) => (
                     <tr key={user._id}>
-                      {/* <td>{user._id}</td> */}
                       <td>{user.name}</td>
                       <td>{user.email}</td>
                       <td>{user.isAdmin ? 'Admin' : 'User'}</td>
@@ -147,16 +158,16 @@ const UsersList = () => {
                       <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                       <td>
                         <Button
-                          variant="primary"
+                          color="primary"
                           className="btn-sm mx-1"
                           onClick={() => navigate(`/admin/user/${user._id}`)}
                         >
-                          <FaEdit />
+                          <FaEdit variant="primary"/>
                         </Button>
                         <Button
-                          variant="danger"
+                          color="error" 
                           className="btn-sm mx-1"
-                          onClick={() => deleteUser(user._id)}
+                          onClick={() => handleOpenDeleteDialog(user)}
                         >
                           <FaTrashAlt />
                         </Button>
@@ -172,8 +183,37 @@ const UsersList = () => {
             </Table>
           )}
         </div>
-
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Delete User Confirmation</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete user <strong>{userToDelete?.name}</strong> ({userToDelete?.email})?
+            This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} disabled={deleteLoading}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={deleteUser} 
+            color="error" 
+            autoFocus
+            disabled={deleteLoading}
+            
+          >
+            {deleteLoading ? <CircularProgress size={24} /> : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

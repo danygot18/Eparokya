@@ -1,263 +1,79 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import MetaData from "../Layout/MetaData";
+import React, { useState } from "react";
+import { Box, Tab, Tabs } from "@mui/material";
+import PropTypes from 'prop-types';
+import Dashboard1 from "./DashboardsAnalythics/Dashboard1";
+import Dashboard2 from "./DashboardsAnalythics/Dashboard2";
+import Dashboard3 from "./DashboardsAnalythics/Dashboard3";
 import SideBar from "./SideBar";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  PieController,
-  ArcElement,
-  Legend,
-  LineElement,
-  PointElement,
-} from "chart.js";
-import { Bar, Pie, Line } from "react-chartjs-2";
+import MetaData from "../Layout/MetaData";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, PieController, ArcElement, Title, Tooltip, Legend, LineElement, PointElement);
+function CustomTabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+CustomTabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
 
 const Dashboard = () => {
-  const [registeredUsersCount, setRegisteredUsersCount] = useState(0);
-  const [weddingData, setWeddingData] = useState([]);
-  const [baptismData, setBaptismData] = useState([]);
-  const [funeralData, setFuneralData] = useState([]);
-  const [weddingStatus, setWeddingStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
-  const [baptismStatus, setBaptismStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
-  const [funeralStatus, setFuneralStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
-  const [ministryCategoryData, setMinistryCategoryData] = useState([]);
-  const [sentimentData, setSentimentData] = useState({ positive: [], negative: [] });
-  const [loading, setLoading] = useState(true);
+  const [value, setValue] = useState(0);
 
-  const config = {
-    withCredentials: true,
-
-  };
-
-
-  const convertToStatusObject = (data) => {
-    const statusObj = { pending: 0, confirmed: 0, cancelled: 0 };
-    data.forEach((item) => {
-      if (item._id) {
-        statusObj[item._id.toLowerCase()] = item.count;
-      }
-    });
-    return statusObj;
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const usersCountRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/registeredUsersCount`, config);
-        setRegisteredUsersCount(usersCountRes.data.count);
-
-        // Confirmed per month
-        const weddingRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/weddingsPerMonth`, config);
-        setWeddingData(weddingRes.data);
-
-        const baptismRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/baptsimsPerMonth`, config);
-        setBaptismData(baptismRes.data);
-
-        const funeralRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/funeralsPerMonth`, config);
-        setFuneralData(funeralRes.data);
-
-        const sentimentRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/sentimentPerMonth`, config);
-        setSentimentData({ positive: sentimentRes.data.positive, negative: sentimentRes.data.negative });
-        // Status counts
-        const weddingStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/weddingStatusCount`, config);
-        const baptismStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/baptismStatusCount`, config);
-        const funeralStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/funeralStatusCount`, config);
-
-        setWeddingStatus(convertToStatusObject(weddingStatusRes.data));
-        setBaptismStatus(convertToStatusObject(baptismStatusRes.data));
-        setFuneralStatus(convertToStatusObject(funeralStatusRes.data));
-
-        // Ministry category data
-        const ministryCategoryRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/admin/getUsersGroupedByMinistryCategory`, config);
-        setMinistryCategoryData(ministryCategoryRes.data.data);
-
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching chart data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const generateChartData = (label, data, color) => ({
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    datasets: [
-      {
-        label,
-        data,
-        backgroundColor: color,
-      },
-    ],
-  });
-
-  const generatePieData = (data) => ({
-    labels: ["Pending", "Confirmed", "Cancelled"],
-    datasets: [
-      {
-        data: [data.pending, data.confirmed, data.cancelled],
-        backgroundColor: ["#FFCE56", "#36A2EB", "#FF6384"],
-        hoverBackgroundColor: ["#FFCE56", "#36A2EB", "#FF6384"],
-      },
-    ],
-  });
-
-  const generateMinistryCategoryChartData = (data) => ({
-    labels: data.map(item => item.ministryCategory),
-    datasets: [
-      {
-        label: "Users",
-        data: data.map(item => item.userCount),
-        backgroundColor: "rgba(255, 159, 64, 0.6)",
-      },
-    ],
-  });
-
-  const options = {
-    scales: {
-      x: {
-        type: "category",
-      },
-      y: {
-        beginAtZero: true,
-      },
-    },
-  };
-
-  const generateSentimentChartData = () => ({
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    datasets: [
-      {
-        label: "Positive Sentiment",
-        data: sentimentData.positive,
-        borderColor: "green",
-        fill: false,
-      },
-      {
-        label: "Negative Sentiment",
-        data: sentimentData.negative,
-        borderColor: "red",
-        fill: false,
-      },
-    ],
-  });
-
-  // const options = {
-  //   scales: {
-  //     x: {
-  //       type: "category",
-  //     },
-  //     y: {
-  //       beginAtZero: true,
-  //     },
-  //   },
-  // };
-
-  const chartCardStyle = {
-    border: "1px solid #ddd",
-    borderRadius: "8px",
-    padding: "16px",
-    margin: "10px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    backgroundColor: "#fff",
-    textAlign: "center",
-    flex: "1 1 calc(50% - 20px)",
-    maxWidth: "calc(50% - 20px)",
-    height: "300px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-  };
-
-  const chartContainerStyle = {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  };
-
-  const pieChartContainerStyle = {
-    maxWidth: "100%",
-    height: "200px",
-    margin: "0 auto",
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
   };
 
   return (
-    <div style={{ display: "flex" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideBar />
-      <div style={{ flex: 1, padding: "20px" }}>
-        <MetaData title={"Dashboard"} />
+      <MetaData title="Admin Live" />
+
+
+      <Box sx={{ flexGrow: 1, p: 3 }}>
         <h1>Statistics Dashboard</h1>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 
-        {loading ? (
-          <p>Loading charts...</p>
-        ) : (
-          <div style={chartContainerStyle}>
-            <div style={chartCardStyle}>
-              <h5>Total Registered Users</h5>
-              <p style={{ fontSize: "24px", fontWeight: "bold" }}>{loading ? "Loading..." : registeredUsersCount}</p>
-            </div>
+          <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+            <Tab label="Basic Stats" {...a11yProps(0)} />
+            <Tab label="Status Distribution" {...a11yProps(1)} />
+            <Tab label="Advanced Analytics" {...a11yProps(2)} />
+          </Tabs>
+        </Box>
 
-            {/* Bar */}
-            <div style={chartCardStyle}>
-              <h5>Confirmed Weddings Per Month</h5>
-              <Bar data={generateChartData("Weddings", weddingData, "rgba(75, 192, 192, 0.6)")} options={options} />
-            </div>
+        <CustomTabPanel value={value} index={0}>
+          <Dashboard1 />
+        </CustomTabPanel>
 
-            <div style={chartCardStyle}>
-              <h5>Confirmed Baptisms Per Month</h5>
-              <Bar data={generateChartData("Baptisms", baptismData, "rgba(153, 102, 255, 0.6)")} options={options} />
-            </div>
+        <CustomTabPanel value={value} index={1}>
+          <Dashboard2 />
+        </CustomTabPanel>
 
-            <div style={chartCardStyle}>
-              <h5>Confirmed Funerals Per Month</h5>
-              <Bar data={generateChartData("Funerals", funeralData, "rgba(255, 99, 132, 0.6)")} options={options} />
-            </div>
+        <CustomTabPanel value={value} index={2}>
+          <Dashboard3 />
+        </CustomTabPanel>
 
-            {/* Ministry Category Bar */}
-            <div style={chartCardStyle}>
-              <h5>Users Grouped by Ministry Category</h5>
-              <Bar data={generateMinistryCategoryChartData(ministryCategoryData)} options={options} />
-            </div>
-
-            {/* Pie */}
-            <div style={chartCardStyle}>
-              <div style={pieChartContainerStyle}>
-                <h5>Wedding Status Distribution</h5>
-                <Pie data={generatePieData(weddingStatus)} />
-              </div>
-            </div>
-
-            <div style={chartCardStyle}>
-              <div style={pieChartContainerStyle}>
-                <h5>Baptism Status Distribution</h5>
-                <Pie data={generatePieData(baptismStatus)} />
-              </div>
-            </div>
-
-            <div style={chartCardStyle}>
-              <div style={pieChartContainerStyle}>
-                <h5>Funeral Status Distribution</h5>
-                <Pie data={generatePieData(funeralStatus)} />
-              </div>
-            </div>
-
-            <div style={chartCardStyle}>
-              <h5>Sentiment Analysis Trends</h5>
-              <Line data={generateSentimentChartData()} options={options} />
-            </div>
-
-          </div>
-        )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

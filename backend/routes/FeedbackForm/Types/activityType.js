@@ -5,6 +5,6 @@ const activityTypeController = require("../../../controllers/FeedbackForm/Types/
 router.post("/createActivityType", activityTypeController.createActivityType);
 router.get("/getAllActivityTypes", activityTypeController.getAllActivityTypes);
 router.get("/getActivityTypeById/:activityTypeId", activityTypeController.getActivityTypeById);
-router.delete("/deleteActivityType/:activityTypeId", activityTypeController.deleteActivityType);
+router.delete("/deleteActivityType/:selectedId", activityTypeController.deleteActivityType);
 
 module.exports = router;

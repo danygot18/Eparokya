@@ -1,15 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import SideBar from '../SideBar';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-import './memberYear.css';
+import SideBar from '../SideBar';
+import {
+    Box,
+    Container,
+    Paper,
+    Typography,
+    TextField,
+    Button,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
+    CircularProgress,
+    List,
+    ListItem,
+    ListItemText,
+    Divider,
+    Stack
+} from '@mui/material';
+import { Delete } from '@mui/icons-material';
 
 const MemberBatchYear = () => {
     const [yearRanges, setYearRanges] = useState([]);
     const [startYear, setStartYear] = useState('');
     const [endYear, setEndYear] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [yearToDelete, setYearToDelete] = useState(null);
 
     useEffect(() => {
         fetchYearRanges();
@@ -17,14 +40,17 @@ const MemberBatchYear = () => {
 
     const fetchYearRanges = async () => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllMemberYear`,{
-                withCredentials: true,
-            });
-
-            // setYearRanges(Array.isArray(response.data) ? response.data : []);
-            setYearRanges(response.data.data);
+            setLoading(true);
+            const response = await axios.get(
+                `${process.env.REACT_APP_API}/api/v1/getAllMemberYear`,
+                { withCredentials: true }
+            );
+            setYearRanges(response.data.data || []);
         } catch (error) {
             console.error('Error fetching year ranges:', error);
+            toast.error('Failed to load year ranges');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -33,13 +59,17 @@ const MemberBatchYear = () => {
             toast.error('Both start year and end year are required.');
             return;
         }
-    
-        const yearRange = { startYear, endYear };
-    
+
+        if (parseInt(startYear) >= parseInt(endYear)) {
+            toast.error('End year must be greater than start year');
+            return;
+        }
+
         try {
+            setLoading(true);
             await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/createMemberYear`,
-                { yearRange },
+                { yearRange: { startYear, endYear } },
                 { withCredentials: true }
             );
             toast.success('Year range successfully added.');
@@ -51,63 +81,159 @@ const MemberBatchYear = () => {
             toast.error(
                 error.response?.data?.message || 'There was an error adding the year range.'
             );
+        } finally {
+            setLoading(false);
         }
     };
-    
 
-    const handleDelete = async (id) => {
+    const handleOpenDeleteDialog = (year) => {
+        setYearToDelete(year);
+        setOpenDeleteDialog(true);
+    };
+
+    const handleCloseDeleteDialog = () => {
+        setOpenDeleteDialog(false);
+        setYearToDelete(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!yearToDelete) return;
+
         try {
-            await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteMemberYear/${id}`);
+            setDeleteLoading(true);
+            await axios.delete(
+                `${process.env.REACT_APP_API}/api/v1/deleteMemberYear/${yearToDelete._id}`,
+                { withCredentials: true }
+            );
+            toast.success('Year range deleted successfully');
             fetchYearRanges();
         } catch (error) {
             console.error('Error deleting year range:', error);
+            toast.error('Failed to delete year range');
+        } finally {
+            setDeleteLoading(false);
+            handleCloseDeleteDialog();
         }
     };
 
     return (
-        <div className="memberYear-wrapper">
+        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
             <SideBar />
-            <div className="memberYear-content">
-                <div className="memberYear-leftPane">
-                    <h2 className="memberYear-title">Add Year Range</h2>
-                    <div className="memberYear-form">
-                        <div className="memberYear-formGroup">
-                            <label className="memberYear-label">Start Year</label>
-                            <input
+            <Container maxWidth="xl" sx={{ p: 3 }}>
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+                    {/* Left Pane - Form */}
+                    <Paper elevation={3} sx={{ p: 3, flex: 1 }}>
+                        <Typography variant="h5" component="h2" gutterBottom>
+                            Add Year Range
+                        </Typography>
+                        <Stack spacing={2} sx={{ mt: 2 }}>
+                            <TextField
+                                label="Start Year"
                                 type="number"
-                                className="memberYear-input"
+                                fullWidth
                                 value={startYear}
                                 onChange={(e) => setStartYear(e.target.value)}
+                                inputProps={{ min: 1900, max: 2100 }}
                             />
-                        </div>
-                        <div className="memberYear-formGroup">
-                            <label className="memberYear-label">End Year</label>
-                            <input
+                            <TextField
+                                label="End Year"
                                 type="number"
-                                className="memberYear-input"
+                                fullWidth
                                 value={endYear}
                                 onChange={(e) => setEndYear(e.target.value)}
+                                inputProps={{ min: 1900, max: 2100 }}
                             />
-                        </div>
-                        <button className="memberYear-submitButton" onClick={handleCreate}>Add Year Range</button>
-                    </div>
-                </div>
+                            <Button
+                                variant="contained"
+                                onClick={handleCreate}
+                                disabled={loading}
+                                sx={{ alignSelf: 'flex-start' }}
+                            >
+                                {loading ? 'Adding...' : 'Add Year Range'}
+                            </Button>
+                        </Stack>
+                    </Paper>
 
-                <div className="memberYear-rightPane">
-                    <h2 className="memberYear-title">Year Ranges</h2>
-                    <ul className="memberYear-list">
-                        {yearRanges.map((year) => (
-                            <li key={year._id} className="memberYear-listItem">
-                                <span className="memberYear-categoryText">{year.yearRange.startYear} - {year.yearRange.endYear}</span>
-                                <div className="memberYear-buttonContainer">
-                                    <button className="memberYear-deleteButton" onClick={() => handleDelete(year._id)}>Delete</button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-        </div>
+                    {/* Right Pane - List */}
+                    <Paper elevation={3} sx={{ p: 3, flex: 2 }}>
+                        <Typography variant="h5" component="h2" gutterBottom>
+                            Year Ranges
+                        </Typography>
+                        {loading ? (
+                            <Typography>Loading...</Typography>
+                        ) : yearRanges.length > 0 ? (
+                            <List>
+                                {yearRanges.map((year) => (
+                                    <React.Fragment key={year._id}>
+                                        <ListItem
+                                            secondaryAction={
+                                                <IconButton
+                                                    edge="end"
+                                                    aria-label="delete"
+                                                    onClick={() => handleOpenDeleteDialog(year)}
+                                                    color="error"
+                                                    disabled={loading}
+                                                >
+                                                    <Delete />
+                                                </IconButton>
+                                            }
+                                        >
+                                            <ListItemText
+                                                primary={`${year.yearRange.startYear} - ${year.yearRange.endYear}`}
+                                                primaryTypographyProps={{
+                                                    variant: 'h6',
+                                                    fontWeight: 'medium'
+                                                }}
+                                            />
+                                        </ListItem>
+                                        <Divider />
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        ) : (
+                            <Typography variant="body1" color="textSecondary">
+                                No year ranges found
+                            </Typography>
+                        )}
+                    </Paper>
+                </Stack>
+
+                {/* Delete Confirmation Dialog */}
+                <Dialog
+                    open={openDeleteDialog}
+                    onClose={handleCloseDeleteDialog}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">
+                        Delete Year Range
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            Are you sure you want to delete the year range{' '}
+                            {yearToDelete && `${yearToDelete.yearRange.startYear} - ${yearToDelete.yearRange.endYear}`}?
+                            This action cannot be undone.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button 
+                            onClick={handleCloseDeleteDialog} 
+                            disabled={deleteLoading}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleConfirmDelete}
+                            color="error"
+                            autoFocus
+                            disabled={deleteLoading}
+                        >
+                            {deleteLoading ? <CircularProgress size={24} /> : 'Delete'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Container>
+        </Box>
     );
 };
 
