@@ -1,13 +1,11 @@
 import React from 'react';
-import { Box, Skeleton, Stack } from '@mui/material';
+import './styles/loader.css';
 
-const Loader = ({ lines = 3 }) => {
+const Loader = () => {
   return (
-    <Stack spacing={1}>
-      {[...Array(lines)].map((_, index) => (
-        <Skeleton key={index} variant="text" animation="wave" height={30} />
-      ))}
-    </Stack>
+    <div className="loader-wrapper">
+      <div className="loader"></div>
+    </div>
   );
 };
 

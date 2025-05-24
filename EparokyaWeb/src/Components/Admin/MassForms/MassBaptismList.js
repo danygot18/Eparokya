@@ -27,8 +27,8 @@ const MassBaptismList = () => {
         }
     };
 
-    const handleCardClick = (baptismId) => {
-        navigate(`/admin/massBaptismDetails/${baptismId}`);
+    const handleCardClick = (massBaptismId) => {
+        navigate(`/admin/massBaptismDetails/${massBaptismId}`);
     };
 
     const filterForms = () => {

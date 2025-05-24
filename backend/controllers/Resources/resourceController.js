@@ -89,15 +89,28 @@ exports.getAllResources = async (req, res) => {
     }
 };
 
+
 exports.getResourceById = async (req, res) => {
     try {
-        const resource = await Resource.findById(req.params.resourceId).populate('resourceCategory');
-        if (!resource) return res.status(404).json({ success: false, message: "Resource not found" });
+        const { resourceId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(resourceId)) {
+            return res.status(400).json({ success: false, message: "Invalid resource ID" });
+        }
+
+        const resource = await Resource.findById(resourceId).populate('resourceCategory');
+
+        if (!resource) {
+            return res.status(404).json({ success: false, message: "Resource not found" });
+        }
+
         res.status(200).json({ success: true, data: resource });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+
 
 exports.updateResource = async (req, res) => {
     try {

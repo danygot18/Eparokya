@@ -152,8 +152,6 @@ exports.toggleInclude = async (req, res) => {
 };
 
 
-
-
 exports.toggleLike = async (req, res) => {
   const prayerId = req.params.prayerId;
   const userId = req.user._id;
@@ -227,18 +225,12 @@ exports.getMySubmittedPrayers = async (req, res) => {
 
     const prayers = await PrayerWall.find({
       userId: userId,
-      // isDeleted: false 
+      isDeletedByUser: { $ne: true },
     })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .select("title prayerRequest prayerWallStatus createdAt");
-
-    // const prayers = await PrayerWall.find({ userId: new mongoose.Types.ObjectId(userId)}) // Removed `isDeleted: false`
-    //   .sort({ createdAt: -1 })
-    //   .skip(skip)
-    //   .limit(limit)
-    //   .select("title prayerRequest prayerWallStatus createdAt");
 
     if (!prayers.length) {
       return res.status(404).json({ message: "No submitted prayers found." });
@@ -254,7 +246,10 @@ exports.getMySubmittedPrayers = async (req, res) => {
             : "Pending",
     }));
 
-    const totalPrayers = await PrayerWall.countDocuments({ userId: userId, isDeleted: false });
+    const totalPrayers = await PrayerWall.countDocuments({
+      userId: userId,
+      isDeletedByUser: { $ne: true }, 
+    });
 
     res.status(200).json({
       prayers: formattedPrayers,
@@ -270,6 +265,7 @@ exports.getMySubmittedPrayers = async (req, res) => {
 
 
 
+
 // softDelete
 exports.softDeletePrayer = async (req, res) => {
   try {
@@ -279,18 +275,24 @@ exports.softDeletePrayer = async (req, res) => {
     const prayer = await PrayerWall.findOne({ _id: prayerId, userId });
 
     if (!prayer) {
-      return res.status(404).json({ message: "Please request this action to the admin." });
+      return res.status(404).json({ success: false, message: "Prayer not found or unauthorized" });
     }
 
     prayer.isDeletedByUser = true;
-    await prayer.save();
 
-    res.status(200).json({ message: "Prayer deleted successfully." });
+    await prayer.save(); // Save the change to MongoDB
+
+    res.status(200).json({
+      success: true,
+      message: "Prayer successfully soft deleted",
+      prayer,
+    });
   } catch (error) {
-    console.error("Error  deleting prayer:", error);
-    res.status(500).json({ message: "Failed to delete prayer." });
+    console.error("Soft delete error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 
 exports.approvePrayer = async (req, res) => {

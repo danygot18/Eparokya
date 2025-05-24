@@ -1,5 +1,5 @@
 const { WeddingChecklist } = require('../../models/weddingChecklist');
-const { massWedding }  = require('../../models/MassForms/massWedding');
+const  {massWedding}  = require('../../models/MassForms/massWedding');
 const AdminDate = require('../../models/adminDate');
 const User = require('../../models/user');
 const mongoose = require('mongoose');
@@ -321,9 +321,9 @@ exports.submitWeddingForm = async (req, res) => {
 
 exports.getAllWeddings = async (req, res) => {
   try {
-    const massWeddingList = await massWedding.find({}, 'brideName groomName bridePhone groomPhone weddingStatus userId')
-      .populate('userId', 'name');
-
+    const massWeddingList = await massWedding.find({}, 'brideName groomName bridePhone groomPhone weddingStatus userId weddingDateTime')
+      .populate('userId', 'name')
+      .populate('weddingDateTime', 'date time'); 
 
     if (!massWeddingList || massWeddingList.length === 0) {
       return res.status(404).json({ success: false, message: "No weddings found." });
@@ -336,22 +336,29 @@ exports.getAllWeddings = async (req, res) => {
   }
 };
 
+
 exports.getWeddingById = async (req, res) => {
   try {
     const { massWeddingId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(massWeddingId)) {
       return res.status(400).json({ message: "Invalid wedding ID format." });
     }
-    const massWedding = await MassWedding.findById(massWeddingId).populate('userId', 'name email');
-    if (!massWedding) {
+
+    const MassWedding = await massWedding.findById(massWeddingId)  
+      .populate('userId', 'name email')
+      .populate('weddingDateTime'); 
+
+    if (!MassWedding) {
       return res.status(404).json({ message: "Wedding not found." });
     }
-    res.status(200).json(massWedding);
+
+    res.status(200).json(MassWedding);
   } catch (error) {
     console.error("Error fetching wedding by ID:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
 
 // Controlles
 exports.confirmWedding = async (req, res) => {

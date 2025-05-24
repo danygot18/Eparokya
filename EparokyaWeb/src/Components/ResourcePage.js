@@ -5,7 +5,8 @@ import axios from "axios";
 import { FaStar, FaBookmark, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
-import { useSelector } from "react-redux";  
+import { useSelector } from "react-redux";
+import ResourceDetails from "../Components/ResourceDetails";
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -41,8 +42,6 @@ const ImageSlider = ({ images }) => {
   );
 };
 
-
-
 const ResourcePage = () => {
   // const [user, setUser] = useState(null);
   const [resources, setResources] = useState([]);
@@ -54,6 +53,8 @@ const ResourcePage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [showResourceModal, setShowResourceModal] = useState(false);
   const navigate = useNavigate();
   const config = { withCredentials: true };
 
@@ -79,7 +80,6 @@ const ResourcePage = () => {
       console.error("Error fetching user:", error);
     }
   };
-
   // const fetchResources = async () => {
   //   try {
   //     const response = await axios.get(
@@ -110,16 +110,12 @@ const ResourcePage = () => {
       setResources([]);
     }
   };
-
-
-
-
   const fetchCategories = async () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/getAllResourceCategory`
       );
-      // console.log("Categories response:", response.data); 
+      // console.log("Categories response:", response.data);
       setCategories(response.data.data || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -128,7 +124,6 @@ const ResourcePage = () => {
       setLoading(false);
     }
   };
-
 
   const handleSearch = (term) => {
     setSearchTerm(term);
@@ -177,10 +172,10 @@ const ResourcePage = () => {
           prevResources.map((resource) =>
             resource._id === updatedResource._id
               ? {
-                ...resource,
-                bookmarkCount: updatedResource.bookmarkCount,
-                isBookmarked: !resource.isBookmarked,
-              }
+                  ...resource,
+                  bookmarkCount: updatedResource.bookmarkCount,
+                  isBookmarked: !resource.isBookmarked,
+                }
               : resource
           )
         );
@@ -189,21 +184,26 @@ const ResourcePage = () => {
       console.error("Error toggling bookmark:", error);
     }
   };
-
   const handleOpenModal = (link) => {
     setModalContent(link);
     setModalOpen(true);
   };
-
   const handleCloseModal = () => {
     setModalOpen(false);
     setModalContent("");
   };
+  const openResourceModal = (resource) => {
+    setSelectedResource(resource);
+    setShowResourceModal(true);
+  };
 
+  const closeResourceModal = () => {
+    setSelectedResource(null);
+    setShowResourceModal(false);
+  };
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(categoryId);
   };
-
   const displayedResources = resources.filter((resource) => {
     const matchesCategory = selectedCategory
       ? resource.resourceCategory?._id === selectedCategory
@@ -212,11 +212,9 @@ const ResourcePage = () => {
     const matchesSearch = searchTerm
       ? resource.title.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
-
     return matchesCategory && matchesSearch;
   });
 
-  
   useEffect(() => {
     fetchUser();
     fetchResources();
@@ -225,12 +223,18 @@ const ResourcePage = () => {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
         <CircularProgress />
       </div>
     );
   }
-
   return (
     <div style={styles.homeContainer}>
       <MetaData title="Resources" />
@@ -275,117 +279,95 @@ const ResourcePage = () => {
             ))}
           </div>
 
-          {/* Resources */}
+          {/* ARTICLES */}
+          <h2 style={{ ...styles.sectionTitle, marginTop: "20px" }}>
+            Articles
+          </h2>
           <div style={styles.resourcesContainer}>
-            {displayedResources.map((resource) => (
-              <div key={resource._id} style={styles.resourceCard}>
-                {/* Bookmark Icon */}
-                <FaBookmark
-                  style={{
-                    color: bookmarkedResources.includes(resource._id)
-                      ? "yellow"
-                      : "gray",
-                    cursor: "pointer",
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                    fontSize: "29px"
-                  }}
-                  onClick={() => handleBookmark(resource._id)}
-                />
-
-                <div style={{ textAlign: "left", width: "100%" }}>
-                  <h2 style={styles.resourceTitle}>{resource.title}</h2>
-                  <p style={{ fontSize: "12px", color: "gray", marginBottom: "8px" }}>
-                    Created on: {new Date(resource.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <p style={{ ...styles.resourceDescription, textAlign: "left", width: "100%" }}>
-                  {resource.description}
-                </p>
-                <p style={{ ...styles.resourceLink, textAlign: "left", width: "100%" }}>
-                  <strong>Reference Link:</strong>{" "}
-                  <span
-                    style={{ ...styles.linkButton, marginLeft: "8px", textDecoration: "underline", color: "#0645AD", cursor: "pointer" }}
-                    onClick={() => handleOpenModal(resource.link)}
-                  >
-                    Click for the reference link
-                  </span>
-                </p>
-
-
-                {/* Resource Image or Slider */}
-                {resource.images && resource.images.length > 0 ? (
-                  <ImageSlider images={resource.images} />
-                ) : resource.image ? (
-                  <img
-                    src={resource.image.url}
-                    alt={resource.title}
-                    style={styles.resourceImage}
+            {displayedResources
+              .filter((r) => r.file)
+              .map((resource) => (
+                <div
+                  key={resource._id}
+                  style={styles.resourceCard}
+                  onClick={() => openResourceModal(resource)} 
+                >
+                  <FaBookmark
+                    style={{
+                      ...styles.bookmarkIcon,
+                      color: bookmarkedResources.includes(resource._id)
+                        ? "yellow"
+                        : "gray",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation(); 
+                      handleBookmark(resource._id);
+                    }}
                   />
-                ) : resource.file ? (
-                  <div style={{ textAlign: "center" }}>
+
+                  <div style={styles.cardHeader}>
+                    <h2 style={styles.resourceTitle}>{resource.title}</h2>
+                    <p style={styles.resourceDate}>
+                      Created on:{" "}
+                      {new Date(resource.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <p style={styles.resourceDescription}>
+                    {resource.description}
+                  </p>
+
+                  <p style={styles.resourceLink}>
+                    <strong>Reference Link:</strong>{" "}
+                    <span
+                      style={styles.linkButton}
+                      onClick={(e) => {
+                        e.stopPropagation(); // prevent triggering modal
+                        handleOpenModal(resource.link);
+                      }}
+                    >
+                      Click for the reference link
+                    </span>
+                  </p>
+
+                  <div style={styles.previewContainer}>
                     <iframe
                       src={`${resource.file.url}#toolbar=0&navpanes=0&scrollbar=0`}
                       title="File Preview"
-                      style={{
-                        width: "100%",
-                        height: "300px",
-                        border: "1px solid #ccc",
-                        borderRadius: "8px",
-                        marginBottom: "10px",
-                      }}
-                    ></iframe>
+                      style={styles.filePreview}
+                    />
                     <button
-                      onClick={() =>
+                      onClick={(e) => {
+                        e.stopPropagation(); // prevent triggering modal
                         window.open(
                           resource.file.url,
                           "_blank",
                           "noopener,noreferrer"
-                        )
-                      }
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor: "#d5edd9",
-                        color: "black",
-                        border: "none",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                        fontSize: "16px",
+                        );
                       }}
+                      style={styles.viewButton}
                     >
                       View Full File
                     </button>
                   </div>
-                ) : null}
-                <p style={{ fontSize: "12px", color: "gray", marginTop: "10px", textAlign: "left", width: "100%" }}>
-                  Number of users who bookmarked this post: {resource.bookmarkCount || 0}
-                </p>
 
-              </div>
-            ))}
+                  <p style={styles.bookmarkCount}>
+                    Number of users who bookmarked this post:{" "}
+                    {resource.bookmarkCount || 0}
+                  </p>
+                </div>
+              ))}
           </div>
         </div>
       </div>
 
-      {modalOpen && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContent}>
-            <FaTimes style={styles.closeIcon} onClick={handleCloseModal} />
-            <div style={{
-              border: "1px solid #ccc",
-              padding: "12px",
-              borderRadius: "6px",
-              backgroundColor: "#f5f5f5",
-              wordWrap: "break-word",
-              wordBreak: "break-word",
-              overflowWrap: "anywhere",
-            }}>
-              {modalContent}
-            </div>
-
-          </div>
-        </div>
+      {/* Resource Details Modal */}
+      {showResourceModal && (
+        <ResourceDetails
+          open={showResourceModal}
+          onClose={closeResourceModal}
+          resource={selectedResource}
+        />
       )}
     </div>
   );
@@ -403,6 +385,9 @@ const styles = {
   mainContent: {
     flex: 1,
     padding: "20px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   },
   searchBarContainer: {
     display: "flex",
@@ -410,7 +395,7 @@ const styles = {
     marginBottom: "20px",
   },
   searchInput: {
-    width: "60%",
+    width: "500%",
     padding: "10px",
     fontSize: "16px",
     borderRadius: "8px",
@@ -433,33 +418,43 @@ const styles = {
   },
   resourcesContainer: {
     display: "grid",
-    gridTemplateColumns: "1fr",
+    gridTemplateColumns: "repeat(4, 1fr)",
     gap: "20px",
-    alignItems: "flex-start",
+    justifyItems: "center",
   },
   resourceCard: {
     backgroundColor: "#e9ecef",
-    borderRadius: "8px",
+    borderRadius: "16px",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    padding: "15px",
-    width: "60%",
-    alignItems: "center",
-    position: "relative",
-    margin: "0 auto",
+    width: "350px",
+    height: "600px",
     display: "flex",
     flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "15px",
     textAlign: "center",
     position: "relative",
+    overflow: "hidden",
   },
 
   resourceTitle: {
-    fontSize: "18px",
+    fontSize: "16px",
     fontWeight: "bold",
-    marginBottom: "10px",
+    marginBottom: "6px",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    width: "100%",
   },
   resourceDescription: {
-    fontSize: "14px",
-    marginBottom: "10px",
+    fontSize: "13px",
+    marginBottom: "8px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
   },
   resourceLink: {
     fontSize: "14px",
@@ -502,8 +497,10 @@ const styles = {
     fontSize: "20px",
   },
   resourceImage: {
-    width: "50%",
-    borderRadius: "8px",
+    width: "100%",
+    height: "120px",
+    objectFit: "cover",
+    borderRadius: "12px",
     marginBottom: "10px",
   },
   starRatings: {
@@ -512,11 +509,11 @@ const styles = {
   },
   sliderWrapper: {
     width: "100%",
-    height: "300px",
-    position: "relative",
+    height: "120px",
+    borderRadius: "12px",
     overflow: "hidden",
+    position: "relative",
     backgroundColor: "#000",
-    borderRadius: "8px",
   },
   sliderButtonLeft: {
     position: "absolute",
@@ -543,6 +540,77 @@ const styles = {
     width: "30px",
     height: "30px",
     cursor: "pointer",
+  },
+  sectionTitle: {
+    fontSize: "24px",
+    fontWeight: "bold",
+    color: "#2c3e50",
+    marginBottom: "10px",
+  },
+  bookmarkIcon: {
+    cursor: "pointer",
+    position: "absolute",
+    top: "10px",
+    right: "10px",
+    fontSize: "29px",
+    transition: "color 0.3s",
+  },
+  cardHeader: {
+    textAlign: "left",
+    width: "100%",
+  },
+  resourceDate: {
+    fontSize: "12px",
+    color: "gray",
+    marginBottom: "8px",
+  },
+
+  previewContainer: {
+    textAlign: "center",
+  },
+
+  filePreview: {
+    width: "100%",
+    height: "300px",
+    border: "1px solid #ccc",
+    borderRadius: "8px",
+    marginBottom: "10px",
+  },
+
+  viewButton: {
+    padding: "8px 16px",
+    backgroundColor: "#d5edd9",
+    color: "black",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "16px",
+    transition: "background-color 0.3s",
+  },
+
+  linkButton: {
+    marginLeft: "8px",
+    textDecoration: "underline",
+    color: "#0645AD",
+    cursor: "pointer",
+  },
+
+  bookmarkCount: {
+    fontSize: "12px",
+    color: "gray",
+    marginTop: "10px",
+    textAlign: "left",
+    width: "100%",
+  },
+
+  modalText: {
+    border: "1px solid #ccc",
+    padding: "12px",
+    borderRadius: "6px",
+    backgroundColor: "#f5f5f5",
+    wordWrap: "break-word",
+    wordBreak: "break-word",
+    overflowWrap: "anywhere",
   },
 };
 

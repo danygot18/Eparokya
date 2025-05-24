@@ -5,12 +5,19 @@ import "./wedding.css";
 
 import SideBar from "../SideBar";
 import WeddingChecklist from "./WeddingChecklist";
-
 import { useParams, useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from "react-toastify";
 // import Modal from 'react-modal';
-import { Card, CardContent, Typography, Box, CardMedia, Grid2, Modal, Button } from "@mui/material";
-
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  CardMedia,
+  Grid2,
+  Modal,
+  Button,
+} from "@mui/material";
 
 const WeddingDetails = () => {
   const { weddingId } = useParams();
@@ -26,8 +33,9 @@ const WeddingDetails = () => {
 
   const [newDate, setNewDate] = useState("");
   const [reason, setReason] = useState("");
-  const [updatedWeddingDate, setUpdatedWeddingDate] = useState(weddingDetails?.weddingDate || "");
-
+  const [updatedWeddingDate, setUpdatedWeddingDate] = useState(
+    weddingDetails?.weddingDate || ""
+  );
 
   const [preMarriageSeminarDate, setPreMarriageSeminarDate] = useState("");
   const [preMarriageSeminarTime, setPreMarriageSeminarTime] = useState("");
@@ -38,9 +46,7 @@ const WeddingDetails = () => {
   const [confessionDate, setConfessionDate] = useState("");
   const [confessionTime, setConfessionTime] = useState("");
 
-
   const [zoom, setZoom] = useState(1);
-
 
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.1, 3));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.1, 1));
@@ -52,11 +58,11 @@ const WeddingDetails = () => {
 
   const [comments, setComments] = useState([]);
 
-
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
-  const formatDate = (date) => (date ? new Date(date).toLocaleDateString() : "N/A");
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleDateString() : "N/A";
 
   useEffect(() => {
     const fetchWeddingDetails = async () => {
@@ -91,6 +97,9 @@ const WeddingDetails = () => {
     "GroomMarriageBans",
     "GroomOrigCeNoMar",
     "GroomOrigPSA",
+    "GroomPermitFromtheParishOftheBride",
+    "GroomChildBirthCertificate",
+    "GroomOneByOne",
   ];
 
   const brideDocs = [
@@ -100,8 +109,9 @@ const WeddingDetails = () => {
     "BrideMarriageBans",
     "BrideOrigCeNoMar",
     "BrideOrigPSA",
-    "PermitFromtheParishOftheBride",
-    "ChildBirthCertificate",
+    "BridePermitFromtheParishOftheBride",
+    "BrideChildBirthCertificate",
+    "BrideOneByOne",
   ];
 
   const openModal = (image) => {
@@ -116,7 +126,6 @@ const WeddingDetails = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-
 
   const handleMouseDown = (e) => {
     e.preventDefault();
@@ -140,7 +149,7 @@ const WeddingDetails = () => {
     "Confirmed",
     "Pending Confirmation",
     "Rescheduled",
-    "Cancelled"
+    "Cancelled",
   ];
 
   const handleSubmitComment = async () => {
@@ -154,7 +163,7 @@ const WeddingDetails = () => {
       additionalComment: additionalComment || "",
     };
 
-    // console.log("Sending comment:", commentData); 
+    // console.log("Sending comment:", commentData);
 
     try {
       const response = await fetch(
@@ -170,7 +179,7 @@ const WeddingDetails = () => {
 
       const data = await response.json();
 
-      // console.log("Response from server:", data); 
+      // console.log("Response from server:", data);
 
       if (!response.ok) {
         throw new Error(data.message || "Failed to submit comment.");
@@ -214,14 +223,11 @@ const WeddingDetails = () => {
     }
   };
 
-
   const handleConfirm = async (weddingId) => {
     try {
-
       const response = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/${weddingId}/confirmWedding`,
-        { withCredentials: true },
-
+        { withCredentials: true }
       );
       console.log("Confirmation response:", response.data);
       toast.success("Wedding confirmed successfully!", {
@@ -229,7 +235,10 @@ const WeddingDetails = () => {
         autoClose: 3000,
       });
     } catch (error) {
-      console.error("Error confirming wedding:", error.response || error.message);
+      console.error(
+        "Error confirming wedding:",
+        error.response || error.message
+      );
       toast.error(
         error.response?.data?.message || "Failed to confirm the wedding.",
         {
@@ -242,7 +251,9 @@ const WeddingDetails = () => {
 
   const handleCancel = async () => {
     if (!cancelReason.trim()) {
-      toast.error("Please provide a cancellation reason.", { position: toast.POSITION.TOP_RIGHT });
+      toast.error("Please provide a cancellation reason.", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
       return;
     }
     try {
@@ -252,12 +263,17 @@ const WeddingDetails = () => {
         { withCredentials: true }
       );
 
-      toast.success("Wedding cancelled successfully!", { position: toast.POSITION.TOP_RIGHT });
-      setShowCancelModal(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to cancel the wedding.", {
+      toast.success("Wedding cancelled successfully!", {
         position: toast.POSITION.TOP_RIGHT,
       });
+      setShowCancelModal(false);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to cancel the wedding.",
+        {
+          position: toast.POSITION.TOP_RIGHT,
+        }
+      );
     }
   };
 
@@ -284,7 +300,6 @@ const WeddingDetails = () => {
     }
   };
 
-
   if (loading) return <div>Loading...</div>;
 
   if (error) return <div>Error: {error}</div>;
@@ -308,23 +323,53 @@ const WeddingDetails = () => {
                   <Typography variant="h5" gutterBottom>
                     Wedding Date
                   </Typography>
-                  <Typography><strong>Date of Application:</strong> {formatDate(weddingDetails?.dateOfApplication)}</Typography>
-                  <Typography><strong>Wedding Date:</strong> {formatDate(weddingDetails?.weddingDate)}</Typography>
-                  <Typography><strong>Wedding Time:</strong> {weddingDetails?.weddingTime || "N/A"}</Typography>
+                  <Typography>
+                    <strong>Date of Application:</strong>{" "}
+                    {formatDate(weddingDetails?.dateOfApplication)}
+                  </Typography>
+                  <Typography>
+                    <strong>Wedding Date:</strong>{" "}
+                    {formatDate(weddingDetails?.weddingDate)}
+                  </Typography>
+                  <Typography>
+                    <strong>Wedding Time:</strong>{" "}
+                    {weddingDetails?.weddingTime || "N/A"}
+                  </Typography>
                 </CardContent>
               </Card>
 
               {/* Bride & Groom Details */}
-              <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
+                  gap: 3,
+                }}
+              >
                 {/* Bride Details */}
                 <Card sx={{ flex: 1 }}>
                   <CardContent>
                     <Typography variant="h6">Bride Details</Typography>
-                    <Typography><strong>Name:</strong> {weddingDetails?.brideName || "N/A"}</Typography>
-                    <Typography><strong>Birth Date:</strong> {formatDate(weddingDetails?.brideBirthDate)}</Typography>
-                    <Typography><strong>Occupation:</strong> {weddingDetails?.brideOccupation || "N/A"}</Typography>
-                    <Typography><strong>Religion:</strong> {weddingDetails?.brideReligion || "N/A"}</Typography>
-                    <Typography><strong>Phone:</strong> {weddingDetails?.bridePhone || "N/A"}</Typography>
+                    <Typography>
+                      <strong>Name:</strong>{" "}
+                      {weddingDetails?.brideName || "N/A"}
+                    </Typography>
+                    <Typography>
+                      <strong>Birth Date:</strong>{" "}
+                      {formatDate(weddingDetails?.brideBirthDate)}
+                    </Typography>
+                    <Typography>
+                      <strong>Occupation:</strong>{" "}
+                      {weddingDetails?.brideOccupation || "N/A"}
+                    </Typography>
+                    <Typography>
+                      <strong>Religion:</strong>{" "}
+                      {weddingDetails?.brideReligion || "N/A"}
+                    </Typography>
+                    <Typography>
+                      <strong>Phone:</strong>{" "}
+                      {weddingDetails?.bridePhone || "N/A"}
+                    </Typography>
                   </CardContent>
                 </Card>
 
@@ -332,11 +377,26 @@ const WeddingDetails = () => {
                 <Card sx={{ flex: 1 }}>
                   <CardContent>
                     <Typography variant="h6">Groom Details</Typography>
-                    <Typography><strong>Name:</strong> {weddingDetails?.groomName || "N/A"}</Typography>
-                    <Typography><strong>Birth Date:</strong> {formatDate(weddingDetails?.groomBirthDate)}</Typography>
-                    <Typography><strong>Occupation:</strong> {weddingDetails?.groomOccupation || "N/A"}</Typography>
-                    <Typography><strong>Religion:</strong> {weddingDetails?.groomReligion || "N/A"}</Typography>
-                    <Typography><strong>Phone:</strong> {weddingDetails?.groomPhone || "N/A"}</Typography>
+                    <Typography>
+                      <strong>Name:</strong>{" "}
+                      {weddingDetails?.groomName || "N/A"}
+                    </Typography>
+                    <Typography>
+                      <strong>Birth Date:</strong>{" "}
+                      {formatDate(weddingDetails?.groomBirthDate)}
+                    </Typography>
+                    <Typography>
+                      <strong>Occupation:</strong>{" "}
+                      {weddingDetails?.groomOccupation || "N/A"}
+                    </Typography>
+                    <Typography>
+                      <strong>Religion:</strong>{" "}
+                      {weddingDetails?.groomReligion || "N/A"}
+                    </Typography>
+                    <Typography>
+                      <strong>Phone:</strong>{" "}
+                      {weddingDetails?.groomPhone || "N/A"}
+                    </Typography>
                   </CardContent>
                 </Card>
               </Box>
@@ -346,10 +406,22 @@ const WeddingDetails = () => {
                 <CardContent>
                   <Typography variant="h6">Parents</Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-                    <Typography sx={{ flex: "1 1 200px" }}><strong>Bride Father:</strong> {weddingDetails?.brideFather || "N/A"}</Typography>
-                    <Typography sx={{ flex: "1 1 200px" }}><strong>Bride Mother:</strong> {weddingDetails?.brideMother || "N/A"}</Typography>
-                    <Typography sx={{ flex: "1 1 200px" }}><strong>Groom Father:</strong> {weddingDetails?.groomFather || "N/A"}</Typography>
-                    <Typography sx={{ flex: "1 1 200px" }}><strong>Groom Mother:</strong> {weddingDetails?.groomMother || "N/A"}</Typography>
+                    <Typography sx={{ flex: "1 1 200px" }}>
+                      <strong>Bride Father:</strong>{" "}
+                      {weddingDetails?.brideFather || "N/A"}
+                    </Typography>
+                    <Typography sx={{ flex: "1 1 200px" }}>
+                      <strong>Bride Mother:</strong>{" "}
+                      {weddingDetails?.brideMother || "N/A"}
+                    </Typography>
+                    <Typography sx={{ flex: "1 1 200px" }}>
+                      <strong>Groom Father:</strong>{" "}
+                      {weddingDetails?.groomFather || "N/A"}
+                    </Typography>
+                    <Typography sx={{ flex: "1 1 200px" }}>
+                      <strong>Groom Mother:</strong>{" "}
+                      {weddingDetails?.groomMother || "N/A"}
+                    </Typography>
                   </Box>
                 </CardContent>
               </Card>
@@ -362,7 +434,9 @@ const WeddingDetails = () => {
                     {weddingDetails?.[role]?.length > 0 ? (
                       weddingDetails[role].map((person, index) => (
                         <Typography key={index}>
-                          <strong>{person.name}:</strong> {person.address.street}, {person.address.city}, {person.address.zip}
+                          <strong>{person.name}:</strong>{" "}
+                          {person.address.street}, {person.address.city},{" "}
+                          {person.address.zip}
                         </Typography>
                       ))
                     ) : (
@@ -379,7 +453,10 @@ const WeddingDetails = () => {
               </Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
                 {groomDocs.map((doc, index) => (
-                  <Card key={index} sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
+                  <Card
+                    key={index}
+                    sx={{ flex: "1 1 300px", maxWidth: "400px" }}
+                  >
                     <CardContent>
                       <Typography variant="body1" fontWeight="bold">
                         {doc.replace(/([A-Z])/g, " $1").trim()}:
@@ -413,7 +490,10 @@ const WeddingDetails = () => {
               </Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
                 {brideDocs.map((doc, index) => (
-                  <Card key={index} sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
+                  <Card
+                    key={index}
+                    sx={{ flex: "1 1 300px", maxWidth: "400px" }}
+                  >
                     <CardContent>
                       <Typography variant="body1" fontWeight="bold">
                         {doc.replace(/([A-Z])/g, " $1").trim()}:
@@ -466,15 +546,36 @@ const WeddingDetails = () => {
               }}
             >
               {/* Header with Close Button */}
-              <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mb: 2 }}>
-                <Button onClick={closeModal} variant="contained" sx={{ mx: 1 }} size="small">
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  mb: 2,
+                }}
+              >
+                <Button
+                  onClick={closeModal}
+                  variant="contained"
+                  sx={{ mx: 1 }}
+                  size="small"
+                >
                   Close
                 </Button>
                 <Box>
-                  <Button onClick={handleZoomIn} variant="outlined" sx={{ mx: 1 }} style={{ marginBottom: "10px" }}>
+                  <Button
+                    onClick={handleZoomIn}
+                    variant="outlined"
+                    sx={{ mx: 1 }}
+                    style={{ marginBottom: "10px" }}
+                  >
                     Zoom In
                   </Button>
-                  <Button onClick={handleZoomOut} variant="outlined" sx={{ mx: 1 }}>
+                  <Button
+                    onClick={handleZoomOut}
+                    variant="outlined"
+                    sx={{ mx: 1 }}
+                  >
                     Zoom Out
                   </Button>
                 </Box>
@@ -514,7 +615,6 @@ const WeddingDetails = () => {
               </Box>
             </Box>
           </Modal>
-
         </div>
         <div className="Wedding-down-container-layout">
           {/* Additional Admin Comment */}
@@ -576,19 +676,16 @@ const WeddingDetails = () => {
                 </div>
               </div>
 
-              <button onClick={updateAdditionalReq}>Submit Additional Requirements</button>
+              <button onClick={updateAdditionalReq}>
+                Submit Additional Requirements
+              </button>
               <button onClick={handleUpdate} disabled={loading}>
                 {loading ? "Updating..." : "Update Wedding Date"}
               </button>
             </div>
           </div>
 
-
-
-
-
           <div className="Down-right-container">
-
             {/* Comments of the Admin Display */}
             <div className="admin-comments-section">
               <h3>Admin Comments</h3>
@@ -598,8 +695,14 @@ const WeddingDetails = () => {
                     <p className="comment-date">
                       {new Date(comment?.createdAt).toLocaleDateString()}
                     </p>
-                    <p><strong>Comment:</strong> {comment?.selectedComment || "N/A"}</p>
-                    <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
+                    <p>
+                      <strong>Comment:</strong>{" "}
+                      {comment?.selectedComment || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Additional Comment:</strong>{" "}
+                      {comment?.additionalComment || "N/A"}
+                    </p>
                   </div>
                 ))
               ) : (
@@ -611,7 +714,9 @@ const WeddingDetails = () => {
             <div className="wedding-date-box">
               <h3>Updated Wedding Date</h3>
               <p className="date">
-                {updatedWeddingDate ? new Date(updatedWeddingDate).toLocaleDateString() : "N/A"}
+                {updatedWeddingDate
+                  ? new Date(updatedWeddingDate).toLocaleDateString()
+                  : "N/A"}
               </p>
 
               {weddingDetails?.adminRescheduled?.reason && (
@@ -631,10 +736,13 @@ const WeddingDetails = () => {
                     <p>
                       <strong>Pre Marriage Seminar 1 Date and Time:</strong>{" "}
                       {weddingDetails.additionalReq.PreMarriageSeminar?.date
-                        ? new Date(weddingDetails.additionalReq.PreMarriageSeminar.date).toLocaleDateString()
+                        ? new Date(
+                            weddingDetails.additionalReq.PreMarriageSeminar.date
+                          ).toLocaleDateString()
                         : "N/A"}{" "}
                       at{" "}
-                      {weddingDetails.additionalReq.PreMarriageSeminar?.time || "N/A"}
+                      {weddingDetails.additionalReq.PreMarriageSeminar?.time ||
+                        "N/A"}
                     </p>
                   </div>
 
@@ -642,10 +750,13 @@ const WeddingDetails = () => {
                     <p>
                       <strong>Canonical Interview Date and Time:</strong>{" "}
                       {weddingDetails.additionalReq.CanonicalInterview?.date
-                        ? new Date(weddingDetails.additionalReq.CanonicalInterview.date).toLocaleDateString()
+                        ? new Date(
+                            weddingDetails.additionalReq.CanonicalInterview.date
+                          ).toLocaleDateString()
                         : "N/A"}{" "}
                       at{" "}
-                      {weddingDetails.additionalReq.CanonicalInterview?.time || "N/A"}
+                      {weddingDetails.additionalReq.CanonicalInterview?.time ||
+                        "N/A"}
                     </p>
                   </div>
 
@@ -653,7 +764,9 @@ const WeddingDetails = () => {
                     <p>
                       <strong>Confession Date and Time:</strong>{" "}
                       {weddingDetails.additionalReq.Confession?.date
-                        ? new Date(weddingDetails.additionalReq.Confession.date).toLocaleDateString()
+                        ? new Date(
+                            weddingDetails.additionalReq.Confession.date
+                          ).toLocaleDateString()
                         : "N/A"}{" "}
                       at{" "}
                       {weddingDetails.additionalReq.Confession?.time || "N/A"}
@@ -663,7 +776,9 @@ const WeddingDetails = () => {
                   <p className="req-updated">
                     <strong>Last Updated:</strong>{" "}
                     {weddingDetails.additionalReq?.createdAt
-                      ? new Date(weddingDetails.additionalReq.createdAt).toLocaleDateString()
+                      ? new Date(
+                          weddingDetails.additionalReq.createdAt
+                        ).toLocaleDateString()
                       : "N/A"}
                   </p>
                 </div>
@@ -699,28 +814,47 @@ const WeddingDetails = () => {
             {/* Admin wedding Date  */}
             <div className="admin-section">
               <h2>Select Updated Wedding Date:</h2>
-              <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
+              <input
+                type="date"
+                value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
+              />
               <label>Reason:</label>
-              <textarea value={reason} onChange={(e) => setReason(e.target.value)} />
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
               <button onClick={handleUpdate} disabled={loading}>
                 {loading ? "Updating..." : "Update Wedding Date"}
               </button>
             </div>
 
             {/* Cancelling Reason Section */}
-            {weddingDetails?.weddingStatus === "Cancelled" && weddingDetails?.cancellingReason ? (
+            {weddingDetails?.weddingStatus === "Cancelled" &&
+            weddingDetails?.cancellingReason ? (
               <div className="house-comments-section">
                 <h2>Cancellation Details</h2>
                 <div className="admin-comment">
-                  <p><strong>Cancelled By:</strong> {weddingDetails.cancellingReason.user === "Admin" ? "Admin" : weddingDetails.cancellingReason.user}</p>
-                  <p><strong>Reason:</strong> {weddingDetails.cancellingReason.reason || "No reason provided."}</p>
+                  <p>
+                    <strong>Cancelled By:</strong>{" "}
+                    {weddingDetails.cancellingReason.user === "Admin"
+                      ? "Admin"
+                      : weddingDetails.cancellingReason.user}
+                  </p>
+                  <p>
+                    <strong>Reason:</strong>{" "}
+                    {weddingDetails.cancellingReason.reason ||
+                      "No reason provided."}
+                  </p>
                 </div>
               </div>
             ) : null}
 
             {/* Cancel Button */}
             <div className="button-container">
-              <button onClick={() => setShowCancelModal(true)}>Cancel Wedding</button>
+              <button onClick={() => setShowCancelModal(true)}>
+                Cancel Wedding
+              </button>
             </div>
 
             {/* Cancellation Modal */}
@@ -737,31 +871,39 @@ const WeddingDetails = () => {
                   />
                   <div className="modal-buttons">
                     <button onClick={handleCancel}>Confirm Cancel</button>
-                    <button onClick={() => setShowCancelModal(false)}>Back</button>
+                    <button onClick={() => setShowCancelModal(false)}>
+                      Back
+                    </button>
                   </div>
                 </div>
               </div>
             )}
-
           </div>
-          <div style={{ justifyContent: "center", marginTop: "20px", borderRadius: "10px" }}>
+          <div
+            style={{
+              justifyContent: "center",
+              marginTop: "20px",
+              borderRadius: "10px",
+            }}
+          >
             <div className="button-container">
-              <button onClick={() => navigate(`/adminChat/${weddingDetails?.userId?._id}/${weddingDetails?.userId?.email}`)}>
+              <button
+                onClick={() =>
+                  navigate(
+                    `/adminChat/${weddingDetails?.userId?._id}/${weddingDetails?.userId?.email}`
+                  )
+                }
+              >
                 Go to Admin Chat
               </button>
             </div>
-            <button onClick={() => handleConfirm(weddingId)}>Confirm Wedding</button>
-
+            <button onClick={() => handleConfirm(weddingId)}>
+              Confirm Wedding
+            </button>
           </div>
-
-
-
         </div>
-
       </div>
     </div>
-
-
   );
 };
 
