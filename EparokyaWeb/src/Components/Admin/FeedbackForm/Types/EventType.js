@@ -1,12 +1,37 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { Table } from "react-bootstrap";
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  CircularProgress
+} from "@mui/material";
+import { Delete, Add, Cancel } from "@mui/icons-material";
 import SideBar from "../../SideBar";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const EventType = () => {
   const [eventTypes, setEventTypes] = useState([]);
   const [name, setName] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
   const config = { withCredentials: true };
 
   useEffect(() => {
@@ -15,180 +40,210 @@ const EventType = () => {
 
   const fetchEventTypes = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/getAllEventType`,
         config
       );
       setEventTypes(response.data);
     } catch (error) {
-      console.error("Error fetching event types:", error);
+      // console.error("Error fetching event types:", error);
+      toast.error("Failed to load activity types");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleAddEventType = async (e) => {
     e.preventDefault();
+    if (!name.trim()) {
+          toast.error("Event type name cannot be empty");
+          return;
+        }
     try {
+      setLoading(true);
       await axios.post(
         `${process.env.REACT_APP_API}/api/v1/createEventType`,
         { name },
         config
       );
+      toast.success("Event type created successfully");
       setName("");
       setShowForm(false);
       fetchEventTypes();
     } catch (error) {
       console.error("Error adding event type:", error);
+      toast.error(
+              error.response?.data?.message || "Failed to create Event type"
+            );
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleOpenDeleteDialog = (id) => {
+    setEventToDelete(id);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    setEventToDelete(null);
+  };
+
+  const handleDelete = async () => {
+    if (!eventToDelete) return;
+    console.log("Deleting EventType ID:", eventToDelete); // Debugging log
     try {
+      setDeleteLoading(true);
       await axios.delete(
-        `${process.env.REACT_APP_API}/api/v1/deleteEventType/${id}`
+        `${process.env.REACT_APP_API}/api/v1/deleteEventType/${eventToDelete}`,
+        config
       );
       fetchEventTypes();
+      toast.success("Event type deleted successfully");
     } catch (error) {
       console.error("Error deleting event type:", error);
+    } finally {
+      setDeleteLoading(false);
+      handleCloseDeleteDialog();
+      setEventToDelete(null);
     }
   };
 
   return (
-    <div style={styles.wrapper}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideBar />
-      <div style={styles.content}>
-        <div style={styles.leftPane}>
-          <h2 style={styles.title}>Manage Event Types</h2>
-          <button style={styles.button} onClick={() => setShowForm(!showForm)}>
-            {showForm ? "Cancel" : "Add Event Type"}
-          </button>
-          {showForm && (
-            <form style={styles.form} onSubmit={handleAddEventType}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Event Type Name:</label>
-                <input
-                  type="text"
-                  style={styles.input}
+      <Container maxWidth="lg" sx={{ p: 3 }}>
+        <Box sx={{ display: "flex", gap: 3, flexDirection: { xs: "column", md: "row" } }}>
+          {/* Left Pane - Form */}
+          <Paper elevation={3} sx={{ p: 3, flex: 1 }}>
+            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: "bold" }}>
+              Manage Event Types
+            </Typography>
+            
+            <Button
+              variant="contained"
+              startIcon={showForm ? <Cancel /> : <Add />}
+              onClick={() => setShowForm(!showForm)}
+              fullWidth
+              sx={{ mb: 2 }}
+            >
+              {showForm ? "Cancel" : "Add Event Type"}
+            </Button>
+
+            {showForm && (
+              <Box component="form" onSubmit={handleAddEventType} sx={{ mt: 2 }}>
+                <TextField
+                  label="Event Type Name"
+                  variant="outlined"
+                  fullWidth
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  sx={{ mb: 2 }}
                 />
-              </div>
-              <button type="submit" style={styles.submitButton}>Add</button>
-            </form>
-          )}
-        </div>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={loading}
+                  fullWidth
+                >
+                  {loading ? <CircularProgress size={24} /> : "Add Event Type"}
+                </Button>
+              </Box>
+            )}
+          </Paper>
 
-        <div style={styles.rightPane}>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {eventTypes.map((event) => (
-                <tr key={event._id}>
-                  <td>{event.name}</td>
-                  <td>
-                    <button
-                      style={styles.deleteButton}
-                      onClick={() => handleDelete(event._id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-      </div>
-    </div>
+          {/* Right Pane - Table */}
+          <Paper elevation={3} sx={{ p: 3, flex: 2 }}>
+            <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: "bold" }}>
+              Event Types List
+            </Typography>
+            
+            {loading && eventTypes.length === 0 ? (
+              <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+                <CircularProgress />
+              </Box>
+            ) : (
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+                      <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {eventTypes.length > 0 ? (
+                      eventTypes.map((event) => (
+                        <TableRow key={event._id}>
+                          <TableCell>{event.name}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              startIcon={<Delete />}
+                              onClick={() => handleOpenDeleteDialog(event._id)}
+                              size="small"
+                            >
+                              Delete
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={2} sx={{ textAlign: "center" }}>
+                          No event types found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Paper>
+        </Box>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={openDeleteDialog}
+          onClose={handleCloseDeleteDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            Confirm Deletion
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to delete the event type <strong>{eventToDelete?.name}</strong>?
+              <br />
+              This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={handleCloseDeleteDialog} 
+              disabled={deleteLoading}
+              color="primary"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDelete}
+              color="error"
+              autoFocus
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? <CircularProgress size={24} /> : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    </Box>
   );
-};
-
-const styles = {
-  wrapper: {
-    display: "flex",
-    minHeight: "100vh",
-    backgroundColor: "#e8f5e9",
-  },
-  content: {
-    display: "flex",
-    flex: 1,
-    padding: "20px",
-    gap: "40px",
-  },
-  leftPane: {
-    flex: 1,
-    backgroundColor: "#d9ead3",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-  rightPane: {
-    flex: 2,
-    backgroundColor: "#d9ead3",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: "20px",
-    color: "#333",
-    fontSize: "24px",
-    fontWeight: "bold",
-  },
-  button: {
-    width: "100%",
-    padding: "10px",
-    borderRadius: "6px",
-    backgroundColor: "#388e3c",
-    color: "#fff",
-    border: "none",
-    fontSize: "16px",
-    cursor: "pointer",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    marginTop: "15px",
-  },
-  formGroup: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  label: {
-    marginBottom: "5px",
-    fontSize: "16px",
-  },
-  input: {
-    padding: "10px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    fontSize: "16px",
-  },
-  submitButton: {
-    padding: "10px",
-    borderRadius: "6px",
-    backgroundColor: "#388e3c",
-    color: "#fff",
-    border: "none",
-    fontSize: "16px",
-    cursor: "pointer",
-  },
-  deleteButton: {
-    padding: "6px",
-    borderRadius: "6px",
-    border: "none",
-    backgroundColor: "#c62828",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
 };
 
 export default EventType;

@@ -5,6 +5,6 @@ const eventTypeController = require("../../../controllers/FeedbackForm/Types/Eve
 router.post("/createEventType", eventTypeController.createEventType);
 router.get("/getAllEventType", eventTypeController.getAllEventTypes);
 router.get("/getEventTypeById/:eventTypeId", eventTypeController.getEventTypeById);
-router.delete("/deleteEventType/:eventTypeId", eventTypeController.deleteEventType);
+router.delete("/deleteEventType/:eventToDelete", eventTypeController.deleteEventType);
 
 module.exports = router;

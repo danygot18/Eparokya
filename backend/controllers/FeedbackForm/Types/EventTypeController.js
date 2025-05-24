@@ -40,8 +40,11 @@ exports.getEventTypeById = async (req, res) => {
 };
 
 exports.deleteEventType = async (req, res) => {
+
   try {
-    const eventType = await EventType.findByIdAndDelete(req.params.id);
+    const { eventToDelete } = req.params;
+
+    const eventType = await EventType.findByIdAndDelete(eventToDelete);
     if (!eventType) {
       return res.status(404).json({ error: "EventType not found" });
     }

@@ -6,34 +6,151 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import MetaData from '../../Layout/MetaData';
 import SideBar from '../SideBar';
 import { useNavigate, useLocation } from 'react-router-dom';
-import '../../Layout/styles/style.css'
-import { Button } from '@mui/material';
+import { useTheme, useMediaQuery } from '@mui/material';
+import { Box, Typography, Paper, Button, IconButton, CircularProgress } from '@mui/material';
+import { ChevronLeft, ChevronRight, Today, ViewModule, ViewWeek, ViewDay, ViewAgenda } from '@mui/icons-material';
+
 const localizer = momentLocalizer(moment);
+
+const CustomToolbar = ({ label, onNavigate, onView, view }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  return (
+    <Box sx={{
+      display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
+      justifyContent: 'space-between',
+      alignItems: isMobile ? 'flex-start' : 'center',
+      mb: 2,
+      p: 2,
+      backgroundColor: 'background.paper',
+      borderRadius: 1,
+      boxShadow: 1,
+      gap: isMobile ? 1 : 2
+    }}>
+      <Typography variant="h6" sx={{
+        fontWeight: 'bold',
+        color: 'success.main',
+        minWidth: isMobile ? '100%' : '200px',
+        mb: isMobile ? 1 : 0,
+        textAlign: isMobile ? 'center' : 'left'
+      }}>
+        {label}
+      </Typography>
+
+      <Box sx={{
+        display: 'flex',
+        order: isMobile ? 2 : 1,
+        width: isMobile ? '100%' : 'auto',
+        justifyContent: 'center',
+        gap: 1
+      }}>
+        <IconButton
+          onClick={() => onNavigate("PREV")}
+          color="success"
+          size={isMobile ? 'medium' : 'small'}
+          sx={{
+            borderRadius: 1,
+            padding: "4px",
+            "&:hover": {
+              backgroundColor: "success.light",
+            },
+          }}
+        >
+          <ChevronLeft />
+        </IconButton>
+        <Button
+          variant="outlined"
+          onClick={() => onNavigate('TODAY')}
+          color='success'
+          size={isMobile ? 'medium' : 'small'}
+          sx={{
+            textTransform: "none",
+            fontWeight: "bold",
+            color: "success.main",
+            borderRadius: 1,
+            padding: isMobile ? '6px 16px' : '4px 12px',
+            minHeight: isMobile ? '40px' : '32px',
+            '&:hover': {
+              backgroundColor: 'success.light',
+              borderColor: 'success.main',
+            }
+          }}
+        >
+          Today
+        </Button>
+        <IconButton
+          onClick={() => onNavigate("NEXT")}
+          color="success"
+          size={isMobile ? 'medium' : 'small'}
+          sx={{
+            borderRadius: 1,
+            padding: "4px",
+            "&:hover": {
+              backgroundColor: "success.light",
+            },
+          }}
+        >
+          <ChevronRight />
+        </IconButton>
+      </Box>
+
+      <Box sx={{
+        display: 'flex',
+        order: isMobile ? 1 : 2,
+        width: isMobile ? '100%' : 'auto',
+        justifyContent: 'center',
+        gap: isMobile ? 1 : 0.5,
+        mb: isMobile ? 1 : 0
+      }}>
+        {['month', 'week', 'day', 'agenda'].map(v => (
+          <Button
+            key={v}
+            onClick={() => onView(v)}
+            variant={view === v ? 'contained' : 'outlined'}
+            color="success"
+            size={isMobile ? 'small' : 'small'}
+            sx={{
+              textTransform: 'capitalize',
+              minWidth: isMobile ? '60px' : 'auto',
+              padding: isMobile ? '6px 8px' : '4px 8px',
+              fontSize: isMobile ? '0.75rem' : '0.875rem',
+              '&:hover': {
+                backgroundColor: 'success.light',
+              }
+            }}
+          >
+            {v}
+          </Button>
+        ))}
+      </Box>
+    </Box>
+  );
+};
 
 const Calendars = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [view, setView] = useState('month');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const config = { withCredentials: true };
 
   const fetchAllEvents = useCallback(async () => {
     try {
+      setLoading(true);
       const [weddingEvents, baptismEvents, funeralEvents, customEvents] = await Promise.all([
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`, config),
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`, config),
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`, config),
         axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`, config),
       ]);
-
-      // console.log('Wedding Events:', weddingEvents.data);
-      console.log('Baptism Events:', baptismEvents.data);
-      // console.log('Funeral Events:', funeralEvents.data);
-      console.log('Custom Events:', customEvents.data);
-      // console.log('Selected Event:', selectedEvent);
-
 
       const formattedEvents = [
         ...weddingEvents.data.map((event) => ({
@@ -42,6 +159,9 @@ const Calendars = () => {
           start: new Date(event.weddingDate),
           end: new Date(event.weddingDate),
           type: 'Wedding',
+          bride: event.bride,
+          groom: event.groom,
+          weddingDate: event.weddingDate
         })),
         ...baptismEvents.data.map((event) => ({
           id: `baptism-${event._id}`,
@@ -49,6 +169,8 @@ const Calendars = () => {
           start: new Date(event.baptismDate),
           end: new Date(event.baptismDate),
           type: 'Baptism',
+          child: event.child,
+          baptismDate: event.baptismDate
         })),
         ...funeralEvents.data.map((event) => ({
           id: `funeral-${event._id}`,
@@ -57,6 +179,7 @@ const Calendars = () => {
           end: new Date(event.funeralDate),
           type: 'Funeral',
           name: event.name,
+          funeralDate: event.funeralDate
         })),
         ...customEvents.data.map((event) => ({
           id: `custom-${event._id}`,
@@ -64,6 +187,7 @@ const Calendars = () => {
           start: new Date(event.customeventDate),
           end: new Date(event.customeventDate),
           type: 'Custom',
+          customeventDate: event.customeventDate
         })),
       ];
 
@@ -75,62 +199,22 @@ const Calendars = () => {
           start: new Date(newEvent.customeventDate),
           end: new Date(newEvent.customeventDate),
           type: 'Custom',
+          customeventDate: newEvent.customeventDate
         });
       }
 
-      setEvents((prev) => {
-        if (JSON.stringify(prev) !== JSON.stringify(formattedEvents)) {
-          return formattedEvents;
-        }
-        return prev;
-      });
+      setEvents(formattedEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
       setErrorMessage('Failed to load events. Please try again.');
+    } finally {
+      setLoading(false);
     }
   }, [config, location.state]);
 
   useEffect(() => {
     fetchAllEvents();
   }, [fetchAllEvents]);
-
-
-  const formatEvent = (event) => {
-    if (event.bride && event.groom) {
-      return {
-        id: `wedding-${event._id}`,
-        title: `${event.brideName} & ${event.groomName} Wedding`,
-        start: new Date(event.weddingDate),
-        end: new Date(event.weddingDate),
-        type: 'Wedding',
-      };
-    } else if (event.child) {
-      return {
-        id: `baptism-${event._id}`,
-        title: `Baptism of ${event.child.fullName || 'Unknown'}`,
-        start: new Date(event.baptismDate),
-        end: new Date(event.baptismDate),
-        type: 'Baptism',
-      };
-    } else if (event.name) {
-      return {
-        id: `funeral-${event._id}`,
-        title: `Funeral for ${event.name.firstName || ''} ${event.name.lastName || ''}`,
-        start: new Date(event.funeralDate),
-        end: new Date(event.funeralDate),
-        type: 'Funeral',
-      };
-    }
-    return null;
-  };
-
-  const formatCustomEvent = (customEvent) => ({
-    id: `custom-${customEvent._id}`,
-    title: customEvent.title,
-    start: new Date(customEvent.date),
-    end: new Date(customEvent.date),
-    type: 'Custom',
-  });
 
   const handleEventClick = (event) => {
     setSelectedEvent(event);
@@ -155,91 +239,141 @@ const Calendars = () => {
     }
   };
 
-
-
   const eventPropGetter = (event) => ({
     style: {
       backgroundColor:
-        event.type === 'Wedding' ? 'blue' :
-          event.type === 'Baptism' ? 'green' :
-            event.type === 'Funeral' ? 'red' : 'purple',
+        event.type === 'Wedding' ? '#FFD700' :
+        event.type === 'Baptism' ? '#4CAF50' :
+        event.type === 'Funeral' ? '#F44336' : '#9C27B0',
       color: 'white',
+      borderRadius: '4px',
+      border: 'none',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+      fontSize: isMobile ? '0.7rem' : '0.8rem',
+      padding: isMobile ? '1px 3px' : '2px 5px'
     },
   });
 
   return (
-    <div style={{ display: 'flex' }}>
+    <Box sx={{ 
+      display: 'flex', 
+      height: '100vh',
+      flexDirection: isMobile ? 'column' : 'row'
+    }}>
       <SideBar />
-      <div style={{ flex: 1, padding: '20px' }}>
+      
+      <Box sx={{ 
+        fontFamily: 'Helvetica, sans-serif', 
+        flex: 1, 
+        p: isMobile ? 2 : 3,
+        overflow: 'auto'
+      }}>
         <MetaData title="Calendar" />
-        <h1>Calendar</h1>
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        <div style={{ height: '700px', marginTop: '20px' }}>
+        <Typography variant="h4" sx={{ 
+          mb: 2, 
+          fontWeight: 'bold', 
+          color: 'success.main',
+          fontSize: isMobile ? '1.5rem' : '2rem'
+        }}>
+          Church Events Calendar
+        </Typography>
+
+        {errorMessage && (
+          <Typography color="error" sx={{ mb: 2 }}>
+            {errorMessage}
+          </Typography>
+        )}
+
+        <Paper elevation={3} sx={{ 
+          height: isMobile ? '500px' : '700px', 
+          p: isMobile ? 1 : 2, 
+          borderRadius: 2 
+        }}>
           <Calendar
             localizer={localizer}
             events={events}
             startAccessor="start"
             endAccessor="end"
-            defaultView="month"
-            views={['month', 'week', 'day', 'agenda']}
+            defaultView={isMobile ? 'agenda' : 'month'}
+            view={view}
+            onView={setView}
+            views={["month", "week", "day", "agenda"]}
             eventPropGetter={eventPropGetter}
             onSelectEvent={handleEventClick}
-            style={{ height: '100%' }}
+            components={{
+              toolbar: CustomToolbar,
+            }}
+            style={{
+              height: '100%',
+              minHeight: isMobile ? '400px' : '600px'
+            }}
           />
-        </div>
+        </Paper>
 
         {selectedEvent && (
-          <div style={{ marginTop: '20px', padding: '10px', border: '1px solid #ccc' }}>
-            <h2>Event Details</h2>
-            <p><strong>Type:</strong> {selectedEvent.type}</p>
-            {selectedEvent.type === 'Wedding' && (
-              <>
-                <p><strong>Bride:</strong> {selectedEvent.bride || 'N/A'}</p>
-                <p><strong>Groom:</strong> {selectedEvent.groom || 'N/A'}</p>
-                <p><strong>Date:</strong> {new Date(selectedEvent.weddingDate).toLocaleDateString()}</p>
-              </>
-            )}
-            {selectedEvent.type === 'Baptism' && (
-              <>
-                <p><strong>Child:</strong> {selectedEvent.child.fullName || 'N/A'}</p>
-                <p><strong>Date:</strong> {new Date(selectedEvent.baptismDate).toLocaleDateString()}</p>
-              </>
-            )}
-            {selectedEvent.type === 'Funeral' && (
-              <>
-                <p><strong>Name:</strong> {selectedEvent.name ? `${selectedEvent.name.firstName || ''} ${selectedEvent.name.lastName || ''}` : 'N/A'}</p>
-                <p><strong>Date:</strong> {selectedEvent.funeralDate ? new Date(selectedEvent.funeralDate).toLocaleDateString() : 'N/A'}</p>
-              </>
-            )}
-            {selectedEvent.type === 'Custom' && (
-              <>
-                <p><strong>Title:</strong> {selectedEvent.title || 'N/A'}</p>
-                {/* <p><strong>Description:</strong> {selectedEvent.description || 'N/A'}</p> */}
-                <p><strong>Date:</strong> {moment(selectedEvent.customeventDate).isValid()
-                  ? moment(selectedEvent.customeventDate).format('MMMM Do YYYY')
-                  : 'Invalid Date'}</p>
-              </>
-            )}
-          </div>
+          <Paper elevation={3} sx={{ 
+            mt: 3, 
+            p: isMobile ? 2 : 3, 
+            borderRadius: 2 
+          }}>
+            <Typography variant="h6" sx={{ 
+              mb: 2, 
+              fontWeight: 'bold',
+              fontSize: isMobile ? '1.1rem' : '1.25rem'
+            }}>
+              Event Details
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                <strong>Type:</strong> {selectedEvent.type}
+              </Typography>
+              {selectedEvent.type === 'Wedding' && (
+                <>
+                  <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                    <strong>Bride:</strong> {selectedEvent.bride || 'N/A'}
+                  </Typography>
+                  <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                    <strong>Groom:</strong> {selectedEvent.groom || 'N/A'}
+                  </Typography>
+                </>
+              )}
+              {selectedEvent.type === 'Baptism' && (
+                <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  <strong>Child:</strong> {selectedEvent.child?.fullName || 'N/A'}
+                </Typography>
+              )}
+              {selectedEvent.type === 'Funeral' && (
+                <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  <strong>Name:</strong> {selectedEvent.name ? `${selectedEvent.name.firstName || ''} ${selectedEvent.name.lastName || ''}` : 'N/A'}
+                </Typography>
+              )}
+              {selectedEvent.type === 'Custom' && (
+                <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  <strong>Title:</strong> {selectedEvent.title || 'N/A'}
+                </Typography>
+              )}
+              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                <strong>Date:</strong> {moment(
+                  selectedEvent.weddingDate || 
+                  selectedEvent.baptismDate || 
+                  selectedEvent.funeralDate || 
+                  selectedEvent.customeventDate
+                ).format('MMMM Do YYYY')}
+              </Typography>
+            </Box>
+          </Paper>
         )}
 
         <Button
-        variant='contained'
-        color='success'
-        style={{ marginTop: '20px' }}
-          onClick={() => {
-            navigate('/admin/addEvent');
-          }}
-
-        
+          variant='contained'
+          color='success'
+          sx={{ mt: 3 }}
+          onClick={() => navigate('/admin/addEvent')}
         >
           Add Event
         </Button>
-
-      </div>
-    </div>
-
-
+      </Box>
+    </Box>
   );
 };
 

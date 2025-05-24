@@ -12,6 +12,11 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
 import { IconButton, Tooltip } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
@@ -28,12 +33,14 @@ const AdminSelection = () => {
   const [selectedTime, setSelectedTime] = useState("");
   const [selections, setSelections] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectionToDelete, setSelectionToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchData = async (category) => {
     let endpoint = "";
     if (category === "event") endpoint = "/api/v1/getAllEventType";
-    else if (category === "activities")
-      endpoint = "/api/v1/getAllActivityTypes";
+    else if (category === "activities") endpoint = "/api/v1/getAllActivityTypes";
     else if (category === "priest") endpoint = "/api/v1/getAllPriest";
 
     if (endpoint) {
@@ -69,25 +76,39 @@ const AdminSelection = () => {
     }
   };
 
-  const handleDeleteSelection = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this selection?"))
-      return;
+  const handleOpenDeleteDialog = (selection) => {
+    setSelectionToDelete(selection);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    setSelectionToDelete(null);
+  };
+
+  const handleDeleteSelection = async () => {
+    if (!selectionToDelete) return;
+
     try {
+      setDeleteLoading(true);
       const response = await axios.delete(
-        `${process.env.REACT_APP_API}/api/v1/deleteSelection/${id}`,
-        {
-          withCredentials: true,
-        }
+        `${process.env.REACT_APP_API}/api/v1/deleteSelection/${selectionToDelete._id}`,
+        { withCredentials: true }
       );
       alert(response.data.message);
       fetchSelections();
     } catch (error) {
       console.error("Error deleting selection:", error);
+      alert("Failed to delete selection");
+    } finally {
+      setDeleteLoading(false);
+      handleCloseDeleteDialog();
     }
   };
 
   const handleEditSelection = (selection) => {
     console.log("Edit selection:", selection);
+    // Implement your edit functionality here
   };
 
   useEffect(() => {
@@ -114,6 +135,7 @@ const AdminSelection = () => {
     }
 
     try {
+      setLoading(true);
       const response = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/addSelection`,
         {
@@ -125,16 +147,23 @@ const AdminSelection = () => {
         },
         { withCredentials: true }
       );
-
       alert(response.data.message);
       fetchSelections();
+      // Reset form after successful submission
+      setSelectedType("");
+      setSelectedDate("");
+      setSelectedTime("");
     } catch (error) {
       console.error("Error adding selection:", error);
+      alert(error.response?.data?.message || "Failed to add selection");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeactivateSelection = async (id) => {
     try {
+      setLoading(true);
       const response = await axios.put(
         `${process.env.REACT_APP_API}/api/v1/deactivateSelection/${id}`,
         {},
@@ -143,24 +172,26 @@ const AdminSelection = () => {
       alert(response.data.message);
       fetchSelections();
     } catch (error) {
-      console.error(
-        "Error deactivating selection:",
-        error.response?.data || error.message
-      );
+      console.error("Error deactivating selection:", error.response?.data || error.message);
+      alert("Failed to deactivate selection");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      
       <SideBar />
-      <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Typography variant="h4" gutterBottom>
+      <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+         {loading && <Loader />}
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
           Add Active Feedback Form
         </Typography>
 
-        {loading && <Loader />}
+       
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <FormControl fullWidth>
             <InputLabel>Category</InputLabel>
             <Select
@@ -182,6 +213,7 @@ const AdminSelection = () => {
                 value={selectedType}
                 label={`${selectedCategory} Type`}
                 onChange={(e) => setSelectedType(e.target.value)}
+                disabled={loading}
               >
                 <MenuItem value="">Select {selectedCategory} Type</MenuItem>
                 {data.map((item) => (
@@ -202,6 +234,7 @@ const AdminSelection = () => {
                 onChange={(e) => setSelectedDate(e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 fullWidth
+                disabled={loading}
               />
               <TextField
                 label="Time"
@@ -210,78 +243,134 @@ const AdminSelection = () => {
                 onChange={(e) => setSelectedTime(e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 fullWidth
+                disabled={loading}
               />
             </>
           )}
 
           {selectedType && selectedDate && selectedTime && (
-            <Button variant="contained" onClick={handleAddSelection}>
-              Add Selection
+            <Button 
+              variant="contained" 
+              onClick={handleAddSelection}
+              disabled={loading}
+              sx={{ alignSelf: "flex-start" }}
+            >
+              {loading ? <CircularProgress size={24} /> : "Add Selection"}
             </Button>
           )}
 
-          <Typography variant="h6" sx={{ mt: 4 }}>
+          <Typography variant="h5" sx={{ mt: 4, fontWeight: "bold" }}>
             Added Selections
           </Typography>
 
-          {selections.map((selection) => (
-            <Card key={selection._id} variant="outlined" sx={{ mb: 2 }}>
-              <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Box>
-                    <Typography variant="h6">
-                      <strong>{selection.category.toUpperCase()}</strong> —{" "}
-                      {selection.typeId?.name || selection.typeId?.fullName}
-                    </Typography>
-                    {/* <Typography variant="subtitle2" color="text.secondary">
-                      {selection.typeId?.name || selection.typeId?.fullName}
-                    </Typography> */}
-                    <Typography>
-                      {selection.date} at {selection.time}
-                    </Typography>
-                    <Typography color={selection.isActive ? "green" : "gray"}>
-                      Status: {selection.isActive ? "Active" : "Inactive"}
-                    </Typography>
-                    {selection.isActive && (
-                      <Button
-                        variant="outlined"
-                        color="error"
+          {selections.length === 0 ? (
+            <Typography variant="body1" color="text.secondary">
+              No selections added yet
+            </Typography>
+          ) : (
+            selections.map((selection) => (
+              <Card key={selection._id} variant="outlined" sx={{ mb: 2 }}>
+                <CardContent>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="h6" component="div">
+                        <strong>{selection.category.toUpperCase()}</strong> —{" "}
+                        {selection.typeId?.name || selection.typeId?.fullName}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {new Date(selection.date).toLocaleDateString()} at {selection.time}
+                      </Typography>
+                      <Typography 
+                        variant="body2"
+                        color={selection.isActive ? "success.main" : "text.secondary"}
                         sx={{ mt: 1 }}
-                        onClick={() => handleDeactivateSelection(selection._id)}
                       >
-                        Deactivate
-                      </Button>
-                    )}
+                        Status: {selection.isActive ? "Active" : "Inactive"}
+                      </Typography>
+                      {selection.isActive && (
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          sx={{ mt: 1 }}
+                          onClick={() => handleDeactivateSelection(selection._id)}
+                          disabled={loading}
+                        >
+                          Deactivate
+                        </Button>
+                      )}
+                    </Box>
+                    <Box>
+                      <Tooltip title="Edit">
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleEditSelection(selection)}
+                          disabled={loading}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton
+                          color="error"
+                          onClick={() => handleOpenDeleteDialog(selection)}
+                          disabled={loading}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </Box>
-                  <Box>
-                    <Tooltip title="Edit">
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleEditSelection(selection)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                      <IconButton
-                        color="error"
-                        onClick={() => handleDeleteSelection(selection._id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          )}
         </Box>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={openDeleteDialog}
+          onClose={handleCloseDeleteDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            Confirm Deletion
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to delete the selection for{" "}
+              <strong>
+                {selectionToDelete?.typeId?.name || selectionToDelete?.typeId?.fullName}
+              </strong>?
+              <br />
+              This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={handleCloseDeleteDialog} 
+              disabled={deleteLoading}
+              color="primary"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteSelection}
+              color="error"
+              autoFocus
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? <CircularProgress size={24} /> : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </Box>
   );
