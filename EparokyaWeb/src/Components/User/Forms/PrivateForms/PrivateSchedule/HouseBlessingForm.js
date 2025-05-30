@@ -21,7 +21,7 @@ const HouseBlessingForm = () => {
             LotBlockPhaseHouseNo: '',
             SubdivisionVillageZone: '',
             Street: '',
-            District: '',
+            district: '',
             barangay: '',
             city: '',
         },
@@ -112,7 +112,7 @@ const HouseBlessingForm = () => {
                 lot: '',
                 phase: '',
                 street: '',
-                baranggay: '',
+                barangay: '',
                 district: '',
                 city: '',
             },
@@ -124,11 +124,14 @@ const HouseBlessingForm = () => {
 
         const { fullName, contactNumber, blessingDate, blessingTime, address } = formData;
 
-        if (!fullName || !contactNumber || !blessingDate || !blessingTime) {
+        if (!fullName || !contactNumber || !blessingDate || !blessingTime ||
+            !address.Street || !address.district || !address.barangay || !address.city
+        ) {
             toast.error('Please fill out all required fields!');
             return;
         }
-        console.log('Submission Data:', formData);
+
+        // console.log('Submission Data:', formData);
 
         try {
             const submissionData = {
@@ -136,10 +139,11 @@ const HouseBlessingForm = () => {
                 address: {
                     ...formData.address,
                     customCity: formData.address.city === 'Others' ? customCity : undefined,
-                    customBarangay: formData.address.baranggay === 'Others' ? customBarangay : undefined,
+                    customBarangay: formData.address.barangay === 'Others' ? customBarangay : undefined,
                 },
                 userId: user?._id,
             };
+
             const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/houseBlessingSubmit`,
                 submissionData,
@@ -162,7 +166,7 @@ const HouseBlessingForm = () => {
         const selectedCity = e.target.value;
         setFormData((prev) => ({
             ...prev,
-            address: { ...prev.address, city: selectedCity, baranggay: '' },
+            address: { ...prev.address, city: selectedCity, barangay: '' },
         }));
 
         if (selectedCity === 'Others') {
@@ -174,13 +178,14 @@ const HouseBlessingForm = () => {
         const selectedBarangay = e.target.value;
         setFormData((prev) => ({
             ...prev,
-            address: { ...prev.address, baranggay: selectedBarangay },
+            address: { ...prev.address, barangay: selectedBarangay },
         }));
 
         if (selectedBarangay === 'Others') {
             setCustomBarangay('');
         }
     };
+
 
     return (
         <Box display="flex">
@@ -221,7 +226,7 @@ const HouseBlessingForm = () => {
                             margin="normal"
                         />
                         <Typography variant="h4" gutterBottom>Address</Typography>
-                        {['BldgNameTower', 'LotBlockPhaseHouseNo', 'SubdivisionVillageZone', 'Street', 'District'].map((field) => (
+                        {['BldgNameTower', 'LotBlockPhaseHouseNo', 'SubdivisionVillageZone', 'Street', 'district'].map((field) => (
                             <TextField
                                 key={field}
                                 label={field.charAt(0).toUpperCase() + field.slice(1)}
@@ -261,6 +266,7 @@ const HouseBlessingForm = () => {
                             fullWidth
                             margin="normal"
                         >
+
                             <MenuItem value="">Select a barangay</MenuItem>
                             {barangays.map((barangay, index) => (
                                 <MenuItem key={index} value={barangay}>{barangay}</MenuItem>

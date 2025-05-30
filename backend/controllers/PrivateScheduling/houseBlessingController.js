@@ -24,7 +24,7 @@ exports.createHouseBlessing = async (req, res) => {
             contactNumber,
             address: {
                 ...address,
-                customBarangay: address.baranggay === 'Others' ? address.customBarangay : undefined,
+                customBarangay: address.barangay === 'Others' ? address.customBarangay : undefined,
                 customCity: address.city === 'Others' ? address.customCity : undefined,
             },
             blessingDate, 

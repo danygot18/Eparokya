@@ -4,19 +4,13 @@ const houseBlessingSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     contactNumber: { type: String, required: true },
     address: {
-        // houseDetails: { type: String, required: true },
-        // block: { type: String, required: false },
-        // lot: { type: String, required: false },
-        // phase: { type: String, required: true },
-        // street: { type: String, required: true },
-
         BldgNameTower: { type: String, required: false },
         LotBlockPhaseHouseNo: { type: String, required: false },
         SubdivisionVillageZone: { type: String, required: false },
         Street: { type: String, required: true },
-        District: { type: String, required: true },
+        district: { type: String, required: true },
         
-        baranggay: {
+        barangay: {
             type: String,
             enum: [
                 'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
@@ -33,7 +27,7 @@ const houseBlessingSchema = new mongoose.Schema({
         customBarangay: {
             type: String,
             required: function() {
-                return this.address.baranggay === 'Others'; 
+                return this.address.barangay === 'Others'; 
             }
         },
         district: { type: String, required: true },
