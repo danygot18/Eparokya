@@ -210,11 +210,11 @@ const SideBar = () => {
       icon: <CalendarTodayIcon />,
       path: "/admin/calendar",
     },
-    {
-      text: "Ministry Inventory",
-      icon: <InventoryIcon />,
-      path: "/admin/adminDate",
-    },
+    // {
+    //   text: "Ministry Inventory",
+    //   icon: <InventoryIcon />,
+    //   path: "/admin/adminDate",
+    // },
     {
       text: "Set Available Date",
       icon: <DateRangeIcon />,

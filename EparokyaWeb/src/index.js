@@ -13,14 +13,49 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 
 const RootComponent = () => {
   useEffect(() => {
-    socket.connect(); // Connect socket when the app starts
-    console.log("Socket connected:", socket.connected);
+    // Only connect if not already connected
+    if (!socket.connected) {
+      socket.connect();
+
+      socket.on('connect', () => {
+        console.log("Socket connected:", socket.connected); // ✅ True
+        console.log("Socket ID:", socket.id); // ✅ Now has a value
+      });
+
+      socket.on('connect_error', (err) => {
+        console.log("Connection error:", err); // ✅ Helps debug failures
+      });
+    }
 
     return () => {
-      socket.disconnect(); // Cleanup on unmount
-      console.log("Socket disconnected");
+      if (socket.connected) {
+        socket.disconnect();
+        console.log("Socket disconnected");
+      }
     };
   }, []);
+  // useEffect(() => {
+  //   // Only connect if not already connected
+  //   if (!socket.connected) {
+  //     socket.connect();
+
+  //     socket.on('connect', () => {
+  //       console.log("Socket connected:", socket.connected);
+  //       console.log("Socket ID:", socket.id);
+  //     });
+
+  //     socket.on('connect_error', (err) => {
+  //       console.log("Connection error:", err);
+  //     });
+  //   }
+
+  //   return () => {
+  //     if (socket.connected) {
+  //       socket.disconnect();
+  //       console.log("Socket disconnected");
+  //     }
+  //   };
+  // }, []);
 
   return (
     <Provider store={store}>

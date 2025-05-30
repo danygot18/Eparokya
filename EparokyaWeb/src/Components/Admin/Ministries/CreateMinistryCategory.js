@@ -200,8 +200,8 @@ const MinistryCategory = () => {
                   {loading
                     ? <CircularProgress size={24} />
                     : editMode
-                    ? 'Update'
-                    : 'Create'}
+                      ? 'Update'
+                      : 'Create'}
                 </Button>
                 <Button
                   variant="outlined"
@@ -220,7 +220,11 @@ const MinistryCategory = () => {
           </Paper>
 
           {/* Right Pane - List */}
+
           <Paper elevation={3} sx={{ p: 3, flex: 2 }}>
+            <Typography variant="h6" component="h3" gutterBottom>
+              Ministry Category List
+            </Typography>
             <TextField
               fullWidth
               label="Search"
@@ -232,9 +236,7 @@ const MinistryCategory = () => {
                 startAdornment: <Search sx={{ mr: 1 }} />,
               }}
             />
-            <Typography variant="h6" component="h3" gutterBottom>
-              Ministry Category List
-            </Typography>
+
             {loading ? (
               <Box display="flex" justifyContent="center" py={4}>
                 <CircularProgress />
@@ -286,16 +288,28 @@ const MinistryCategory = () => {
                     </React.Fragment>
                   ))}
                 </List>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+
+                <div style={{ position: "relative", width: "50%", height: "100%", alignItems: "center", margin: "auto" }}>
                   <Pagination
+                    sx={{
+                      transform: "scale(0.7)",
+                      padding: 2,
+                      '& .MuiPagination-ul': {
+                        gap: '9px', // This adds space between all pagination items
+                      },
+                      '& .MuiPaginationItem-root': {
+                        margin: 0, // Remove default margins if needed
+                      },
+                    }}
                     count={totalPages}
                     page={currentPage}
                     onChange={handlePageChange}
                     color="primary"
-                    showFirstButton
-                    showLastButton
+                    // showFirstButton
+                    // showLastButton
                   />
-                </Box>
+                </div>
+
               </>
             ) : (
               <Typography variant="body1" color="textSecondary" align="center">

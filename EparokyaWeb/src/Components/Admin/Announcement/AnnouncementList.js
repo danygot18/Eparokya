@@ -147,282 +147,296 @@ const AdminAnnouncementList = () => {
     filteredAnnouncements.length / announcementsPerPage
   );
 
-return (
-  <Box
-    sx={{
-      display: "flex",
-      minHeight: "100vh",
-      bgcolor: "background.default",
-    }}
-  >
-    <SideBar />
-
+  return (
     <Box
-      component="main"
       sx={{
-        flexGrow: 1,
-        p: 3,
         display: "flex",
-        flexDirection: "column",
-        gap: 3,
+        minHeight: "100vh",
+        bgcolor: "background.default",
       }}
     >
-      <Typography
-        variant="h4"
-        sx={{
-          textAlign: "center",
-          mb: 3,
-          fontWeight: "bold",
-          color: "text.primary",
-        }}
-      >
-        Announcements
-      </Typography>
+      <SideBar />
 
-      {/* Announcements Grid */}
       <Box
+        component="main"
         sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)",
-            lg: "repeat(4, 1fr)",
-          },
+          flexGrow: 1,
+          p: 3,
+          display: "flex",
+          flexDirection: "column",
           gap: 3,
-          width: "100%",
-          maxWidth: "1800px",
-          mx: "auto",
         }}
       >
-        {currentAnnouncements.map((announcement) => (
-          <Card
-            key={announcement._id}
-            sx={{
-              borderRadius: 2,
-              boxShadow: 3,
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-              transition: "transform 0.2s",
-              "&:hover": {
-                transform: "translateY(-4px)",
-              },
-            }}
-          >
-            <CardHeader
-              avatar={
-                <Avatar
-                  src="/EPAROKYA-SYST.png"
-                  alt="Saint Joseph Parish"
-                  sx={{ width: 56, height: 56 }}
-                />
-              }
-              action={
-                <Box>
-                  <IconButton
-                    onClick={() =>
-                      navigate(`/admin/updateAnnouncementPage/${announcement._id}`)
-                    }
-                  >
-                    <EditIcon color="primary" />
-                  </IconButton>
-                  <IconButton onClick={() => handleDelete(announcement._id)}>
-                    <DeleteIcon color="error" />
-                  </IconButton>
-                </Box>
-              }
-              title={announcement.name}
-              subheader={
-                <Typography variant="caption" color="text.secondary">
-                  {new Date(announcement.dateCreated).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Typography>
-              }
-              sx={{
-                alignItems: "flex-start",
-                "& .MuiCardHeader-content": {
-                  overflow: "hidden",
-                },
-              }}
-            />
-
-            <CardContent sx={{ flexGrow: 1, py: 1 }}>
-              <Typography variant="body1" paragraph>
-                {announcement.description}
-              </Typography>
-
-              <Typography variant="body2" color="text.secondary" paragraph>
-                {announcement.richDescription}
-              </Typography>
-
-              {announcement.images?.length > 0 && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    gap: 1,
-                    overflowX: "auto",
-                    py: 1,
-                    "& img": {
-                      height: 120,
-                      width: "auto",
-                      borderRadius: 1,
-                      cursor: "pointer",
-                      transition: "transform 0.2s",
-                      "&:hover": {
-                        transform: "scale(1.03)",
-                      },
-                    },
-                  }}
-                >
-                  {announcement.images.map((img, index) => (
-                    <img
-                      key={index}
-                      src={img.url}
-                      alt={`Slide ${index + 1}`}
-                      onClick={() => setPreviewImage(img.url)}
-                    />
-                  ))}
-                </Box>
-              )}
-            </CardContent>
-
-            <CardActions
-              sx={{
-                p: 2,
-                borderTop: "1px solid",
-                borderColor: "divider",
-                bgcolor: "action.hover",
-                justifyContent: "space-between",
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={announcement.isFeatured}
-                      onChange={() => toggleFeatured(announcement._id)}
-                      size="small"
-                    />
-                  }
-                  label="Featured"
-                />
-                {announcement.isFeatured && (
-                  <Chip
-                    label="Featured"
-                    size="small"
-                    color="primary"
-                    icon={<StarIcon fontSize="small" />}
-                  />
-                )}
-              </Box>
-
-              <Box sx={{ display: "flex", gap: 1 }}>
-                <Chip
-                  label={
-                    announcement.announcementCategory?.name || "Uncategorized"
-                  }
-                  size="small"
-                  variant="outlined"
-                />
-              </Box>
-            </CardActions>
-          </Card>
-        ))}
-      </Box>
-
-      {/* Pagination */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 2,
-          mt: 3,
-        }}
-      >
-        <Button
-          variant="outlined"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          startIcon={<ChevronLeftIcon />}
-        >
-          Previous
-        </Button>
-
-        <Typography variant="body1" color="text.secondary">
-          Page {currentPage} of {totalPages}
-        </Typography>
-
-        <Button
-          variant="outlined"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-          endIcon={<ChevronRightIcon />}
-        >
-          Next
-        </Button>
-      </Box>
-    </Box>
-
-    {/* Image Zoom Preview */}
-    {previewImage && (
-      <Box
-        onClick={() => setPreviewImage(null)}
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.8)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 1300,
-          cursor: "zoom-out",
-        }}
-      >
-        <Box
-          onClick={(e) => e.stopPropagation()}
-          onWheel={handleWheel}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+        <Typography
+          variant="h4"
           sx={{
-            overflow: "hidden",
-            maxWidth: "90%",
-            maxHeight: "90%",
-            cursor: dragging ? "grabbing" : "grab",
+            textAlign: "center",
+            mb: 3,
+            fontWeight: "bold",
+            color: "text.primary",
           }}
         >
-          <img
-            src={previewImage}
-            alt="Zoomed Preview"
-            style={{
-              transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
-              transformOrigin: "top left",
-              transition: dragging ? "none" : "transform 0.2s ease",
-              maxWidth: "100%",
-              maxHeight: "100%",
-              userSelect: "none",
-              pointerEvents: "none",
-            }}
-            draggable={false}
-          />
+          Announcements
+        </Typography>
+
+        {/* Announcements Grid */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+              lg: "repeat(4, 1fr)",
+            },
+            gap: 3,
+            width: "100%",
+            maxWidth: "1800px",
+            mx: "auto",
+          }}
+        >
+          {currentAnnouncements.map((announcement) => (
+            <Card
+              key={announcement._id}
+              sx={{
+                borderRadius: 2,
+                boxShadow: 3,
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                transition: "transform 0.2s",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                },
+              }}
+            >
+              <CardHeader
+                avatar={
+                  <Avatar
+                    src="/EPAROKYA-SYST.png"
+                    alt="Saint Joseph Parish"
+                    sx={{ width: 56, height: 56 }}
+                  />
+                }
+                action={
+                   <div style={{  gap: '8px', maxWidth: '50px', }}>
+                    <Box>
+                      <IconButton
+                        onClick={() =>
+                          navigate(`/admin/updateAnnouncementPage/${announcement._id}`)
+                        }
+                      >
+                        <EditIcon color="primary" />
+                      </IconButton>
+                      <IconButton onClick={() => handleDelete(announcement._id)}>
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    </Box>
+                  </div>
+                }
+                title={announcement.name}
+                subheader={
+                  <Typography variant="caption" color="text.secondary">
+                    {new Date(announcement.dateCreated).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Typography>
+                }
+                sx={{
+                  alignItems: "flex-start",
+                  "& .MuiCardHeader-content": {
+                    overflow: "hidden",
+                  },
+                }}
+              />
+
+              <CardContent sx={{ flexGrow: 1, py: 1 }}>
+                <Typography variant="body1" paragraph>
+                  {announcement.description}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  {announcement.richDescription}
+                </Typography>
+
+                {announcement.images?.length > 0 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      overflowX: "auto",
+                      py: 1,
+                      "& img": {
+                        height: 120,
+                        width: "auto",
+                        borderRadius: 1,
+                        cursor: "pointer",
+                        transition: "transform 0.2s",
+                        "&:hover": {
+                          transform: "scale(1.03)",
+                        },
+                      },
+                    }}
+                  >
+                    {announcement.images.map((img, index) => (
+                      <img
+                        key={index}
+                        src={img.url}
+                        alt={`Slide ${index + 1}`}
+                        onClick={() => setPreviewImage(img.url)}
+                      />
+                    ))}
+                  </Box>
+                )}
+              </CardContent>
+
+              <CardActions
+                sx={{
+                  p: 2,
+                  borderTop: "1px solid",
+                  borderColor: "divider",
+                  bgcolor: "action.hover",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={announcement.isFeatured}
+                        onChange={() => toggleFeatured(announcement._id)}
+                        size="small"
+                      />
+                    }
+                    label="Featured"
+                  />
+                  {announcement.isFeatured && (
+                    <Chip
+                      label="Featured"
+                      size="small"
+                      color="primary"
+                      icon={<StarIcon fontSize="small" />}
+                    />
+                  )}
+                </Box>
+
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Chip
+                    label={
+                      announcement.announcementCategory?.name || "Uncategorized"
+                    }
+                    size="small"
+                    variant="outlined"
+                  />
+                </Box>
+              </CardActions>
+            </Card>
+          ))}
         </Box>
-      </Box>
-    )}
-  </Box>
-);
+
+        {/* Pagination */}
+        <div style={{ position: "relative", width: "50%", height: "100%", alignItems: "center", margin: "auto" }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 2,
+              mt: 3,
+            }}
+          >
+            <div>
+              <Button
+                variant="outlined"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                startIcon={<ChevronLeftIcon />}
+              >
+                Previous
+              </Button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+              <Typography variant="body1" color="text.secondary">
+                Page {currentPage} of {totalPages}
+              </Typography>
+            </div>
+
+            <div>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                endIcon={<ChevronRightIcon />}
+              >
+                Next
+              </Button>
+            </div>
+          </Box>
+        </div>
+      </Box >
+
+      {/* Image Zoom Preview */}
+      {
+        previewImage && (
+          <Box
+            onClick={() => setPreviewImage(null)}
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.8)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1300,
+              cursor: "zoom-out",
+            }}
+          >
+
+            <Box
+              onClick={(e) => e.stopPropagation()}
+              onWheel={handleWheel}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              sx={{
+                overflow: "hidden",
+                maxWidth: "90%",
+                maxHeight: "90%",
+                cursor: dragging ? "grabbing" : "grab",
+              }}
+            >
+              <img
+                src={previewImage}
+                alt="Zoomed Preview"
+                style={{
+                  transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+                  transformOrigin: "top left",
+                  transition: dragging ? "none" : "transform 0.2s ease",
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  userSelect: "none",
+                  pointerEvents: "none",
+                }}
+                draggable={false}
+              />
+            </Box>
+
+          </Box>
+
+        )
+      }
+    </Box >
+  );
 
 };
 

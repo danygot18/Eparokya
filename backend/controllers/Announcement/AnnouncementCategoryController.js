@@ -81,8 +81,8 @@ exports.updateAnnouncementCategory = async (req, res) => {
 
 exports.deleteAnnouncementCategory = async (req, res) => {
     try {
-        const { announcementCatgeoryId } = req.params;
-        const deletedCategory = await announcementCategory.findByIdAndDelete(announcementCatgeoryId);
+        const { selectedId } = req.params;
+        const deletedCategory = await announcementCategory.findByIdAndDelete(selectedId);
 
         if (!deletedCategory) {
             return res.status(404).json({ error: 'Announcement category not found' });

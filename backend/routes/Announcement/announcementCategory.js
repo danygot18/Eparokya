@@ -10,6 +10,6 @@ const upload = require('../../utils/multer');
 router.post('/create/announcementCategory', isAuthenticatedUser, isAuthorized('admin'), upload.single('images'), announcementCategoryController.createAnnouncementCategory);
 router.get('/getAllannouncementCategory', announcementCategoryController.getAnnouncementCategory);
 router.put('/updateAnnouncementCategory/:announcementCategoryId', announcementCategoryController.updateAnnouncementCategory);
-router.delete('/deleteAnnouncementCategory/:announcementCategoryId', announcementCategoryController.deleteAnnouncementCategory);
+router.delete('/deleteAnnouncementCategory/:selectedId', announcementCategoryController.deleteAnnouncementCategory);
 
 module.exports = router;

@@ -39,7 +39,7 @@
 // //     "http://localhost:3000",  // Web (Development)
 // //     null,  // Mobile app (since built apps may send requests with null origin)
 // //   ];
-  
+
 // //   const io = new Server(server, {
 // //     cors: {
 // //       origin: function (origin, callback) {
@@ -62,45 +62,54 @@
 const dotenv = require('dotenv');
 const cloudinary = require('cloudinary');
 const connectDatabase = require('./config/database');
-const { server, io } = require('./app'); 
-const socket = require('./socket');
+const { server, io } = require('./app');
+const socketHandler = require('./socket');
 
-// dotenv.config({ path: './config/config.env' });
+// Load environment variables
 dotenv.config({ path: './config/config.env' });
-console.log("DB_URI:", process.env.DB_URI || "NOT FOUND");
-console.log("Hugging Face API Key:", process.env.HUGGING_FACE_API_KEY || "NOT FOUND");
+console.log("✅ DB_URI:", process.env.DB_URI || "NOT FOUND");
+console.log("🔐 Hugging Face API Key:", process.env.HUGGING_FACE_API_KEY || "NOT FOUND");
 
+// Connect DB
 connectDatabase();
+
+// Cloudinary config
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Start server
 const port = process.env.PORT || 8080;
-
-// server.listen(port, () => {
-//     console.log(`Server started on port ${port} in ${process.env.NODE_ENV} mode`);
-// });
-
 server.listen(port, '0.0.0.0', () => {
-    console.log(`Server started on port ${port} in ${process.env.NODE_ENV} mode`);
+    console.log(`🚀 Server running on port ${port} in ${process.env.NODE_ENV} mode`);
 });
 
-io.on('connection', socket);
+// Attach socket handler
+// io.on('connection', socketHandler);
+io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+    socketHandler(socket);
 
-// ---------------------- SENTIMENT ANALYSIS ---------------------- //
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
+
+// Load sentiment analysis model
 let sentimentAnalyzer;
 
 (async () => {
     try {
-        const { pipeline } = await import('@xenova/transformers'); 
+        const { pipeline } = await import('@xenova/transformers');
         sentimentAnalyzer = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
-        console.log('Sentiment model loaded successfully!');
+        console.log('🧠 Sentiment model loaded successfully!');
     } catch (error) {
-        console.error("Error loading sentiment model:", error);
+        console.error("❌ Error loading sentiment model:", error);
     }
 })();
+
 
 
 //new

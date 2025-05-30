@@ -4,123 +4,44 @@ const cors = require("cors");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const errorHandler = require("./helpers/error-handler");
-
-
-// For natification:
-const { Server } = require("socket.io");
 const http = require("http");
+const { Server } = require("socket.io");
 
+const allowedOrigins = [
+  "*",
+  "https://eparokya.vercel.app",
+  "http://localhost:3000",
+];
+
+// Middleware
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+app.use(express.json());
+app.use(cookieParser());
+app.use(morgan("tiny"));
+app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
+app.use("/api/v1", require("./routes/user"));
+app.use(errorHandler);
+
+// Create HTTP server and export
 const server = http.createServer(app);
+
+// Create Socket.IO server
 const io = new Server(server, {
   cors: {
-    origin: [
-      // "*",
-      "https://eparokya.vercel.app", 
-      "http://localhost:3000"],
+    origin: allowedOrigins,
+    methods: ["GET", "POST",],
     credentials: true,
-  },
+  }
 });
 
 
-// const allowedOrigins = ["https://eparokya.vercel.app","*", null];
 
-// Load environment variables
-// require("dotenv/config");
-
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       if (allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//     credentials: true,
-//   })
-// );
-// Enable CORS for both Web & Mobile
-// app.use(
-//   cors({
-//     origin: ["*", "https://eparokya.vercel.app", null, "http://localhost:3000"],
-//     // origin: "*",
-//     credentials: true,
-//   })
-// );
-// app.use(cors());
-// app.options("*", cors());
-
-// app.use(cors());
-// app.options("*", cors());
-app.use(express.json());
-
-//new
-app.use(
-  cors({
-    origin: [
-      "*",
-      // "https://eparokya.vercel.app", 
-      "http://localhost:3000"], // Allowed domains
-    credentials: true, // Allow sending cookies
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-// Middleware
-// app.use(express.json({ limit: "50mb" }));
-// app.use(express.urlencoded({ limit: "50mb", extended: true }));
-app.use(cookieParser());
-app.use(morgan("tiny"));
-app.use(errorHandler);
-app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
-
-// const express = require("express");
-// const app = express();
-// const cors = require("cors");
-// const morgan = require("morgan");
-// const cookieParser = require("cookie-parser");
-// const errorHandler = require("./helpers/error-handler");
-
-// // For real-time communication (Socket.IO)
-// const { Server } = require("socket.io");
-// const http = require("http");
-
-// // Initialize server and Socket.IO
-// const server = http.createServer(app);
-// const io = new Server(server, {
-//   cors: {
-//     origin: [
-//       "https://eparokya.vercel.app", 
-//       "http://localhost:3000"
-//     ],
-//     credentials: true,
-//   },
-// });
-
-// // Middleware
-// app.use(express.json());
-// app.use(cookieParser());
-// app.use(morgan("tiny"));
-// app.use(errorHandler);
-// app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
-
-// // CORS Configuration
-// app.use(
-//   cors({
-//     origin: [
-//       "https://eparokya.vercel.app", 
-//       "http://localhost:3000"
-//     ], // Allowed domains
-//     credentials: true, // Allow sending cookies
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
-
-
-// === ROUTES ===
-// User & Authentication
 app.use("/api/v1", require("./routes/user"));
 app.use("/api/v1/chat", require("./routes/chat"));
 app.use("/api/v1", require("./routes/Resources/resource"));

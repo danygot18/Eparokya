@@ -2,169 +2,32 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import SideBar from '../SideBar';
-import '@fortawesome/fontawesome-free/css/all.min.css';
-
-const styles = {
-    wrapper: {
-        display: 'flex',
-        minHeight: '100vh',
-        backgroundColor: '#e8f5e9',
-    },
-    content: {
-        display: 'flex',
-        flex: 1,
-        padding: '20px',
-        gap: '40px',
-    },
-    leftPane: {
-        flex: 1,
-        backgroundColor: '#d9ead3',
-        padding: '20px',
-        borderRadius: '10px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    },
-    rightPane: {
-        flex: 2,
-        backgroundColor: '#d9ead3',
-        padding: '20px',
-        borderRadius: '10px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    },
-    title: {
-        textAlign: 'center',
-        marginBottom: '20px',
-        color: '#333',
-        fontSize: '24px',
-        fontWeight: 'bold',
-    },
-    form: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '15px',
-    },
-    formGroup: {
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    label: {
-        marginBottom: '5px',
-        fontSize: '16px',
-    },
-    input: {
-        padding: '10px',
-        borderRadius: '6px',
-        border: '1px solid #ccc',
-        fontSize: '16px',
-    },
-    textarea: {
-        padding: '10px',
-        borderRadius: '6px',
-        border: '1px solid #ccc',
-        fontSize: '16px',
-        minHeight: '80px',
-    },
-    buttonGroup: {
-        display: 'flex',
-        gap: '10px',
-    },
-    submitButton: {
-        flex: 1,
-        padding: '10px',
-        borderRadius: '6px',
-        backgroundColor: '#388e3c',
-        color: '#fff',
-        border: 'none',
-        fontSize: '16px',
-        cursor: 'pointer',
-    },
-    cancelButton: {
-        flex: 1,
-        padding: '10px',
-        borderRadius: '6px',
-        backgroundColor: '#d32f2f',
-        color: '#fff',
-        border: 'none',
-        fontSize: '16px',
-        cursor: 'pointer',
-    },
-    searchInput: {
-        padding: '10px',
-        width: '100%',
-        borderRadius: '6px',
-        border: '1px solid #ccc',
-        marginBottom: '20px',
-        fontSize: '16px',
-    },
-    listTitle: {
-        marginBottom: '10px',
-        fontSize: '20px',
-        fontWeight: 'bold',
-    },
-    list: {
-        listStyleType: 'none',
-        padding: '0',
-        marginBottom: '20px',
-    },
-    listItem: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '10px 15px',
-        borderBottom: '1px solid #ddd',
-        borderRadius: '8px',
-        backgroundColor: '#e6f4e9',
-        marginBottom: '10px',
-        fontSize: '16px',
-    },
-    categoryText: {
-        flex: 1,
-        marginRight: '15px',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-    },
-    buttonContainer: {
-        display: 'flex',
-        gap: '10px',
-    },
-    editButton: {
-        padding: '6px',
-        borderRadius: '6px',
-        border: 'none',
-        backgroundColor: '#2e7d32',
-        color: '#fff',
-        cursor: 'pointer',
-        fontSize: '14px',
-    },
-    deleteButton: {
-        padding: '6px',
-        borderRadius: '6px',
-        border: 'none',
-        backgroundColor: '#c62828',
-        color: '#fff',
-        cursor: 'pointer',
-        fontSize: '14px',
-    },
-    imageContainer: {
-        marginRight: '10px',
-        width: '50px',
-        height: '50px',
-        overflow: 'hidden',
-        borderRadius: '50%',
-        border: '1px solid #ccc',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-
-    categoryImage: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-    },
-
-}
+import {
+    Box,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
+    Typography,
+    TextField,
+    Button,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    IconButton,
+    Container,
+    Stack,
+    CircularProgress,
+    Avatar
+} from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
 
 const CreateAnnouncementCategory = () => {
     const [name, setName] = useState('');
@@ -172,12 +35,14 @@ const CreateAnnouncementCategory = () => {
     const [categories, setCategories] = useState([]);
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [editMode, setEditMode] = useState(false);
     const [editId, setEditId] = useState(null);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [selectedId, setSelectedId] = useState(null);
 
     const navigate = useNavigate();
-    // const API_URL = process.env.REACT_APP_API || 'http://localhost:5000';
 
     useEffect(() => {
         fetchCategories();
@@ -185,23 +50,22 @@ const CreateAnnouncementCategory = () => {
 
     const fetchCategories = async () => {
         try {
+            setLoading(true);
             const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllannouncementCategory`, {
                 withCredentials: true,
             });
 
-            console.log('Fetched categories:', response.data);
-
-            // Ensure we extract the categories array correctly
             if (response.data && Array.isArray(response.data.categories)) {
                 setCategories(response.data.categories);
             } else {
                 console.error('Unexpected data structure:', response.data);
-                setCategories([]); // Set default empty array to avoid errors
+                setCategories([]);
             }
-
         } catch (error) {
             console.error('Error fetching categories:', error);
             toast.error('Failed to load announcement categories.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -217,18 +81,15 @@ const CreateAnnouncementCategory = () => {
             setLoading(true);
             if (editMode) {
                 await axios.put(`${process.env.REACT_APP_API}/api/v1/updateAnnouncementCategory/${editId}`, formData, {
-                    // headers: { 'Content-Type': 'multipart/form-data' },
                     withCredentials: true,
                 });
                 toast.success('Announcement Category Updated Successfully.');
             } else {
                 await axios.post(`${process.env.REACT_APP_API}/api/v1/create/announcementCategory`, formData, {
-                    //headers: { 'Content-Type': 'multipart/form-data' },
                     withCredentials: true,
                 });
                 toast.success('Announcement Category Created Successfully.');
             }
-            setLoading(false);
             setName('');
             setDescription('');
             setImages([]);
@@ -236,20 +97,38 @@ const CreateAnnouncementCategory = () => {
             setEditId(null);
             fetchCategories();
         } catch (error) {
+            toast.error('Error while saving Announcement Category. Check your File Inputs');
+        } finally {
             setLoading(false);
-            toast.error('Error while saving Announcement Category.');
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleOpenDialog = (id) => {
+        setSelectedId(id);
+        setOpenDialog(true);
+    };
+
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setSelectedId(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!selectedId) return;
+         console.log("Deleting EventType ID:", selectedId);
+
         try {
-            await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteAnnouncementCategory/${id}`, {
+            setDeleteLoading(true);
+            await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteAnnouncementCategory/${selectedId}`, {
                 withCredentials: true,
             });
             toast.success('Announcement Category Deleted Successfully.');
             fetchCategories();
         } catch (error) {
             toast.error('Error deleting Announcement Category.');
+        } finally {
+            setDeleteLoading(false);
+            handleCloseDialog();
         }
     };
 
@@ -257,126 +136,204 @@ const CreateAnnouncementCategory = () => {
         setImages([...e.target.files]);
     };
 
+    const handleCancelEdit = () => {
+        setEditMode(false);
+        setName('');
+        setDescription('');
+        setImages([]);
+        setEditId(null);
+    };
+
     return (
-        <div style={styles.wrapper}>
+        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
             <SideBar />
-            <div style={styles.content}>
-                <div style={styles.leftPane}>
-                    <h2 style={styles.title}>
-                        {editMode ? 'Edit Announcement Category' : 'Create Announcement Category'}
-                    </h2>
-                    <form onSubmit={handleSubmit} style={styles.form}>
-                        <div style={styles.formGroup}>
-                            <label style={styles.label}>Name:</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                                style={styles.input}
-                            />
-                        </div>
-                        <div style={styles.formGroup}>
-                            <label style={styles.label}>Description:</label>
-                            <textarea
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                required
-                                style={styles.textarea}
-                            />
-                        </div>
-                        <div style={styles.formGroup}>
-                            <label style={styles.label}>Choose Images:</label>
-                            <input
-                                type="file"
-                                multiple
-                                onChange={handleImageChange}
-                                style={styles.input}
-                            />
-                        </div>
-                        <div style={styles.buttonGroup}>
-                            <button
-                                type="submit"
-                                style={styles.submitButton}
-                                disabled={loading}
-                            >
-                                {loading ? 'Saving...' : 'Submit'}
-                            </button>
-                            {editMode && (
-                                <button
-                                    type="button"
-                                    style={styles.cancelButton}
-                                    onClick={() => {
-                                        setEditMode(false);
-                                        setName('');
-                                        setDescription('');
-                                        setImages([]);
-                                        setEditId(null);
-                                    }}
+            <Container maxWidth="xl" sx={{ p: 3 }}>
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+                    {/* Left Pane - Form */}
+                    <Paper elevation={3} sx={{ p: 3, flex: 1 }}>
+                        <Typography variant="h5" component="h2" gutterBottom>
+                            {editMode ? 'Edit Announcement Category' : 'Create Announcement Category'}
+                        </Typography>
+                        <form onSubmit={handleSubmit}>
+                            <Stack spacing={2}>
+                                <TextField
+                                    label="Name"
+                                    variant="outlined"
+                                    fullWidth
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                    disabled={loading}
+                                />
+                                <TextField
+                                    label="Description"
+                                    variant="outlined"
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    required
+                                    disabled={loading}
+                                />
+                                <Button
+                                    variant="contained"
+                                    component="label"
+                                    disabled={loading}
                                 >
-                                    Cancel
-                                </button>
-                            )}
-                        </div>
-                    </form>
-                </div>
-                <div style={styles.rightPane}>
-                    <input
-                        type="text"
-                        placeholder="Search categories..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={styles.searchInput}
-                    />
-                    <h2 style={styles.listTitle}>Categories</h2>
-                    <ul style={styles.list}>
-                        {categories
-                            .filter((category) =>
-                                category.name.toLowerCase().includes(searchTerm.toLowerCase())
-                            )
-                            .map((category) => (
-                                <li key={category._id} style={styles.listItem}>
-                                    <div style={styles.imageContainer}>
-                                        <img
-                                            src={
-                                                typeof category.image === 'string'
-                                                    ? category.image || 'default-image-url.jpg'  // Mobile string image
-                                                    : category.image?.url || 'default-image-url.jpg'  // Web object image
-                                            }
-                                            alt={category.name}
-                                            style={styles.categoryImage}
-                                        />
-                                    </div>
-                                    <div style={styles.categoryText}>{category.name}</div>
-                                    <div style={styles.buttonContainer}>
-                                        <button
-                                            style={styles.editButton}
-                                            onClick={() => {
-                                                setEditMode(true);
-                                                setEditId(category._id);
-                                                setName(category.name);
-                                                setDescription(category.description);
-                                            }}
+                                    Upload Images
+                                    <input
+                                        type="file"
+                                        hidden
+                                        multiple
+                                        onChange={handleImageChange}
+                                    />
+                                </Button>
+                                {images.length > 0 && (
+                                    <Typography variant="body2">
+                                        {images.length} file(s) selected
+                                    </Typography>
+                                )}
+                                <Stack direction="row" spacing={2}>
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={loading}
+                                        fullWidth
+                                    >
+                                        {loading ? <CircularProgress size={24} /> : 'Submit'}
+                                    </Button>
+                                    {editMode && (
+                                        <Button
+                                            variant="outlined"
+                                            color="error"
+                                            onClick={handleCancelEdit}
+                                            fullWidth
                                         >
-                                            Edit
-                                        </button>
-                                        <button
-                                            style={styles.deleteButton}
-                                            onClick={() => handleDelete(category._id)}
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                    </ul>
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </Stack>
+                            </Stack>
+                        </form>
+                    </Paper>
 
+                    {/* Right Pane - Table */}
+                    <Paper elevation={3} sx={{ p: 3, flex: 2 }}>
+                        <Typography variant="h5" component="h2" gutterBottom>
+                            Announcement Categories
+                        </Typography>
+                        <TextField
+                            label="Search categories"
+                            variant="outlined"
+                            fullWidth
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            sx={{ mb: 3 }}
+                        />
+                        {loading ? (
+                            <Box display="flex" justifyContent="center" py={4}>
+                                <CircularProgress />
+                            </Box>
+                        ) : categories.length > 0 ? (
+                            <TableContainer>
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell sx={{ fontWeight: 'bold' }}>Image</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold' }} align="right">
+                                                Actions
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {categories
+                                            .filter((category) =>
+                                                category.name.toLowerCase().includes(searchTerm.toLowerCase())
+                                            )
+                                            .map((category) => (
+                                                <TableRow key={category._id} hover>
+                                                    <TableCell>
+                                                        <Avatar
+                                                            src={
+                                                                typeof category.image === 'string'
+                                                                    ? category.image || ''
+                                                                    : category.image?.url || ''
+                                                            }
+                                                            alt={category.name}
+                                                            sx={{ width: 56, height: 56 }}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>{category.name}</TableCell>
 
-                </div>
-            </div>
-        </div>
+                                                    <TableCell align="right">
+                                                        <div style={{  gap: '8px', maxWidth: '50px', }}>
+                                                            <IconButton
+                                                                onClick={() => {
+                                                                    setEditMode(true);
+                                                                    setEditId(category._id);
+                                                                    setName(category.name);
+                                                                    setDescription(category.description);
+                                                                }}
+                                                                color="primary"
+                                                            >
+                                                                <Edit />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                onClick={() => handleOpenDialog(category._id)}
+                                                                color="error"
+                                                            >
+                                                                <Delete />
+                                                            </IconButton>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        ) : (
+                            <Typography variant="body1" color="textSecondary" py={2}>
+                                No announcement categories found
+                            </Typography>
+                        )}
+                    </Paper>
+                </Stack>
+
+                {/* Delete Confirmation Dialog */}
+                <Dialog
+                    open={openDialog}
+                    onClose={handleCloseDialog}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">
+                        Confirm Deletion
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            Are you sure you want to delete this announcement category? This action cannot be undone.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseDialog} disabled={deleteLoading}>
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleConfirmDelete}
+                            color="error"
+                            autoFocus
+                            disabled={deleteLoading}
+                        >
+                            {deleteLoading ? <CircularProgress size={24} /> : 'Delete'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Container>
+        </Box>
     );
 };
-
 
 export default CreateAnnouncementCategory;
