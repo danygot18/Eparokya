@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  FlatList, 
-  ActivityIndicator, 
-  TouchableOpacity,
-  StyleSheet,
-   
+import {
+    View,
+    Text,
+    TextInput,
+    FlatList,
+    ActivityIndicator,
+    TouchableOpacity,
+    StyleSheet,
+
 } from "react-native";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
@@ -30,10 +30,10 @@ const SubmittedHouseBlessingList = () => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `${baseURL}/getAllUserSubmittedHouseBlessing`, 
+                `${baseURL}/getAllUserSubmittedHouseBlessing`,
                 { withCredentials: true }
             );
-            
+
             if (response.data && Array.isArray(response.data.forms)) {
                 setHouseBlessingForms(response.data.forms);
                 setFilteredForms(response.data.forms);
@@ -51,13 +51,13 @@ const SubmittedHouseBlessingList = () => {
 
     useEffect(() => {
         let filtered = houseBlessingForms;
-        
+
         if (activeFilter !== "All") {
             filtered = filtered.filter(
                 (form) => form.blessingStatus === activeFilter
             );
         }
-        
+
         if (searchTerm) {
             filtered = filtered.filter((form) =>
                 form.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -65,18 +65,13 @@ const SubmittedHouseBlessingList = () => {
                 form.address?.baranggay?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
-        
+
         setFilteredForms(filtered);
     }, [activeFilter, searchTerm, houseBlessingForms]);
 
     const handleCardPress = (formId) => {
         navigation.navigate("SubmittedHouseBlessingForm", { formId });
     };
-
-
-
-
-
     return (
         <View style={styles.container}>
             <Text style={styles.title}>My Submitted House Blessing Forms</Text>
@@ -120,7 +115,7 @@ const SubmittedHouseBlessingList = () => {
                     renderItem={({ item, index }) => {
                         const statusColor =
                             item.blessingStatus === "Confirmed" ? "#4caf50" :
-                            item.blessingStatus === "Cancelled" ? "#ff5722" : "#ffd700";
+                                item.blessingStatus === "Cancelled" ? "#ff5722" : "#ffd700";
 
                         return (
                             <TouchableOpacity
@@ -139,12 +134,16 @@ const SubmittedHouseBlessingList = () => {
                                     <Text><Text style={styles.bold}>Blessing Date:</Text> {item.blessingDate ? new Date(item.blessingDate).toLocaleDateString() : "N/A"}</Text>
                                     <Text><Text style={styles.bold}>Blessing Time:</Text> {item.blessingTime ?? "N/A"}</Text>
                                     <Text><Text style={styles.bold}>Contact:</Text> {item.contactNumber ?? "N/A"}</Text>
-                                    <Text><Text style={styles.bold}>Address:</Text> {[
-                                        item.address?.houseDetails,
-                                        item.address?.street,
-                                        item.address?.baranggay,
-                                        item.address?.city
-                                    ].filter(Boolean).join(", ")}</Text>
+                                    <Text>
+                                        <Text style={styles.bold}>Address:</Text>{" "}
+                                        {[
+                                            item.address?.houseDetails,
+                                            item.address?.street,
+                                            item.address?.barangay === 'Others' ? item.address?.customBarangay : item.address?.barangay,
+                                            item.address?.city === 'Others' ? item.address?.customCity : item.address?.city
+                                        ].filter(Boolean).join(", ")}
+                                    </Text>
+
                                 </View>
                             </TouchableOpacity>
                         );

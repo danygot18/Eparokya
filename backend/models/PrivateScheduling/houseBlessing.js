@@ -8,8 +8,7 @@ const houseBlessingSchema = new mongoose.Schema({
         LotBlockPhaseHouseNo: { type: String, required: false },
         SubdivisionVillageZone: { type: String, required: false },
         Street: { type: String, required: true },
-        district: { type: String, required: true },
-        
+        district: { type: String, required: true },   
         barangay: {
             type: String,
             enum: [
