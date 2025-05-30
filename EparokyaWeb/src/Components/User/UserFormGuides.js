@@ -10,7 +10,7 @@ import funeral1 from '../../assets/images/Patay1-Paalala.png';
 import funeral2 from '../../assets/images/Patay2-Paalala.png';
 import './userFormGuide.css';
 
-Modal.setAppElement('#root'); // Set the app element for accessibility
+Modal.setAppElement('#root');
 
 const UserFormGuides = () => {
     const [modalIsOpen, setModalIsOpen] = useState(false);

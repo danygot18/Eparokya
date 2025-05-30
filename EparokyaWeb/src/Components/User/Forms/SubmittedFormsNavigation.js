@@ -14,7 +14,6 @@ const SubmittedFormsNavigation = () => {
                 { name: 'Private Funeral', path: '/user/SubmittedFuneralList' },
                 { name: 'Mass Intentions', path: '/user/SubmittedPrayerRequestList' },
                 { name: 'Counseling', path: '/user/SubmittedCounselingList' },
-                { name: 'Street Mass', path: '/user/streetMassForm' },
                 { name: 'House Blessing', path: '/user/SubmittedHouseBlessingList' },
             ],
         },

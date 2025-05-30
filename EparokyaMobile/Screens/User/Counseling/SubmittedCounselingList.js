@@ -142,7 +142,22 @@ const SubmittedCounselingList = () => {
                                             <Text fontWeight="bold">Counseling Time:</Text> {item.counselingTime || "N/A"}
                                         </Text>
                                         <Text>
-                                            <Text fontWeight="bold">Address:</Text> {item.address?.street || "N/A"}
+                                            <Text fontWeight="bold">Address:</Text>{" "}
+                                            {[
+                                                item.address?.BldgNameTower,
+                                                item.address?.LotBlockPhaseHouseNo,
+                                                item.address?.SubdivisionVillageZone,
+                                                item.address?.Street,
+                                                item.address?.District,
+                                                item.address?.barangay === "Others"
+                                                    ? item.address?.customBarangay
+                                                    : item.address?.barangay,
+                                                item.address?.city === "Others"
+                                                    ? item.address?.customCity
+                                                    : item.address?.city,
+                                            ]
+                                                .filter(Boolean)
+                                                .join(", ") || "N/A"}
                                         </Text>
                                         <Text>
                                             <Text fontWeight="bold">Contact Person:</Text> {item.contactPerson?.fullName || "N/A"}

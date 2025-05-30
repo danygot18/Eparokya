@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
 import { useMemo } from "react";
 import Loader from "./Layout/Loader";
+import MassReadingsCard from "./MassReadingsCard";
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -269,12 +270,15 @@ export const Home = () => {
 }
 
 
-  return (
-    <div style={styles.homeContainer}>
-      <MetaData title="Home" />
-      <div style={styles.contentContainer}>
-        <GuestSideBar />
+ return (
+  <div style={styles.homeContainer}>
+    <MetaData title="Home" />
+    <div style={styles.contentContainer}>
+      <GuestSideBar />
 
+      {/* Main content and right sidebar */}
+      <div style={{ display: "flex", flex: 1 }}>
+        {/* Main Content */}
         <div style={styles.mainContent}>
           {/* Banner */}
           <div style={styles.bannerContainer}>
@@ -321,7 +325,6 @@ export const Home = () => {
             >
               All
             </span>
-
             {categories.map((category) => (
               <span
                 key={category._id}
@@ -405,9 +408,15 @@ export const Home = () => {
             )}
           </div>
         </div>
+
+        {/* Right side: Mass Readings */}
+        <div>
+          <MassReadingsCard />
+        </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 const styles = {

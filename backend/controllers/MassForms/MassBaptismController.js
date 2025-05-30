@@ -120,7 +120,7 @@ exports.getAllBaptisms = async (req, res) => {
     try {
       const baptism = await MassBaptism.findById(req.params.massBaptismId)
         .populate('userId')
-        .populate('baptismDateTime'); 
+        // .populate('baptismDateTime'); 
   
       if (!baptism) {
         return res.status(404).json({ message: 'Baptism not found' });

@@ -98,6 +98,11 @@ const SideBar = () => {
       path: "/admin/priestNavigation",
     },
     {
+      text: "Add Sunday Readings ",
+      icon: <DashboardIcon />,
+      path: "/admin/addReadings",
+    },
+    {
       text: "Users",
       icon: <PeopleIcon />,
       path: "/admin/users",

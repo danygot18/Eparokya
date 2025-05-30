@@ -225,29 +225,39 @@ exports.getAnnouncementById = async (req, res) => {
 };
 
 exports.likeAnnouncement = async (req, res) => {
-    const { announcementId } = req.params;
-    const userId = req.user.id;  
+  const { announcementId } = req.params;
+  const userId = req.user.id;
 
-    try {
-        const announcement = await Announcement.findById(announcementId);
-        if (!announcement) {
-            return res.status(404).json({ message: 'Announcement not found' });
-        }
-
-        const alreadyLiked = announcement.likedBy.includes(userId);
-
-        if (alreadyLiked) {
-            announcement.likedBy = announcement.likedBy.filter(uid => uid.toString() !== userId);
-        } else {
-            announcement.likedBy.push(userId);
-        }
-
-        await announcement.save();
-        res.status(200).json({ liked: !alreadyLiked });
-    } catch (error) {
-        console.error('Error liking announcement:', error);
-        res.status(500).json({ message: 'Server error' });
+  try {
+    const announcement = await Announcement.findById(announcementId);
+    if (!announcement) {
+      return res.status(404).json({ message: 'Announcement not found' });
     }
+
+    const userIdStr = userId.toString();
+    const alreadyLiked = announcement.likedBy.includes(userIdStr);
+
+    if (alreadyLiked) {
+      announcement.likedBy = announcement.likedBy.filter(
+        (uid) => uid.toString() !== userIdStr
+      );
+    } else {
+      announcement.likedBy.push(userIdStr);
+    }
+
+    await announcement.save();
+
+    const updatedAnnouncement = await Announcement.findById(announcementId); 
+
+    res.status(200).json({
+      message: alreadyLiked ? "Unliked successfully" : "Liked successfully",
+      data: updatedAnnouncement,
+      liked: !alreadyLiked,
+    });
+  } catch (error) {
+    console.error("Error liking announcement:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 exports.unlikeAnnouncement = async (req, res) => {

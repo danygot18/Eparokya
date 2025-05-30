@@ -137,6 +137,9 @@ import CreatePriest from "./Components/Admin/Priest/CreatePriest";
 import PriestList from "./Components/Admin/Priest/PriestList";
 import PriestNavigation from "./Components/Admin/Priest/PriestNavigation";
 
+// Readings
+import Readings from "./Components/Admin/Readings";
+
 // FeedbackForm
 import EventType from "./Components/Admin/FeedbackForm/Types/EventType";
 import ActivityType from "./Components/Admin/FeedbackForm/Types/ActivityType";
@@ -669,6 +672,17 @@ function App() {
           element={
             <ProtectedRoute isAdmin={true}>
               <PriestNavigation />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Readings - Admin */}
+         {/* Priest */}
+        <Route
+          path="/admin/addReadings"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <Readings />
             </ProtectedRoute>
           }
         />

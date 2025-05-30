@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -37,7 +38,7 @@ const EventSentiment = () => {
   const [comment, setComment] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [userId, setUserId] = useState(null);
-
+ const navigate = useNavigate();
   const config = useMemo(() => ({ withCredentials: true }), []);
 
   useEffect(() => {
@@ -120,6 +121,15 @@ const EventSentiment = () => {
     }
   };
 
+  const handleCloseModal = () => {
+    setResponses(Array(5).fill(null));
+    setComment("");
+    setModalOpen(false);
+    navigate("/");
+  };
+
+
+
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       {adminSelection ? (
@@ -184,7 +194,7 @@ const EventSentiment = () => {
         Submit Feedback
       </Button>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+       <Modal open={modalOpen} onClose={handleCloseModal}>
         <Box
           sx={{
             p: 4,
@@ -206,7 +216,7 @@ const EventSentiment = () => {
           <Button
             variant="contained"
             sx={{ mt: 2 }}
-            onClick={() => setModalOpen(false)}
+            onClick={handleCloseModal}
           >
             Close
           </Button>

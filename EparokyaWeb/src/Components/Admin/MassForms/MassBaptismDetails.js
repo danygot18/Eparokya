@@ -3,12 +3,12 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import SideBar from "../SideBar";
 
-import MassBaptismDetails from "../Baptism/BaptismChecklist";
+import MassBaptismChecklist from "../Baptism/BaptismChecklist";
 import { toast, ToastContainer } from 'react-toastify';
 import "../Baptism/baptism.css";
 import { Card, CardContent, Typography, Divider, Box, Button, Modal } from "@mui/material";
 
-const BaptismDetails = () => {
+const MassBaptismDetails = () => {
     const { massBaptismId } = useParams();
     const navigate = useNavigate();
     const [baptismDetails, setBaptismDetails] = useState(null);
@@ -60,7 +60,7 @@ const BaptismDetails = () => {
     useEffect(() => {
         const fetchBaptismDetails = async () => {
             try {
-                const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getMassBaptismForm/${massBaptismId}`,
+                const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getMassBaptism/${massBaptismId}`,
                     { withCredentials: true });
 
                 console.log("API Response:", response.data);
@@ -577,7 +577,7 @@ const BaptismDetails = () => {
                 </div>
             </div>
             <div className="wedding-checklist-container">
-                <MassBaptismDetails massBaptismId={massBaptismId} />
+                <MassBaptismChecklist massBaptismId={massBaptismId} />
                 <button onClick={() => navigate(`/adminChat/${baptismDetails?.userId?._id}/${baptismDetails?.userId?.email}`)}>
                     Go to Admin Chat
                 </button>

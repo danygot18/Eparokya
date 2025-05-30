@@ -124,22 +124,22 @@ exports.analyzeSentiment = async (req, res) => {
     let commentSentiment = comment
       ? await analyzeSentiment(emojiSentiment.score, comment)
       : {
-          basic: {
-            score: 0,
-            comparative: 0,
-            magnitude: 0,
-            words: [],
-            positive: [],
-            negative: [],
-            method: "basic",
-          },
-          advanced: {
-            label: "neutral",
-            score: 0,
-            magnitude: 0,
-            method: "huggingface",
-          },
-        };
+        basic: {
+          score: 0,
+          comparative: 0,
+          magnitude: 0,
+          words: [],
+          positive: [],
+          negative: [],
+          method: "basic",
+        },
+        advanced: {
+          label: "neutral",
+          score: 0,
+          magnitude: 0,
+          method: "huggingface",
+        },
+      };
 
     if (!commentSentiment.basic) {
       commentSentiment.basic = {
@@ -185,9 +185,15 @@ exports.analyzeSentiment = async (req, res) => {
       responses: processedResponses,
       comment: comment || null,
       commentSentiment: {
-        ...commentSentiment,
+        score: commentSentiment.basic.score,
+        comparative: commentSentiment.basic.comparative,
+        magnitude: commentSentiment.basic.magnitude,
+        words: commentSentiment.basic.words,
+        positive: commentSentiment.basic.positive,
+        negative: commentSentiment.basic.negative,
         label: sentimentToStars(overallSentiment, commentSentiment.basic),
       },
+
       overallSentiment,
       confidence: finalConfidence,
     });
@@ -243,8 +249,8 @@ exports.getSentimentById = async (req, res) => {
   try {
     const { eventSentimentId } = req.params;
     const sentiment = await EventSentiment.findById(eventSentimentId)
-      .populate("userId", "name") 
-      .populate("eventTypeId", "name"); 
+      .populate("userId", "name")
+      .populate("eventTypeId", "name");
 
     if (!sentiment) {
       return res.status(404).json({ message: "Sentiment not found" });
@@ -262,7 +268,7 @@ exports.getMySubmittedSentiments = async (req, res) => {
     const userId = req.user._id;
 
     const mySentiments = await EventSentiment.find({ userId })
-      .populate("eventTypeId", "name") 
+      .populate("eventTypeId", "name")
       .sort({ createdAt: -1 });
 
     if (!mySentiments || mySentiments.length === 0) {

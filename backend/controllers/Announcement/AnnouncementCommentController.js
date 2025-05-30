@@ -125,6 +125,7 @@ exports.getCommentsWithReplies = async (req, res) => {
     try {
         const comments = await Comment.find({ announcement: announcementId })
             .populate('user', 'name avatar') 
+              .populate('likedBy', '_id') 
             .populate({
                 path: 'replies',
                 populate: {
@@ -140,48 +141,56 @@ exports.getCommentsWithReplies = async (req, res) => {
     }
 };
 
-
 exports.likeComment = async (req, res) => {
-    const { commentId } = req.params;
-    const userId = req.user.id;
+  const { commentId } = req.params;
+  const { userId } = req.body;
 
-    if (!userId) {
-        return res.status(401).json({ message: 'Unauthorized' });
+  if (!userId) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found' });
     }
 
-    try {
-        const comment = await Comment.findById(commentId);
-        if (!comment) {
-            return res.status(404).json({ message: 'Comment not found' });
-        }
+    const userIdStr = userId.toString();
+    const index = comment.likedBy.findIndex(
+      (id) => id.toString() === userIdStr
+    );
+    let liked;
 
-        let liked;
-        if (comment.likedBy.includes(userId)) {
-            comment.likedBy = comment.likedBy.filter(id => id.toString() !== userId);
-            liked = false;
-        } else {
-            comment.likedBy.push(userId);
-            liked = true;
-        }
-
-        await comment.save();
-
-        res.status(200).json({
-            message: liked ? 'Comment liked successfully' : 'Comment unliked successfully',
-            data: {
-                _id: comment._id,
-                likedBy: comment.likedBy,
-            },
-            liked,
-        });
-    } catch (error) {
-        console.error('Error toggling like on comment:', error);
-        res.status(500).json({ message: 'Failed to toggle like on comment', error });
+    if (index > -1) {
+      comment.likedBy.splice(index, 1); 
+      liked = false;
+    } else {
+      comment.likedBy.push(userId); 
+      liked = true;
     }
+
+    await comment.save();
+
+    const updatedComment = await Comment.findById(commentId).populate(
+      'user',
+      'name avatar'
+    );
+
+    res.status(200).json({
+      message: liked
+        ? 'Comment liked successfully'
+        : 'Comment unliked successfully',
+      data: updatedComment,
+      liked,
+    });
+  } catch (error) {
+    console.error('Error toggling like on comment:', error);
+    res.status(500).json({
+      message: 'Failed to toggle like on comment',
+      error,
+    });
+  }
 };
-
-
-
 
 exports.unlikeComment = async (req, res) => {
     const { commentId } = req.params;

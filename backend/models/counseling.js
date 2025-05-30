@@ -28,12 +28,6 @@ const counselingSchema = new mongoose.Schema({
 
     contactNumber: { type: String, required: true },
     address: {
-        // block: { type: String, required: false },
-        // lot: { type: String, required: false },
-        // street: { type: String, required: false },
-        // phase: { type: String, required: false },
-        // baranggay: { type: String, required: false },
-
         BldgNameTower: { type: String, required: false },
         LotBlockPhaseHouseNo: { type: String, required: false },
         SubdivisionVillageZone: { type: String, required: false },

@@ -67,28 +67,24 @@ const AnnouncementDetails = () => {
     }
   }, [id, userId]);
 
-  useEffect(() => {
-    if (announcement && userId) {
-      const isLikedNow = announcement.likedBy.includes(userId);
-      setLiked(isLikedNow);
-    }
-  }, [announcement, userId, id]);
+  // useEffect(() => {
+  //   if (announcement && userId) {
+  //     const isLikedNow = announcement.likedBy.includes(userId);
+  //     setLiked(isLikedNow);
+  //   }
+  // }, [announcement, userId, id]);
 
   const fetchAnnouncement = async () => {
     try {
-      console.log("Fetching announcement ID:", id);
       const res = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/getAnnouncement/${id}`
       );
-      setAnnouncement(res.data.announcement);
-      setLikeCount(res.data.announcement.likedBy.length);
-      setLikedUsers(res.data.announcement.likedBy);
 
-      if (res.data.announcement.likedBy.includes(userId)) {
-        setLiked(true);
-      } else {
-        setLiked(false);
-      }
+      const fetchedAnnouncement = res.data.announcement;
+
+      setAnnouncement(fetchedAnnouncement);
+      setLikeCount(fetchedAnnouncement.likedBy.length);
+      setLikedUsers(fetchedAnnouncement.likedBy);
     } catch (error) {
       console.error("Error fetching announcement:", error);
     } finally {
@@ -112,24 +108,16 @@ const AnnouncementDetails = () => {
 
   const toggleLike = async () => {
     try {
-      const response = await axios.put(
+      const res = await axios.put(
         `${process.env.REACT_APP_API}/api/v1/likeAnnouncement/${id}`,
-        { userId },
+        {}, 
         { withCredentials: true }
       );
 
-      const isLikedNow = response.data.liked;
+      const updatedAnnouncement = res.data.data;
 
-      setLiked(isLikedNow);
-
-      setAnnouncement((prev) => ({
-        ...prev,
-        likedBy: isLikedNow
-          ? [...prev.likedBy, userId]
-          : prev.likedBy.filter((uid) => uid !== userId),
-      }));
-
-      setLikeCount((prev) => (isLikedNow ? prev + 1 : prev - 1));
+      setAnnouncement(updatedAnnouncement); 
+      setLikeCount(updatedAnnouncement.likedBy.length);
     } catch (error) {
       console.error("Error toggling like:", error);
     }
@@ -161,35 +149,25 @@ const AnnouncementDetails = () => {
   };
 
   const toggleLikeComment = async (commentId) => {
-    setComments((prevComments) =>
-        prevComments.map((comment) => {
-            if (comment._id === commentId) {
-                const alreadyLiked = comment.likedBy.includes(user._id);
-                return {
-                    ...comment,
-                    likedBy: alreadyLiked
-                        ? comment.likedBy.filter((id) => id !== user._id)
-                        : [...comment.likedBy, user._id],
-                };
-            }
-            return comment;
-        })
-    );
-
     try {
-        const res = await axios.put(
-            `${process.env.REACT_APP_API}/api/v1/announcementCommentLike/${commentId}`
-            ,
-            { userId },       
-            { withCredentials: true }
-        );
-        console.log(res.data.message);
+      const res = await axios.put(
+        `${process.env.REACT_APP_API}/api/v1/announcementCommentLike/${commentId}`,
+        { userId },
+        { withCredentials: true }
+      );
+
+      const updatedComment = res.data.data;
+
+      // Replace only the updated comment in the list
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment._id === updatedComment._id ? updatedComment : comment
+        )
+      );
     } catch (error) {
-        console.error("Error toggling like on comment:", error);
+      console.error('Error toggling like on comment:', error);
     }
-};
-
-
+  };
 
   const addReply = async (commentId, replyText) => {
     if (!replyText.trim()) return;
@@ -268,13 +246,10 @@ const AnnouncementDetails = () => {
   return (
     <div className="announcement-details-container">
       <div className="announcement-center-container">
-        {/* Sidebar */}
         <GuestSideBar />
-        {/* Main Content */}
         <div className="announcement-container">
           {announcement ? (
             <>
-              {/* Header Section */}
               <div className="post-header">
                 <img
                   src="/public/../EPAROKYA-SYST.png"
@@ -284,10 +259,11 @@ const AnnouncementDetails = () => {
                 <div className="post-user-info">
                   <p className="post-user-name">Saint Joseph Parish - Taguig</p>
                   <p className="post-date">
-                    {announcement.createdAt
-                      ? format(parseISO(announcement.createdAt), "PPP")
+                    {announcement.dateCreated
+                      ? format(parseISO(announcement.dateCreated), "PPP")
                       : "Date not available"}
                   </p>
+
                 </div>
               </div>
 
@@ -343,9 +319,22 @@ const AnnouncementDetails = () => {
                 ))}
               </div>
               <div className="like-section">
-                <FaHeart color={liked ? "red" : "gray"} onClick={toggleLike} />
-                <span>{likeCount} Likes</span>
+                <FaHeart
+                  color={
+                    announcement?.likedBy?.some(
+                      (likerId) =>
+                        likerId === userId ||
+                        likerId?._id === userId ||
+                        likerId?.toString?.() === userId
+                    )
+                      ? "red"
+                      : "gray"
+                  }
+                  onClick={toggleLike}
+                />
+                <span>{announcement?.likedBy?.length || 0} Likes</span>
               </div>
+
 
               {/* Comments Section */}
               <div className="comments-section">
@@ -387,12 +376,18 @@ const AnnouncementDetails = () => {
                     <div className="comment-footer">
                       <FaThumbsUp
                         color={
-                          comment.likedBy.includes(user._id) ? "blue" : "gray"
+                          comment.likedBy.some(
+                            (likerId) =>
+                              likerId === user._id || 
+                              likerId?._id === user._id || 
+                              likerId?.toString?.() === user._id 
+                          )
+                            ? 'blue'
+                            : 'gray'
                         }
                         onClick={() => toggleLikeComment(comment._id)}
                       />
                       <span>{comment.likedBy.length} Likes</span>
-
                       <FaReply onClick={() => toggleReplies(comment._id)} />
                       <span>{comment.replies.length} Replies</span>
                     </div>
