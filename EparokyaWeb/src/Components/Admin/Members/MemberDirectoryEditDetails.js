@@ -50,12 +50,13 @@ const MemberDirectoryEditDetails = ({ onClose, onUpdated }) => {
             `${process.env.REACT_APP_API}/api/v1/getMemberDirectoryUser/${userId}`
           ),
           axios.get(
-            `${process.env.REACT_APP_API}/api/v1/getAllMinistryCategories`
+            `${process.env.REACT_APP_API}/api/v1/ministryCategory/getAllMinistryCategories`
           ),
         ]);
         setUser(userRes.data.user);
         setMinistries(userRes.data.user.ministryRoles || []);
-        setMinistryOptions(ministriesRes.data.ministries);
+        setMinistryOptions(ministriesRes.data.categories);
+
       } catch (err) {
         alert("Failed to fetch data.");
       }
@@ -85,24 +86,32 @@ const MemberDirectoryEditDetails = ({ onClose, onUpdated }) => {
     setMinistries((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await axios.put(
-        `${process.env.REACT_APP_API}/api/v1/updateMemberDirectoryUser/${userId}`,
-        {
-          civilStatus: user.civilStatus,
-          ministryRoles: ministries,
-        }
-      );
-      alert("Member details updated!");
-      if (onUpdated) onUpdated();
-      if (onClose) onClose();
-    } catch (err) {
-      alert("Failed to update member.");
-    }
-    setSaving(false);
-  };
+ const handleSave = async () => {
+  setSaving(true);
+  try {
+    const preparedMinistries = ministries.map((m) => ({
+      ...m,
+      ministry: typeof m.ministry === "object" && m.ministry._id ? m.ministry._id : m.ministry,
+    }));
+
+    await axios.put(
+      `${process.env.REACT_APP_API}/api/v1/updateMemberDirectoryUser/${userId}`,
+      {
+        civilStatus: user.civilStatus,
+        ministryRoles: preparedMinistries,
+      }
+    );
+
+    alert("Member details updated!");
+    if (onUpdated) onUpdated();
+    if (onClose) onClose();
+  } catch (err) {
+    alert("Failed to update member.");
+  }
+  setSaving(false);
+};
+
+
 
   if (loading) {
     return (
@@ -157,19 +166,22 @@ const MemberDirectoryEditDetails = ({ onClose, onUpdated }) => {
               <FormControl sx={{ minWidth: 150 }}>
                 <InputLabel>Ministry</InputLabel>
                 <Select
-                  value={ministry.ministry || ""}
+                  value={ministry.ministry?._id || ""}
+                  onChange={(e) => {
+                    const selectedMinistry = ministryOptions.find(m => m._id === e.target.value);
+                    handleMinistryChange(idx, "ministry", selectedMinistry);
+                  }}
                   label="Ministry"
-                  onChange={(e) =>
-                    handleMinistryChange(idx, "ministry", e.target.value)
-                  }
                   size="small"
                 >
+
                   {ministryOptions.map((m) => (
                     <MenuItem key={m._id} value={m._id}>
                       {m.name}
                     </MenuItem>
                   ))}
                 </Select>
+
               </FormControl>
 
               <FormControl sx={{ minWidth: 150 }}>

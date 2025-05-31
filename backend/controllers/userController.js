@@ -11,198 +11,6 @@ const HouseBlessing = require("../models/PrivateScheduling/houseBlessing");
 const mongoose = require("mongoose");
 const fs = require("fs");
 
-// exports.registerUser = async (req, res, next) => {
-//     const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
-//         folder: 'baghub/avatar',
-//         width: 150,
-//         crop: "scale"
-//     }, (err, res) => {
-//         console.log(err, res);
-//     });
-//     const { name, email, password, role } = req.body;
-//     const user = await User.create({
-//         name,
-//         email,
-//         password,
-//         avatar: {
-//             public_id: result.public_id,
-//             url: result.secure_url
-//         },
-
-//         // role,
-//     })
-
-//     // const token = user.getJwtToken();
-//     if (!user) {
-//         return res.status(500).json({
-//             success: false,
-//             message: 'user not created'
-//         })
-//     }
-//     sendToken(user, 200, res)
-
-// }
-
-// exports.registerUser = async (req, res, next) => {
-//     try {
-//         console.log('Received ministryCategory:', req.body.ministryCategory);
-
-//         // Upload avatar
-//         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
-//             folder: 'baghub/avatar',
-//             width: 150,
-//             crop: "scale"
-//         });
-
-//         // Extract fields
-//         const { name, email, password, age, preference, phone, barangay, zip, city, country, ministryCategory } = req.body;
-
-//         let ministryCategoryArray = [];
-
-//         // Ensure ministryCategory is processed correctly
-//         if (ministryCategory) {
-//             let categoryArray = Array.isArray(ministryCategory) ? ministryCategory : [ministryCategory];
-
-//             // Log the data before processing
-//             console.log('Raw request body:', req.body);
-
-//             // Process the categories if they are valid
-//             ministryCategoryArray = categoryArray
-//                 .map(item => {
-//                     // Check if it's an object and try to extract the ID
-//                     if (typeof item === "string") {
-//                         return item; // It's already an ID
-//                     } else if (item && item._id) {
-//                         return item._id; // Extract _id if it's an object
-//                     } else {
-//                         return null;
-//                     }
-//                 })
-//                 .filter(id => mongoose.Types.ObjectId.isValid(id)) // Ensure valid ObjectId
-//                 .map(id => new mongoose.Types.ObjectId(id)); // Convert to ObjectId
-
-//             // Log the processed ministry categories
-//             console.log('Processed ministryCategory:', ministryCategoryArray);
-//         }
-
-//         // Create user
-//         const user = await User.create({
-//             name,
-//             email,
-//             password,
-//             avatar: {
-//                 public_id: result.public_id,
-//                 url: result.secure_url
-//             },
-//             age,
-//             preference,
-//             phone,
-//             barangay,
-//             zip,
-//             city,
-//             country,
-//             ministryCategory: ministryCategoryArray, // Save the processed category IDs
-//         });
-
-//         if (!user) {
-//             return res.status(500).json({
-//                 success: false,
-//                 message: 'User not created'
-//             });
-//         }
-
-//         sendToken(user, 200, res);
-//     } catch (error) {
-//         console.error('Error registering user:', error);
-//         res.status(500).json({ success: false, message: 'Internal Server Error' });
-//     }
-// };
-
-//Pass Register 3-20-2025
-// exports.registerUser = async (req, res, next) => {
-//     try {
-//         console.log('Request Body:', req.body);
-//         console.log('Uploaded File:', req.file);
-
-//         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
-//             folder: 'eparokya/avatar',
-//             width: 150,
-//             crop: "scale"
-//         });
-
-//         const { name, email, password, birthDate, civilStatus, preference, phone, address, ministryRoles } = req.body;
-
-//         if (!birthDate || isNaN(Date.parse(birthDate))) {
-//             return res.status(400).json({ success: false, message: "Invalid birthDate format" });
-//         }
-
-//         let parsedAddress = {};
-//         try {
-//             parsedAddress = JSON.parse(address);
-//         } catch (error) {
-//             console.error("Error parsing address:", error);
-//             return res.status(400).json({ success: false, message: "Invalid address format" });
-//         }
-
-//         let ministryRolesArray = [];
-//         if (ministryRoles) {
-//             try {
-//                 const parsedRoles = JSON.parse(ministryRoles);
-//                 console.log("Parsed ministryRoles:", parsedRoles);
-
-//                 let startYear, endYear;
-//                 if (parsedRoles.length > 0) {
-//                     startYear = parsedRoles[0].startYear;
-//                     endYear = parsedRoles[0].endYear;
-//                 }
-
-//                 ministryRolesArray = parsedRoles.map(item => ({
-//                     ministry: new mongoose.Types.ObjectId(item.ministry),
-//                     role: item.role,
-//                     customRole: item.role === 'Others' ? item.customRole || '' : undefined,
-//                     startYear: startYear,
-//                     endYear: endYear
-//                 }));
-
-//             } catch (error) {
-//                 console.error('Error parsing ministryRoles:', error);
-//                 return res.status(400).json({ success: false, message: "Invalid ministryRoles format" });
-//             }
-//         }
-
-//         const user = await User.create({
-//             name,
-//             email,
-//             password,
-//             avatar: {
-//                 public_id: result.public_id,
-//                 url: result.secure_url
-//             },
-//             birthDate: new Date(birthDate),
-//             civilStatus,
-//             preference,
-//             phone,
-//             address: {
-//                 ...parsedAddress,
-//                 customBarangay: parsedAddress.barangay === 'Others' ? parsedAddress.customBarangay : undefined,
-//                 customCity: parsedAddress.city === 'Others' ? parsedAddress.customCity : undefined,
-//             },
-//             ministryRoles: ministryRolesArray
-//         });
-
-//         if (!user) {
-//             return res.status(500).json({
-//                 success: false,
-//                 message: 'User not created'
-//             });
-//         }
-
-//         sendToken(user, 200, res);
-//     } catch (error) {
-//         console.error('Error registering user:', error);
-//         res.status(500).json({ success: false, message: 'Internal Server Error' });
-//     }
-// };
 
 exports.registerUser = async (req, res, next) => {
   try {
@@ -324,194 +132,6 @@ exports.registerUser = async (req, res, next) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
-
-// exports.registerUser = async (req, res, next) => {
-//     try {
-//         console.log('Request Body:', req.body);
-//         console.log('Uploaded File:', req.file);
-
-//         if (!req.body.avatar) {
-//             return res.status(400).json({ success: false, message: "No file uploaded" });
-//         }
-
-//         // Upload the base64-encoded image to Cloudinary
-//         const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
-//             folder: 'eparokya/avatar',
-//             width: 150,
-//             crop: "scale"
-//         });
-
-//         const { name, email, password, birthDate, civilStatus, preference, phone, address, ministryRoles } = req.body;
-
-//         if (!birthDate || isNaN(Date.parse(birthDate))) {
-//             return res.status(400).json({ success: false, message: "Invalid birthDate format" });
-//         }
-
-//         let parsedAddress = {};
-//         try {
-//             parsedAddress = JSON.parse(address);
-//         } catch (error) {
-//             console.error("Error parsing address:", error);
-//             return res.status(400).json({ success: false, message: "Invalid address format" });
-//         }
-
-//         let ministryRolesArray = [];
-//         if (ministryRoles) {
-//             try {
-//                 const parsedRoles = JSON.parse(ministryRoles);
-//                 console.log("Parsed ministryRoles:", parsedRoles);
-
-//                 let startYear, endYear;
-//                 if (parsedRoles.length > 0) {
-//                     startYear = parsedRoles[0].startYear;
-//                     endYear = parsedRoles[0].endYear;
-//                 }
-
-//                 ministryRolesArray = parsedRoles.map(item => ({
-//                     ministry: new mongoose.Types.ObjectId(item.ministry),
-//                     role: item.role,
-//                     customRole: item.role === 'Others' ? item.customRole || '' : undefined,
-//                     startYear: startYear,
-//                     endYear: endYear
-//                 }));
-
-//             } catch (error) {
-//                 console.error('Error parsing ministryRoles:', error);
-//                 return res.status(400).json({ success: false, message: "Invalid ministryRoles format" });
-//             }
-//         }
-
-//         const user = await User.create({
-//             name,
-//             email,
-//             password,
-//             avatar: {
-//                 public_id: result.public_id,
-//                 url: result.secure_url
-//             },
-//             birthDate: new Date(birthDate),
-//             civilStatus,
-//             preference,
-//             phone,
-//             address: {
-//                 ...parsedAddress,
-//                 customBarangay: parsedAddress.barangay === 'Others' ? parsedAddress.customBarangay : undefined,
-//                 customCity: parsedAddress.city === 'Others' ? parsedAddress.customCity : undefined,
-//             },
-//             ministryRoles: ministryRolesArray
-//         });
-
-//         if (!user) {
-//             return res.status(500).json({
-//                 success: false,
-//                 message: 'User not created'
-//             });
-//         }
-
-//         sendToken(user, 200, res);
-//     } catch (error) {
-//         console.error('Error registering user:', error);
-//         res.status(500).json({ success: false, message: 'Internal Server Error' });
-//     }
-// };
-
-// exports.registerUser = async (req, res, next) => {
-//     try {
-//       console.log('Request Body:', req.body);
-//       console.log('Uploaded File:', req.file);
-
-//       if (!req.file) {
-//         return res.status(400).json({ success: false, message: "No file uploaded" });
-//       }
-
-//       // Log the file path and check if it exists
-//       console.log('File Path:', req.file.path);
-//       const fileExists = fs.existsSync(req.file.path);
-//       console.log('File Exists:', fileExists);
-
-//       // Upload the file to Cloudinary
-//       const result = await cloudinary.v2.uploader.upload(req.file.path, {
-//         folder: 'eparokya/avatar',
-//         width: 150,
-//         crop: "scale"
-//       });
-
-//       // Delete the temporary file after uploading to Cloudinary
-//       fs.unlinkSync(req.file.path);
-
-//       const { name, email, password, birthDate, civilStatus, preference, phone, address, ministryRoles } = req.body;
-
-//       if (!birthDate || isNaN(Date.parse(birthDate))) {
-//         return res.status(400).json({ success: false, message: "Invalid birthDate format" });
-//       }
-
-//       let parsedAddress = {};
-//       try {
-//         parsedAddress = JSON.parse(address);
-//       } catch (error) {
-//         console.error("Error parsing address:", error);
-//         return res.status(400).json({ success: false, message: "Invalid address format" });
-//       }
-
-//       let ministryRolesArray = [];
-//       if (ministryRoles) {
-//         try {
-//           const parsedRoles = JSON.parse(ministryRoles);
-//           console.log("Parsed ministryRoles:", parsedRoles);
-
-//           let startYear, endYear;
-//           if (parsedRoles.length > 0) {
-//             startYear = parsedRoles[0].startYear;
-//             endYear = parsedRoles[0].endYear;
-//           }
-
-//           ministryRolesArray = parsedRoles.map(item => ({
-//             ministry: new mongoose.Types.ObjectId(item.ministry),
-//             role: item.role,
-//             customRole: item.role === 'Others' ? item.customRole || '' : undefined,
-//             startYear: startYear,
-//             endYear: endYear
-//           }));
-
-//         } catch (error) {
-//           console.error('Error parsing ministryRoles:', error);
-//           return res.status(400).json({ success: false, message: "Invalid ministryRoles format" });
-//         }
-//       }
-
-//       const user = await User.create({
-//         name,
-//         email,
-//         password,
-//         avatar: {
-//           public_id: result.public_id,
-//           url: result.secure_url
-//         },
-//         birthDate: new Date(birthDate),
-//         civilStatus,
-//         preference,
-//         phone,
-//         address: {
-//           ...parsedAddress,
-//           customBarangay: parsedAddress.barangay === 'Others' ? parsedAddress.customBarangay : undefined,
-//           customCity: parsedAddress.city === 'Others' ? parsedAddress.customCity : undefined,
-//         },
-//         ministryRoles: ministryRolesArray
-//       });
-
-//       if (!user) {
-//         return res.status(500).json({
-//           success: false,
-//           message: 'User not created'
-//         });
-//       }
-
-//       sendToken(user, 200, res);
-//     } catch (error) {
-//       console.error('Error registering user:', error);
-//       res.status(500).json({ success: false, message: 'Internal Server Error' });
-//     }
-//   };
 
 exports.Profile = async (req, res, next) => {
   try {
@@ -695,7 +315,6 @@ exports.updatePassword = async (req, res, next) => {
 
 exports.UpdateProfile = async (req, res, next) => {
   try {
-    // Get the current user data first
     const currentUser = await User.findById(req.user.id);
     if (!currentUser) {
       return res.status(404).json({
@@ -704,7 +323,6 @@ exports.UpdateProfile = async (req, res, next) => {
       });
     }
 
-    // Initialize with current user data
     const updateData = {
       name: currentUser.name,
       email: currentUser.email,
@@ -713,11 +331,10 @@ exports.UpdateProfile = async (req, res, next) => {
       preference: currentUser.preference,
       civilStatus: currentUser.civilStatus,
       address: {
-        ...currentUser.address.toObject(), // Convert Mongoose document to plain object
+        ...currentUser.address.toObject(),
       },
     };
 
-    // Update only the fields that were provided in the request
     if (req.body.name) updateData.name = req.body.name;
     if (req.body.email) updateData.email = req.body.email;
     if (req.body.phone) updateData.phone = req.body.phone;
@@ -725,7 +342,6 @@ exports.UpdateProfile = async (req, res, next) => {
     if (req.body.preference) updateData.preference = req.body.preference;
     if (req.body.civilStatus) updateData.civilStatus = req.body.civilStatus;
 
-    // Handle address updates
     if (req.body.address) {
       let addressData = {};
       try {
@@ -734,7 +350,6 @@ exports.UpdateProfile = async (req, res, next) => {
             ? JSON.parse(req.body.address)
             : req.body.address;
 
-        // Update only the provided address fields
         if (addressData.BldgNameTower !== undefined)
           updateData.address.BldgNameTower = addressData.BldgNameTower;
         if (addressData.LotBlockPhaseHouseNo !== undefined)
@@ -748,20 +363,16 @@ exports.UpdateProfile = async (req, res, next) => {
         if (addressData.District !== undefined)
           updateData.address.District = addressData.District;
 
-        // Handle barangay and customBarangay
         if (addressData.barangay !== undefined) {
           updateData.address.barangay = addressData.barangay;
-          // Only update customBarangay if barangay is 'Others'
           updateData.address.customBarangay =
             addressData.barangay === "Others"
               ? addressData.customBarangay
               : undefined;
         }
 
-        // Handle city and customCity
         if (addressData.city !== undefined) {
           updateData.address.city = addressData.city;
-          // Only update customCity if city is 'Others'
           updateData.address.customCity =
             addressData.city === "Others" ? addressData.customCity : undefined;
         }
@@ -774,14 +385,11 @@ exports.UpdateProfile = async (req, res, next) => {
       }
     }
 
-    // Handle password update if provided
     if (req.body.password && req.body.password.trim() !== "") {
       updateData.password = req.body.password;
     }
 
-    // Handle avatar upload if provided
     if (req.body.avatar && req.body.avatar !== "") {
-      // Delete previous avatar from Cloudinary if it exists
       if (currentUser.avatar && currentUser.avatar.public_id) {
         await cloudinary.v2.uploader.destroy(currentUser.avatar.public_id);
       }
@@ -798,7 +406,6 @@ exports.UpdateProfile = async (req, res, next) => {
       };
     }
 
-    // Update the user
     const updatedUser = await User.findByIdAndUpdate(req.user.id, updateData, {
       new: true,
       runValidators: true,
@@ -812,7 +419,6 @@ exports.UpdateProfile = async (req, res, next) => {
   } catch (error) {
     console.error("UpdateProfile error:", error);
 
-    // Handle specific errors
     if (error.name === "ValidationError") {
       const errors = {};
       Object.keys(error.errors).forEach((key) => {
@@ -1340,8 +946,6 @@ exports.getUserFormCounts = async (req, res) => {
 exports.getMemberStatuses = async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
-
-    // Fetch all required fields from User
     const users = await User.find(
       {},
       "name email avatar birthDate civilStatus preference ministryRoles"
@@ -1352,7 +956,7 @@ exports.getMemberStatuses = async (req, res) => {
 
       user.ministryRoles.forEach((role) => {
         if (!role.endYear || role.endYear >= currentYear) {
-          isActive = true; // If any ministry role is still valid, the user is active
+          isActive = true;
         }
       });
 
@@ -1360,8 +964,8 @@ exports.getMemberStatuses = async (req, res) => {
         userId: user._id,
         name: user.name,
         email: user.email,
-        avatar: user.avatar || "", // Ensure avatar is included
-        birthDate: user.birthDate || null, // Ensure birthDate is included
+        avatar: user.avatar || "",
+        birthDate: user.birthDate || null,
         civilStatus: user.civilStatus || "N/A",
         preference: user.preference || "N/A",
         isActive,
@@ -1454,23 +1058,29 @@ exports.getMemberStatuses = async (req, res) => {
 // Member Directory Fetching of Editables - Admin Side
 exports.getMemberDirectoryUser = async (req, res) => {
   try {
-  const user = await User.findById(req.params.userId)
-  .select("civilStatus ministryRoles")
-  .populate("ministryRoles.ministry", "name"); 
+    const { userId } = req.params;
+
+    const user = await User.findById(userId)
+      .select("-password") 
+      .populate("ministryRoles.ministry", "name");
 
     if (!user) return res.status(404).json({ message: "User not found" });
+
     res.json({ user });
   } catch (err) {
+    console.error("Error in getMemberDirectoryUser:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
+
+
 exports.updateMemberDirectoryUser = async (req, res) => {
   try {
-    const { civilStatus, ministries } = req.body;
+    const { civilStatus, ministryRoles  } = req.body;
     const user = await User.findByIdAndUpdate(
       req.params.userId,
-      { civilStatus, ministries },
+      { civilStatus, ministryRoles  },
       { new: true }
     );
     if (!user) return res.status(404).json({ message: "User not found" });

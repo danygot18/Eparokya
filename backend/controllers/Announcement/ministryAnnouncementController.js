@@ -65,7 +65,6 @@ exports.createAnnouncement = async (req, res) => {
     
 };
 
-
 // exports.getAllAnnouncements = async (req, res) => {
 //     try {
 //         const announcements = await AnnouncementMinistry.find()
@@ -113,8 +112,6 @@ exports.getAnnouncementsByMinistryCategory = async (req, res) => {
   }
 };
 
-
-
 exports.togglePinAnnouncement = async (req, res) => {
     try {
         const { announcementId } = req.params;
@@ -161,7 +158,7 @@ exports.getPinnedAnnouncementsByMinistryCategory = async (req, res) => {
         isPinned: true 
       })
       .populate('ministryCategory', 'name')
-      .populate('acknowledgedBy', '_id')  // ✅ ADD THIS LINE
+      .populate('acknowledgedBy', '_id') 
       .sort({ createdAt: -1 });
 
     res.status(200).json(pinnedAnnouncements);
@@ -170,7 +167,6 @@ exports.getPinnedAnnouncementsByMinistryCategory = async (req, res) => {
     res.status(500).json({ message: "Failed to retrieve pinned announcements." });
   }
 };
-
 
 exports.getAnnouncementById = async (req, res) => {
     try {
@@ -212,11 +208,10 @@ exports.updateAnnouncement = async (req, res) => {
   }
 };
 
-
 exports.deleteAnnouncement = async (req, res) => {
     try {
         const deletedAnnouncement = await AnnouncementMinistry.findByIdAndDelete(
-            req.params.ministryAnnouncementId // fixed typo here
+            req.params.ministryAnnouncementId 
         );
         if (!deletedAnnouncement)
             return res.status(404).json({ message: 'Announcement not found.' });
