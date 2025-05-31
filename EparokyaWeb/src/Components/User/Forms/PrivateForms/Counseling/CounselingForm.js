@@ -438,7 +438,7 @@ const CounselingForm = () => {
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
-                                    label="Araw"
+                                    label="Araw (Monday Schedules are NOT Available)"
                                     type="date"
                                     fullWidth
                                     value={formData.counselingDate}

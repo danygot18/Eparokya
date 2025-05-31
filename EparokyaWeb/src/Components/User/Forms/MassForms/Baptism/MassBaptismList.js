@@ -17,7 +17,7 @@ const fetchMySubmittedForms = async () => {
     setLoading(true);
     try {
         const response = await axios.get(
-            `${process.env.REACT_APP_API}/api/v1/getAllUserSubmittedBaptism`,
+            `${process.env.REACT_APP_API}/api/v1/getAllUserMassSubmittedBaptism`,
             { withCredentials: true }
         );
 
@@ -45,7 +45,7 @@ const fetchMySubmittedForms = async () => {
         <div style={{ display: "flex", height: "100vh" }}>
             <GuestSideBar />
             <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
-                <h1 className="baptism-title">My Submitted Baptism Forms</h1>
+                <h1 className="baptism-title">My Submitted Mass Baptism Forms</h1>
 
                 {loading ? (
                     <p className="loading-text">Loading...</p>

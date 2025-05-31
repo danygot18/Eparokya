@@ -619,7 +619,7 @@ const WeddingForm = () => {
               />
             </Form.Group>
             <Form.Group>
-              <Form.Label>Wedding Date</Form.Label>
+              <Form.Label>Wedding Date (Monday Schedules are NOT Available)</Form.Label>
               <Form.Control
                 type="date"
                 name="weddingDate"

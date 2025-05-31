@@ -36,7 +36,7 @@ const URL = process.env.NODE_ENV === 'production'
 export const socket = io(URL, {
   withCredentials: true,
   autoConnect: false,
-  reconnection: true,
+reconnection: true,
   reconnectionAttempts: 10,
   reconnectionDelay: 500,
   reconnectionDelayMax: 2000,

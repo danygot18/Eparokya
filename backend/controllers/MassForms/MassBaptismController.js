@@ -114,7 +114,7 @@ exports.getAllBaptisms = async (req, res) => {
     } catch (error) {
       res.status(500).json({ message: 'Error fetching baptisms', error });
     }
-  };
+};
   
   exports.getBaptismById = async (req, res) => {
     try {
@@ -129,16 +129,20 @@ exports.getAllBaptisms = async (req, res) => {
     } catch (error) {
       res.status(500).json({ message: 'Error fetching baptism', error });
     }
-  };
+};
   
 exports.getMySubmittedForms = async (req, res) => {
   try {
-    const userId = req.user.id;
-    // console.log("Authenticated User ID:", userId);
+    const userId = req.user?.id || req.user?._id;
 
-    const forms = await MassBaptism.find({ userId: userId });
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated." });
+    }
 
-    if (!forms.length) {
+    // Check the actual field name used in your schema
+    const forms = await MassBaptism.find({ user: userId });
+
+    if (forms.length === 0) {
       return res.status(404).json({ message: "No forms found for this user." });
     }
 
@@ -148,6 +152,7 @@ exports.getMySubmittedForms = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch submitted baptism forms." });
   }
 };
+
 exports.confirmBaptism = async (req, res) => {
     try {
         const { id } = req.params;

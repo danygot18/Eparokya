@@ -46,7 +46,9 @@ const PriestNavigation = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [dateFilter, setDateFilter] = useState("all");
   const navigate = useNavigate();
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -56,14 +58,32 @@ const PriestNavigation = () => {
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`),
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`),
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`),
-        axios.get(`${process.env.REACT_APP_API}/api/v1/getAllPrayerRequestIntention`),
+        axios.get(
+          `${process.env.REACT_APP_API}/api/v1/getAllPrayerRequestIntention`
+        ),
       ]);
 
       setData([
-        ...weddings.data.map((item) => ({ type: "wedding", id: item._id, ...item })),
-        ...baptisms.data.map((item) => ({ type: "baptism", id: item._id, ...item })),
-        ...funerals.data.map((item) => ({ type: "funeral", id: item._id, ...item })),
-        ...prayers.data.map((item) => ({ type: "prayer", id: item._id, ...item })),
+        ...weddings.data.map((item) => ({
+          type: "wedding",
+          id: item._id,
+          ...item,
+        })),
+        ...baptisms.data.map((item) => ({
+          type: "baptism",
+          id: item._id,
+          ...item,
+        })),
+        ...funerals.data.map((item) => ({
+          type: "funeral",
+          id: item._id,
+          ...item,
+        })),
+        ...prayers.data.map((item) => ({
+          type: "prayer",
+          id: item._id,
+          ...item,
+        })),
       ]);
       setLastUpdated(new Date());
     } catch (error) {
@@ -101,11 +121,16 @@ const PriestNavigation = () => {
   // Helper function to get date field based on event type
   const getEventDate = (item) => {
     switch (item.type) {
-      case "wedding": return item.weddingDate;
-      case "baptism": return item.baptismDate;
-      case "funeral": return item.dateOfDeath; // or funeral date if available
-      case "prayer": return item.prayerRequestDate;
-      default: return null;
+      case "wedding":
+        return item.weddingDate;
+      case "baptism":
+        return item.baptismDate;
+      case "funeral":
+        return item.dateOfDeath; // or funeral date if available
+      case "prayer":
+        return item.prayerRequestDate;
+      default:
+        return null;
     }
   };
 
@@ -114,7 +139,7 @@ const PriestNavigation = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return data.filter(item => {
+    return data.filter((item) => {
       const eventDate = new Date(getEventDate(item));
       eventDate.setHours(0, 0, 0, 0);
       return eventDate.getTime() === today.getTime();
@@ -128,16 +153,44 @@ const PriestNavigation = () => {
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     endOfMonth.setHours(23, 59, 59, 999);
 
-    return data.filter(item => {
-      const eventDate = new Date(getEventDate(item));
-      return eventDate > today && eventDate <= endOfMonth;
-    }).sort((a, b) => new Date(getEventDate(a)) - new Date(getEventDate(b)));
+    return data
+      .filter((item) => {
+        const eventDate = new Date(getEventDate(item));
+        return eventDate > today && eventDate <= endOfMonth;
+      })
+      .sort((a, b) => new Date(getEventDate(a)) - new Date(getEventDate(b)));
   };
 
-  const filteredData = filter === "all"
-    ? data
-    : data.filter((item) => item.type === filter);
+  const filterByDate = (items) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
+    switch (dateFilter) {
+      case "today":
+        return items.filter((item) => {
+          const date = new Date(getEventDate(item));
+          date.setHours(0, 0, 0, 0);
+          return date.getTime() === today.getTime();
+        });
+      case "upcoming":
+        return items.filter((item) => {
+          const date = new Date(getEventDate(item));
+          return date > today;
+        });
+      case "done":
+        return items.filter((item) => {
+          const date = new Date(getEventDate(item));
+          return date < today;
+        });
+      default:
+        return items;
+    }
+  };
+
+    const filteredData = filterByDate(
+    filter === "all" ? data : data.filter((item) => item.type === filter)
+  );
+  
   const handleCardClick = (item) => {
     const paths = {
       wedding: `/admin/weddingDetails/${item.id}`,
@@ -187,7 +240,8 @@ const PriestNavigation = () => {
               <strong>Bride:</strong> {item.brideName}
             </Typography>
             <Typography variant="body2" gutterBottom>
-              <strong>Date:</strong> {formatDate(item.weddingDate)} at {formatTime(item.weddingTime)}
+              <strong>Date:</strong> {formatDate(item.weddingDate)} at{" "}
+              {formatTime(item.weddingTime)}
             </Typography>
           </>
         );
@@ -201,7 +255,8 @@ const PriestNavigation = () => {
               <strong>Born:</strong> {formatDate(item.child?.dateOfBirth)}
             </Typography>
             <Typography variant="body2" gutterBottom>
-              <strong>Date:</strong> {formatDate(item.baptismDate)} at {formatTime(item.baptismTime)}
+              <strong>Date:</strong> {formatDate(item.baptismDate)} at{" "}
+              {formatTime(item.baptismTime)}
             </Typography>
           </>
         );
@@ -232,7 +287,8 @@ const PriestNavigation = () => {
               <strong>Request:</strong> {item.prayerDescription}
             </Typography>
             <Typography variant="body2" gutterBottom>
-              <strong>Date:</strong> {formatDate(item.prayerRequestDate)} at {formatTime(item.prayerRequestTime)}
+              <strong>Date:</strong> {formatDate(item.prayerRequestDate)} at{" "}
+              {formatTime(item.prayerRequestTime)}
             </Typography>
           </>
         );
@@ -247,10 +303,13 @@ const PriestNavigation = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return data.filter(item => {
-      const eventDate = new Date(getEventDate(item));
-      return eventDate < today;
-    }).sort((a, b) => new Date(getEventDate(b)) - new Date(getEventDate(a))).slice(0, 5); // Show only 5 most recent
+    return data
+      .filter((item) => {
+        const eventDate = new Date(getEventDate(item));
+        return eventDate < today;
+      })
+      .sort((a, b) => new Date(getEventDate(b)) - new Date(getEventDate(a)))
+      .slice(0, 5); // Show only 5 most recent
   };
 
   // Get past events
@@ -259,18 +318,35 @@ const PriestNavigation = () => {
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideBar />
       <MetaData title="Priest Navigation" />
-      <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center", p: 3 }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 3,
+        }}
+      >
         <Grid container spacing={3}>
           {/* Main Content - 8 columns */}
           <Grid item xs={12} md={8}>
             <Paper elevation={2} sx={{ p: 3, height: "100%" }}>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={3}
+              >
                 <Typography variant="h4" component="h1">
                   Sacrament Dashboard
                 </Typography>
                 <Box>
                   <Tooltip title="Refresh data">
-                    <IconButton onClick={fetchData} color="primary" sx={{ mr: 1 }}>
+                    <IconButton
+                      onClick={fetchData}
+                      color="primary"
+                      sx={{ mr: 1 }}
+                    >
                       <RefreshIcon />
                     </IconButton>
                   </Tooltip>
@@ -297,6 +373,25 @@ const PriestNavigation = () => {
                       <MenuItem value="prayer">Prayer Requests</MenuItem>
                     </Select>
                   </FormControl>
+
+                  <FormControl variant="outlined" sx={{ minWidth: 200, ml: 2 }}>
+                    <InputLabel id="date-filter-label">
+                      <Box display="flex" alignItems="center">
+                        <CalendarIcon sx={{ mr: 1 }} /> Date Filter
+                      </Box>
+                    </InputLabel>
+                    <Select
+                      labelId="date-filter-label"
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value)}
+                      label="Date Filter"
+                    >
+                      <MenuItem value="all">All Dates</MenuItem>
+                      <MenuItem value="today">Today</MenuItem>
+                      <MenuItem value="upcoming">Upcoming</MenuItem>
+                      <MenuItem value="done">Done</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Box>
               </Box>
 
@@ -319,11 +414,20 @@ const PriestNavigation = () => {
                   <CircularProgress />
                 </Box>
               ) : filteredData.length === 0 ? (
-                <Alert severity="info">No {filter === "all" ? "" : filter} events found</Alert>
+                <Alert severity="info">
+                  No {filter === "all" ? "" : filter} events found
+                </Alert>
               ) : (
                 <Grid container spacing={3}>
                   {filteredData.map((item) => (
-                    <Grid item xs={12} sm={6} md={6} lg={4} key={`${item.type}-${item.id}`}>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      md={6}
+                      lg={4}
+                      key={`${item.type}-${item.id}`}
+                    >
                       <Card
                         onClick={() => handleCardClick(item)}
                         sx={{
@@ -342,7 +446,8 @@ const PriestNavigation = () => {
                           <Box display="flex" alignItems="center" mb={2}>
                             <Box
                               sx={{
-                                backgroundColor: typeConfig[item.type]?.color || "#757575",
+                                backgroundColor:
+                                  typeConfig[item.type]?.color || "#757575",
                                 color: "white",
                                 borderRadius: "50%",
                                 width: 40,
@@ -366,10 +471,14 @@ const PriestNavigation = () => {
 
                           <Box mt={2}>
                             <Chip
-                              label={item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                              label={
+                                item.type.charAt(0).toUpperCase() +
+                                item.type.slice(1)
+                              }
                               size="small"
                               sx={{
-                                backgroundColor: typeConfig[item.type]?.color || "#757575",
+                                backgroundColor:
+                                  typeConfig[item.type]?.color || "#757575",
                                 color: "white",
                               }}
                             />
@@ -409,7 +518,8 @@ const PriestNavigation = () => {
                       <ListItemIcon>
                         <Box
                           sx={{
-                            backgroundColor: typeConfig[item.type]?.color || "#757575",
+                            backgroundColor:
+                              typeConfig[item.type]?.color || "#757575",
                             color: "white",
                             borderRadius: "50%",
                             width: 32,
@@ -423,23 +533,33 @@ const PriestNavigation = () => {
                         </Box>
                       </ListItemIcon>
                       <ListItemText
-                        primary={item.type === "wedding"
-                          ? `${item.groomName} & ${item.brideName}`
-                          : item.type === "baptism"
+                        primary={
+                          item.type === "wedding"
+                            ? `${item.groomName} & ${item.brideName}`
+                            : item.type === "baptism"
                             ? item.child?.fullName
                             : item.type === "funeral"
-                              ? item.name
-                              : item.offerrorsName}
+                            ? item.name
+                            : item.offerrorsName
+                        }
                         secondary={
                           <>
-                            <Typography component="span" variant="body2" color="text.primary">
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="text.primary"
+                            >
                               {typeConfig[item.type]?.label}
                             </Typography>
                             {" — "}
                             {formatTime(
-                              item.type === "wedding" ? item.weddingTime :
-                                item.type === "baptism" ? item.baptismTime :
-                                  item.type === "prayer" ? item.prayerRequestTime : ""
+                              item.type === "wedding"
+                                ? item.weddingTime
+                                : item.type === "baptism"
+                                ? item.baptismTime
+                                : item.type === "prayer"
+                                ? item.prayerRequestTime
+                                : ""
                             )}
                           </>
                         }
@@ -478,7 +598,8 @@ const PriestNavigation = () => {
                       <ListItemIcon>
                         <Box
                           sx={{
-                            backgroundColor: typeConfig[item.type]?.color || "#757575",
+                            backgroundColor:
+                              typeConfig[item.type]?.color || "#757575",
                             color: "white",
                             borderRadius: "50%",
                             width: 32,
@@ -492,16 +613,22 @@ const PriestNavigation = () => {
                         </Box>
                       </ListItemIcon>
                       <ListItemText
-                        primary={item.type === "wedding"
-                          ? `${item.groomName} & ${item.brideName}`
-                          : item.type === "baptism"
+                        primary={
+                          item.type === "wedding"
+                            ? `${item.groomName} & ${item.brideName}`
+                            : item.type === "baptism"
                             ? item.child?.fullName
                             : item.type === "funeral"
-                              ? item.name
-                              : item.offerrorsName}
+                            ? item.name
+                            : item.offerrorsName
+                        }
                         secondary={
                           <>
-                            <Typography component="span" variant="body2" color="text.primary">
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="text.primary"
+                            >
                               {formatDate(getEventDate(item))}
                             </Typography>
                             {" — "}
@@ -543,7 +670,8 @@ const PriestNavigation = () => {
                       <ListItemIcon>
                         <Box
                           sx={{
-                            backgroundColor: typeConfig[item.type]?.color || "#757575",
+                            backgroundColor:
+                              typeConfig[item.type]?.color || "#757575",
                             color: "white",
                             borderRadius: "50%",
                             width: 32,
@@ -558,16 +686,22 @@ const PriestNavigation = () => {
                         </Box>
                       </ListItemIcon>
                       <ListItemText
-                        primary={item.type === "wedding"
-                          ? `${item.groomName} & ${item.brideName}`
-                          : item.type === "baptism"
+                        primary={
+                          item.type === "wedding"
+                            ? `${item.groomName} & ${item.brideName}`
+                            : item.type === "baptism"
                             ? item.child?.fullName
                             : item.type === "funeral"
-                              ? item.name
-                              : item.offerrorsName}
+                            ? item.name
+                            : item.offerrorsName
+                        }
                         secondary={
                           <>
-                            <Typography component="span" variant="body2" color="text.primary">
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="text.primary"
+                            >
                               {formatDate(getEventDate(item))}
                             </Typography>
                             {" — "}

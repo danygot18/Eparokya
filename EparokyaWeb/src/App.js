@@ -52,6 +52,9 @@ import MassWeddingForm from "./Components/User/Forms/MassForms/Wedding/MassWeddi
 import MassWeddingDetailsForm from "./Components/Admin/MassForms/MassWeddingDetails";
 import MassBaptismDetailsForm from "./Components/Admin/MassForms/MassBaptismDetails";
 
+import SubmittedMassBaptismList from "./Components/User/Forms/MassForms/Baptism/MassBaptismList";
+// import SubmittedMassWeddingList from "./Components/User/Forms/MassForms/MassWeddingList";
+
 
 import MySubmittedWeddingForm from "./Components/User/Forms/PrivateForms/Wedding/MySubmittedWeddingForm";
 import SubmittedWeddingList from "./Components/User/Forms/PrivateForms/Wedding/SubmittedWeddingList";
@@ -364,6 +367,12 @@ function App() {
         <Route
           path="/user/massWedding"
           element={<MassWeddingForm />}
+          exact="true"
+        />
+
+          <Route
+          path="/user/massBaptismList"
+          element={<SubmittedMassBaptismList />}
           exact="true"
         />
 

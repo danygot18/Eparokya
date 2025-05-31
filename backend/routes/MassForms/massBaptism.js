@@ -34,7 +34,7 @@ router.get('/activeDates/massBaptism', MassBaptismController.getActiveBaptismDat
 // router.get('/stats/baptismStatusCount', isAuthenticatedUser, isAuthorized("admin"),  MassBaptismController.getBaptismStatusCounts);
 // router.put('/updateBaptismChecklist/:baptismId', MassBaptismController.updateBaptismChecklist);
 
-router.get('/getAllUserSubmittedBaptism', isAuthenticatedUser, MassBaptismController.getMySubmittedForms);
+router.get('/getAllUserMassSubmittedBaptism', isAuthenticatedUser, MassBaptismController.getMySubmittedForms);
 // router.get('/getBaptismForm/:formId', isAuthenticatedUser, MassBaptismController.getBaptismFormById);
 
 router.put('/declineBaptism/:massBaptismId/', isAuthenticatedUser, MassBaptismController.cancelBaptism);

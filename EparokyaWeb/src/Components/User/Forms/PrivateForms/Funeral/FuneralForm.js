@@ -461,7 +461,7 @@ const FuneralForm = () => {
                                             fullWidth
                                         />
                                         <TextField
-                                            label="Araw ng Libing"
+                                            label="Araw ng Libing (Monday Schedules are NOT Available)"
                                             type="date"
                                             value={formData.funeralDate}
                                             onChange={(e) => handleChange(e, 'funeralDate')}

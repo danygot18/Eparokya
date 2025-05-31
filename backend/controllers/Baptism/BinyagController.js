@@ -357,10 +357,9 @@ exports.addAdminNotes = async (req, res) => {
 // For user fetching
 exports.getMySubmittedForms = async (req, res) => {
   try {
-    const userId = req.user.id;
-    // console.log("Authenticated User ID:", userId);
+    const userId = req.user.id; 
 
-    const forms = await Baptism.find({ userId: userId });
+    const forms = await Baptism.find({ user: userId });
 
     if (!forms.length) {
       return res.status(404).json({ message: "No forms found for this user." });
@@ -372,6 +371,7 @@ exports.getMySubmittedForms = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch submitted baptism forms." });
   }
 };
+
 
 // details 
 exports.getBaptismFormById = async (req, res) => {

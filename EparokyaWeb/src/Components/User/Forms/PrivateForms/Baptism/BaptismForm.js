@@ -72,18 +72,21 @@ const BaptismForm = () => {
     fetchUser();
   }, []);
 
-  const handleChange = (e, fieldPath) => {
-    const keys = fieldPath.split(".");
-    setFormData((prev) => {
-      const updated = { ...prev };
-      let current = updated;
-      for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
-      }
-      current[keys[keys.length - 1]] = e.target.value;
-      return updated;
-    });
-  };
+const handleChange = (e, path) => {
+  const value = e.target.value;
+  const keys = path.split(".");
+  const updatedFormData = { ...formData };
+  let current = updatedFormData;
+
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (!current[keys[i]]) current[keys[i]] = {};
+    current = current[keys[i]];
+  }
+
+  current[keys[keys.length - 1]] = value;
+  setFormData(updatedFormData);
+};
+
 
   // const handleFileChange = (e, name) => {
   //     const files = Array.from(e.target.files);
@@ -267,7 +270,7 @@ const BaptismForm = () => {
             <Row>
               <Col>
                 <Form.Group>
-                  <Form.Label>Araw ng Binyag</Form.Label>
+                  <Form.Label>Araw ng Binyag (Monday Schedules are NOT Available) </Form.Label>
                   <Form.Control
                     type="date"
                     value={formData.baptismDate}
@@ -717,7 +720,7 @@ const BaptismForm = () => {
               </Form.Group>
             ))}
 
-            <Button type="submit" className="mt-4">
+            <Button type="submit" variant="primary">
               Submit
             </Button>
           </Form>
