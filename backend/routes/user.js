@@ -21,8 +21,9 @@ const {
     getUserMinistries,
     getUserFormCounts,
     getMemberStatuses,
-
-     
+    updateMemberDirectoryUser,
+    getMemberDirectoryUser
+    
 } = require('../controllers/userController');
 const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
 
@@ -39,12 +40,14 @@ router.post('/password/forgot', ForgotPassword);
 router.put('/password/reset/:token', ResetPassword);
 router.put('/password/update', isAuthenticatedUser, updatePassword);
 router.put('/profile/update', upload.single("avatar"), isAuthenticatedUser, UpdateProfile)
+router.put('/updateMemberDirectoryUser/:userId', updateMemberDirectoryUser);
 
 router.get('/admin/users', isAuthenticatedUser, isAuthorized("admin"), AllUsers)
 router.route('/admin/user/:id').get(isAuthenticatedUser, isAuthorized("admin"), getUserDetails).delete(isAuthenticatedUser,isAuthorized("admin"), deleteUser).put(isAuthenticatedUser,isAuthorized("admin"), updateUser)
 
 router.get("/userMinistries", isAuthenticatedUser, getUserMinistries);
 router.get('/:ministryCategoryId/getUsers', getUsersByMinistryCategory);
+router.get('/getMemberDirectoryUser/:userId', getMemberDirectoryUser);
 router.get('/admin/getUsersGroupedByMinistryCategory', isAuthenticatedUser, isAuthorized("admin"), getUsersGroupedByMinistryCategory)
 
 router.get('/getMemberStatuses', getMemberStatuses);

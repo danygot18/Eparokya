@@ -1450,3 +1450,32 @@ exports.getMemberStatuses = async (req, res) => {
 //         res.status(500).json({ message: "Server error", error });
 //     }
 // };
+
+// Member Directory Fetching of Editables - Admin Side
+exports.getMemberDirectoryUser = async (req, res) => {
+  try {
+  const user = await User.findById(req.params.userId)
+  .select("civilStatus ministryRoles")
+  .populate("ministryRoles.ministry", "name"); 
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.updateMemberDirectoryUser = async (req, res) => {
+  try {
+    const { civilStatus, ministries } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.userId,
+      { civilStatus, ministries },
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};

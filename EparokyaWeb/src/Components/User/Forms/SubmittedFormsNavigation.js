@@ -20,8 +20,8 @@ const SubmittedFormsNavigation = () => {
         {
             title: 'Mass Forms',
             forms: [
-                { name: 'Kasalang Bayan', path: '/forms/mass/mass-wedding' },
-                { name: 'Binyagang Bayan', path: '/forms/mass/mass-baptism' },
+                { name: 'Kasalang Bayan', path: 'user/SubmittedWeddingList' },
+                { name: 'Binyagang Bayan', path: '/user/SubmittedBaptismList' },
             ],
         },
     ];

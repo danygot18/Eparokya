@@ -55,7 +55,6 @@ import MassBaptismDetailsForm from "./Components/Admin/MassForms/MassBaptismDeta
 import SubmittedMassBaptismList from "./Components/User/Forms/MassForms/Baptism/MassBaptismList";
 // import SubmittedMassWeddingList from "./Components/User/Forms/MassForms/MassWeddingList";
 
-
 import MySubmittedWeddingForm from "./Components/User/Forms/PrivateForms/Wedding/MySubmittedWeddingForm";
 import SubmittedWeddingList from "./Components/User/Forms/PrivateForms/Wedding/SubmittedWeddingList";
 // import UserWeddingChecklist from './Components/User/Forms/PrivateForms/Wedding/UserWeddingChecklist';
@@ -109,6 +108,7 @@ import UpdateUser from "./Components/Admin/User/UserUpdate";
 // Members
 import MemberBatchYear from "./Components/Admin/Members/MemberBatchYear";
 import MemberDirectory from "./Components/Admin/Members/MemberDirectory";
+import MemberDirectoryEditDetails from "./Components/Admin/Members/MemberDirectoryEditDetails";
 
 //Calendar
 import Calendar from "./Components/Admin/Calendar/Calendar";
@@ -370,7 +370,7 @@ function App() {
           exact="true"
         />
 
-          <Route
+        <Route
           path="/user/massBaptismList"
           element={<SubmittedMassBaptismList />}
           exact="true"
@@ -641,6 +641,15 @@ function App() {
           }
         />
 
+        <Route
+          path="/admin/memberDirectoryEditDetails/:id"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <MemberDirectoryEditDetails/>
+            </ProtectedRoute>
+          }
+        />
+
         {/* Resource */}
         <Route
           path="/admin/resource/create"
@@ -686,7 +695,7 @@ function App() {
         />
 
         {/* Readings - Admin */}
-         {/* Priest */}
+        {/* Priest */}
         <Route
           path="/admin/addReadings"
           element={
