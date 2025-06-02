@@ -20,10 +20,10 @@ const SentimentAnalysisSchema = new mongoose.Schema({
     }
   ],
   overallSentiment: {
-    type: String, // Final sentiment: Positive, Neutral, Negative
+    type: String,
   },
   confidence: {
-    type: Number, // Overall confidence score
+    type: Number,
   },
   createdAt: {
     type: Date,

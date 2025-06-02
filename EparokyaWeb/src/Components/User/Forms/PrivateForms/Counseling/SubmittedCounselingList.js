@@ -19,8 +19,8 @@ const SubmittedCounselingList = () => {
             const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllUserSubmittedCounseling`, {
                 withCredentials: true,
             });
-            const forms = response.data.forms || []; // Ensure forms is an array
-            console.log(forms); // Add this line to debug the response
+            const forms = response.data.forms || [];
+            // console.log(forms); 
             setCounselingForms(forms);
             setFilteredForms(forms);
         } catch (err) {
@@ -122,12 +122,18 @@ const SubmittedCounselingList = () => {
                                         <strong>Counseling Time:</strong> {item.counselingTime || "N/A"}
                                     </p>
                                     <p>
-                                        <strong>Address:</strong>
-                                        {item.address?.block || "N/A"},
-                                        {item.address?.lot || "N/A"},
-                                        {item.address?.street || "N/A"},
-                                        {item.address?.phase || "N/A"},
-                                        {item.address?.baranggay || "N/A"}
+                                        <strong>Address:</strong>{" "}
+                                        {item.address?.BldgNameTower ? `${item.address.BldgNameTower}, ` : ""}
+                                        {item.address?.LotBlockPhaseHouseNo ? `${item.address.LotBlockPhaseHouseNo}, ` : ""}
+                                        {item.address?.SubdivisionVillageZone ? `${item.address.SubdivisionVillageZone}, ` : ""}
+                                        {item.address?.Street ? `${item.address.Street}, ` : ""}
+                                        {item.address?.district ? `${item.address.district}, ` : ""}
+                                        {item.address?.barangay === "Others"
+                                            ? (item.address.customBarangay ? `${item.address.customBarangay}, ` : "")
+                                            : (item.address?.barangay ? `${item.address.barangay}, ` : "")}
+                                        {item.address?.city === "Others"
+                                            ? (item.address.customCity ? `${item.address.customCity}` : "")
+                                            : (item.address?.city || "")}
                                     </p>
 
                                     <p>

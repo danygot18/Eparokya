@@ -4,9 +4,10 @@ import "../../../../Layout/styles/style.css";
 import GuestSideBar from "../../../../GuestSideBar";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import Loader from "../../../../Layout/Loader";
 
 const MySubmittedHouseBlessingForm = () => {
-    const { formId } = useParams(); 
+    const { formId } = useParams();
     const [blessingDetails, setBlessingDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -59,8 +60,10 @@ const MySubmittedHouseBlessingForm = () => {
         }
     };
 
-    if (loading) return <div>Loading...</div>;
-    // if (error) return <div>Error: {error}</div>;
+    if (loading) {
+      return <Loader />; 
+    }
+
 
     return (
         <div className="wedding-details-page">
@@ -77,12 +80,20 @@ const MySubmittedHouseBlessingForm = () => {
                             <p><strong>Contact Number:</strong> {blessingDetails?.contactNumber || "N/A"}</p>
                         </div>
                         <div className="house-details-item">
-                            <p><strong>Address:</strong> {blessingDetails?.address?.houseDetails || "N/A"},
-                                {blessingDetails?.address?.phase || "N/A"},
-                                {blessingDetails?.address?.street || "N/A"},
-                                {blessingDetails?.address?.baranggay || "N/A"},
-                                {blessingDetails?.address?.district || "N/A"},
-                                {blessingDetails?.address?.city || "N/A"}</p>
+                            <p>
+                                <strong>Address:</strong>{" "}
+                                {blessingDetails?.address?.BldgNameTower ? `${blessingDetails.address.BldgNameTower}, ` : ""}
+                                {blessingDetails?.address?.LotBlockPhaseHouseNo ? `${blessingDetails.address.LotBlockPhaseHouseNo}, ` : ""}
+                                {blessingDetails?.address?.SubdivisionVillageZone ? `${blessingDetails.address.SubdivisionVillageZone}, ` : ""}
+                                {blessingDetails?.address?.Street ? `${blessingDetails.address.Street}, ` : ""}
+                                {blessingDetails?.address?.district ? `${blessingDetails.address.district}, ` : ""}
+                                {blessingDetails?.address?.barangay === "Others"
+                                    ? (blessingDetails.address.customBarangay ? `${blessingDetails.address.customBarangay}, ` : "")
+                                    : (blessingDetails?.address?.barangay ? `${blessingDetails.address.barangay}, ` : "")}
+                                {blessingDetails?.address?.city === "Others"
+                                    ? (blessingDetails.address.customCity ? `${blessingDetails.address.customCity}` : "")
+                                    : (blessingDetails?.address?.city || "")}
+                            </p>
                         </div>
                         <div className="house-details-item">
                             <p><strong>Blessing Date:</strong> {blessingDetails?.blessingDate ? new Date(blessingDetails.blessingDate).toLocaleDateString() : "N/A"}</p>

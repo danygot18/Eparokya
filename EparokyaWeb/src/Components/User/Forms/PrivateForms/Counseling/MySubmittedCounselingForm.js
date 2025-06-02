@@ -5,6 +5,7 @@ import "./counseling.css";
 import GuestSideBar from "../../../../GuestSideBar";
 import { useParams } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
+import Loader from "../../../../Layout/Loader";
 
 const MySubmittedCounselingForms = () => {
     const { formId } = useParams();
@@ -64,7 +65,9 @@ const MySubmittedCounselingForms = () => {
     };
 
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) {
+        return <Loader />;
+    }
     if (error) return <div>Error: {error}</div>;
 
     return (
@@ -94,11 +97,20 @@ const MySubmittedCounselingForms = () => {
                             <p><strong>Relationship:</strong> {counselingDetails?.contactPerson?.relationship || "N/A"}</p>
                         </div>
                         <div className="house-details-item">
-                            <p><strong>Address:</strong> {counselingDetails?.address?.block || "N/A"},
-                                {counselingDetails?.address?.lot || "N/A"},
-                                {counselingDetails?.address?.street || "N/A"},
-                                {counselingDetails?.address?.phase || "N/A"},
-                                {counselingDetails?.address?.baranggay || "N/A"}</p>
+                            <p>
+                                <strong>Address:</strong>{" "}
+                                {counselingDetails?.address?.BldgNameTower ? `${counselingDetails.address.BldgNameTower}, ` : ""}
+                                {counselingDetails?.address?.LotBlockPhaseHouseNo ? `${counselingDetails.address.LotBlockPhaseHouseNo}, ` : ""}
+                                {counselingDetails?.address?.SubdivisionVillageZone ? `${counselingDetails.address.SubdivisionVillageZone}, ` : ""}
+                                {counselingDetails?.address?.Street ? `${counselingDetails.address.Street}, ` : ""}
+                                {counselingDetails?.address?.district ? `${counselingDetails.address.district}, ` : ""}
+                                {counselingDetails?.address?.barangay === "Others"
+                                    ? (counselingDetails.address.customBarangay ? `${counselingDetails.address.customBarangay}, ` : "")
+                                    : (counselingDetails?.address?.barangay ? `${counselingDetails.address.barangay}, ` : "")}
+                                {counselingDetails?.address?.city === "Others"
+                                    ? (counselingDetails.address.customCity ? `${counselingDetails.address.customCity}` : "")
+                                    : (counselingDetails?.address?.city || "")}
+                            </p>
                         </div>
                         <div className="house-details-item">
                             <p><strong>Counseling Date:</strong> {counselingDetails?.counselingDate ? new Date(counselingDetails.counselingDate).toLocaleDateString() : "N/A"}</p>
