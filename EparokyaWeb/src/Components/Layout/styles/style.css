@@ -88,6 +88,17 @@
   color: #666;
 }
 
+.custom-modal {
+  max-width: 90vw !important; /* Adjust to your needs */
+  width: 90vw !important;
+  margin: auto;
+}
+
+.custom-modal .modal-content {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
 
   /* baptismList */
   

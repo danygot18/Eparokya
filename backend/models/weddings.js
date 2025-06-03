@@ -13,6 +13,8 @@ const weddingSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  weddingTheme: { type: String, required: true },
+
 
   groomName: { type: String, required: true },
   groomAddress: {

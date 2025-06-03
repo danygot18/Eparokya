@@ -43,7 +43,6 @@ exports.createCounseling = async (req, res) => {
   }
 };
 
-// Fetch all counseling requests for a user
 exports.getUserCounselingRequests = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -55,7 +54,6 @@ exports.getUserCounselingRequests = async (req, res) => {
   }
 };
 
-// Fetch all counseling requests (Admin)
 exports.getAllCounselingRequests = async (req, res) => {
   try {
     const counselingRequests = await Counseling.find().populate('userId', 'name email');
@@ -375,6 +373,35 @@ exports.addCommentToCounseling = async (req, res) => {
   } catch (error) {
     console.error('Error adding comment:', error);
     res.status(500).json({ error: 'Failed to add comment' });
+  }
+};
+
+// For Reports
+exports.getCounselingPerMonth = async (req, res) => {
+  const data = await Counseling.aggregate([
+    {
+      $group: {
+        _id: { $month: "$counselingDate" },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+  const result = Array(12).fill(0);
+  data.forEach(({ _id, count }) => {
+    result[_id - 1] = count;
+  });
+  res.json(result);
+};
+
+exports.getCounselingStatusCounts = async (req, res) => {
+  try {
+    const counts = await Counseling.aggregate([
+      { $group: { _id: "$counselingStatus", count: { $sum: 1 } } },
+    ]);
+    res.status(200).json(counts);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch counseling status counts", error });
   }
 };
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const houseBlessingController = require('../../controllers/PrivateScheduling/houseBlessingController');
-const { isAuthenticatedUser, authorizeAdmin } = require('../../middleware/auth');
+const { isAuthenticatedUser, isAuthorized } = require('../../middleware/auth');
 
 router.post('/houseBlessingSubmit', houseBlessingController.createHouseBlessing);
 router.get('/getAllhouseBlessing', houseBlessingController.getAllHouseBlessingRequests);
@@ -19,6 +19,8 @@ router.post('/declineBlessing/:blessingId', isAuthenticatedUser, houseBlessingCo
 router.get('/getAllUserSubmittedHouseBlessing', isAuthenticatedUser, houseBlessingController.getMySubmittedForms);
 router.get('/getHouseBlessingForm/:formId', isAuthenticatedUser, houseBlessingController.getHouseBlessingFormById);
 
+router.get('/stats/blessingPerMonth', isAuthenticatedUser, isAuthorized("admin"), houseBlessingController.getHouseBlessingPerMonth);
+router.get('/stats/blessingStatusCount', isAuthenticatedUser, isAuthorized("admin"),  houseBlessingController.getHouseBlessingStatusCounts); 
 // router.post('/updateAdditionalReq/:blessingId',  houseBlessingController.updateAdditionalReq);
 
 router.get('/user/:userId', houseBlessingController.getUserHouseBlessingRequests);

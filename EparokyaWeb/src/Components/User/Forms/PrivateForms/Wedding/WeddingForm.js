@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import GuestSidebar from "../../../../GuestSideBar";
 import MetaData from "../../../../Layout/MetaData";
+import WeddingCalendar from "../../../WeddingCalendar";
 // import termsAndConditionsText from "../../../../Term";
 
 const WeddingForm = () => {
@@ -11,6 +12,7 @@ const WeddingForm = () => {
     dateOfApplication: "",
     weddingDate: "",
     weddingTime: "",
+    weddingTheme: "",
     groomName: "",
     groomAddress: {
       BldgNameTower: "",
@@ -118,7 +120,7 @@ const WeddingForm = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
-
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
 
   const FileUploadField = ({
     name,
@@ -275,7 +277,7 @@ const WeddingForm = () => {
     if (!file) return;
 
     // Validate file
-    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_SIZE = 10 * 1024 * 1024;
     const ALLOWED_TYPES = [
       'image/jpeg',
       'image/png',
@@ -294,7 +296,6 @@ const WeddingForm = () => {
       return;
     }
 
-    // Create object URL for preview (better for PDFs)
     const fileUrl = URL.createObjectURL(file);
 
     setFormData(prev => ({
@@ -317,6 +318,7 @@ const WeddingForm = () => {
       dateOfApplication: "",
       weddingDate: "",
       weddingTime: "",
+      weddingTheme: "",
       groomName: "",
       groomAddress: "",
       brideName: "",
@@ -530,18 +532,13 @@ const WeddingForm = () => {
       toast.error(`Missing required documents: ${missingDocuments.join(', ')}`);
       return;
     }
-
-    // Prepare FormData
     const formDataObj = new FormData();
-
-    // Append all documents
     Object.entries(formData.documents).forEach(([fieldName, file]) => {
       if (file) {
         formDataObj.append(fieldName, file);
       }
     });
 
-    // Append other form data (excluding documents and previews)
     const { documents, previews, ...otherData } = formData;
     Object.entries(otherData).forEach(([key, value]) => {
       if (typeof value === 'object' && value !== null) {
@@ -551,7 +548,6 @@ const WeddingForm = () => {
       }
     });
 
-    // Submit the form
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/submitWeddingForm`,
@@ -565,9 +561,9 @@ const WeddingForm = () => {
       );
 
       toast.success("Wedding form submitted successfully!");
-      // Reset form...
+
     } catch (error) {
-      // Error handling...
+
     }
   };
 
@@ -585,11 +581,72 @@ const WeddingForm = () => {
             width: "calc(100% - 270px)",
           }}
         >
+          {/* wedding calendar */}
+          <Modal
+            show={showCalendarModal}
+            onHide={() => setShowCalendarModal(false)}
+            centered
+            backdrop="static"
+            keyboard={false}
+            dialogClassName="modal-dialog-centered modal-xl"
+            contentClassName="border-0"
+            style={{ zIndex: 2000 }}
+          >
+            <Modal.Header className="border-0" style={{ justifyContent: "space-between" }}>
+              <Modal.Title style={{ fontWeight: 700, fontSize: "1.4rem" }}>
+                Confirmed Weddings Calendar
+              </Modal.Title>
+              <Button
+                variant="light"
+                onClick={() => setShowCalendarModal(false)}
+                style={{
+                  border: "none",
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                  color: "#333",
+                  background: "transparent",
+                  lineHeight: 1,
+                  marginLeft: "auto"
+                }}
+                aria-label="Close"
+              >
+                ×
+              </Button>
+            </Modal.Header>
+            <Modal.Body style={{ padding: 0, minHeight: 600 }}>
+              <div style={{ minHeight: 600, padding: '1rem' }}>
+                <WeddingCalendar onlyCalendar />
+              </div>
+            </Modal.Body>
+          </Modal>
+
           <form
             onSubmit={handleSubmit}
             encType="multipart/form-data"
             style={{ paddingLeft: "30px" }}
           >
+
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
+              <h2 style={{ marginRight: 16 }}>Wedding Form</h2>
+              <Button
+                variant="outline-secondary"
+                style={{
+                  border: "1px solid #aaa",
+                  background: "transparent",
+                  color: "#333",
+                  fontWeight: "bold",
+                  borderRadius: 6,
+                  padding: "4px 14px",
+                  fontSize: "1rem",
+                  marginLeft: 0,
+                  boxShadow: "none"
+                }}
+                onClick={() => setShowCalendarModal(true)}
+              >
+                View Calendar
+              </Button>
+            </div>
+
             <h2>Wedding Form</h2>
 
             {/* Warning message if user is married */}
@@ -638,6 +695,18 @@ const WeddingForm = () => {
                 required
               />
             </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Wedding Theme</Form.Label>
+              <Form.Control
+                type="text"
+                name="weddingTheme"
+                value={formData.weddingTheme}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+
 
             {/* Groom's Information */}
             <fieldset className="form-group">
@@ -1543,8 +1612,8 @@ const WeddingForm = () => {
               </Row>
             </fieldset>
 
-             <fieldset className="form-group">
-             
+            <fieldset className="form-group">
+
 
               {/* Bride's Documents Section */}
               <Row className="mb-3">

@@ -322,3 +322,32 @@ exports.getHouseBlessingById = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch house blessing by ID' });
     }
 };
+
+// For Reports
+exports.getHouseBlessingPerMonth = async (req, res) => {
+  const data = await HouseBlessing.aggregate([
+    {
+      $group: {
+        _id: { $month: "$blessingDate" },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+  const result = Array(12).fill(0);
+  data.forEach(({ _id, count }) => {
+    result[_id - 1] = count;
+  });
+  res.json(result);
+};
+
+exports.getHouseBlessingStatusCounts = async (req, res) => {
+  try {
+    const counts = await HouseBlessing.aggregate([
+      { $group: { _id: "$blessingStatus", count: { $sum: 1 } } },
+    ]);
+    res.status(200).json(counts);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch blessing status counts", error });
+  }
+};

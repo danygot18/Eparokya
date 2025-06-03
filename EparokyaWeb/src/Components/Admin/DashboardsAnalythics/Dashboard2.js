@@ -9,6 +9,10 @@ const Dashboard2 = () => {
   const [weddingStatus, setWeddingStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
   const [baptismStatus, setBaptismStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
   const [funeralStatus, setFuneralStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
+  const [counselingStatus, setCounselingStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
+  const [houseBlessingStatus, sethouseBlessingStatus] = useState({ pending: 0, confirmed: 0, cancelled: 0 });
+
+
   const [loading, setLoading] = useState(true);
 
   const config = {
@@ -21,10 +25,16 @@ const Dashboard2 = () => {
         const weddingStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/weddingStatusCount`, config);
         const baptismStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/baptismStatusCount`, config);
         const funeralStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/funeralStatusCount`, config);
+        const counselingStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/counselingStatusCount`, config);
+        const houseBlessingStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/blessingStatusCount`, config);
+
 
         setWeddingStatus(convertToStatusObject(weddingStatusRes.data));
         setBaptismStatus(convertToStatusObject(baptismStatusRes.data));
         setFuneralStatus(convertToStatusObject(funeralStatusRes.data));
+        setCounselingStatus(convertToStatusObject(counselingStatusRes.data));
+        sethouseBlessingStatus(convertToStatusObject(houseBlessingStatusRes.data));
+
 
         setLoading(false);
       } catch (error) {
@@ -104,6 +114,18 @@ const Dashboard2 = () => {
         <div style={pieChartContainerStyle}>
           <h5>Funeral Status Distribution</h5>
           <Pie data={generatePieData(funeralStatus)} />
+        </div>
+      </div>
+      <div style={chartCardStyle}>
+        <div style={pieChartContainerStyle}>
+          <h5>Counseling Status Distribution</h5>
+          <Pie data={generatePieData(counselingStatus)} />
+        </div>
+      </div>
+      <div style={chartCardStyle}>
+        <div style={pieChartContainerStyle}>
+          <h5>Blessing Status Distribution</h5>
+          <Pie data={generatePieData(houseBlessingStatus)} />
         </div>
       </div>
     </div>

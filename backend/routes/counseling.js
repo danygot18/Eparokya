@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const counselingController = require('../controllers/Counseling/counselingController'); 
-const { isAuthenticatedUser, authorizeAdmin } = require('../middleware/auth');
+const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
 
 router.post('/counselingSubmit', counselingController.createCounseling);
 router.get('/getAllcounseling', counselingController.getAllCounselingRequests);
@@ -18,6 +18,8 @@ router.get('/getCounselingPriest/:counselingId', counselingController.getCounsel
 router.get('/getAllUserSubmittedCounseling', isAuthenticatedUser, counselingController.getMySubmittedForms);
 router.get('/getCounselingForm/:formId', isAuthenticatedUser, counselingController.getCounselingFormById);
 
+router.get('/stats/counselingPerMonth', isAuthenticatedUser, isAuthorized("admin"), counselingController.getCounselingPerMonth);
+router.get('/stats/counselingStatusCount', isAuthenticatedUser, isAuthorized("admin"),  counselingController.getCounselingStatusCounts);
 
 router.put('/:updateCounselingDate/:counselingId', counselingController.updateCounselingDate);
 
