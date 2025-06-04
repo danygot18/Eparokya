@@ -43,6 +43,7 @@ const MemberDirectory = () => {
                 userId: user.userId,
                 name: user.name,
                 email: user.email,
+                address: user.address || null,
                 role: ministryRole.role,
                 yearsActive: ministryRole.endYear
                   ? `${ministryRole.startYear} - ${ministryRole.endYear}`
@@ -53,6 +54,7 @@ const MemberDirectory = () => {
                 civilStatus: user.civilStatus || "N/A",
                 preference: user.preference || "N/A",
               });
+
             });
           });
 
@@ -74,11 +76,46 @@ const MemberDirectory = () => {
     return isNaN(dateObj.getTime())
       ? "Invalid Date"
       : dateObj.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
   };
+
+  const formatAddress = (address = {}) => {
+    if (!address) return null;
+
+    const {
+      LotBlockPhaseHouseNo,
+      BldgNameTower,
+      SubdivisionVillageZone,
+      Street,
+      District,
+      barangay,
+      customBarangay,
+      city,
+      customCity,
+    } = address;
+
+    const barangayDisplay = barangay === 'Others' ? customBarangay : barangay;
+    const cityDisplay = city === 'Others' ? customCity : city;
+
+    // Return null if essential components like Street, District, or Barangay are missing
+    if (!Street || !District || !barangayDisplay || !cityDisplay) return null;
+
+    const components = [];
+
+    if (LotBlockPhaseHouseNo) components.push(LotBlockPhaseHouseNo);
+    if (BldgNameTower) components.push(BldgNameTower);
+    if (SubdivisionVillageZone) components.push(SubdivisionVillageZone);
+
+    // Required address suffix
+    components.push(Street, District, barangayDisplay, cityDisplay);
+
+    return components.join(' ');
+  };
+
+
 
   const filteredMinistries = {};
   Object.keys(ministries).forEach((ministryName) => {
@@ -139,6 +176,14 @@ const MemberDirectory = () => {
                       <TableCell>
                         <strong>Preference</strong>
                       </TableCell>
+                       <TableCell><strong>Lot/Block/Phase/House No</strong></TableCell>
+                      <TableCell><strong>Building Name/Tower</strong></TableCell>
+                      <TableCell><strong>Subdivision/Village/Zone</strong></TableCell>
+                      <TableCell><strong>Street</strong></TableCell>
+                      <TableCell><strong>District</strong></TableCell>
+                      <TableCell><strong>Barangay</strong></TableCell>
+                      <TableCell><strong>City</strong></TableCell>
+
                       <TableCell>
                         <strong>Role</strong>
                       </TableCell>
@@ -148,6 +193,8 @@ const MemberDirectory = () => {
                       <TableCell>
                         <strong>Status</strong>
                       </TableCell>
+                     
+
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -170,11 +217,29 @@ const MemberDirectory = () => {
                         <TableCell>{formatDate(member.birthDate)}</TableCell>
                         <TableCell>{member.civilStatus || "N/A"}</TableCell>
                         <TableCell>{member.preference || "N/A"}</TableCell>
+                         <TableCell>{member.address?.LotBlockPhaseHouseNo || "N/A"}</TableCell>
+<TableCell>{member.address?.BldgNameTower || "N/A"}</TableCell>
+<TableCell>{member.address?.SubdivisionVillageZone || "N/A"}</TableCell>
+<TableCell>{member.address?.Street || "N/A"}</TableCell>
+<TableCell>{member.address?.District || "N/A"}</TableCell>
+<TableCell>
+  {(member.address?.barangay === 'Others'
+    ? member.address?.customBarangay
+    : member.address?.barangay) || "N/A"}
+</TableCell>
+<TableCell>
+  {(member.address?.city === 'Others'
+    ? member.address?.customCity
+    : member.address?.city) || "N/A"}
+</TableCell>
                         <TableCell>{member.role}</TableCell>
                         <TableCell>{member.yearsActive}</TableCell>
                         <TableCell style={{ color: member.isActive ? "green" : "red" }}>
                           {member.isActive ? "Active" : "Inactive"}
                         </TableCell>
+                      
+
+
                       </TableRow>
                     ))}
                   </TableBody>

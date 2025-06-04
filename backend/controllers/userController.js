@@ -948,7 +948,7 @@ exports.getMemberStatuses = async (req, res) => {
     const currentYear = new Date().getFullYear();
     const users = await User.find(
       {},
-      "name email avatar birthDate civilStatus preference ministryRoles"
+      "name email avatar birthDate civilStatus preference ministryRoles address"
     ).populate("ministryRoles.ministry", "name");
 
     const memberStatuses = users.map((user) => {
@@ -968,6 +968,7 @@ exports.getMemberStatuses = async (req, res) => {
         birthDate: user.birthDate || null,
         civilStatus: user.civilStatus || "N/A",
         preference: user.preference || "N/A",
+        address: user.address || null, 
         isActive,
         ministries: user.ministryRoles.map((role) => ({
           ministry: role.ministry?.name || "Unknown",
@@ -976,6 +977,7 @@ exports.getMemberStatuses = async (req, res) => {
           endYear: role.endYear || "Ongoing",
         })),
       };
+
     });
 
     res.status(200).json(memberStatuses);
@@ -1061,7 +1063,7 @@ exports.getMemberDirectoryUser = async (req, res) => {
     const { userId } = req.params;
 
     const user = await User.findById(userId)
-      .select("-password") 
+      .select("-password")
       .populate("ministryRoles.ministry", "name");
 
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -1077,10 +1079,10 @@ exports.getMemberDirectoryUser = async (req, res) => {
 
 exports.updateMemberDirectoryUser = async (req, res) => {
   try {
-    const { civilStatus, ministryRoles  } = req.body;
+    const { civilStatus, ministryRoles } = req.body;
     const user = await User.findByIdAndUpdate(
       req.params.userId,
-      { civilStatus, ministryRoles  },
+      { civilStatus, ministryRoles },
       { new: true }
     );
     if (!user) return res.status(404).json({ message: "User not found" });

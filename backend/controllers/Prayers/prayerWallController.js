@@ -263,9 +263,6 @@ exports.getMySubmittedPrayers = async (req, res) => {
   }
 };
 
-
-
-
 // softDelete
 exports.softDeletePrayer = async (req, res) => {
   try {
@@ -280,15 +277,15 @@ exports.softDeletePrayer = async (req, res) => {
 
     prayer.isDeletedByUser = true;
 
-    await prayer.save(); // Save the change to MongoDB
+    await prayer.save(); 
 
     res.status(200).json({
       success: true,
-      message: "Prayer successfully soft deleted",
+      message: "Prayer successfully deleted",
       prayer,
     });
   } catch (error) {
-    console.error("Soft delete error:", error);
+    console.error("Delete error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
