@@ -21,6 +21,8 @@ router.get('/getCounselingForm/:formId', isAuthenticatedUser, counselingControll
 router.get('/stats/counselingPerMonth', isAuthenticatedUser, isAuthorized("admin"), counselingController.getCounselingPerMonth);
 router.get('/stats/counselingStatusCount', isAuthenticatedUser, isAuthorized("admin"),  counselingController.getCounselingStatusCounts);
 
+router.get('/getConfirmedCounseling', counselingController.getConfirmedCounseling);
+
 router.put('/:updateCounselingDate/:counselingId', counselingController.updateCounselingDate);
 
 router.get('/counseling/user/:userId', counselingController.getUserCounselingRequests);

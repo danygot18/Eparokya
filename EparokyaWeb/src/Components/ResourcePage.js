@@ -59,7 +59,7 @@ const ResourcePage = () => {
   const config = { withCredentials: true };
 
   const { user } = useSelector((state) => state.auth);
-  console.log("user", user._id);
+  // console.log("user", user._id);
   const fetchUser = async () => {
     try {
       const response = await axios.get(

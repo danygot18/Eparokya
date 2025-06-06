@@ -2,11 +2,20 @@ const { BaptismChecklist } = require('../../models/baptismChecklist');
 const Baptism = require("../../models/Binyag");
 const mongoose = require("mongoose");
 const cloudinary = require('cloudinary').v2;
+const User = require('../../models/user');
 // Submit Baptism Form
 
 
 exports.submitBaptismForm = async (req, res) => {
   try {
+    console.log("Incoming body:", req.body);
+    console.log("Incoming files:", req.files);
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
     const {
       baptismDate,
       baptismTime,
@@ -19,76 +28,104 @@ exports.submitBaptismForm = async (req, res) => {
       NinangGodparents,
     } = req.body;
 
-    const Docs = { additionalDocs: {} };
+    // Validate required fields
+    const requiredFields = [
+      'baptismDate', 'baptismTime', 'phone', 'child', 'parents'
+    ];
+
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({ message: `Missing required field: ${field}` });
+      }
+    }
+
+    const Docs = {};
     const additionalDocs = {};
+    const requiredDocumentFields = [
+      "birthCertificate",
+      "marriageCertificate"
+    ];
 
-    const uploadToCloudinary = async (file, folder) => {
-      if (!file) throw new Error('File is required for upload.');
-      const result = await cloudinary.uploader.upload(file.path, { folder });
-      return { public_id: result.public_id, url: result.secure_url };
-    };
-
-    try {
-      if (req.files?.birthCertificate) {
-        Docs.birthCertificate = await uploadToCloudinary(req.files.birthCertificate[0], 'eparokya/baptism/docs');
+    // Upload all required documents to Cloudinary
+    for (const field of requiredDocumentFields) {
+      if (req.files?.[field]) {
+        const file = req.files[field][0];
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "eparokya/baptism/docs",
+          resource_type: file.mimetype.startsWith('image') ? 'image' : 'raw'
+        });
+        Docs[field] = {
+          public_id: result.public_id,
+          url: result.secure_url
+        };
       } else {
-        throw new Error('Birth Certificate is required.');
+        return res.status(400).json({ message: `Missing required document: ${field}` });
       }
+    }
 
-      if (req.files?.marriageCertificate) {
-        Docs.marriageCertificate = await uploadToCloudinary(req.files.marriageCertificate[0], 'eparokya/baptism/docs');
-      } else {
-        throw new Error('Marriage Certificate is required.');
+    // Handle optional documents
+    const optionalDocumentFields = [
+      "baptismPermit",
+      "certificateOfNoRecordBaptism"
+    ];
+
+    for (const field of optionalDocumentFields) {
+      if (req.files?.[field]) {
+        const file = req.files[field][0];
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "eparokya/baptism/additionalDocs",
+          resource_type: file.mimetype.startsWith('image') ? 'image' : 'raw'
+        });
+        additionalDocs[field] = {
+          public_id: result.public_id,
+          url: result.secure_url
+        };
       }
-
-      if (req.files?.baptismPermit) {
-        const uploadedBaptismPermit = await Promise.all(
-            req.files.baptismPermit.map(file => uploadToCloudinary(file, 'eparokya/baptism/additionalDocs'))
-        );
-        additionalDocs.baptismPermit = uploadedBaptismPermit[0]; 
-    }
-    
-    if (req.files?.certificateOfNoRecordBaptism) {
-        const uploadedCertificate = await Promise.all(
-            req.files.certificateOfNoRecordBaptism.map(file => uploadToCloudinary(file, 'eparokya/baptism/additionalDocs'))
-        );
-        additionalDocs.certificateOfNoRecordBaptism = uploadedCertificate[0]; 
-    }
-    
-
-    } catch (error) {
-      return res.status(400).json({ success: false, message: error.message });
     }
 
-    const userId = req.user._id;
+    // Parse JSON fields
+    const childObject = typeof child === "string" ? JSON.parse(child) : child;
+    const parentsObject = typeof parents === "string" ? JSON.parse(parents) : parents;
+    const ninongArray = ninong ? JSON.parse(ninong) : [];
+    const ninangArray = ninang ? JSON.parse(ninang) : [];
+    const NinongGodparentsArray = NinongGodparents ? JSON.parse(NinongGodparents) : [];
+    const NinangGodparentsArray = NinangGodparents ? JSON.parse(NinangGodparents) : [];
 
-    if (Object.keys(additionalDocs).length === 0) {
-      additionalDocs = null;
-    }
-    const baptism = new Baptism({
+    // Validate child information
+
+
+    // Validate parents information
+
+
+    const newBaptismForm = new Baptism({
       baptismDate,
       baptismTime,
       phone,
-      child: child ? JSON.parse(child) : null,
-      parents: parents ? JSON.parse(parents) : null,
-      ninong: ninong ? JSON.parse(ninong) : [],
-      ninang: ninang ? JSON.parse(ninang) : [],
-      NinongGodparents: NinongGodparents ? JSON.parse(NinongGodparents) : [],
-      NinangGodparents: NinangGodparents ? JSON.parse(NinangGodparents) : [],
+      child: childObject,
+      parents: parentsObject,
+      ninong: ninongArray,
+      ninang: ninangArray,
+      NinongGodparents: NinongGodparentsArray,
+      NinangGodparents: NinangGodparentsArray,
       Docs,
-      additionalDocs,
-      userId,
+      additionalDocs: Object.keys(additionalDocs).length > 0 ? additionalDocs : null,
+      userId: req.user._id,
     });
 
-    const savedBaptism = await baptism.save();
+    await newBaptismForm.save();
 
-    res.status(201).json({ success: true, baptism: savedBaptism });
+    res.status(201).json({
+      message: "Baptism form submitted successfully!",
+      baptismForm: newBaptismForm,
+    });
   } catch (error) {
-    console.error('Error creating baptism:', error);
-    res.status(500).json({ success: false, message: 'Error creating baptism', error: error.message });
+    console.error("Error submitting baptism form:", error);
+    res.status(500).json({ 
+      message: "An error occurred during submission.", 
+      error: error.message 
+    });
   }
 };
-
 
 exports.listBaptismForms = async (req, res) => {
   try {
@@ -357,9 +394,10 @@ exports.addAdminNotes = async (req, res) => {
 // For user fetching
 exports.getMySubmittedForms = async (req, res) => {
   try {
-    const userId = req.user.id; 
+    const userId = req.user.id;
+    console.log("Authenticated User ID:", userId);
 
-    const forms = await Baptism.find({ user: userId });
+    const forms = await Baptism.find({ userId: userId });
 
     if (!forms.length) {
       return res.status(404).json({ message: "No forms found for this user." });
@@ -376,9 +414,10 @@ exports.getMySubmittedForms = async (req, res) => {
 // details 
 exports.getBaptismFormById = async (req, res) => {
   try {
-    const { formId } = req.params;
+    const { baptismId } = req.params;
 
-    const baptismForm = await Baptism.findById(formId)
+    const baptismForm = await Baptism.findById(baptismId)
+      .populate('adminNotes.priest')
       .populate('userId', 'name email')
       .lean();
 

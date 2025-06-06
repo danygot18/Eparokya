@@ -323,6 +323,18 @@ exports.getHouseBlessingById = async (req, res) => {
     }
 };
 
+// Getting Confirmed House Blessing Requests
+// Confirmed Counseling: 
+exports.getConfirmedHouseBlessing = async (req, res) => {
+  try {
+    const confirmedHouseBlessing = await HouseBlessing.find({ blessingStatus: 'Confirmed' });
+    res.status(200).json(confirmedHouseBlessing);
+  } catch (error) {
+    console.error("Error fetching confirmed house blessings:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // For Reports
 exports.getHouseBlessingPerMonth = async (req, res) => {
   const data = await HouseBlessing.aggregate([

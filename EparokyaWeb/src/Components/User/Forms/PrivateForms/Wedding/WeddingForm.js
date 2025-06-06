@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import GuestSidebar from "../../../../GuestSideBar";
 import MetaData from "../../../../Layout/MetaData";
-import WeddingCalendar from "../../../WeddingCalendar";
+import ConfirmedWeddingModal from "./ConfirmedWeddingModal";
 // import termsAndConditionsText from "../../../../Term";
 
 const WeddingForm = () => {
@@ -121,6 +121,7 @@ const WeddingForm = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
 
   const FileUploadField = ({
     name,
@@ -241,33 +242,6 @@ const WeddingForm = () => {
     });
   };
 
-  // const handleFileChange = (e) => {
-  //   const { name, files } = e.target;
-  //   console.log(`File selected: ${name}`, files[0]);
-  //   const file = e.target.files[0];
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     images: { ...prev.images, [name]: file },
-  //   }));
-  // };
-
-  // const handleFileChange = (e) => {
-  //   const { name, files } = e.target;
-  //   const file = files[0];
-
-  //   if (!file) return;
-
-  //   // Generate a preview URL
-  //   const reader = new FileReader();
-  //   reader.onloadend = () => {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       images: { ...prev.images, [name]: file },
-  //       previews: { ...prev.previews, [name]: reader.result },
-  //     }));
-  //   };
-  //   reader.readAsDataURL(file);
-  // };
 
   console.log("Form data:", formData);
   const handleFileChange = (e) => {
@@ -361,150 +335,14 @@ const WeddingForm = () => {
     }
   };
 
-  //submit form 5/18
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     // Prepare groomAddress and brideAddress
-  //     const groomAddress = {
-  //       ...formData.groomAddress,
-  //       customCity:
-  //         formData.groomAddress.city === "Others" ? customCity : undefined,
-  //       customBarangay:
-  //         formData.groomAddress.barangay === "Others"
-  //           ? customBarangay
-  //           : undefined,
-  //     };
-
-  //     const brideAddress = {
-  //       ...formData.brideAddress,
-  //       customCity:
-  //         formData.brideAddress.city === "Others" ? customCity : undefined,
-  //       customBarangay:
-  //         formData.brideAddress.barangay === "Others"
-  //           ? customBarangay
-  //           : undefined,
-  //     };
-
-  //     // Validate required fields
-  //     if (!groomAddress.city || !groomAddress.barangay) {
-  //       toast.error("Please complete the groom's address.");
-  //       return;
-  //     }
-  //     if (!brideAddress.city || !brideAddress.barangay) {
-  //       toast.error("Please complete the bride's address.");
-  //       return;
-  //     }
-
-  //     // Prepare FormData
-  //     const formDataObj = new FormData();
-  //     const imageFields = [
-  //       "GroomNewBaptismalCertificate",
-  //       "GroomNewConfirmationCertificate",
-  //       "GroomMarriageLicense",
-  //       "GroomMarriageBans",
-  //       "GroomOrigCeNoMar",
-  //       "GroomOrigPSA",
-  //       "GroomPermitFromtheParishOftheBride",
-  //       "GroomChildBirthCertificate",
-  //       "GroomOneByOne",
-  //       "BrideNewBaptismalCertificate",
-  //       "BrideNewConfirmationCertificate",
-  //       "BrideMarriageLicense",
-  //       "BrideMarriageBans",
-  //       "BrideOrigCeNoMar",
-  //       "BrideOrigPSA",
-  //       "BridePermitFromtheParishOftheBride",
-  //       "BrideChildBirthCertificate",
-  //       "BrideOneByOne",
-  //     ];
-
-  //     console.log("Form data before submit:", formData);
-  //     imageFields.forEach((field) => {
-  //       const file = formData.images[field];
-  //       if (file) {
-  //         console.log(`Appending ${field} to FormData`, file);
-  //         formDataObj.append(field, file);
-  //       } else {
-  //         console.warn(`⚠️ No file found for ${field}`);
-  //       }
-  //     });
-
-  //     // Append other form data
-  //     Object.entries(formData).forEach(([key, value]) => {
-  //       if (key !== "images") {
-  //         if (key === "groomAddress") {
-  //           formDataObj.append(key, JSON.stringify(groomAddress));
-  //         } else if (key === "brideAddress") {
-  //           formDataObj.append(key, JSON.stringify(brideAddress));
-  //         } else if (Array.isArray(value)) {
-  //           formDataObj.append(key, JSON.stringify(value));
-  //         } else if (typeof value === "object" && value !== null) {
-  //           formDataObj.append(key, JSON.stringify(value));
-  //         } else {
-  //           formDataObj.append(key, value);
-  //         }
-  //       }
-  //     });
-
-  //     // Submit the form
-  //     const response = await axios.post(
-  //       `${process.env.REACT_APP_API}/api/v1/submitWeddingForm`,
-  //       formDataObj,
-  //       config
-  //     );
-
-  //     toast.success("Wedding form submitted successfully!");
-  //     console.log("Response:", response.data);
-
-  //     // Reset form data
-  //     setFormData({
-  //       dateOfApplication: "",
-  //       weddingDate: "",
-  //       weddingTime: "",
-  //       groomName: "",
-  //       groomAddress: {
-  //         BldgNameTower: "",
-  //         LotBlockPhaseHouseNo: "",
-  //         SubdivisionVillageZone: "",
-  //         Street: "",
-  //         District: "",
-  //         barangay: "",
-  //         city: "",
-  //       },
-  //       brideName: "",
-  //       brideAddress: {
-  //         BldgNameTower: "",
-  //         LotBlockPhaseHouseNo: "",
-  //         SubdivisionVillageZone: "",
-  //         Street: "",
-  //         District: "",
-  //         barangay: "",
-  //         city: "",
-  //       },
-  //       groomFather: "",
-  //       groomMother: "",
-  //       brideFather: "",
-  //       brideMother: "",
-  //       Ninong: [],
-  //       Ninang: [],
-  //       images: {},
-  //     });
-
-  //     console.log("Form data after submit:", formData);
-  //   } catch (error) {
-  //     console.error(
-  //       "Error submitting wedding form:",
-  //       error.response ? error.response.data : error.message
-  //     );
-  //     toast.error("Failed to submit wedding form. Please try again.");
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (isMarried) {
+    toast.error('Sorry, but a "Married" user cannot submit an application.');
+    return;
+  }
     // Required documents list
     const REQUIRED_DOCUMENTS = [
       'GroomNewBaptismalCertificate',
@@ -582,43 +420,7 @@ const WeddingForm = () => {
           }}
         >
           {/* wedding calendar */}
-          <Modal
-            show={showCalendarModal}
-            onHide={() => setShowCalendarModal(false)}
-            centered
-            backdrop="static"
-            keyboard={false}
-            dialogClassName="modal-dialog-centered modal-xl"
-            contentClassName="border-0"
-            style={{ zIndex: 2000 }}
-          >
-            <Modal.Header className="border-0" style={{ justifyContent: "space-between" }}>
-              <Modal.Title style={{ fontWeight: 700, fontSize: "1.4rem" }}>
-                Confirmed Weddings Calendar
-              </Modal.Title>
-              <Button
-                variant="light"
-                onClick={() => setShowCalendarModal(false)}
-                style={{
-                  border: "none",
-                  fontSize: "2rem",
-                  fontWeight: "bold",
-                  color: "#333",
-                  background: "transparent",
-                  lineHeight: 1,
-                  marginLeft: "auto"
-                }}
-                aria-label="Close"
-              >
-                ×
-              </Button>
-            </Modal.Header>
-            <Modal.Body style={{ padding: 0, minHeight: 600 }}>
-              <div style={{ minHeight: 600, padding: '1rem' }}>
-                <WeddingCalendar onlyCalendar />
-              </div>
-            </Modal.Body>
-          </Modal>
+
 
           <form
             onSubmit={handleSubmit}
@@ -626,26 +428,32 @@ const WeddingForm = () => {
             style={{ paddingLeft: "30px" }}
           >
 
-            <div style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
-              <h2 style={{ marginRight: 16 }}>Wedding Form</h2>
-              <Button
-                variant="outline-secondary"
-                style={{
-                  border: "1px solid #aaa",
-                  background: "transparent",
-                  color: "#333",
-                  fontWeight: "bold",
-                  borderRadius: 6,
-                  padding: "4px 14px",
-                  fontSize: "1rem",
-                  marginLeft: 0,
-                  boxShadow: "none"
-                }}
-                onClick={() => setShowCalendarModal(true)}
-              >
-                View Calendar
-              </Button>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", maxWidth: "300px" }}>
+                <div>
+                  <h2 style={{ fontSize: "1.2rem", margin: 0 }}>Click here to see Available Dates</h2>
+                </div>
+                <Button
+                  variant="outline-secondary"
+                  style={{
+                    border: "1px solid #aaa",
+                    background: "transparent",
+                    color: "#333",
+                    fontWeight: "bold",
+                    borderRadius: 6,
+                    padding: "4px 14px",
+                    fontSize: "0.95rem",
+                    boxShadow: "none"
+                  }}
+                  onClick={() => setShowOverlay(true)}
+                >
+                  View Calendar
+                </Button>
+              </div>
+              <ConfirmedWeddingModal show={showOverlay} onClose={() => setShowOverlay(false)} />
             </div>
+
 
             <h2>Wedding Form</h2>
 
@@ -1966,7 +1774,7 @@ const WeddingForm = () => {
               </Row>
             </fieldset>
 
-            <button type="submit">Submit</button>
+          <button type="submit" disabled={isMarried}>Submit</button>
             <button type="button" onClick={handleClearFields}>
               Clear All Fields
             </button>

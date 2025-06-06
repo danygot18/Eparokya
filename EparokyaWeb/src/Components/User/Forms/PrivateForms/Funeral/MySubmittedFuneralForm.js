@@ -5,6 +5,7 @@ import GuestSideBar from "../../../../GuestSideBar";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
 import { useParams } from "react-router-dom";
+import { Card, CardContent, Typography, Box, Paper, Button, Modal, Tabs, Tab } from "@mui/material";
 
 const MySubmittedFuneralForm = () => {
     const [funeralDetails, setFuneralDetails] = useState(null);
@@ -23,6 +24,7 @@ const MySubmittedFuneralForm = () => {
     const [comments, setComments] = useState([]);
     const [updatedFuneralDate, setUpdatedFuneralDate] = useState(funeralDetails?.funeralDate || "");
     const [priest, setPriest] = useState("");
+    const [activeTab, setActiveTab] = useState(0);
 
     useEffect(() => {
         const fetchFuneralDetails = async () => {
@@ -32,12 +34,12 @@ const MySubmittedFuneralForm = () => {
                     { withCredentials: true }
                 );
                 console.log("API Response:", response.data);
-    
+
                 if (response.data) {
                     setFuneralDetails(response.data);
                     setComments(response.data.comments || []);
                     setPriest(response.data.priest || "N/A");
-    
+
                     if (response.data.funeralDate) {
                         setUpdatedFuneralDate(response.data.funeralDate);
                     }
@@ -49,11 +51,13 @@ const MySubmittedFuneralForm = () => {
                 setLoading(false);
             }
         };
-    
+
         if (formId) fetchFuneralDetails(); // Only fetch if formId exists
     }, [formId]);
-    
 
+    const handleTabChange = (event, newValue) => {
+        setActiveTab(newValue);
+    };
 
     const handleCancel = async () => {
         try {
@@ -94,154 +98,188 @@ const MySubmittedFuneralForm = () => {
     const handleMouseUp = () => {
         setIsDragging(false);
     };
+    const formatTime12Hour = (timeString) => {
+        if (!timeString) return "N/A";
+        const date = new Date(`1970-01-01T${timeString}`);
+        return isNaN(date.getTime())
+            ? timeString
+            : date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true });
+    };
+
+    const formatDate = (date) => {
+        return date ? new Date(date).toLocaleDateString() : "N/A";
+    };
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
     return (
-        <div className="wedding-details-page">
+
+        <Box sx={{ display: "flex", minHeight: "100vh" }}>
             <GuestSideBar />
-            <div className="house-details-content">
-                <div className="house-details-grid">
-                    {/* Funeral Details Box */}
-                    <div className="house-details-box">
-                        <h3>Funeral Details</h3>
-                        <div className="house-details-item">
-                            <p><strong>Name:</strong> {funeralDetails?.name || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Age:</strong> {funeralDetails?.age || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Contact Person:</strong> {funeralDetails?.contactPerson || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Relationship:</strong> {funeralDetails?.relationship || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Phone:</strong> {funeralDetails?.phone || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Address:</strong> {funeralDetails?.address?.state || "N/A"}, {funeralDetails?.address?.country || "N/A"}, {funeralDetails?.address?.zip || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Place of Death:</strong> {funeralDetails?.placeOfDeath || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Funeral Date:</strong> {funeralDetails?.funeralDate ? new Date(funeralDetails.funeralDate).toLocaleDateString() : "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Time:</strong> {funeralDetails?.funeraltime || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Service Type:</strong> {funeralDetails?.serviceType || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Priest Visit:</strong> {funeralDetails?.priestVisit || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Reason of Death:</strong> {funeralDetails?.reasonOfDeath || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Funeral Mass Date:</strong> {funeralDetails?.funeralMassDate ? new Date(funeralDetails.funeralMassDate).toLocaleDateString() : "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Funeral Mass Time:</strong> {funeralDetails?.funeralMasstime || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Funeral Mass:</strong> {funeralDetails?.funeralMass || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Funeral Status:</strong> {funeralDetails?.funeralStatus || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Confirmed At:</strong> {funeralDetails?.confirmedAt ? new Date(funeralDetails.confirmedAt).toLocaleDateString() : "N/A"}</p>
-                        </div>
-                        {funeralDetails?.placingOfPall?.by && (
-                            <div className="house-details-item">
-                                <p><strong>Placing of Pall by:</strong> {funeralDetails.placingOfPall.by}</p>
+            <Box sx={{
+                flexGrow: 1,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "flex-start",
+                p: 3,
+                marginLeft: "240px" // Adjust based on your sidebar width
+            }}>
+                <Paper elevation={3} sx={{
+                    padding: 3,
+                    width: "100%",
+                    maxWidth: "1200px", // Fixed max width
+                    minHeight: "800px", // Fixed minimum height
+                }}>
+                    <Typography variant="h4" gutterBottom sx={{ textAlign: "center" }}>
+                        My Submitted Funeral Form
+                    </Typography>
+                    <Tabs
+                        value={activeTab}
+                        onChange={handleTabChange}
+                        centered
+                        sx={{ mb: 3 }}
+                    >
+                        <Tab label="Funeral Information" />
+                        <Tab label="Funeral Documents" />
+                        <Tab label="Admin & Checklist" />
+                    </Tabs>
+                    <Box sx={{
+                        minHeight: "600px", // Fixed height for tab content
+                        overflow: "auto" // Add scroll if content is too long
+                    }}>
+
+                        {/* Funeral Details Box */}
+                        {activeTab === 0 && (
+                            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                                <Card>
+                                    <CardContent>
+                                        <Typography variant="h5" gutterBottom>
+                                            Funeral Details
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                                            {[
+                                                { label: "Name", value: funeralDetails?.name },
+                                                { label: "Age", value: funeralDetails?.age },
+                                                { label: "Contact Person", value: funeralDetails?.contactPerson },
+                                                { label: "Relationship", value: funeralDetails?.relationship },
+                                                { label: "Phone", value: funeralDetails?.phone },
+                                                {
+                                                    label: "Address",
+                                                    value: funeralDetails?.address
+                                                        ? `${funeralDetails.address.state || ""}, ${funeralDetails.address.country || ""}, ${funeralDetails.address.zip || ""}`
+                                                        : "N/A",
+                                                    flex: "1 1 100%"
+                                                },
+                                                { label: "Place of Death", value: funeralDetails?.placeOfDeath },
+                                                { label: "Funeral Date", value: formatDate(funeralDetails?.funeralDate) },
+                                                { label: "Time", value: formatTime12Hour(funeralDetails?.funeraltime) },
+                                                { label: "Service Type", value: funeralDetails?.serviceType },
+                                                { label: "Priest Visit", value: funeralDetails?.priestVisit },
+                                                { label: "Reason of Death", value: funeralDetails?.reasonOfDeath },
+                                                { label: "Funeral Mass Date", value: formatDate(funeralDetails?.funeralMassDate) },
+                                                { label: "Funeral Mass Time", value: formatTime12Hour(funeralDetails?.funeralMasstime) },
+                                                { label: "Funeral Mass", value: funeralDetails?.funeralMass },
+                                                { label: "Funeral Status", value: funeralDetails?.funeralStatus },
+                                                { label: "Confirmed At", value: formatDate(funeralDetails?.confirmedAt) },
+                                                { label: "Placing of Pall by", value: funeralDetails?.placingOfPall?.by },
+                                                {
+                                                    label: "Family Members Placing Pall",
+                                                    value: funeralDetails?.placingOfPall?.familyMembers?.join(", "),
+                                                    hidden: !(funeralDetails?.placingOfPall?.familyMembers?.length > 0)
+                                                },
+                                            ].map(
+                                                ({ label, value, flex = "1 1 250px", hidden }, i) =>
+                                                    !hidden && (
+                                                        <Typography key={i} sx={{ flex }}>
+                                                            <strong>{label}:</strong> {value || "N/A"}
+                                                        </Typography>
+                                                    )
+                                            )}
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            </Box>
+                        )}
+                        {/* Death Certificate Section */}
+                        {activeTab === 1 && (
+                            <div className="house-details-box">
+                                <h3>Death Certificate</h3>
+                                {['deathCertificate'].map((doc, index) => (
+                                    <div key={index} className="house-details-item">
+                                        <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
+                                        {funeralDetails?.[doc]?.url ? (
+                                            <img
+                                                src={funeralDetails[doc].url}
+                                                alt={doc}
+                                                style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
+                                                onClick={() => openModal(funeralDetails[doc].url)}
+                                            />
+                                        ) : (
+                                            "N/A"
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         )}
-                        {funeralDetails?.placingOfPall?.familyMembers?.length > 0 && (
-                            <div className="house-details-item">
-                                <p><strong>Family Members Placing Pall:</strong> {funeralDetails.placingOfPall.familyMembers.join(", ")}</p>
-                            </div>
-                        )}
-                    </div>
+                        {activeTab === 2 && (
+                            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                                <div className="admin-comments-section">
+                                    <h3>Admin Comments</h3>
+                                    {comments && Array.isArray(comments) && comments.length > 0 ? (
+                                        comments.map((comment, index) => (
 
-                    {/* Death Certificate Section */}
-                    <div className="house-details-box">
-                        <h3>Death Certificate</h3>
-                        {['deathCertificate'].map((doc, index) => (
-                            <div key={index} className="house-details-item">
-                                <p>{doc.replace(/([A-Z])/g, ' $1').trim()}:</p>
-                                {funeralDetails?.[doc]?.url ? (
-                                    <img
-                                        src={funeralDetails[doc].url}
-                                        alt={doc}
-                                        style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer" }}
-                                        onClick={() => openModal(funeralDetails[doc].url)}
-                                    />
-                                ) : (
-                                    "N/A"
-                                )}
-                            </div>
-                        ))}
-                    </div>
-
-
-                    <div className="admin-comments-section">
-                        <h3>Admin Comments</h3>
-                        {comments && Array.isArray(comments) && comments.length > 0 ? (
-                            comments.map((comment, index) => (
-
-                                <div key={index} className="admin-comment">
-                                    <p className="comment-date">
-                                        {new Date(comment?.createdAt).toLocaleDateString()}
-                                    </p>
-                                    <p><strong>Comment:</strong> {comment?.selectedComment || "N/A"}</p>
-                                    <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
+                                            <div key={index} className="admin-comment">
+                                                <p className="comment-date">
+                                                    {new Date(comment?.createdAt).toLocaleDateString()}
+                                                </p>
+                                                <p><strong>Comment:</strong> {comment?.selectedComment || "N/A"}</p>
+                                                <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p>No admin comments yet.</p>
+                                    )}
                                 </div>
-                            ))
-                        ) : (
-                            <p>No admin comments yet.</p>
-                        )}
-                    </div>
 
-                    {/* Updated Funeral Date Section */}
-                    <div className="blessing-date-box">
-                        <h3>Updated Funeral Date</h3>
-                        <p className="date">
-                            {funeralDetails?.adminRescheduled ? new Date(funeralDetails.adminRescheduled.date).toLocaleDateString() : "N/A"}
-                        </p>
-                        {funeralDetails?.adminRescheduled?.reason && (
-                            <div className="reschedule-reason">
-                                <h3>Reason for Rescheduling</h3>
-                                <p>{funeralDetails.adminRescheduled.reason}</p>
-                            </div>
-                        )}
-                    </div>
+                                {/* Updated Funeral Date Section */}
+                                <div className="blessing-date-box">
+                                    <h3>Updated Funeral Date</h3>
+                                    <p className="date">
+                                        {funeralDetails?.adminRescheduled ? new Date(funeralDetails.adminRescheduled.date).toLocaleDateString() : "N/A"}
+                                    </p>
+                                    {funeralDetails?.adminRescheduled?.reason && (
+                                        <div className="reschedule-reason">
+                                            <h3>Reason for Rescheduling</h3>
+                                            <p>{funeralDetails.adminRescheduled.reason}</p>
+                                        </div>
+                                    )}
+                                </div>
 
-                    {/* Priest Section */}
-                    <div className="house-comments-section">
-                        <h2>Priest</h2>
-                        {funeralDetails?.Priest?.name ? (
-                            <div className="admin-comment">
-                                <p><strong>Priest:</strong> {funeralDetails.Priest.name}</p>
-                            </div>
-                        ) : (
-                            <p>No priest.</p>
+                                {/* Priest Section */}
+                                <div className="house-comments-section">
+                                    <h2>Priest</h2>
+                                    {funeralDetails?.Priest?.name ? (
+                                        <div className="admin-comment">
+                                            <p><strong>Priest:</strong> {funeralDetails.Priest.name}</p>
+                                        </div>
+                                    ) : (
+                                        <p>No priest.</p>
+                                    )}
+                                </div>
+                            </Box>
                         )}
-                    </div>
 
-                    {/* Cancel Button */}
-                    <div className="button-container">
-                        <button onClick={handleCancel}>Cancel</button>
-                    </div>
-                </div>
-            </div>
+                        {/* Cancel Button */}
+                        <div className="button-container">
+                            <button onClick={handleCancel}>Cancel</button>
+                        </div>
+
+                    </Box>
+                </Paper>
+            </Box>
             <ToastContainer />
-        </div>
+        </Box >
     );
 };
 

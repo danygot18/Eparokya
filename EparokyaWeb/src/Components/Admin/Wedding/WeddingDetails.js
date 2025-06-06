@@ -7,7 +7,6 @@ import SideBar from "../SideBar";
 import WeddingChecklist from "./WeddingChecklist";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-// import Modal from 'react-modal';
 import {
   Card,
   CardContent,
@@ -17,7 +16,13 @@ import {
   Grid2,
   Modal,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress
 } from "@mui/material";
+import { format } from "date-fns";
 
 const WeddingDetails = () => {
   const { weddingId } = useParams();
@@ -27,6 +32,14 @@ const WeddingDetails = () => {
   const [weddingDetails, setWeddingDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Image modal controls
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
 
   const [selectedComment, setSelectedComment] = useState("");
   const [additionalComment, setAdditionalComment] = useState("");
@@ -46,20 +59,13 @@ const WeddingDetails = () => {
   const [confessionDate, setConfessionDate] = useState("");
   const [confessionTime, setConfessionTime] = useState("");
 
-  const [zoom, setZoom] = useState(1);
-
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.1, 3));
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.1, 1));
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState("");
-
   const [comments, setComments] = useState([]);
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   const formatDate = (date) =>
     date ? new Date(date).toLocaleDateString() : "N/A";
@@ -122,10 +128,9 @@ const WeddingDetails = () => {
   const closeModal = () => {
     setSelectedImage("");
     setIsModalOpen(false);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
   };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   const handleMouseDown = (e) => {
     e.preventDefault();
@@ -144,7 +149,6 @@ const WeddingDetails = () => {
   const handleMouseUp = () => {
     setIsDragging(false);
   };
-
   const predefinedComments = [
     "Confirmed",
     "Pending Confirmation",
@@ -154,7 +158,7 @@ const WeddingDetails = () => {
 
   const handleSubmitComment = async () => {
     if (!selectedComment && !additionalComment) {
-      alert("Please select or enter a comment.");
+      toast.error("Please select or enter a comment.");
       return;
     }
 
@@ -185,10 +189,10 @@ const WeddingDetails = () => {
         throw new Error(data.message || "Failed to submit comment.");
       }
 
-      alert("Comment submitted successfully!");
+      toast.success("Comment submitted successfully!");
     } catch (error) {
       console.error("Error submitting comment:", error);
-      alert("Failed to submit comment.");
+      toast.error("Failed to submit comment.");
     }
   };
 
@@ -215,30 +219,32 @@ const WeddingDetails = () => {
         { withCredentials: true }
       );
 
-      alert("Additional requirements updated successfully!");
+      toast.success("Additional requirements updated successfully!");
       setWeddingDetails(response.data.wedding);
     } catch (err) {
       console.error("Error updating additional requirements:", err);
-      alert("Failed to update additional requirements.");
+      toast.error("Failed to update additional requirements.");
     }
   };
 
   const handleConfirm = async (weddingId) => {
+    setConfirmLoading(true);
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/${weddingId}/confirmWedding`,
         { withCredentials: true }
       );
-      console.log("Confirmation response:", response.data);
       toast.success("Wedding confirmed successfully!", {
         position: toast.POSITION.TOP_RIGHT,
         autoClose: 3000,
       });
+      // Optionally refresh details after confirmation
+      setWeddingDetails((prev) => ({
+        ...prev,
+        weddingStatus: "Confirmed",
+      }));
+      setShowConfirmDialog(false);
     } catch (error) {
-      console.error(
-        "Error confirming wedding:",
-        error.response || error.message
-      );
       toast.error(
         error.response?.data?.message || "Failed to confirm the wedding.",
         {
@@ -246,6 +252,8 @@ const WeddingDetails = () => {
           autoClose: 3000,
         }
       );
+    } finally {
+      setConfirmLoading(false);
     }
   };
 
@@ -279,7 +287,7 @@ const WeddingDetails = () => {
 
   const handleUpdate = async () => {
     if (!newDate || !reason) {
-      alert("Please select a date and provide a reason.");
+      toast.error("Please select a date and provide a reason.");
       return;
     }
 
@@ -291,10 +299,10 @@ const WeddingDetails = () => {
       );
 
       setUpdatedWeddingDate(response.data.wedding.weddingDate);
-      alert("Wedding date updated successfully!");
+      toast.success("Wedding date updated successfully!");
     } catch (error) {
       console.error("Error updating wedding date:", error);
-      alert("Failed to update wedding date.");
+      toast.error("Failed to update wedding date.");
     } finally {
       setLoading(false);
     }
@@ -333,7 +341,31 @@ const WeddingDetails = () => {
                   </Typography>
                   <Typography>
                     <strong>Wedding Time:</strong>{" "}
-                    {weddingDetails?.weddingTime || "N/A"}
+                    {weddingDetails?.weddingTime ? (() => {
+                      try {
+                        const rawTime = weddingDetails.weddingTime;
+
+                        // If it's just a time string like "12:41", create a full date with today's date
+                        let date;
+                        if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
+                          const today = new Date();
+                          const [hours, minutes] = rawTime.split(':');
+                          date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), +hours, +minutes);
+                        } else {
+                          date = new Date(rawTime);
+                        }
+
+                        if (isNaN(date.getTime())) {
+                          console.warn("Invalid weddingTime:", rawTime);
+                          return "N/A";
+                        }
+
+                        return format(date, 'h:mm a'); // e.g. "1:08 AM"
+                      } catch (e) {
+                        console.error("Error parsing weddingTime:", weddingDetails.weddingTime, e);
+                        return "N/A";
+                      }
+                    })() : "N/A"}
                   </Typography>
                 </CardContent>
               </Card>
@@ -462,20 +494,62 @@ const WeddingDetails = () => {
                         {doc.replace(/([A-Z])/g, " $1").trim()}:
                       </Typography>
                       {weddingDetails?.[doc]?.url ? (
-                        <CardMedia
-                          component="img"
-                          image={weddingDetails[doc].url}
-                          alt={doc}
-                          sx={{
-                            maxWidth: 100,
-                            maxHeight: 100,
-                            objectFit: "contain",
-                            cursor: "pointer",
-                            borderRadius: 1,
+                        /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(weddingDetails[doc].url) ? (
+                          <>
+                            <Box
+                              component="img"
+                              src={weddingDetails[doc].url}
+                              alt={doc}
+                              sx={{
+                                maxWidth: 150,
+                                maxHeight: 150,
+                                width: '100%',
+                                objectFit: "contain",
+                                cursor: "pointer",
+                                borderRadius: 1,
+                                mt: 1,
+                              }}
+                              onClick={() => openModal(weddingDetails[doc].url)}
+                            />
+                            <Button
+                              onClick={() => openModal(weddingDetails[doc].url)}
+                              variant="contained"
+                              sx={{ mt: 1, backgroundColor: "#d5edd9", color: "black" }}
+                            >
+                              View Full Image
+                            </Button>
+                          </>
+                        ) : (
+                          <Box sx={{
+                            width: '100%',
                             mt: 1,
-                          }}
-                          onClick={() => openModal(weddingDetails[doc].url)}
-                        />
+                            mb: 2,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 2
+                          }}>
+                            <iframe
+                              src={`${weddingDetails[doc].url}#toolbar=0&navpanes=0&scrollbar=0`}
+                              title={`${doc} Preview`}
+                              style={{
+                                width: '100%',
+                                height: '200px',
+                                border: '1px solid #ddd',
+                                borderRadius: 4,
+                              }}
+                            />
+                            <Typography variant="caption" color="text.secondary">
+                              {weddingDetails[doc]?.name || 'Document Preview'}
+                            </Typography>
+                            <Button
+                              onClick={() => window.open(weddingDetails[doc].url, "_blank")}
+                              variant="contained"
+                              sx={{ backgroundColor: "#d5edd9", color: "black" }}
+                            >
+                              View Full File
+                            </Button>
+                          </Box>
+                        )
                       ) : (
                         <Typography color="textSecondary">N/A</Typography>
                       )}
@@ -499,20 +573,62 @@ const WeddingDetails = () => {
                         {doc.replace(/([A-Z])/g, " $1").trim()}:
                       </Typography>
                       {weddingDetails?.[doc]?.url ? (
-                        <CardMedia
-                          component="img"
-                          image={weddingDetails[doc].url}
-                          alt={doc}
-                          sx={{
-                            maxWidth: 100,
-                            maxHeight: 100,
-                            objectFit: "contain",
-                            cursor: "pointer",
-                            borderRadius: 1,
+                        /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(weddingDetails[doc].url) ? (
+                          <>
+                            <Box
+                              component="img"
+                              src={weddingDetails[doc].url}
+                              alt={doc}
+                              sx={{
+                                maxWidth: 150,
+                                maxHeight: 150,
+                                width: '100%',
+                                objectFit: "contain",
+                                cursor: "pointer",
+                                borderRadius: 1,
+                                mt: 1,
+                              }}
+                              onClick={() => openModal(weddingDetails[doc].url)}
+                            />
+                            <Button
+                              onClick={() => openModal(weddingDetails[doc].url)}
+                              variant="contained"
+                              sx={{ mt: 1, backgroundColor: "#d5edd9", color: "black" }}
+                            >
+                              View Full Image
+                            </Button>
+                          </>
+                        ) : (
+                          <Box sx={{
+                            width: '100%',
                             mt: 1,
-                          }}
-                          onClick={() => openModal(weddingDetails[doc].url)}
-                        />
+                            mb: 2,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 2
+                          }}>
+                            <iframe
+                              src={`${weddingDetails[doc].url}#toolbar=0&navpanes=0&scrollbar=0`}
+                              title={`${doc} Preview`}
+                              style={{
+                                width: '100%',
+                                height: '200px',
+                                border: '1px solid #ddd',
+                                borderRadius: 4,
+                              }}
+                            />
+                            <Typography variant="caption" color="text.secondary">
+                              {weddingDetails[doc]?.name || 'Document Preview'}
+                            </Typography>
+                            <Button
+                              onClick={() => window.open(weddingDetails[doc].url, "_blank")}
+                              variant="contained"
+                              sx={{ backgroundColor: "#d5edd9", color: "black" }}
+                            >
+                              View Full File
+                            </Button>
+                          </Box>
+                        )
                       ) : (
                         <Typography color="textSecondary">N/A</Typography>
                       )}
@@ -555,30 +671,22 @@ const WeddingDetails = () => {
                 }}
               >
                 <Button
-                  onClick={closeModal}
-                  variant="contained"
+                  onClick={() => setZoom(prev => Math.min(prev + 0.1, 3))}
+                  variant="outlined"
                   sx={{ mx: 1 }}
-                  size="small"
                 >
+                  Zoom In
+                </Button>
+                <Button
+                  onClick={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
+                  variant="outlined"
+                  sx={{ mx: 1 }}
+                >
+                  Zoom Out
+                </Button>
+                <Button onClick={closeModal} variant="contained" color="error" sx={{ mx: 1 }}>
                   Close
                 </Button>
-                <Box>
-                  <Button
-                    onClick={handleZoomIn}
-                    variant="outlined"
-                    sx={{ mx: 1 }}
-                    style={{ marginBottom: "10px" }}
-                  >
-                    Zoom In
-                  </Button>
-                  <Button
-                    onClick={handleZoomOut}
-                    variant="outlined"
-                    sx={{ mx: 1 }}
-                  >
-                    Zoom Out
-                  </Button>
-                </Box>
               </Box>
 
               {/* Image Container */}
@@ -601,7 +709,7 @@ const WeddingDetails = () => {
               >
                 <img
                   src={selectedImage}
-                  alt="Certificate Preview"
+                  alt="Document Preview"
                   style={{
                     transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
                     transition: isDragging ? "none" : "transform 0.3s ease",
@@ -737,8 +845,8 @@ const WeddingDetails = () => {
                       <strong>Pre Marriage Seminar 1 Date and Time:</strong>{" "}
                       {weddingDetails.additionalReq.PreMarriageSeminar?.date
                         ? new Date(
-                            weddingDetails.additionalReq.PreMarriageSeminar.date
-                          ).toLocaleDateString()
+                          weddingDetails.additionalReq.PreMarriageSeminar.date
+                        ).toLocaleDateString()
                         : "N/A"}{" "}
                       at{" "}
                       {weddingDetails.additionalReq.PreMarriageSeminar?.time ||
@@ -751,8 +859,8 @@ const WeddingDetails = () => {
                       <strong>Canonical Interview Date and Time:</strong>{" "}
                       {weddingDetails.additionalReq.CanonicalInterview?.date
                         ? new Date(
-                            weddingDetails.additionalReq.CanonicalInterview.date
-                          ).toLocaleDateString()
+                          weddingDetails.additionalReq.CanonicalInterview.date
+                        ).toLocaleDateString()
                         : "N/A"}{" "}
                       at{" "}
                       {weddingDetails.additionalReq.CanonicalInterview?.time ||
@@ -765,8 +873,8 @@ const WeddingDetails = () => {
                       <strong>Confession Date and Time:</strong>{" "}
                       {weddingDetails.additionalReq.Confession?.date
                         ? new Date(
-                            weddingDetails.additionalReq.Confession.date
-                          ).toLocaleDateString()
+                          weddingDetails.additionalReq.Confession.date
+                        ).toLocaleDateString()
                         : "N/A"}{" "}
                       at{" "}
                       {weddingDetails.additionalReq.Confession?.time || "N/A"}
@@ -777,8 +885,8 @@ const WeddingDetails = () => {
                     <strong>Last Updated:</strong>{" "}
                     {weddingDetails.additionalReq?.createdAt
                       ? new Date(
-                          weddingDetails.additionalReq.createdAt
-                        ).toLocaleDateString()
+                        weddingDetails.additionalReq.createdAt
+                      ).toLocaleDateString()
                       : "N/A"}
                   </p>
                 </div>
@@ -831,7 +939,7 @@ const WeddingDetails = () => {
 
             {/* Cancelling Reason Section */}
             {weddingDetails?.weddingStatus === "Cancelled" &&
-            weddingDetails?.cancellingReason ? (
+              weddingDetails?.cancellingReason ? (
               <div className="house-comments-section">
                 <h2>Cancellation Details</h2>
                 <div className="admin-comment">
@@ -897,9 +1005,42 @@ const WeddingDetails = () => {
                 Go to Admin Chat
               </button>
             </div>
-            <button onClick={() => handleConfirm(weddingId)}>
-              Confirm Wedding
+            <button
+              disabled={weddingDetails?.weddingStatus === "Confirmed"}
+              onClick={() => setShowConfirmDialog(true)}
+              style={{
+                backgroundColor: weddingDetails?.weddingStatus === "Confirmed" ? "#bdbdbd" : "#1976d2",
+                color: "#fff",
+                cursor: weddingDetails?.weddingStatus === "Confirmed" ? "not-allowed" : "pointer",
+                border: "none",
+                padding: "10px 24px",
+                borderRadius: "4px",
+                fontWeight: "bold",
+                fontSize: "16px",
+                marginTop: "10px"
+              }}
+            >
+              {weddingDetails?.weddingStatus === "Confirmed" ? "Confirmed Wedding" : "Confirm Wedding"}
             </button>
+            <Dialog open={showConfirmDialog} onClose={() => setShowConfirmDialog(false)}>
+              <DialogTitle>Confirm Wedding</DialogTitle>
+              <DialogContent>
+                <Typography>Are you sure you want to accept this?</Typography>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setShowConfirmDialog(false)} color="primary">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleConfirm(weddingId)}
+                  color="success"
+                  disabled={confirmLoading}
+                  variant="contained"
+                >
+                  {confirmLoading ? <CircularProgress size={24} /> : "Yes, Confirm"}
+                </Button>
+              </DialogActions>
+            </Dialog>
           </div>
         </div>
       </div>

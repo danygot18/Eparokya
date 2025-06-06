@@ -35,7 +35,10 @@ import {
   Refresh as RefreshIcon,
   Today as TodayIcon,
   CalendarMonth as CalendarIcon,
+  People as CounselingIcon,
+  
 } from "@mui/icons-material";
+import HouseIcon from '@mui/icons-material/House';
 import { History as HistoryIcon } from "@mui/icons-material";
 import SideBar from "../SideBar";
 import MetaData from "../../Layout/MetaData";
@@ -49,18 +52,21 @@ const PriestNavigation = () => {
   const [dateFilter, setDateFilter] = useState("all");
   const navigate = useNavigate();
 
+  const config = {
+    withCredentials: true,
+  }
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [weddings, baptisms, funerals, prayers] = await Promise.all([
+      const [weddings, baptisms, funerals, counseling, houseBlessing, prayers] = await Promise.all([
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`),
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`),
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`),
-        axios.get(
-          `${process.env.REACT_APP_API}/api/v1/getAllPrayerRequestIntention`
-        ),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/getConfirmedCounseling`),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/getConfirmedHouseBlessing`, config),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/getAllPrayerRequestIntention`),
       ]);
 
       setData([
@@ -79,6 +85,16 @@ const PriestNavigation = () => {
           id: item._id,
           ...item,
         })),
+        ...counseling.data.map((item) => ({
+          type: "counseling",
+          id: item._id,
+          ...item,
+        })),
+        ...houseBlessing.data.map((item) => ({
+          type: "houseBlessing",
+          id: item._id,
+          ...item,
+        })),
         ...prayers.data.map((item) => ({
           type: "prayer",
           id: item._id,
@@ -86,6 +102,7 @@ const PriestNavigation = () => {
         })),
       ]);
       setLastUpdated(new Date());
+      console.log(houseBlessing.data);
     } catch (error) {
       console.error("Error fetching data:", error);
       setError("Failed to fetch data. Please try again.");
@@ -118,7 +135,6 @@ const PriestNavigation = () => {
     });
   };
 
-  // Helper function to get date field based on event type
   const getEventDate = (item) => {
     switch (item.type) {
       case "wedding":
@@ -126,7 +142,11 @@ const PriestNavigation = () => {
       case "baptism":
         return item.baptismDate;
       case "funeral":
-        return item.dateOfDeath; // or funeral date if available
+        return item.dateOfDeath;
+      case "counseling":
+        return item.counselingDate;
+      case "houseBlessing":
+        return item.blessingDate;
       case "prayer":
         return item.prayerRequestDate;
       default:
@@ -134,7 +154,6 @@ const PriestNavigation = () => {
     }
   };
 
-  // Filter events happening today
   const getTodaysEvents = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -146,7 +165,6 @@ const PriestNavigation = () => {
     });
   };
 
-  // Filter events happening this month (excluding today)
   const getUpcomingEvents = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -187,15 +205,17 @@ const PriestNavigation = () => {
     }
   };
 
-    const filteredData = filterByDate(
+  const filteredData = filterByDate(
     filter === "all" ? data : data.filter((item) => item.type === filter)
   );
-  
+
   const handleCardClick = (item) => {
     const paths = {
       wedding: `/admin/weddingDetails/${item.id}`,
       baptism: `/admin/baptismDetails/${item.id}`,
       funeral: `/admin/funeralDetails/${item.id}`,
+      counseling: `/admin/counselingDetails/${item.id}`,
+      houseBlessing: `/admin/houseBlessingDetails/${item.id}`,
       prayer: `/admin/prayerIntention/details/${item.id}`,
     };
     if (paths[item.type]) navigate(paths[item.type]);
@@ -216,6 +236,21 @@ const PriestNavigation = () => {
       color: "#9C27B0",
       icon: <FuneralIcon />,
       label: "Funeral",
+    },
+    counseling: {
+      color: "#FF9800",
+      icon: <CounselingIcon />,
+      label: "Counseling",
+    },
+    counseling: {
+      color: "#FF9800",
+      icon: <CounselingIcon />,
+      label: "Counseling",
+    },
+    houseBlessing: {
+      color: "#FF9800",
+      icon: <HouseIcon />,
+      label: "House Blessing",
     },
     prayer: {
       color: "#607D8B",
@@ -274,6 +309,42 @@ const PriestNavigation = () => {
             </Typography>
           </>
         );
+      case "counseling":
+        return (
+          <>
+            <Typography variant="body2" gutterBottom>
+              <strong>Client:</strong> {item.person.fullName}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Contact:</strong> {item.contactNumber}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Date:</strong> {formatDate(item.counselingDate)} at{" "}
+              {formatTime(item.counselingTime)}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Purpose:</strong> {item.purpose}
+            </Typography>
+          </>
+        );
+        case "houseBlessing":
+        return (
+          <>
+            <Typography variant="body2" gutterBottom>
+              <strong>Client:</strong> {item.fullName}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Contact:</strong> {item.contactNumber}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Date:</strong> {formatDate(item.blessingDate)} at{" "}
+              {formatTime(item.counselingTime)}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Time:</strong> {item.blessingTime}
+            </Typography>
+          </>
+        );
       case "prayer":
         return (
           <>
@@ -309,11 +380,11 @@ const PriestNavigation = () => {
         return eventDate < today;
       })
       .sort((a, b) => new Date(getEventDate(b)) - new Date(getEventDate(a)))
-      .slice(0, 5); // Show only 5 most recent
+      .slice(0, 5);
   };
 
-  // Get past events
   const pastEvents = getPastEvents();
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideBar />
@@ -370,6 +441,7 @@ const PriestNavigation = () => {
                       <MenuItem value="wedding">Weddings</MenuItem>
                       <MenuItem value="baptism">Baptisms</MenuItem>
                       <MenuItem value="funeral">Funerals</MenuItem>
+                      <MenuItem value="counseling">Counseling</MenuItem>
                       <MenuItem value="prayer">Prayer Requests</MenuItem>
                     </Select>
                   </FormControl>
@@ -537,10 +609,12 @@ const PriestNavigation = () => {
                           item.type === "wedding"
                             ? `${item.groomName} & ${item.brideName}`
                             : item.type === "baptism"
-                            ? item.child?.fullName
-                            : item.type === "funeral"
-                            ? item.name
-                            : item.offerrorsName
+                              ? item.child?.fullName
+                              : item.type === "funeral"
+                                ? item.name
+                                : item.type === "counseling"
+                                  ? item.person?.fullName
+                                  : item.contactPerson
                         }
                         secondary={
                           <>
@@ -556,10 +630,12 @@ const PriestNavigation = () => {
                               item.type === "wedding"
                                 ? item.weddingTime
                                 : item.type === "baptism"
-                                ? item.baptismTime
-                                : item.type === "prayer"
-                                ? item.prayerRequestTime
-                                : ""
+                                  ? item.baptismTime
+                                  : item.type === "counseling"
+                                    ? item.counselingTime
+                                    : item.type === "prayer"
+                                      ? item.prayerRequestTime
+                                      : ""
                             )}
                           </>
                         }
@@ -617,10 +693,12 @@ const PriestNavigation = () => {
                           item.type === "wedding"
                             ? `${item.groomName} & ${item.brideName}`
                             : item.type === "baptism"
-                            ? item.child?.fullName
-                            : item.type === "funeral"
-                            ? item.name
-                            : item.offerrorsName
+                              ? item.child?.fullName
+                              : item.type === "funeral"
+                                ? item.name
+                                : item.type === "counseling"
+                                  ? item.person?.fullName
+                                  : item.contactPerson
                         }
                         secondary={
                           <>
@@ -646,7 +724,6 @@ const PriestNavigation = () => {
               )}
               <Divider sx={{ my: 3 }} />
 
-              {/* NEW: Past Events section */}
               <Typography variant="h5" component="h2" gutterBottom>
                 <HistoryIcon sx={{ verticalAlign: "middle", mr: 1 }} />
                 Recent Past Events
@@ -690,10 +767,12 @@ const PriestNavigation = () => {
                           item.type === "wedding"
                             ? `${item.groomName} & ${item.brideName}`
                             : item.type === "baptism"
-                            ? item.child?.fullName
-                            : item.type === "funeral"
-                            ? item.name
-                            : item.offerrorsName
+                              ? item.child?.fullName
+                              : item.type === "funeral"
+                                ? item.name
+                                : item.type === "counseling"
+                                  ? item.person?.fullName
+                                  : item.contactPerson
                         }
                         secondary={
                           <>

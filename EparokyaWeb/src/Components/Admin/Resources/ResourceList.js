@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Container,
-    Grid,
     Card,
     CardHeader,
     CardContent,
@@ -21,17 +20,17 @@ import {
     Button,
     Pagination,
     Modal,
-    Avatar
-} from '@mui/material';
-
-import {
+    Avatar,
+    CircularProgress,
     Dialog,
     DialogTitle,
     DialogContent,
+    DialogContentText,
     DialogActions
-} from '@mui/material'; 
-
+} from '@mui/material';
 import SideBar from '../SideBar';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const AdminResourceList = () => {
     const [resources, setResources] = useState([]);
@@ -42,7 +41,9 @@ const AdminResourceList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedLink, setSelectedLink] = useState('');
     const [openLinkModal, setOpenLinkModal] = useState(false);
-
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [resourceToDelete, setResourceToDelete] = useState(null);
 
     const resourcesPerPage = 10;
     const navigate = useNavigate();
@@ -87,14 +88,29 @@ const AdminResourceList = () => {
         setSearchQuery(e.target.value.toLowerCase());
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this resource?')) {
-            try {
-                await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteResource/${id}`);
-                setResources(resources.filter((r) => r._id !== id));
-            } catch (error) {
-                console.error('Error deleting resource:', error);
-            }
+    const handleDeleteClick = (id) => {
+        setResourceToDelete(id);
+        setOpenDeleteDialog(true);
+    };
+
+    const handleCloseDeleteDialog = () => {
+        setOpenDeleteDialog(false);
+        setResourceToDelete(null);
+    };
+
+    const handleDelete = async () => {
+        if (!resourceToDelete) return;
+
+        setDeleteLoading(true);
+        try {
+            await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteResource/${resourceToDelete}`);
+            setResources(resources.filter((r) => r._id !== resourceToDelete));
+            setOpenDeleteDialog(false);
+        } catch (error) {
+            console.error('Error deleting resource:', error);
+        } finally {
+            setDeleteLoading(false);
+            setResourceToDelete(null);
         }
     };
 
@@ -126,65 +142,49 @@ const AdminResourceList = () => {
     const currentResources = filteredResources.slice(indexOfFirstResource, indexOfLastResource);
     const totalPages = Math.ceil(filteredResources.length / resourcesPerPage);
 
-
-    <Dialog open={openLinkModal} onClose={() => setOpenLinkModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Resource Link</DialogTitle>
-        <DialogContent>
-            {selectedLink ? (
-                <Typography>
-                    <a href={selectedLink} target="_blank" rel="noopener noreferrer">
-                        {selectedLink}
-                    </a>
+    return (
+        <Box sx={{ display: 'flex' }}>
+            <SideBar />
+            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+                <Typography variant="h4" component="h1" gutterBottom align="center">
+                    Resources List
                 </Typography>
-            ) : (
-                <Typography>No link available.</Typography>
-            )}
-        </DialogContent>
-        <DialogActions>
-            <Button onClick={() => setOpenLinkModal(false)} color="primary">
-                Close
-            </Button>
-        </DialogActions>
-    </Dialog>
 
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                    <TextField
+                        label="Search Resources"
+                        variant="outlined"
+                        size="small"
+                        onChange={handleSearch}
+                        sx={{ width: 300 }}
+                    />
+                    <FormControl sx={{ minWidth: 200 }}>
+                        <InputLabel>Filter by Category</InputLabel>
+                        <Select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            label="Filter by Category"
+                        >
+                            <MenuItem value="">All Categories</MenuItem>
+                            {categories.map((category) => (
+                                <MenuItem key={category._id} value={category._id}>
+                                    {category.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Box>
 
-return (
-    <Box sx={{ display: 'flex' }}>
-        <SideBar />
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Typography variant="h4" component="h1" gutterBottom align="center">
-                Resources List
-            </Typography>
-
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <TextField
-                    label="Search Resources"
-                    variant="outlined"
-                    size="small"
-                    onChange={handleSearch}
-                    sx={{ width: 300 }}
-                />
-                <FormControl sx={{ minWidth: 200 }}>
-                    <InputLabel>Filter by Category</InputLabel>
-                    <Select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        label="Filter by Category"
-                    >
-                        <MenuItem value="">All Categories</MenuItem>
-                        {categories.map((category) => (
-                            <MenuItem key={category._id} value={category._id}>
-                                {category.name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </Box>
-
-            <Grid container spacing={3}>
-                {currentResources.map((resource) => (
-                    <Grid item xs={12} sm={6} md={4} key={resource._id}>
-                        <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+                        gap: 3,
+                        mb: 4
+                    }}
+                >
+                    {currentResources.map((resource) => (
+                        <Card key={resource._id} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                             <CardHeader
                                 avatar={<Avatar src="/public/../../../../EPAROKYA-SYST.png" alt="Saint Joseph Parish" />}
                                 action={
@@ -197,7 +197,7 @@ return (
                                         </Button>
                                         <Button
                                             size="small"
-                                            onClick={() => handleDelete(resource._id)}
+                                            onClick={() => handleDeleteClick(resource._id)}
                                             color="error"
                                         >
                                             <FaTrash />
@@ -267,54 +267,124 @@ return (
                                 </Box>
                             )}
 
-                            {/* Bookmark Count */}
                             <Box sx={{ px: 2, pb: 2 }}>
                                 <Typography variant="body2" color="text.secondary">
                                     Bookmarked by {resource.bookmarkedBy?.length || 0} user(s)
                                 </Typography>
                             </Box>
                         </Card>
-                    </Grid>
-                ))}
-            </Grid>
-
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                <Pagination
-                    count={totalPages}
-                    page={currentPage}
-                    onChange={(event, value) => setCurrentPage(value)}
-                    color="primary"
-                />
-            </Box>
-
-            {/* Link Modal */}
-            <Modal open={openLinkModal} onClose={() => setOpenLinkModal(false)}>
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: 400,
-                        bgcolor: 'background.paper',
-                        boxShadow: 24,
-                        p: 4,
-                        borderRadius: 2,
-                        textAlign: 'center'
-                    }}
-                >
-                    <Typography variant="h6" gutterBottom>
-                        Resource Link
-                    </Typography>
-                    <a href={selectedLink} target="_blank" rel="noopener noreferrer">
-                        {selectedLink}
-                    </a>
+                    ))}
                 </Box>
-            </Modal>
-        </Container>
-    </Box>
-);
 
+                {/* <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Pagination
+                        count={totalPages}
+                        page={currentPage}
+                        onChange={(event, value) => setCurrentPage(value)}
+                        color="primary"
+                    />
+                </Box> */}
+                <div style={{ position: "relative", width: "50%", height: "100%", alignItems: "center", margin: "auto" }}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: 2,
+                            mt: 3,
+                        }}
+                    >
+                        <div>
+                            <Button
+                                variant="outlined"
+                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                startIcon={<ChevronLeftIcon />}
+                            >
+                                Previous
+                            </Button>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                            <Typography variant="body1" color="text.secondary">
+                                Page {currentPage} of {totalPages}
+                            </Typography>
+                        </div>
+
+
+
+                        <div>
+                            <Button
+                                variant="outlined"
+                                onClick={() =>
+                                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                                }
+                                disabled={currentPage === totalPages}
+                                endIcon={<ChevronRightIcon />}
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    </Box>
+                </div>
+                {/* Delete Confirmation Dialog */}
+                <Dialog
+                    open={openDeleteDialog}
+                    onClose={handleCloseDeleteDialog}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">
+                        Confirm Deletion
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            Are you sure you want to delete this resource?
+                            <br />
+                            This action cannot be undone.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button
+                            onClick={handleCloseDeleteDialog}
+                            disabled={deleteLoading}
+                            color="primary"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleDelete}
+                            color="error"
+                            autoFocus
+                            disabled={deleteLoading}
+                        >
+                            {deleteLoading ? <CircularProgress size={24} /> : 'Delete'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Link Modal */}
+                <Dialog open={openLinkModal} onClose={() => setOpenLinkModal(false)} maxWidth="md" fullWidth>
+                    <DialogTitle>Resource Link</DialogTitle>
+                    <DialogContent>
+                        {selectedLink ? (
+                            <Typography>
+                                <a href={selectedLink} target="_blank" rel="noopener noreferrer">
+                                    {selectedLink}
+                                </a>
+                            </Typography>
+                        ) : (
+                            <Typography>No link available.</Typography>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpenLinkModal(false)} color="primary">
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Container>
+        </Box>
+    );
 };
 
 export default AdminResourceList;

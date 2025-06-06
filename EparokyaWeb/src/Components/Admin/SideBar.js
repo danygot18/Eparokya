@@ -191,7 +191,7 @@ const SideBar = () => {
         },
         {
           text: "Activity Sentiments",
-          path: "/admin/ActivitySentimentList",
+          path: "/admin/ActivitytSentimentList",
         },
       ],
     },

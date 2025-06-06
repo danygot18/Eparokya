@@ -139,7 +139,7 @@ const MinistryAnnouncement = () => {
       // Refresh the announcements to get updated data
       await fetchPinnedAnnouncements(ministryCategoryId);
       await fetchAnnouncements(ministryCategoryId);
-      
+
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error acknowledging announcement:", error);
@@ -342,9 +342,14 @@ const MinistryAnnouncement = () => {
             <List>
               {ministryCategory.map((ministry) => (
                 <ListItem
-                  key={ministry._id}
+                  key={ministry.ministryId}
                   button
-                  onClick={() => handleMinistryClick(ministry._id)}
+                  selected={ministryCategoryId === ministry.ministryId}
+                  onClick={() => handleMinistryClick(ministry.ministryId)}
+                  style={{
+                    backgroundColor: ministryCategoryId === ministry.ministryId ? "#e3f2fd" : undefined,
+                    cursor: "pointer"
+                  }}
                 >
                   {ministry.ministryName}
                 </ListItem>

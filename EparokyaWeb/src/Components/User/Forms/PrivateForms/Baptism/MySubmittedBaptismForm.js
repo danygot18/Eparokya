@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import Modal from "react-modal";
-import "../../../../Layout/styles/style.css";
+import { useNavigate, useParams } from "react-router-dom";
+import { Card, CardContent, Typography, Box, Paper, Button, Modal, Tabs, Tab } from "@mui/material";
 import GuestSideBar from "../../../../GuestSideBar";
-import { useParams } from "react-router-dom";
 import UserBaptismChecklist from "./UserBaptismChecklist";
+import "../../../../Layout/styles/style.css";
 import "./MySubmittedBaptismForm.css";
-
-Modal.setAppElement("#root");
 
 const MySubmittedBaptismForm = () => {
   const navigate = useNavigate();
-  const { baptismId } = useParams();
+  const { formId } = useParams();
   const [baptismDetails, setBaptismDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState(0);
 
+  // Image modal controls
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -24,61 +23,16 @@ const MySubmittedBaptismForm = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
 
-  const [comments, setComments] = useState([]);
-  const [updatedBaptismDate, setUpdatedBaptismDate] = useState(
-    baptismDetails?.baptismDate || ""
-  );
-  const [adminNotes, setAdminNotes] = useState([]);
-  const { formId } = useParams();
-
-  const [checklist, setChecklist] = useState({
-    PhotocopyOfBirthCertificate: false,
-    PhotocopyOfMarriageCertificate: false,
-    BaptismalPermit: false,
-    CertificateOfNoRecordBaptism: false,
-    PreBaptismSeminar1: false,
-    PreBaptismSeminar2: false,
-  });
-
-  // useEffect(() => {
-  //     const fetchChecklist = async () => {
-  //         if (baptismId) {
-  //             try {
-  //                 const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getBaptismChecklist/${formId}`, { withCredentials: true });
-  //                 console.log("Checklist:", response.data);
-
-  //                 if (response.data.checklist) {
-  //                     setChecklist(response.data.checklist);
-  //                     console.log("Updated Checklist State:", response.data.checklist);
-  //                 }
-  //                 console.log("Checklist:", response.data.checklist);
-  //             } catch (err) {
-  //                 console.error("Error fetching checklist:", err);
-  //             }
-  //         }
-  //     };
-
-  //     fetchChecklist();
-
-  // }, [baptismId]);
-  // console.log("Baptism ID:", formId);
-
   useEffect(() => {
     const fetchBaptismDetails = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API}/api/v1/getAllUserSubmittedBaptism`,
+          `${process.env.REACT_APP_API}/api/v1/getBaptismForm/${formId}`,
           { withCredentials: true }
         );
 
         if (response.data) {
           setBaptismDetails(response.data);
-          setAdminNotes(response.data.adminNotes);
-          setComments(response.data.comments || []);
-
-          if (response.data.baptismDate) {
-            setUpdatedBaptismDate(response.data.baptismDate);
-          }
         } else {
           setBaptismDetails(null);
         }
@@ -105,6 +59,8 @@ const MySubmittedBaptismForm = () => {
   const closeModal = () => {
     setSelectedImage("");
     setIsModalOpen(false);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
   };
 
   const handleMouseDown = (e) => {
@@ -130,9 +86,7 @@ const MySubmittedBaptismForm = () => {
       await axios.post(
         `${process.env.REACT_APP_API}/api/v1/${baptismDetails._id}/declineBaptism`,
         null,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       alert("Baptism request cancelled.");
       navigate("/user/dashboard");
@@ -142,295 +96,522 @@ const MySubmittedBaptismForm = () => {
     }
   };
 
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
   if (!baptismDetails) return <div>No baptism form submitted yet.</div>;
 
   return (
-    <div className="baptism-details-page">
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <GuestSideBar />
-      <div className="baptism-details-container">
-        <h2>My Submitted Baptism Form</h2>
+      <Box sx={{
+        flexGrow: 1,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "flex-start",
+        p: 3,
+        marginLeft: "240px" // Adjust based on your sidebar width
+      }}>
+        <Paper elevation={3} sx={{
+          padding: 3,
+          width: "100%",
+          maxWidth: "1200px", // Fixed max width
+          minHeight: "800px", // Fixed minimum height
+        }}>
+          <Typography variant="h4" gutterBottom sx={{ textAlign: "center" }}>
+            My Submitted Baptism Form
+          </Typography>
 
-        {/* Two Containers */}
-        <div className="two-container-layout">
-          {/* Left Container */}
-          <div className="left-container">
-            <div className="details-section">
-              <h3>User Information</h3>
-              <p>
-                <strong>User:</strong> {baptismDetails?.userId?.name || "N/A"}
-              </p>
-              <p>
-                <strong>Contact Number:</strong>{" "}
-                {baptismDetails?.phone || "N/A"}
-              </p>
-            </div>
-            <div className="details-section">
-              <h3>Baptism Information</h3>
-              <p>
-                <strong>Baptism Date:</strong>{" "}
-                {baptismDetails?.baptismDate
-                  ? new Date(baptismDetails.baptismDate).toLocaleDateString()
-                  : "N/A"}
-              </p>
-              <p>
-                <strong>Baptism Time:</strong>{" "}
-                {baptismDetails?.baptismTime || "N/A"}
-              </p>
-            </div>
-            <div className="details-section">
-              <h3>Child Information</h3>
-              <p>
-                <strong>Child Name:</strong>{" "}
-                {baptismDetails?.child?.fullName || "N/A"}
-              </p>
-              <p>
-                <strong>Birthdate:</strong>{" "}
-                {baptismDetails?.child?.dateOfBirth
-                  ? new Date(
-                      baptismDetails.child.dateOfBirth
-                    ).toLocaleDateString()
-                  : "N/A"}
-              </p>
-              <p>
-                <strong>Sex:</strong> {baptismDetails?.child?.gender || "N/A"}
-              </p>
-            </div>
-          </div>
-
-          {/* Right Container */}
-          <div className="right-container">
-            <div className="details-section">
-              <h3>Parents Information</h3>
-              <p>
-                <strong>Father:</strong>{" "}
-                {baptismDetails?.parents?.fatherFullName || "N/A"}
-              </p>
-              <p>
-                <strong>Father's Place of Birth:</strong>{" "}
-                {baptismDetails?.parents?.placeOfFathersBirth || "N/A"}
-              </p>
-              <p>
-                <strong>Mother:</strong>{" "}
-                {baptismDetails?.parents?.motherFullName || "N/A"}
-              </p>
-              <p>
-                <strong>Mother's Place of Birth:</strong>{" "}
-                {baptismDetails?.parents?.placeOfMothersBirth || "N/A"}
-              </p>
-              <p>
-                <strong>Address:</strong>{" "}
-                {baptismDetails?.parents?.address || "N/A"}
-              </p>
-              <p>
-                <strong>Marriage Status:</strong>{" "}
-                {baptismDetails?.parents?.marriageStatus || "N/A"}
-              </p>
-            </div>
-            <div className="details-section">
-              <h3>Godparents Information</h3>
-              <p>
-                <strong>Primary Ninong:</strong>{" "}
-                {baptismDetails?.ninong?.name || "N/A"}
-              </p>
-              <p>
-                <strong>Primary Ninong Address:</strong>{" "}
-                {baptismDetails?.ninong?.address || "N/A"}
-              </p>
-              <p>
-                <strong>Primary Ninong Religion:</strong>{" "}
-                {baptismDetails?.ninong?.religion || "N/A"}
-              </p>
-              <p>
-                <strong>Primary Ninang:</strong>{" "}
-                {baptismDetails?.ninang?.name || "N/A"}
-              </p>
-              <p>
-                <strong>Primary Ninang Address:</strong>{" "}
-                {baptismDetails?.ninang?.address || "N/A"}
-              </p>
-              <p>
-                <strong>Primary Ninang Religion:</strong>{" "}
-                {baptismDetails?.ninang?.religion || "N/A"}
-              </p>
-              <p>
-                <strong>Ninong:</strong>{" "}
-                {baptismDetails?.NinongGodparents?.map((gp) => gp.name).join(
-                  ", "
-                ) || "N/A"}
-              </p>
-              <p>
-                <strong>Ninang:</strong>{" "}
-                {baptismDetails?.NinangGodparents?.map((gp) => gp.name).join(
-                  ", "
-                ) || "N/A"}
-              </p>
-            </div>
-          </div>
-          <div className="third-container ">
-            <div className="details-section-container">
-              {/* Add other sections here */}
-              <div className="details-box">
-                <h3>Baptismal Documents</h3>
-                {["birthCertificate", "marriageCertificate"].map(
-                  (doc, index) => (
-                    <div key={index} className="grid-row">
-                      <p>{doc.replace(/([A-Z])/g, " $1").trim()}:</p>
-                      {baptismDetails?.Docs?.[doc]?.url ? (
-                        <img
-                          src={baptismDetails.Docs[doc].url}
-                          alt={doc}
-                          style={{
-                            maxWidth: "100px",
-                            maxHeight: "100px",
-                            objectFit: "contain",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => openModal(baptismDetails.Docs.url)}
-                        />
-                      ) : (
-                        "N/A"
-                      )}
-                    </div>
-                  )
-                )}
-              </div>
-              <div className="details-box">
-                <h2>Additional Notes</h2>
-                {baptismDetails?.adminNotes?.length > 0 ? (
-                  (() => {
-                    const latestAdminNote =
-                      baptismDetails.adminNotes[
-                        baptismDetails.adminNotes.length - 1
-                      ]; // Get the latest entry
-
-                    return (
-                      <div className="admin-comment">
-                        <p>
-                          <strong>Priest:</strong>{" "}
-                          {latestAdminNote.priest || "No priest"}
-                        </p>
-                        <p>
-                          <strong>Recorded By:</strong>{" "}
-                          {latestAdminNote.recordedBy || "No record"}
-                        </p>
-                        <p>
-                          <strong>Book Number:</strong>{" "}
-                          {latestAdminNote.bookNumber || "No book number"}
-                        </p>
-                        <p>
-                          <strong>Page Number:</strong>{" "}
-                          {latestAdminNote.pageNumber || "No page number"}
-                        </p>
-                        <p>
-                          <strong>Line Number:</strong>{" "}
-                          {latestAdminNote.lineNumber || "No line number"}
-                        </p>
-                      </div>
-                    );
-                  })()
-                ) : (
-                  <p>No admin notes available.</p>
-                )}
-              </div>
-
-              {/* for Rescheduling */}
-              <div className="wedding-date-box">
-                <h3>Updated Baptism Date</h3>
-                <p className="date">
-                  {baptismDetails?.adminRescheduled
-                    ? new Date(
-                        baptismDetails.adminRescheduled.date
-                      ).toLocaleDateString()
-                    : "N/A"}
-                </p>
-
-                {baptismDetails?.adminRescheduled?.reason && (
-                  <div className="reschedule-reason">
-                    <h3>Reason for Rescheduling</h3>
-                    <p>{baptismDetails.adminRescheduled.reason}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="actions">
-          <button onClick={handleCancel} className="cancel-button">
-            Cancel Baptism Request
-          </button>
-        </div>
-        <div className="baptism-checklist-container">
-          <UserBaptismChecklist baptismId={formId} />
-        </div>
-        <Modal
-          isOpen={isModalOpen}
-          onRequestClose={closeModal}
-          contentLabel="Image Modal"
-          style={{
-            overlay: {
-              backgroundColor: "rgba(0, 0, 0, 0.75)",
-            },
-            content: {
-              maxWidth: "500px",
-              margin: "auto",
-              padding: "20px",
-              textAlign: "center",
-            },
-          }}
-        >
-          <div className="modal-header">
-            <button onClick={closeModal} className="modal-close-button">
-              Close
-            </button>
-            <div className="zoom-controls">
-              <button
-                onClick={() =>
-                  setZoom((prevZoom) => Math.min(prevZoom + 0.1, 3))
-                }
-                className="zoom-button"
-              >
-                Zoom In
-              </button>
-              <button
-                onClick={() =>
-                  setZoom((prevZoom) => Math.max(prevZoom - 0.1, 1))
-                }
-                className="zoom-button"
-              >
-                Zoom Out
-              </button>
-            </div>
-          </div>
-          <div
-            className="modal-image-container"
-            onMouseDown={(e) => handleMouseDown(e)}
-            onMouseMove={(e) => handleMouseMove(e)}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            centered
+            sx={{ mb: 3 }}
           >
-            <img
-              src={selectedImage}
-              alt="Certificate Preview"
-              className="modal-image"
-              style={{
-                // transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
-                // transition: isDragging ? "none" : "transform 0.3s ease",
-                transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
-                transition: isDragging ? "none" : "transform 0.3s ease",
-                maxWidth: "100%",
-                maxHeight: "100%",
-                objectFit: "contain",
-                cursor: isDragging ? "grabbing" : "grab",
+            <Tab label="Baptism Information" />
+            <Tab label="Baptism Documents" />
+            <Tab label="Admin & Checklist" />
+          </Tabs>
+
+          <Box sx={{
+            minHeight: "600px", // Fixed height for tab content
+            overflow: "auto" // Add scroll if content is too long
+          }}>
+            {activeTab === 0 && (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                {/* Baptism Information */}
+                <Card>
+                  <CardContent>
+                    <Typography variant="h5" gutterBottom>
+                      Baptism Information
+                    </Typography>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                      <Typography sx={{ flex: "1 1 200px" }}>
+                        <strong>Baptism Date:</strong>{" "}
+                        {baptismDetails.baptismDate
+                          ? new Date(baptismDetails.baptismDate).toLocaleDateString()
+                          : "N/A"}
+                      </Typography>
+                      <Typography sx={{ flex: "1 1 200px" }}>
+                        <strong>Baptism Time:</strong> {baptismDetails.baptismTime
+                          ? new Date(`1970-01-01T${baptismDetails.baptismTime}`).toLocaleTimeString([], {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })
+                          : "N/A"}
+                      </Typography>
+                      <Typography sx={{ flex: "1 1 200px" }}>
+                        <strong>Contact Number:</strong> {baptismDetails.phone || "N/A"}
+                      </Typography>
+                      <Typography sx={{ flex: "1 1 200px" }}>
+                        <strong>Status:</strong> {baptismDetails.binyagStatus || "N/A"}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                {/* Child Information */}
+                <Card>
+                  <CardContent>
+                    <Typography variant="h5" gutterBottom>
+                      Child Information
+                    </Typography>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                      <Typography sx={{ flex: "1 1 300px" }}>
+                        <strong>Full Name:</strong> {baptismDetails.child?.fullName || "N/A"}
+                      </Typography>
+                      <Typography sx={{ flex: "1 1 300px" }}>
+                        <strong>Birthdate:</strong>{" "}
+                        {baptismDetails.child?.dateOfBirth
+                          ? new Date(baptismDetails.child.dateOfBirth).toLocaleDateString()
+                          : "N/A"}
+                      </Typography>
+                      <Typography sx={{ flex: "1 1 300px" }}>
+                        <strong>Place of Birth:</strong> {baptismDetails.child?.placeOfBirth || "N/A"}
+                      </Typography>
+                      <Typography sx={{ flex: "1 1 300px" }}>
+                        <strong>Gender:</strong> {baptismDetails.child?.gender || "N/A"}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                {/* Parents Information */}
+                <Card>
+                  <CardContent>
+                    <Typography variant="h5" gutterBottom>
+                      Parents Information
+                    </Typography>
+                    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3 }}>
+                      {/* Father */}
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="h6">Father</Typography>
+                        <Typography><strong>Name:</strong> {baptismDetails.parents?.fatherFullName || "N/A"}</Typography>
+                        <Typography><strong>Place of Birth:</strong> {baptismDetails.parents?.placeOfFathersBirth || "N/A"}</Typography>
+                      </Box>
+
+                      {/* Mother */}
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="h6">Mother</Typography>
+                        <Typography><strong>Name:</strong> {baptismDetails.parents?.motherFullName || "N/A"}</Typography>
+                        <Typography><strong>Place of Birth:</strong> {baptismDetails.parents?.placeOfMothersBirth || "N/A"}</Typography>
+                      </Box>
+
+                      {/* Marriage Info */}
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="h6">Marriage Details</Typography>
+                        <Typography><strong>Address:</strong> {baptismDetails.parents?.address || "N/A"}</Typography>
+                        <Typography><strong>Marriage Status:</strong> {baptismDetails.parents?.marriageStatus || "N/A"}</Typography>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                {/* Godparents */}
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3 }}>
+                  {/* Primary Godparents */}
+                  <Card sx={{ flex: 1 }}>
+                    <CardContent>
+                      <Typography variant="h5" gutterBottom>
+                        Primary Godparents
+                      </Typography>
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <Box>
+                          <Typography variant="h6">Ninong</Typography>
+                          <Typography><strong>Name:</strong> {baptismDetails.ninong?.name || "N/A"}</Typography>
+                          <Typography><strong>Address:</strong> {baptismDetails.ninong?.address || "N/A"}</Typography>
+                          <Typography><strong>Religion:</strong> {baptismDetails.ninong?.religion || "N/A"}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="h6">Ninang</Typography>
+                          <Typography><strong>Name:</strong> {baptismDetails.ninang?.name || "N/A"}</Typography>
+                          <Typography><strong>Address:</strong> {baptismDetails.ninang?.address || "N/A"}</Typography>
+                          <Typography><strong>Religion:</strong> {baptismDetails.ninang?.religion || "N/A"}</Typography>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+
+                  {/* Secondary Godparents */}
+                  <Card sx={{ flex: 1 }}>
+                    <CardContent>
+                      <Typography variant="h5" gutterBottom>
+                        Secondary Godparents
+                      </Typography>
+                      <Box sx={{ display: "flex", gap: 3 }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="h6">Ninong</Typography>
+                          {baptismDetails.NinongGodparents?.length > 0 ? (
+                            baptismDetails.NinongGodparents.map((gp, index) => (
+                              <Typography key={index}>{gp.name}</Typography>
+                            ))
+                          ) : (
+                            <Typography>No secondary ninong</Typography>
+                          )}
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="h6">Ninang</Typography>
+                          {baptismDetails.NinangGodparents?.length > 0 ? (
+                            baptismDetails.NinangGodparents.map((gp, index) => (
+                              <Typography key={index}>{gp.name}</Typography>
+                            ))
+                          ) : (
+                            <Typography>No secondary ninang</Typography>
+                          )}
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Box>
+              </Box>
+            )}
+
+            {activeTab === 1 && (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                {/* Baptism Documents Section */}
+                <Box>
+                  <Typography variant="h5" gutterBottom>
+                    Baptism Documents
+                  </Typography>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                    {/* Required Documents */}
+                    {baptismDetails.Docs && (
+                      <>
+                        <Card sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
+                          <CardContent>
+                            <Typography variant="body1" fontWeight="bold">
+                              Birth Certificate:
+                            </Typography>
+                            {baptismDetails.Docs.birthCertificate?.url ? (
+                              <>
+                                <Box
+                                  component="img"
+                                  src={baptismDetails.Docs.birthCertificate.url}
+                                  alt="Birth Certificate"
+                                  sx={{
+                                    maxWidth: 150,
+                                    maxHeight: 150,
+                                    width: '100%',
+                                    objectFit: "contain",
+                                    cursor: "pointer",
+                                    borderRadius: 1,
+                                    mt: 1,
+                                  }}
+                                  onClick={() => openModal(baptismDetails.Docs.birthCertificate.url)}
+                                />
+                                <Button
+                                  onClick={() => openModal(baptismDetails.Docs.birthCertificate.url)}
+                                  variant="contained"
+                                  sx={{ mt: 1, backgroundColor: "#d5edd9", color: "black" }}
+                                >
+                                  View Full Image
+                                </Button>
+                              </>
+                            ) : (
+                              <Typography color="textSecondary">N/A</Typography>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        <Card sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
+                          <CardContent>
+                            <Typography variant="body1" fontWeight="bold">
+                              Marriage Certificate:
+                            </Typography>
+                            {baptismDetails.Docs.marriageCertificate?.url ? (
+                              <>
+                                <Box
+                                  component="img"
+                                  src={baptismDetails.Docs.marriageCertificate.url}
+                                  alt="Marriage Certificate"
+                                  sx={{
+                                    maxWidth: 150,
+                                    maxHeight: 150,
+                                    width: '100%',
+                                    objectFit: "contain",
+                                    cursor: "pointer",
+                                    borderRadius: 1,
+                                    mt: 1,
+                                  }}
+                                  onClick={() => openModal(baptismDetails.Docs.marriageCertificate.url)}
+                                />
+                                <Button
+                                  onClick={() => openModal(baptismDetails.Docs.marriageCertificate.url)}
+                                  variant="contained"
+                                  sx={{ mt: 1, backgroundColor: "#d5edd9", color: "black" }}
+                                >
+                                  View Full Image
+                                </Button>
+                              </>
+                            ) : (
+                              <Typography color="textSecondary">N/A</Typography>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </>
+                    )}
+
+                    {/* Additional Documents */}
+                    {baptismDetails.additionalDocs && (
+                      <>
+                        <Card sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
+                          <CardContent>
+                            <Typography variant="body1" fontWeight="bold">
+                              Baptism Permit:
+                            </Typography>
+                            {baptismDetails.additionalDocs.baptismPermit?.url ? (
+                              <>
+                                <Box
+                                  component="img"
+                                  src={baptismDetails.additionalDocs.baptismPermit.url}
+                                  alt="Baptism Permit"
+                                  sx={{
+                                    maxWidth: 150,
+                                    maxHeight: 150,
+                                    width: '100%',
+                                    objectFit: "contain",
+                                    cursor: "pointer",
+                                    borderRadius: 1,
+                                    mt: 1,
+                                  }}
+                                  onClick={() => openModal(baptismDetails.additionalDocs.baptismPermit.url)}
+                                />
+                                <Button
+                                  onClick={() => openModal(baptismDetails.additionalDocs.baptismPermit.url)}
+                                  variant="contained"
+                                  sx={{ mt: 1, backgroundColor: "#d5edd9", color: "black" }}
+                                >
+                                  View Full Image
+                                </Button>
+                              </>
+                            ) : (
+                              <Typography color="textSecondary">N/A</Typography>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        <Card sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
+                          <CardContent>
+                            <Typography variant="body1" fontWeight="bold">
+                              Certificate Of No Record Baptism:
+                            </Typography>
+                            {baptismDetails.additionalDocs.certificateOfNoRecordBaptism?.url ? (
+                              <>
+                                <Box
+                                  component="img"
+                                  src={baptismDetails.additionalDocs.certificateOfNoRecordBaptism.url}
+                                  alt="Certificate Of No Record Baptism"
+                                  sx={{
+                                    maxWidth: 150,
+                                    maxHeight: 150,
+                                    width: '100%',
+                                    objectFit: "contain",
+                                    cursor: "pointer",
+                                    borderRadius: 1,
+                                    mt: 1,
+                                  }}
+                                  onClick={() => openModal(baptismDetails.additionalDocs.certificateOfNoRecordBaptism.url)}
+                                />
+                                <Button
+                                  onClick={() => openModal(baptismDetails.additionalDocs.certificateOfNoRecordBaptism.url)}
+                                  variant="contained"
+                                  sx={{ mt: 1, backgroundColor: "#d5edd9", color: "black" }}
+                                >
+                                  View Full Image
+                                </Button>
+                              </>
+                            ) : (
+                              <Typography color="textSecondary">N/A</Typography>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </>
+                    )}
+                  </Box>
+                </Box>
+
+                {/* Baptism Checklist Section - Now properly separated */}
+                <Box>
+                  <Typography variant="h5" gutterBottom>
+                    Baptism Checklist
+                  </Typography>
+                  <UserBaptismChecklist baptismId={formId} />
+                </Box>
+              </Box>
+            )}
+
+            {activeTab === 2 && (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3 }}>
+                  {/* Admin Notes */}
+                  <Card sx={{ flex: 1 }}>
+                    <CardContent>
+                      <Typography variant="h5" gutterBottom>
+                        Admin Notes
+                      </Typography>
+                      {baptismDetails.adminNotes?.length > 0 ? (
+                        baptismDetails.adminNotes.map((note, index) => (
+                          <Box key={index} sx={{ mb: 2 }}>
+                            <Typography><strong>Priest:</strong> {note.priest || "N/A"}</Typography>
+                            <Typography><strong>Recorded By:</strong> {note.recordedBy || "N/A"}</Typography>
+                            <Typography><strong>Book Number:</strong> {note.bookNumber || "N/A"}</Typography>
+                            <Typography><strong>Page Number:</strong> {note.pageNumber || "N/A"}</Typography>
+                            <Typography><strong>Line Number:</strong> {note.lineNumber || "N/A"}</Typography>
+                          </Box>
+                        ))
+                      ) : (
+                        <Typography>No admin notes available.</Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Rescheduling */}
+                  <Card sx={{ flex: 1 }}>
+                    <CardContent>
+                      <Typography variant="h5" gutterBottom>
+                        Rescheduling Information
+                      </Typography>
+                      {baptismDetails.adminRescheduled ? (
+                        <>
+                          <Typography>
+                            <strong>Updated Baptism Date:</strong>{" "}
+                            {new Date(baptismDetails.adminRescheduled.date).toLocaleDateString()}
+                          </Typography>
+                          <Typography>
+                            <strong>Reason:</strong> {baptismDetails.adminRescheduled.reason}
+                          </Typography>
+                        </>
+                      ) : (
+                        <Typography>No rescheduling information available.</Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Box>
+
+                {/* Checklist */}
+
+              </Box>
+            )}
+          </Box>
+
+          {/* Cancel Button - Shown on all tabs */}
+
+
+          {/* Image Modal */}
+          <Modal open={isModalOpen} onClose={closeModal}>
+            <Box
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                p: 3,
+                maxWidth: "90vw",
+                maxHeight: "90vh",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                borderRadius: 2,
               }}
-              draggable={false}
-            />
-          </div>
-        </Modal>
-      </div>
-    </div>
+            >
+              {/* Header with Close Button */}
+              <div>
+                <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mb: 2 }}>
+
+                  <Button
+                    onClick={() => setZoom(prev => Math.min(prev + 0.1, 3))}
+                    variant="outlined"
+                    sx={{ mx: 1 }}
+                  >
+                    Zoom In
+                  </Button>
+                  <Button
+                    onClick={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
+                    variant="outlined"
+                    sx={{ mx: 1 }}
+                  >
+                    Zoom Out
+                  </Button>
+
+                  <Button onClick={closeModal} variant="contained" color="error" sx={{ mx: 1 }} size="small" >
+                    Close
+                  </Button>
+
+                </Box>
+              </div>
+              {/* Image Container */}
+              <Box
+                sx={{
+                  overflow: "hidden",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%",
+                  height: "80vh",
+                  cursor: isDragging ? "grabbing" : "grab",
+                  border: "1px solid #ddd",
+                  position: "relative",
+                }}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              >
+                <img
+                  src={selectedImage}
+                  alt="Document Preview"
+                  style={{
+                    transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
+                    transition: isDragging ? "none" : "transform 0.3s ease",
+                    maxWidth: "100%",
+                    maxHeight: "100%",
+                    objectFit: "contain",
+                    cursor: isDragging ? "grabbing" : "grab",
+                  }}
+                  draggable={false}
+                />
+              </Box>
+            </Box>
+          </Modal>
+        </Paper>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3, m: 3 }}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleCancel}
+            sx={{ px: 4, py: 2 }}
+          >
+            Cancel Baptism Request
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

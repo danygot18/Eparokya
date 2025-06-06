@@ -28,7 +28,7 @@ const NotificationUser = () => {
         config
       );
       setNotifications(response.data || []);
-     // console.log("response.data", response.data);  
+      // console.log("response.data", response.data);  
       setUnreadCount(response.data.unreadCount || 0);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -126,8 +126,8 @@ const NotificationUser = () => {
         <div
           className="dropdown-menu dropdown-menu-end show position-absolute mt-2 p-2 shadow-lg"
           style={{
-            minWidth: "300px",
-            maxHeight: "400px",
+            minWidth: "200px",
+            maxHeight: "500px",
             overflowY: "auto",
             right: -20,
             zIndex: 1050
@@ -147,36 +147,36 @@ const NotificationUser = () => {
 
           {notifications.length > 0 ? (
             notifications.map((notif) => (
-              <button
+              <div
+                className="dropdown-item d-flex justify-content-between align-items-start"
                 key={notif.N_id}
-                className="w-100 text-start p-2 border-0 bg-transparent"
-                style={{ textDecoration: "none", color: "inherit" }}
-                onClick={() => handleNotificationClick(notif.N_id)}
+                style={{ gap: "10px" }}
               >
-                <div className="d-inline align-items-start">
-                  <div>
-                    <span className="me-2">{notif.message}</span>
-                    <br />
-                    <small className="text-muted">
-                      {new Date(notif.createdAt).toLocaleString()}
-                    </small>
-                  </div>
-                  <button
-                    className="btn btn-link btn-sm text-danger p-0 ms-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteNotification(notif.N_id);
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </button>
+                {/* Message and timestamp */}
+                <div className="d-flex flex-column align-items-start">
+                  <span className="me-2">{notif.message}</span>
+                  <small className="text-muted">
+                    {new Date(notif.createdAt).toLocaleString()}
+                  </small>
                 </div>
 
-              </button>
+                {/* Delete button */}
+                <button
+                  className="btn btn-link btn-sm text-danger p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteNotification(notif.N_id);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </button>
+              </div>
             ))
           ) : (
             <div className="dropdown-item text-muted">No new notifications</div>
           )}
+
+
 
 
         </div>

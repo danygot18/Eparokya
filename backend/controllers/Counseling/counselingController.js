@@ -289,7 +289,7 @@ exports.getCounselingWithPriest = async (req, res) => {
 
 
 // For user fetching
-exports.getMySubmittedForms = async (req, res) => {
+exports.getMySubmittedForms = async (req, res) => { 
   try {
     const userId = req.user.id;
     console.log("Authenticated User ID:", userId);
@@ -324,6 +324,17 @@ exports.getCounselingFormById = async (req, res) => {
   } catch (error) {
     console.error("Error fetching counseling form by ID:", error);
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Confirmed Counseling: 
+exports.getConfirmedCounseling = async (req, res) => {
+  try {
+    const confirmedCounseling = await Counseling.find({ counselingStatus: 'Confirmed' });
+    res.status(200).json(confirmedCounseling);
+  } catch (error) {
+    console.error("Error fetching confirmed counseling:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 

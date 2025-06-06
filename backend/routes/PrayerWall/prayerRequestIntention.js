@@ -17,7 +17,7 @@ module.exports = (io) => {
     const express = require('express');
     const router = express.Router();
     const prayerRequestIntentionController = require('../../controllers/Prayers/PrayerRequestIntentionController');
-    const { isAuthenticatedUser } = require('../../middleware/auth');
+    const { isAuthenticatedUser, isAuthorized } = require('../../middleware/auth');
 
     router.use((req, res, next) => {
         req.app.set("io", io);  
@@ -31,6 +31,8 @@ module.exports = (io) => {
     router.put('/updatePrayerRequestIntention/:prayerIntentionId', prayerRequestIntentionController.updatePrayerRequestIntention);
     router.post('/markPrayerRequestIntentionAsDone/:prayerIntentionId', prayerRequestIntentionController.markPrayerRequestIntentionAsDone);
     router.delete('/deletePrayerRequestIntention/:prayerIntentionId', prayerRequestIntentionController.deletePrayerRequestIntention);
+
+
 
     return router;
 };

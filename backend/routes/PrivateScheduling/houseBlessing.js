@@ -23,6 +23,9 @@ router.get('/stats/blessingPerMonth', isAuthenticatedUser, isAuthorized("admin")
 router.get('/stats/blessingStatusCount', isAuthenticatedUser, isAuthorized("admin"),  houseBlessingController.getHouseBlessingStatusCounts); 
 // router.post('/updateAdditionalReq/:blessingId',  houseBlessingController.updateAdditionalReq);
 
+router.get('/getConfirmedHouseBlessing', isAuthenticatedUser, houseBlessingController.getConfirmedHouseBlessing);
+
+
 router.get('/user/:userId', houseBlessingController.getUserHouseBlessingRequests);
 router.put('/blessingStatus/:blessingId', houseBlessingController.updateHouseBlessingStatus);
 // router.post('/comment/:blessingId', houseBlessingController.addCommentToHouseBlessing);

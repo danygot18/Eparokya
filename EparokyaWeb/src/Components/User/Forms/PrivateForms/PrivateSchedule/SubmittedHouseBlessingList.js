@@ -3,6 +3,65 @@ import axios from "axios";
 import "../../../../Layout/styles/style.css";
 import GuestSideBar from "../../../../GuestSideBar";
 import { useNavigate } from "react-router-dom";
+import {
+    Box,
+    Typography,
+    CircularProgress,
+    Card,
+    CardContent,
+    CardActionArea,
+    Chip,
+    Stack,
+    Divider,
+    useTheme,
+    Paper,
+    Alert
+} from "@mui/material";
+import { format } from 'date-fns';
+import { styled } from '@mui/material/styles';
+
+const StatusChip = styled(Chip)(({ theme, status }) => ({
+    position: 'absolute',
+    right: theme.spacing(2),
+    top: theme.spacing(2),
+    fontWeight: 'bold',
+    backgroundColor:
+        status === 'Confirmed' ? theme.palette.success.light :
+        status === 'Cancelled' ? theme.palette.error.light :
+        theme.palette.warning.light,
+    color: theme.palette.getContrastText(
+        status === 'Confirmed' ? theme.palette.success.light :
+        status === 'Cancelled' ? theme.palette.error.light :
+        theme.palette.warning.light
+    )
+}));
+
+const StyledCard = styled(Card)(({ theme, status }) => ({
+    position: 'relative',
+    borderLeft: `6px solid ${
+        status === 'Confirmed' ? theme.palette.success.main :
+        status === 'Cancelled' ? theme.palette.error.main :
+        theme.palette.warning.main
+    }`,
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    '&:hover': {
+        transform: 'translateY(-4px)',
+        boxShadow: theme.shadows[6]
+    }
+}));
+
+const groupByMonthYear = (forms) => {
+    const grouped = {};
+    forms.forEach(form => {
+        const date = new Date(form.createdAt || form.blessingDate || new Date());
+        const monthYear = format(date, 'MMMM yyyy');
+        if (!grouped[monthYear]) {
+            grouped[monthYear] = [];
+        }
+        grouped[monthYear].push(form);
+    });
+    return grouped;
+};
 
 const SubmittedHouseBlessingList = () => {
     const [houseBlessingForms, setHouseBlessingForms] = useState([]);
@@ -12,6 +71,7 @@ const SubmittedHouseBlessingList = () => {
     const [activeFilter, setActiveFilter] = useState("All");
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
+    const theme = useTheme();
 
     useEffect(() => {
         fetchMySubmittedForms();
@@ -24,9 +84,6 @@ const SubmittedHouseBlessingList = () => {
                 `${process.env.REACT_APP_API}/api/v1/getAllUserSubmittedHouseBlessing`,
                 { withCredentials: true }
             );
-
-            console.log("Frontend API Response:", response.data);
-
             if (response.data && Array.isArray(response.data.forms)) {
                 setHouseBlessingForms(response.data.forms);
                 setFilteredForms(response.data.forms);
@@ -35,7 +92,6 @@ const SubmittedHouseBlessingList = () => {
                 setFilteredForms([]);
             }
         } catch (error) {
-            console.error("Error fetching house blessing forms:", error);
             setError("Unable to fetch house blessing forms.");
         } finally {
             setLoading(false);
@@ -46,21 +102,16 @@ const SubmittedHouseBlessingList = () => {
         navigate(`/user/mySubmittedHouseBlessingForm/${houseBlessingId}`);
     };
 
-
-
     const filterForms = () => {
         let filtered = houseBlessingForms;
-
         if (activeFilter !== "All") {
             filtered = filtered.filter((form) => form.blessingStatus === activeFilter);
         }
-
         if (searchTerm) {
             filtered = filtered.filter((form) =>
                 form.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
-
         setFilteredForms(filtered);
     };
 
@@ -69,12 +120,20 @@ const SubmittedHouseBlessingList = () => {
     }, [activeFilter, searchTerm, houseBlessingForms]);
 
     return (
-        <div style={{ display: "flex", height: "100vh" }}>
+        <Box sx={{ display: "flex", minHeight: "100vh" }}>
             <GuestSideBar />
-            <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
-                <h1 className="houseBlessing-title">My Submitted House Blessing Records</h1>
-
-                <div className="houseBlessing-filters">
+            <Box
+                component="main"
+                sx={{
+                    flexGrow: 1,
+                    p: 3,
+                    backgroundColor: theme.palette.grey[50]
+                }}
+            >
+                <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                    My Submitted House Blessing Records
+                </Typography>
+                <div className="houseBlessing-filters" style={{ marginBottom: 16 }}>
                     {["All", "Pending", "Confirmed", "Cancelled"].map((status) => (
                         <button
                             key={status}
@@ -85,7 +144,6 @@ const SubmittedHouseBlessingList = () => {
                         </button>
                     ))}
                 </div>
-
                 <div className="search-bar">
                     <input
                         type="text"
@@ -95,60 +153,116 @@ const SubmittedHouseBlessingList = () => {
                         style={{ padding: "10px", marginBottom: "20px", width: "100%" }}
                     />
                 </div>
-
                 {loading ? (
-                    <p className="loading-text">Loading your submitted house blessings forms...</p>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                        <CircularProgress />
+                    </Box>
+                ) : error ? (
+                    <Alert severity="info" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
                 ) : filteredForms.length === 0 ? (
-                    <p className="empty-text">No house blessings forms submitted by you.</p>
+                    <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
+                        <Typography variant="body1" color="textSecondary">
+                            No house blessings forms submitted by you.
+                        </Typography>
+                    </Paper>
                 ) : (
-                    <div className="houseBlessing-list">
-                        {filteredForms.map((item, index) => (
-                            <div
-                                key={item._id}
-                                className={`houseBlessing-card ${item.blessingStatus?.toLowerCase() || ""}`}
-                                onClick={() => handleCardClick(item._id)}
-                                style={{ cursor: "pointer" }}
-                            >
-                                <div className="status-badge">{item.blessingStatus}</div>
-                                <h3 className="card-title">Record #{index + 1}</h3>
-                                <div className="card-details">
-                                    <p>
-                                        <strong>Full Name:</strong> {item.fullName || "N/A"}
-                                    </p>
-                                    <p>
-                                        <strong>Contact Number:</strong> {item.contactNumber || "N/A"}
-                                    </p>
-                                    <p>
-                                        <strong>House Blessing Date:</strong> {item.blessingDate ? new Date(item.blessingDate).toLocaleDateString() : "N/A"}
-                                    </p>
-                                    <p>
-                                        <strong>House Blessing Time:</strong> {item.blessingTime || "N/A"}
-                                    </p>
-                                    <p>
-                                        <strong>Address:</strong>{" "}
-                                        {item.address?.BldgNameTower ? `${item.address.BldgNameTower}, ` : ""}
-                                        {item.address?.LotBlockPhaseHouseNo ? `${item.address.LotBlockPhaseHouseNo}, ` : ""}
-                                        {item.address?.SubdivisionVillageZone ? `${item.address.SubdivisionVillageZone}, ` : ""}
-                                        {item.address?.Street ? `${item.address.Street}, ` : ""}
-                                        {item.address?.district ? `${item.address.district}, ` : ""}
-                                        {item.address?.barangay === "Others"
-                                            ? `${item.address.customBarangay || "N/A"}, `
-                                            : item.address?.barangay
-                                                ? `${item.address.barangay}, `
-                                                : ""}
-                                        {item.address?.city === "Others"
-                                            ? `${item.address.customCity || "N/A"}`
-                                            : item.address?.city || ""}
-                                    </p>
-                                </div>
-                            </div>
+                    <Stack spacing={4}>
+                        {Object.entries(groupByMonthYear(filteredForms)).map(([monthYear, forms]) => (
+                            <Box key={monthYear}>
+                                <Divider sx={{ mb: 2 }}>
+                                    <Chip
+                                        label={monthYear}
+                                        color="primary"
+                                        variant="outlined"
+                                        sx={{ px: 2, fontSize: '0.875rem' }}
+                                    />
+                                </Divider>
+                                <Stack spacing={3}>
+                                    {forms.map((item, index) => {
+                                        const status = item.blessingStatus || 'Pending';
+                                        return (
+                                            <StyledCard
+                                                key={item._id}
+                                                elevation={3}
+                                                status={status}
+                                            >
+                                                <CardActionArea onClick={() => handleCardClick(item._id)}>
+                                                    <CardContent>
+                                                        <StatusChip
+                                                            label={status}
+                                                            size="small"
+                                                            status={status}
+                                                        />
+                                                        <Typography variant="h6" component="h2" gutterBottom>
+                                                            Record #{index + 1}: {item.fullName || "N/A"}
+                                                        </Typography>
+                                                        <Divider sx={{ my: 1 }} />
+                                                        <Stack
+                                                            direction={{ xs: 'column', sm: 'row' }}
+                                                            spacing={2}
+                                                            sx={{ mt: 2 }}
+                                                        >
+                                                            <Box>
+                                                                <Typography variant="body2" color="textSecondary">
+                                                                    Contact Number
+                                                                </Typography>
+                                                                <Typography variant="body1">
+                                                                    {item.contactNumber || "N/A"}
+                                                                </Typography>
+                                                            </Box>
+                                                            <Box>
+                                                                <Typography variant="body2" color="textSecondary">
+                                                                    House Blessing Date
+                                                                </Typography>
+                                                                <Typography variant="body1">
+                                                                    {item.blessingDate
+                                                                        ? new Date(item.blessingDate).toLocaleDateString()
+                                                                        : "N/A"}
+                                                                </Typography>
+                                                            </Box>
+                                                            <Box>
+                                                                <Typography variant="body2" color="textSecondary">
+                                                                    House Blessing Time
+                                                                </Typography>
+                                                                <Typography variant="body1">
+                                                                    {item.blessingTime || "N/A"}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                        <Divider sx={{ my: 1 }} />
+                                                        <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                                                            Address
+                                                        </Typography>
+                                                        <Typography variant="body1">
+                                                            {item.address?.BldgNameTower ? `${item.address.BldgNameTower}, ` : ""}
+                                                            {item.address?.LotBlockPhaseHouseNo ? `${item.address.LotBlockPhaseHouseNo}, ` : ""}
+                                                            {item.address?.SubdivisionVillageZone ? `${item.address.SubdivisionVillageZone}, ` : ""}
+                                                            {item.address?.Street ? `${item.address.Street}, ` : ""}
+                                                            {item.address?.district ? `${item.address.district}, ` : ""}
+                                                            {item.address?.barangay === "Others"
+                                                                ? `${item.address.customBarangay || "N/A"}, `
+                                                                : item.address?.barangay
+                                                                    ? `${item.address.barangay}, `
+                                                                    : ""}
+                                                            {item.address?.city === "Others"
+                                                                ? `${item.address.customCity || "N/A"}`
+                                                                : item.address?.city || ""}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </CardActionArea>
+                                            </StyledCard>
+                                        );
+                                    })}
+                                </Stack>
+                            </Box>
                         ))}
-                    </div>
+                    </Stack>
                 )}
-            </div>
-        </div>
+            </Box>
+        </Box>
     );
-
 };
 
 export default SubmittedHouseBlessingList;

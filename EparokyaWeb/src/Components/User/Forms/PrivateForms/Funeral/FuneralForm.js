@@ -7,6 +7,8 @@ import TermsModal from "../../../../TermsModal";
 import termsAndConditionsText from "../../../../TermsAndConditionText";
 import { Button, TextField, Typography, Stack, Paper, Box, Container, InputLabel, Select, MenuItem, } from '@mui/material';
 import MetaData from '../../../../Layout/MetaData';
+import ConfirmationModal from './ConfirmFuneralModal';
+
 const FuneralForm = () => {
     const [filePreview, setFilePreview] = useState(null);
     const [filePreviewType, setFilePreviewType] = useState(null);
@@ -15,6 +17,8 @@ const FuneralForm = () => {
     const [userId, setUserId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAgreed, setIsAgreed] = useState(false);
+    const [showOverlay, setShowOverlay] = useState(false);
+
 
     const [formData, setFormData] = useState({
         name: '',
@@ -44,6 +48,8 @@ const FuneralForm = () => {
         funeralMasstime: '',
         funeralMass: '',
         deathCertificate: [],
+        documents: {},
+        previews: {},
     });
     const [user, setUser] = useState(null);
     const [cities] = useState(['Taguig City', 'Others']);
@@ -137,13 +143,56 @@ const FuneralForm = () => {
         });
     };
 
-    const handleFileChange = (e) => {
-        const files = Array.from(e.target.files);
-        setFormData((prevData) => ({
-            ...prevData,
-            deathCertificate: files,
+    const handleFileChange = (e, fieldName) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validation
+        const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+        const ALLOWED_TYPES = [
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+
+        if (file.size > MAX_SIZE) {
+            toast.error(`File too large (max 10MB): ${file.name}`);
+            e.target.value = '';
+            return;
+        }
+
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            toast.error(`Unsupported file type: ${file.type}`);
+            e.target.value = '';
+            return;
+        }
+
+        // Create preview URL
+        const fileUrl = URL.createObjectURL(file);
+
+        // Clean up previous preview URL if exists
+        if (formData.previews[fieldName]) {
+            URL.revokeObjectURL(formData.previews[fieldName]);
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            [fieldName]: [file], // For deathCertificate, keep as array
+            documents: {
+                ...prev.documents,
+                [fieldName]: file
+            },
+            previews: {
+                ...prev.previews,
+                [fieldName]: fileUrl
+            }
         }));
     };
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -274,6 +323,20 @@ const FuneralForm = () => {
         }
     };
 
+    const handlePreview = (fieldName) => {
+        const file = formData[fieldName][0];
+        if (!file) return;
+        setFilePreview(formData.previews[fieldName]);
+        setFilePreviewType(file.type);
+        setShowPreviewModal(true);
+    };
+
+    const closePreviewModal = () => {
+        setShowPreviewModal(false);
+        setFilePreview(null);
+        setFilePreviewType(null);
+    };
+
 
     return (
         <div style={{ display: "flex" }}>
@@ -286,6 +349,31 @@ const FuneralForm = () => {
                         <MetaData title="Funeral Form" />
                         <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center", alignItems: "center", p: 3 }}>
                             <Paper elevation={3} sx={{ padding: 3, width: "100%", maxWidth: 900 }}>
+                                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
+
+                                    <div style={{ display: "flex", alignItems: "center", gap: "12px", maxWidth: "300px" }}>
+                                        <div>
+                                            <h2 style={{ fontSize: "0.90rem", margin: 0 }}>Click here to see Available Dates</h2>
+                                        </div>
+                                        <Button
+                                            variant="outline-secondary"
+                                            style={{
+                                                border: "1px solid #aaa",
+                                                background: "transparent",
+                                                color: "#333",
+                                                fontWeight: "bold",
+                                                borderRadius: 6,
+                                                padding: "4px 14px",
+
+                                                boxShadow: "none"
+                                            }}
+                                            onClick={() => setShowOverlay(true)}
+                                        >
+                                            View Calendar
+                                        </Button>
+                                    </div>
+                                    <ConfirmationModal show={showOverlay} onClose={() => setShowOverlay(false)} />
+                                </div>
                                 <Typography variant="h4" gutterBottom>Funeral Request Form</Typography>
                                 <form onSubmit={handleSubmit}>
                                     <Stack spacing={2}>
@@ -553,13 +641,13 @@ const FuneralForm = () => {
                                             fullWidth
                                         />
                                         <TextField
-
                                             type="file"
-                                            inputProps={{ accept: "image/*,application/pdf" }}
+                                            accept="image/*,.pdf,.doc,.docx"
                                             onChange={(e) => handleFileChange(e, 'deathCertificate')}
                                             required
                                             fullWidth
                                         />
+                                        
                                         <Box>
                                             <input
                                                 type="checkbox"

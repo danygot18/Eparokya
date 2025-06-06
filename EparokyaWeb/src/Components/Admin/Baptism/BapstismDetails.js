@@ -6,7 +6,24 @@ import SideBar from "../SideBar";
 import BaptismChecklist from "./BaptismChecklist";
 import { toast, ToastContainer } from 'react-toastify';
 import "./baptism.css";
-import { Card, CardContent, Typography, Divider, Box, Button, Modal } from "@mui/material";
+import {
+    Card,
+    CardContent,
+    Typography,
+    Box,
+    CardMedia,
+    Grid2,
+    Modal,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    CircularProgress,
+    Divider
+} from "@mui/material";
+import { format } from "date-fns";
+
 
 
 
@@ -52,12 +69,38 @@ const BaptismDetails = () => {
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancelReason, setCancelReason] = useState("");
 
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+
     const predefinedComments = [
         "Confirmed and on schedule",
         "Rescheduled - awaiting response",
         "Pending final confirmation",
         "Cancelled by user",
     ];
+
+    const [priests, setPriests] = useState([]);
+    const [formData, setFormData] = useState({
+        priest: '',
+        recordedBy: '',
+        bookNumber: '',
+        pageNumber: '',
+        lineNumber: ''
+    });
+
+    useEffect(() => {
+        const fetchPriests = async () => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllPriest`);
+                setPriests(response.data);
+                console.log("Fetched priests:", response.data);
+            } catch (error) {
+                console.error('Error fetching priests:', error);
+            }
+        };
+        fetchPriests();
+    }, []);
+
 
     useEffect(() => {
         const fetchBaptismDetails = async () => {
@@ -117,6 +160,8 @@ const BaptismDetails = () => {
     const closeModal = () => {
         setSelectedImage("");
         setIsModalOpen(false);
+        setZoom(1);
+        setOffset({ x: 0, y: 0 });
     };
 
     if (loading) return <div>Loading...</div>;
@@ -157,16 +202,20 @@ const BaptismDetails = () => {
             setComments([...comments, response.data]);
             setSelectedComment("");
             setAdditionalComment("");
-            alert("Comment submitted.");
+            toast.success("Comment submitted.");
         } catch (error) {
             console.error("Error submitting comment:", error.response || error);
-            alert("Failed to submit the comment.");
+            toast.error("Failed to submit the comment.");
         }
     };
 
     const handleAdminNotes = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem("jwt");
+
+        if (!priest) {
+            toast.error("Please select a priest.");
+            return;
+        }
 
         const newAdminNote = {
             priest,
@@ -182,21 +231,22 @@ const BaptismDetails = () => {
                 newAdminNote
             );
 
-            // Added
             setAdminNotes(prevNotes => [...prevNotes, response.data]);
 
+            // Reset fields
             setPriest("");
             setrecordedBy("");
             setbookNumber("");
             setpageNumber("");
             setlineNumber("");
 
-            alert("Additional notes submitted.");
+            toast.success("Additional notes submitted.");
         } catch (error) {
             console.error("Error submitting additional notes:", error.response || error);
-            alert("Failed to submit the additional notes.");
+            toast.error("Failed to submit the additional notes.");
         }
     };
+
 
 
     const handleConfirm = async () => {
@@ -205,11 +255,11 @@ const BaptismDetails = () => {
                 `${process.env.REACT_APP_API}/api/v1/${baptismId}/confirmBaptism`,
                 { withCredentials: true },
             );
-            alert(response.data.message);
+            toast.success("Baptism confirmed successfully!", { position: toast.POSITION.TOP_RIGHT });
             navigate("/admin/baptismList");
         } catch (error) {
             console.error("Error confirming baptism:", error.response || error);
-            alert("Failed to confirm the baptism.");
+            toast.error("Failed to confirm the baptism.");
         }
     };
 
@@ -236,7 +286,7 @@ const BaptismDetails = () => {
 
     const handleUpdate = async () => {
         if (!newDate || !reason) {
-            alert("Please select a date and provide a reason.");
+            toast.error("Please select a date and provide a reason.");
             return;
         }
 
@@ -247,11 +297,11 @@ const BaptismDetails = () => {
                 { newDate, reason }
             );
 
-            setUpdatedBaptismDate(response.data.baptism.baptsimDate);
-            alert("Baptism date updated successfully!");
+            setUpdatedBaptismDate(response.data.baptism.baptismDate);
+            toast.success("Baptism date updated successfully!");
         } catch (error) {
             console.error("Error updating baptism date:", error);
-            alert("Failed to update baptism date.");
+            toast.error("Failed to update baptism date.");
         } finally {
             setLoading(false);
         }
@@ -277,7 +327,34 @@ const BaptismDetails = () => {
                                 </Typography>
                                 <Typography><strong>User:</strong> {baptismDetails?.userId?.name || "N/A"}</Typography>
                                 <Typography><strong>Baptism Date:</strong> {baptismDetails?.baptismDate ? new Date(baptismDetails.baptismDate).toLocaleDateString() : "N/A"}</Typography>
-                                <Typography><strong>Baptism Time:</strong> {baptismDetails?.baptismTime || "N/A"}</Typography>
+                                <Typography>
+                                    <strong>Baptism Time:</strong>{" "}
+                                    {baptismDetails?.baptismTime ? (() => {
+                                        try {
+                                            const rawTime = baptismDetails.baptismTime;
+
+                                            // If it's just a time string like "12:41", create a full date with today's date
+                                            let date;
+                                            if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
+                                                const today = new Date();
+                                                const [hours, minutes] = rawTime.split(':');
+                                                date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), +hours, +minutes);
+                                            } else {
+                                                date = new Date(rawTime);
+                                            }
+
+                                            if (isNaN(date.getTime())) {
+                                                console.warn("Invalid weddingTime:", rawTime);
+                                                return "N/A";
+                                            }
+
+                                            return format(date, 'h:mm a'); // e.g. "1:08 AM"
+                                        } catch (e) {
+                                            console.error("Error parsing baptismTime:", baptismDetails.baptismTime, e);
+                                            return "N/A";
+                                        }
+                                    })() : "N/A"}
+                                </Typography>
                                 <Typography><strong>Contact Number:</strong> {baptismDetails?.phone || "N/A"}</Typography>
                             </CardContent>
 
@@ -320,84 +397,153 @@ const BaptismDetails = () => {
                     </Box>
 
                 </CardContent>
-                <Card sx={{ maxWidth: 600, margin: "auto", padding: 2, boxShadow: 3 }}>
-                    <CardContent>
-                        <Typography variant="h5" gutterBottom>
-                            Baptism Details
-                        </Typography>
-                        <Divider sx={{ marginBottom: 2 }} />
-                        <Box>
-                            <Typography variant="h6" mt={2}>Baptismal Documents</Typography>
-                            <Divider sx={{ marginBottom: 2 }} />
-                            {['birthCertificate', 'marriageCertificate'].map((doc, index) => (
-                                <Box key={index} sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}>
-                                    <Typography sx={{ flex: 1 }}><strong>{doc.replace(/([A-Z])/g, ' $1').trim()}:</strong></Typography>
-                                    {baptismDetails?.Docs?.[doc]?.url ? (
-                                        <img
-                                            src={baptismDetails.Docs[doc].url}
-                                            alt={doc}
-                                            style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain", cursor: "pointer", borderRadius: 8, boxShadow: 1 }}
-                                            onClick={() => openModal(baptismDetails.Docs[doc].url)}
-                                        />
+                <Divider sx={{ marginBottom: 2 }} />
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                    {['birthCertificate', 'marriageCertificate'].map((doc, index) => (
+                        <Card key={index} sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
+                            <CardContent>
+                                <Typography variant="body1" fontWeight="bold">
+                                    {doc.replace(/([A-Z])/g, " $1").trim()}:
+                                </Typography>
+
+                                {baptismDetails?.Docs?.[doc]?.url ? (
+                                    /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(baptismDetails.Docs[doc].url) ? (
+                                        <>
+                                            <Box
+                                                component="img"
+                                                src={baptismDetails.Docs[doc].url}
+                                                alt={doc}
+                                                sx={{
+                                                    maxWidth: 150,
+                                                    maxHeight: 150,
+                                                    width: '100%',
+                                                    objectFit: "contain",
+                                                    cursor: "pointer",
+                                                    borderRadius: 1,
+                                                    mt: 1,
+                                                }}
+                                                onClick={() => openModal(baptismDetails.Docs[doc].url)}
+                                            />
+                                            <Button
+                                                onClick={() => openModal(baptismDetails.Docs[doc].url)}
+                                                variant="contained"
+                                                sx={{ mt: 1, backgroundColor: "#d5edd9", color: "black" }}
+                                            >
+                                                View Full Image
+                                            </Button>
+                                        </>
                                     ) : (
-                                        <Typography>N/A</Typography>
-                                    )}
-                                </Box>
-                            ))}
-                        </Box>
-                    </CardContent>
-                    <Modal open={isModalOpen} onClose={closeModal}>
-                        <Box
-                            sx={{
-                                position: "absolute",
-                                top: "50%",
-                                left: "50%",
-                                transform: "translate(-50%, -50%)",
-                                bgcolor: "background.paper",
-                                boxShadow: 24,
-                                p: 3,
-                                maxWidth: "90vw",
-                                maxHeight: "90vh",
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                borderRadius: 2,
-                            }}
-                        >
-                            <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mb: 2 }}>
-                                <Button onClick={closeModal} variant="contained" sx={{ mx: 1 }} size="small">
-                                    Close
-                                </Button>
-                                <Box>
-                                    <Button onClick={handleZoomIn} variant="outlined" sx={{ mx: 1 }}>
-                                        Zoom In
-                                    </Button>
-                                    <Button onClick={handleZoomOut} variant="outlined" sx={{ mx: 1 }}>
-                                        Zoom Out
-                                    </Button>
-                                </Box>
-                            </Box>
+                                        <Box
+                                            sx={{
+                                                width: '100%',
+                                                mt: 1,
+                                                mb: 2,
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: 2,
+                                            }}
+                                        >
+                                            <iframe
+                                                src={`${baptismDetails.Docs[doc].url}#toolbar=0&navpanes=0&scrollbar=0`}
+                                                title={`${doc} Preview`}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '200px',
+                                                    border: '1px solid #ddd',
+                                                    borderRadius: 4,
+                                                }}
+                                            />
+                                            <Typography variant="caption" color="text.secondary">
+                                                {baptismDetails.Docs[doc]?.name || 'Document Preview'}
+                                            </Typography>
+                                            <Button
+                                                onClick={() => window.open(baptismDetails.Docs[doc].url, "_blank")}
+                                                variant="contained"
+                                                sx={{ backgroundColor: "#d5edd9", color: "black" }}
+                                            >
+                                                View Full File
+                                            </Button>
+                                        </Box>
+                                    )
+                                ) : (
+                                    <Typography color="textSecondary">N/A</Typography>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))}
+
+                </Box>
+                <Modal open={isModalOpen} onClose={closeModal}>
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            bgcolor: "background.paper",
+                            boxShadow: 24,
+                            p: 3,
+                            maxWidth: "90vw",
+                            maxHeight: "90vh",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            borderRadius: 2,
+                        }}
+                    >
+                        <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mb: 2 }}>
+
 
                             <Box
                                 sx={{
-                                    overflow: "hidden",
                                     display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
+                                    justifyContent: "space-between",
                                     width: "100%",
-                                    height: "80vh",
-                                    cursor: isDragging ? "grabbing" : "grab",
-                                    border: "1px solid #ddd",
-                                    position: "relative",
+                                    mb: 2,
                                 }}
-                                onMouseDown={handleMouseDown}
-                                onMouseMove={handleMouseMove}
-                                onMouseUp={handleMouseUp}
-                                onMouseLeave={handleMouseUp}
                             >
+                                <Button
+                                    onClick={() => setZoom(prev => Math.min(prev + 0.1, 3))}
+                                    variant="outlined"
+                                    sx={{ mx: 1 }}
+                                >
+                                    Zoom In
+                                </Button>
+                                <Button
+                                    onClick={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
+                                    variant="outlined"
+                                    sx={{ mx: 1 }}
+                                >
+                                    Zoom Out
+                                </Button>
+                                <Button onClick={closeModal} variant="contained" color="error" sx={{ mx: 1 }}>
+                                    Close
+                                </Button>
+                            </Box>
+
+                        </Box>
+                        <Box
+                            sx={{
+                                overflow: "hidden",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                width: "100%",
+                                height: "80vh",
+                                cursor: isDragging ? "grabbing" : "grab",
+                                border: "1px solid #ddd",
+                                position: "relative",
+                            }}
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                        >
+                            {/* Show image or PDF/other file */}
+                            {/\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(selectedImage) ? (
                                 <img
                                     src={selectedImage}
-                                    alt="Certificate Preview"
+                                    alt="Document Preview"
                                     style={{
                                         transform: `scale(${zoom}) translate(${offset.x}px, ${offset.y}px)`,
                                         transition: isDragging ? "none" : "transform 0.3s ease",
@@ -408,10 +554,21 @@ const BaptismDetails = () => {
                                     }}
                                     draggable={false}
                                 />
-                            </Box>
+                            ) : (
+                                <iframe
+                                    src={`${selectedImage}#toolbar=0&navpanes=0&scrollbar=0`}
+                                    title="Document Preview"
+                                    style={{
+                                        width: "80vw",
+                                        height: "70vh",
+                                        border: "none",
+                                        borderRadius: 8,
+                                    }}
+                                />
+                            )}
                         </Box>
-                    </Modal>
-                </Card>
+                    </Box>
+                </Modal>
 
                 {/* Display Updated Date  */}
 
@@ -451,30 +608,34 @@ const BaptismDetails = () => {
                 <div className="admin-comments-section">
                     <h2>Additional Notes</h2>
                     {baptismDetails?.adminNotes?.length > 0 ? (
-                        baptismDetails.adminNotes.map((note, index) => (
-                            <div key={index} className="admin-comment">
-                                {note.priest && (
-                                    <p><strong>Priest:</strong> {note.priest}</p>
-                                )}
-                                {note.recordedBy && (
-                                    <p><strong>Recorded By:</strong> {note.recordedBy}</p>
-                                )}
-                                {note.bookNumber && (
-                                    <p><strong>Book Number:</strong> {note.bookNumber}</p>
-                                )}
-                                {note.pageNumber && (
-                                    <p><strong>Page Number:</strong> {note.pageNumber}</p>
-                                )}
-                                {note.lineNumber && (
-                                    <p><strong>Line Number:</strong> {note.lineNumber}</p>
-                                )}
-                                <hr />
-                            </div>
-                        ))
+                        baptismDetails.adminNotes.map((note, index) => {
+                            const priestInfo = priests.find(p => p._id === note.priest);
+                            const priestName = priestInfo ? `${priestInfo.title} ${priestInfo.fullName}` : "Unknown Priest";
+
+                            return (
+                                <div key={index} className="admin-comment">
+                                    <p><strong>Priest:</strong> {priestName}</p>
+                                    {note.recordedBy && (
+                                        <p><strong>Recorded By:</strong> {note.recordedBy}</p>
+                                    )}
+                                    {note.bookNumber && (
+                                        <p><strong>Book Number:</strong> {note.bookNumber}</p>
+                                    )}
+                                    {note.pageNumber && (
+                                        <p><strong>Page Number:</strong> {note.pageNumber}</p>
+                                    )}
+                                    {note.lineNumber && (
+                                        <p><strong>Line Number:</strong> {note.lineNumber}</p>
+                                    )}
+                                    <hr />
+                                </div>
+                            );
+                        })
                     ) : (
                         <p>No additional notes available.</p>
                     )}
                 </div>
+
 
                 {/* Creating Comments */}
                 <form onSubmit={handleSubmitComment}>
@@ -519,11 +680,15 @@ const BaptismDetails = () => {
                 {/* Adding of additional notes */}
                 <div className="admin-section">
                     <h4>Priest Name</h4>
-                    <textarea
-                        placeholder="Priest Name"
-                        value={priest}
-                        onChange={(e) => setPriest(e.target.value)}
-                    />
+                    <select value={priest} onChange={(e) => setPriest(e.target.value)} required>
+                        <option value="">Select a priest</option>
+                        {priests.map(p => (
+                            <option key={p._id} value={p._id}>
+                                {p.fullName}
+                            </option>
+                        ))}
+                    </select>
+
 
                     <h4>Recored By</h4>
                     <textarea
@@ -593,15 +758,51 @@ const BaptismDetails = () => {
                     </div>
                 )}
 
-                <div className="button-container">
-                    <button onClick={handleConfirm}>Confirm</button>
-                </div>
+
             </div>
             <div className="wedding-checklist-container">
                 <BaptismChecklist baptismId={baptismId} />
                 <button onClick={() => navigate(`/adminChat/${baptismDetails?.userId?._id}/${baptismDetails?.userId?.email}`)}>
                     Go to Admin Chat
                 </button>
+
+                <button
+                    disabled={baptismDetails?.binyagStatus === "Confirmed"}
+                    onClick={() => setShowConfirmDialog(true)}
+                    style={{
+                        backgroundColor: baptismDetails?.binyagStatus === "Confirmed" ? "#bdbdbd" : "#1976d2",
+                        color: "#fff",
+                        cursor: baptismDetails?.binyagStatus === "Confirmed" ? "not-allowed" : "pointer",
+                        border: "none",
+                        padding: "10px 24px",
+                        borderRadius: "4px",
+                        fontWeight: "bold",
+                        fontSize: "16px",
+                        marginTop: "10px"
+                    }}
+                >
+                    {baptismDetails?.binyagStatus === "Confirmed" ? "Confirmed Baptism" : "Confirm Baptism"}
+                </button>
+                <Dialog open={showConfirmDialog} onClose={() => setShowConfirmDialog(false)}>
+                    <DialogTitle>Confirm Baptism</DialogTitle>
+                    <DialogContent>
+                        <Typography>Are you sure you want to accept this?</Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setShowConfirmDialog(false)} color="primary">
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => handleConfirm(baptismId)}
+                            color="success"
+                            disabled={confirmLoading}
+                            variant="contained"
+                        >
+                            {confirmLoading ? <CircularProgress size={24} /> : "Yes, Confirm"}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
             </div>
 
         </div>

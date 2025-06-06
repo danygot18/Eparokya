@@ -21,7 +21,7 @@ router.post(
 );
 
 
-router.get('/mySubmittedForms', isAuthenticatedUser, BaptismController.getMySubmittedForms);
+// router.get('/mySubmittedForms', isAuthenticatedUser, BaptismController.getMySubmittedForms);
 router.get('/confirmedBaptism', BaptismController.getConfirmedBaptisms);
 router.get('/getBaptismChecklist/:baptismId', BaptismController.getBaptismChecklist);
 
@@ -35,7 +35,7 @@ router.get('/stats/baptismStatusCount', isAuthenticatedUser, isAuthorized("admin
 router.put('/updateBaptismChecklist/:baptismId', BaptismController.updateBaptismChecklist);
 
 router.get('/getAllUserSubmittedBaptism', isAuthenticatedUser, BaptismController.getMySubmittedForms);
-router.get('/getBaptismForm/:formId', isAuthenticatedUser, BaptismController.getBaptismFormById);
+router.get('/getBaptismForm/:baptismId', isAuthenticatedUser, BaptismController.getBaptismFormById);
 
 
 router.put('/declineBaptism/:baptismId/', isAuthenticatedUser, BaptismController.declineBaptism);

@@ -14,10 +14,11 @@ const PrayerRequestList = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
 
+     const config = { withCredentials: true };
     const fetchPrayerRequestForms = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/admin/getAllPrayerRequest`);
+            const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/admin/getAllPrayerRequest`, config);
             console.log("Fetched Prayer Requests:", response.data); // Debugging
             setprayerRequestForms(response.data.prayerRequests || []);
             setFilteredForms(response.data.prayerRequests || []);

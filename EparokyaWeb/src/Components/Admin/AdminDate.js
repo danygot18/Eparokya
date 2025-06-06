@@ -66,6 +66,7 @@ const AdminDates = () => {
         config
       );
       setDates(response.data);
+      console.log('Fetched dates:', response.data);
     } catch (error) {
       console.error('Failed to fetch dates', error);
       toast.error('Failed to load dates');
@@ -138,7 +139,7 @@ const AdminDates = () => {
 
   const handleDeleteDate = async () => {
     if (!dateToDelete) return;
-    
+
     try {
       setDeleteLoading(true);
       await axios.delete(
@@ -179,16 +180,16 @@ const AdminDates = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', maxWidth: "100%" }}>
       <SideBar />
       <Container maxWidth="lg" sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
           {/* Left Pane - Form */}
-          <Paper elevation={3} sx={{ p: 3, flex: 1 }}>
+          <Paper elevation={3} sx={{ p: 3, flex: 1, width: 1 }}>
             <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
               Manage Dates
             </Typography>
-            
+
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Category</InputLabel>
               <Select
@@ -255,7 +256,7 @@ const AdminDates = () => {
             <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
               Dates List
             </Typography>
-            
+
             <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
               <TextField
                 placeholder="Search by category..."
@@ -264,7 +265,7 @@ const AdminDates = () => {
                 fullWidth
                 size="small"
               />
-              
+
               <FormControl fullWidth size="small">
                 <InputLabel>Filter by Category</InputLabel>
                 <Select
@@ -285,7 +286,7 @@ const AdminDates = () => {
               </Box>
             ) : (
               <TableContainer>
-                <Table size="small">
+                <Table size="medium">
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 'bold' }}>Category</TableCell>
@@ -293,6 +294,8 @@ const AdminDates = () => {
                       <TableCell sx={{ fontWeight: 'bold' }}>Time</TableCell>
                       <TableCell sx={{ fontWeight: 'bold' }}>Max Participants</TableCell>
                       <TableCell sx={{ fontWeight: 'bold' }}>Available</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>Confirmed</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>User Submitted</TableCell>
                       <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                       <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
                     </TableRow>
@@ -317,8 +320,8 @@ const AdminDates = () => {
                                 <TextField
                                   type="number"
                                   value={date.maxParticipants}
-                                  onChange={(e) => setDates(dates.map(d => 
-                                    d._id === date._id ? {...d, maxParticipants: e.target.value} : d
+                                  onChange={(e) => setDates(dates.map(d =>
+                                    d._id === date._id ? { ...d, maxParticipants: e.target.value } : d
                                   ))}
                                   size="small"
                                   sx={{ width: 80 }}
@@ -328,7 +331,13 @@ const AdminDates = () => {
                               )}
                             </TableCell>
                             <TableCell>
-                              {date.maxParticipants - (date.confirmedParticipants || 0) - (date.submittedParticipants || 0)}
+                              {date.maxParticipants - date.confirmedParticipants || 0}
+                            </TableCell>
+                            <TableCell>
+                              {date.confirmedParticipants}
+                            </TableCell>
+                            <TableCell>
+                              {date.submittedParticipants}
                             </TableCell>
                             <TableCell>
                               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -343,7 +352,9 @@ const AdminDates = () => {
                               </Box>
                             </TableCell>
                             <TableCell>
-                              <Box sx={{ display: 'flex', gap: 1 }}>
+
+                              <div>
+
                                 {editingDate === date._id ? (
                                   <>
                                     <IconButton
@@ -375,7 +386,7 @@ const AdminDates = () => {
                                     </IconButton>
                                   </>
                                 )}
-                              </Box>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))
@@ -411,8 +422,8 @@ const AdminDates = () => {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button 
-              onClick={handleCloseDeleteDialog} 
+            <Button
+              onClick={handleCloseDeleteDialog}
               disabled={deleteLoading}
               color="primary"
             >

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "../../Layout/styles/style.css";
 import SideBar from "../SideBar";
@@ -14,9 +13,15 @@ import {
   CardHeader,
   Checkbox,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControlLabel,
   IconButton,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import {
   ChevronLeft as ChevronLeftIcon,
@@ -25,6 +30,7 @@ import {
   Edit as EditIcon,
   Star as StarIcon,
 } from "@mui/icons-material";
+import { toast } from "react-toastify";
 
 const AdminAnnouncementList = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -37,6 +43,9 @@ const AdminAnnouncementList = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [start, setStart] = useState({ x: 0, y: 0 });
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [announcementToDelete, setAnnouncementToDelete] = useState(null);
 
   const announcementsPerPage = 10;
   const navigate = useNavigate();
@@ -64,6 +73,18 @@ const AdminAnnouncementList = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/getAllannouncementCategory`
+      );
+      setCategories(response.data.categories || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setCategories([]);
+    }
+  };
+
   const handleWheel = (e) => {
     e.preventDefault();
     const newZoom = Math.min(Math.max(zoom + e.deltaY * -0.001, 1), 3);
@@ -83,32 +104,35 @@ const AdminAnnouncementList = () => {
 
   const handleMouseUp = () => setDragging(false);
 
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API}/api/v1/getAllannouncementCategory`
-      );
-      setCategories(response.data.categories || []);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      setCategories([]);
-    }
-  };
-
   const handleSearch = (e) => {
     setSearchQuery(e.target.value.toLowerCase());
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this announcement?")) {
-      try {
-        await axios.delete(
-          `${process.env.REACT_APP_API}/api/v1/deleteAnnouncement/${id}`
-        );
-        setAnnouncements(announcements.filter((a) => a._id !== id));
-      } catch (error) {
-        console.error("Error deleting announcement:", error);
-      }
+  const handleOpenDeleteDialog = (id) => {
+    setAnnouncementToDelete(id);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    setAnnouncementToDelete(null);
+  };
+
+  const handleDeleteAnnouncement = async () => {
+    if (!announcementToDelete) return;
+
+    try {
+      setDeleteLoading(true);
+      await axios.delete(
+        `${process.env.REACT_APP_API}/api/v1/deleteAnnouncement/${announcementToDelete}`
+      );
+      setAnnouncements(announcements.filter((a) => a._id !== announcementToDelete));
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
+    } finally {
+      setDeleteLoading(false);
+      handleCloseDeleteDialog();
+      toast.success("Announcement deleted successfully!");
     }
   };
 
@@ -179,7 +203,6 @@ const AdminAnnouncementList = () => {
           Announcements
         </Typography>
 
-        {/* Announcements Grid */}
         <Box
           sx={{
             display: "grid",
@@ -219,7 +242,7 @@ const AdminAnnouncementList = () => {
                   />
                 }
                 action={
-                   <div style={{  gap: '8px', maxWidth: '50px', }}>
+                  <div style={{ gap: '8px', maxWidth: '50px' }}>
                     <Box>
                       <IconButton
                         onClick={() =>
@@ -228,7 +251,7 @@ const AdminAnnouncementList = () => {
                       >
                         <EditIcon color="primary" />
                       </IconButton>
-                      <IconButton onClick={() => handleDelete(announcement._id)}>
+                      <IconButton onClick={() => handleOpenDeleteDialog(announcement._id)}>
                         <DeleteIcon color="error" />
                       </IconButton>
                     </Box>
@@ -338,7 +361,6 @@ const AdminAnnouncementList = () => {
           ))}
         </Box>
 
-        {/* Pagination */}
         <div style={{ position: "relative", width: "50%", height: "100%", alignItems: "center", margin: "auto" }}>
           <Box
             sx={{
@@ -379,65 +401,94 @@ const AdminAnnouncementList = () => {
             </div>
           </Box>
         </div>
-      </Box >
 
-      {/* Image Zoom Preview */}
-      {
-        previewImage && (
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={openDeleteDialog}
+          onClose={handleCloseDeleteDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            Confirm Deletion
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to delete this announcement?
+              <br />
+              This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleCloseDeleteDialog}
+              disabled={deleteLoading}
+              color="primary"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteAnnouncement}
+              color="error"
+              autoFocus
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? <CircularProgress size={24} /> : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+
+      {previewImage && (
+        <Box
+          onClick={() => setPreviewImage(null)}
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1300,
+            cursor: "zoom-out",
+          }}
+        >
           <Box
-            onClick={() => setPreviewImage(null)}
+            onClick={(e) => e.stopPropagation()}
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
             sx={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "rgba(0,0,0,0.8)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 1300,
-              cursor: "zoom-out",
+              overflow: "hidden",
+              maxWidth: "90%",
+              maxHeight: "90%",
+              cursor: dragging ? "grabbing" : "grab",
             }}
           >
-
-            <Box
-              onClick={(e) => e.stopPropagation()}
-              onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              sx={{
-                overflow: "hidden",
-                maxWidth: "90%",
-                maxHeight: "90%",
-                cursor: dragging ? "grabbing" : "grab",
+            <img
+              src={previewImage}
+              alt="Zoomed Preview"
+              style={{
+                transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+                transformOrigin: "top left",
+                transition: dragging ? "none" : "transform 0.2s ease",
+                maxWidth: "100%",
+                maxHeight: "100%",
+                userSelect: "none",
+                pointerEvents: "none",
               }}
-            >
-              <img
-                src={previewImage}
-                alt="Zoomed Preview"
-                style={{
-                  transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
-                  transformOrigin: "top left",
-                  transition: dragging ? "none" : "transform 0.2s ease",
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  userSelect: "none",
-                  pointerEvents: "none",
-                }}
-                draggable={false}
-              />
-            </Box>
-
+              draggable={false}
+            />
           </Box>
-
-        )
-      }
-    </Box >
+        </Box>
+      )}
+    </Box>
   );
-
 };
 
 export default AdminAnnouncementList;
