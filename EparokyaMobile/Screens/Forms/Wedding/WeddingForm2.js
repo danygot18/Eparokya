@@ -1,135 +1,267 @@
 import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet, Text } from "react-native";
+import { View } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useSelector } from "react-redux";
+import {
+  Input,
+  Label,
+  Button,
+  Text,
+  YStack,
+  ScrollView,
+  Select,
+  Tooltip,
+} from "tamagui";
+import { Picker } from '@react-native-picker/picker';
+
+
+
+
+const barangayOptions = [
+  "Bagumbayan",
+  "Bambang",
+  "Calzada",
+  "Cembo",
+  "Central Bicutan",
+  "Central Signal Village",
+  "Comembo",
+  "East Rembo",
+  "Fort Bonifacio",
+  "Hagonoy",
+  "Ibayo-Tipas",
+  "Katuparan",
+  "Ligid-Tipas",
+  "Lower Bicutan",
+  "Maharlika Village",
+  "Napindan",
+  "New Lower Bicutan",
+  "North Daang Hari",
+  "North Signal Village",
+  "Palingon",
+  "Pembo",
+  "Pinagsama",
+  "Pitogo",
+  "Post Proper Northside",
+  "Post Proper Southside",
+  "Rizal",
+  "San Miguel",
+  "Santa Ana",
+  "South Cembo",
+  "South Daang Hari",
+  "South Signal Village",
+  "Tanyag",
+  "Tuktukan",
+  "Upper Bicutan",
+  "Ususan",
+  "Wawa",
+  "West Rembo",
+  "Western Bicutan",
+  "Others",
+];
+
+const cityOptions = ["Taguig City", "Others"];
 
 const WeddingForm2 = ({ navigation, route }) => {
-  const {
-    bride,
-    brideAge,
-    brideGender,
-    bridePhone,
-    brideAddress,
-    dateOfApplication,
-    weddingDate,
-    weddingTime,
-  } = route.params;
-  console.log(route.params);
-
   const [groomName, setGroomName] = useState("");
-  const [groomStreet, setGroomStreet] = useState("");
-  const [groomZip, setGroomZip] = useState("");
-  const [groomCity, setGroomCity] = useState("");
   const [groomPhone, setGroomPhone] = useState("");
   const [groomBirthDate, setGroomBirthDate] = useState(new Date());
   const [groomOccupation, setGroomOccupation] = useState("");
   const [groomReligion, setGroomReligion] = useState("");
   const [groomFather, setGroomFather] = useState("");
   const [groomMother, setGroomMother] = useState("");
-  const [error, setError] = useState("");
-  const [showGroomBirthDatePicker, setShowGroomBirthDatePicker] = useState(false);
-  const { user, token } = useSelector((state) => state.auth);
 
-  const onGroomBirthDateChange = (event, selectedDate) => {
+  const [address, setAddress] = useState({
+    BldgNameTower: "",
+    LotBlockPhaseHouseNo: "",
+    SubdivisionVillageZone: "",
+    Street: "",
+    District: "",
+    barangay: "",
+    customBarangay: "",
+    city: "",
+    customCity: "",
+  });
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [error, setError] = useState("");
+
+  const onDateChange = (event, selectedDate) => {
     if (selectedDate) {
       setGroomBirthDate(selectedDate);
     }
-    setShowGroomBirthDatePicker(false);
-  };
-
-  const clearFields = () => {
-    setGroomName("");
-    setGroomStreet("");
-    setGroomZip("");
-    setGroomCity("");
-    setGroomPhone("");
-    setGroomBirthDate(new Date());
-    setGroomOccupation("");
-    setGroomReligion("");
-    setGroomFather("");
-    setGroomMother("");
-    setError("");
+    setShowDatePicker(false);
   };
 
   const goToNextPage = () => {
     if (
       !groomName ||
-      !groomStreet ||
-      !groomZip ||
-      !groomCity ||
       !groomPhone ||
       !groomBirthDate ||
       !groomOccupation ||
       !groomReligion ||
       !groomFather ||
-      !groomMother
+      !groomMother ||
+      !address.Street ||
+      !address.District ||
+      !address.barangay ||
+      !address.city ||
+      (address.barangay === "Others" && !address.customBarangay) ||
+      (address.city === "Others" && !address.customCity)
     ) {
-      setError("Please fill in all fields.");
+      setError("Please fill in all required fields.");
       return;
     }
 
     const groomAddress = {
-      street: groomStreet,
-      zip: groomZip,
-      city: groomCity,
+      ...address,
+      barangay: address.barangay,
+      customBarangay:
+        address.barangay === "Others" ? address.customBarangay : "",
+      city: address.city,
+      customCity: address.city === "Others" ? address.customCity : "",
     };
 
     navigation.navigate("WeddingForm3", {
-      ...route.params, // Include previous form data
+      ...route.params,
       groomName,
-      groomAddress,
       groomPhone,
       groomBirthDate: groomBirthDate.toISOString(),
       groomOccupation,
       groomReligion,
       groomFather,
       groomMother,
+      groomAddress,
     });
   };
-
+  console.log(route.params);
   return (
-    <View style={styles.container}>
-      <TextInput placeholder="Groom's Name" value={groomName} onChangeText={setGroomName} style={styles.input} />
-      <TextInput placeholder="Street" value={groomStreet} onChangeText={setGroomStreet} style={styles.input} />
-      <TextInput placeholder="Zip" value={groomZip} keyboardType="numeric" onChangeText={setGroomZip} style={styles.input} />
-      <TextInput placeholder="City" value={groomCity} onChangeText={setGroomCity} style={styles.input} />
-      <TextInput placeholder="Phone" keyboardType="phone-pad" value={groomPhone} onChangeText={setGroomPhone} style={styles.input} />
+    <ScrollView>
+      <YStack space="$3" p="$4">
+        <Input
+          placeholder="Groom's Name"
+          value={groomName}
+          onChangeText={setGroomName}
+        />
+        <Input
+          placeholder="Phone"
+          keyboardType="phone-pad"
+          value={groomPhone}
+          onChangeText={setGroomPhone}
+        />
 
-      <TouchableOpacity onPress={() => setShowGroomBirthDatePicker(true)} style={styles.button}>
-        <Text style={styles.buttonText}>Select Birthday</Text>
-      </TouchableOpacity>
-      {showGroomBirthDatePicker && (
-        <DateTimePicker value={groomBirthDate} mode="date" display="default" onChange={onGroomBirthDateChange} />
-      )}
-      <Text style={styles.selectedDate}>Selected Birthday: {groomBirthDate.toDateString()}</Text>
+        <Button onPress={() => setShowDatePicker(true)}>Select Birthday</Button>
+        {showDatePicker && (
+          <DateTimePicker
+            value={groomBirthDate}
+            mode="date"
+            display="default"
+            onChange={onDateChange}
+          />
+        )}
+        <Text>Selected Birthday: {groomBirthDate.toDateString()}</Text>
 
-      <TextInput placeholder="Occupation" value={groomOccupation} onChangeText={setGroomOccupation} style={styles.input} />
-      <TextInput placeholder="Religion" value={groomReligion} onChangeText={setGroomReligion} style={styles.input} />
-      <TextInput placeholder="Father's Name" value={groomFather} onChangeText={setGroomFather} style={styles.input} />
-      <TextInput placeholder="Mother's Name" value={groomMother} onChangeText={setGroomMother} style={styles.input} />
+        <Input
+          placeholder="Occupation"
+          value={groomOccupation}
+          onChangeText={setGroomOccupation}
+        />
+        <Input
+          placeholder="Religion"
+          value={groomReligion}
+          onChangeText={setGroomReligion}
+        />
+        <Input
+          placeholder="Father's Name"
+          value={groomFather}
+          onChangeText={setGroomFather}
+        />
+        <Input
+          placeholder="Mother's Name"
+          value={groomMother}
+          onChangeText={setGroomMother}
+        />
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+        <Label>Address</Label>
+        <Input
+          placeholder="Building Name / Tower"
+          value={address.BldgNameTower}
+          onChangeText={(v) => setAddress({ ...address, BldgNameTower: v })}
+        />
+        <Input
+          placeholder="Lot / Block / Phase / House No."
+          value={address.LotBlockPhaseHouseNo}
+          onChangeText={(v) =>
+            setAddress({ ...address, LotBlockPhaseHouseNo: v })
+          }
+        />
+        <Input
+          placeholder="Subdivision / Village / Zone"
+          value={address.SubdivisionVillageZone}
+          onChangeText={(v) =>
+            setAddress({ ...address, SubdivisionVillageZone: v })
+          }
+        />
+        <Input
+          placeholder="Street"
+          value={address.Street}
+          onChangeText={(v) => setAddress({ ...address, Street: v })}
+        />
+        <Input
+          placeholder="District"
+          value={address.District}
+          onChangeText={(v) => setAddress({ ...address, District: v })}
+        />
 
-      <TouchableOpacity onPress={goToNextPage} style={[styles.button, styles.nextButton]}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={clearFields} style={[styles.button, styles.clearButton]}>
-        <Text style={styles.clearButtonText}>Clear Fields</Text>
-      </TouchableOpacity>
-    </View>
+       {/* Barangay Select */}
+<Label>Barangay</Label>
+<Picker
+  selectedValue={address.barangay}
+  onValueChange={(val) => setAddress({ ...address, barangay: val })}
+>
+  <Picker.Item label="Select Barangay" value="" />
+  {barangayOptions.map((item, index) => (
+    <Picker.Item key={index} label={item} value={item} />
+  ))}
+</Picker>
+
+{address.barangay === "Others" && (
+  <Input
+    placeholder="Enter Barangay"
+    value={address.customBarangay}
+    onChangeText={(v) => setAddress({ ...address, customBarangay: v })}
+  />
+)}
+
+<Label>City</Label>
+<Picker
+  selectedValue={address.city}
+  onValueChange={(val) => setAddress({ ...address, city: val })}
+>
+  <Picker.Item label="Select City" value="" />
+  {cityOptions.map((item, index) => (
+    <Picker.Item key={index} label={item} value={item} />
+  ))}
+</Picker>
+
+{address.city === "Others" && (
+  <Input
+    placeholder="Enter City"
+    value={address.customCity}
+    onChangeText={(v) => setAddress({ ...address, customCity: v })}
+  />
+)}
+
+
+
+        {error && <Text color="red">{error}</Text>}
+
+        <Tooltip content="Go to next page">
+          <Button onPress={goToNextPage} bg="#26572E">
+            Next →
+          </Button>
+        </Tooltip>
+      </YStack>
+    </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { padding: 20, alignItems: "flex-start" },
-  input: { marginBottom: 10, padding: 10, borderWidth: 1, borderColor: "#ccc", width: "100%" },
-  error: { color: "red", marginBottom: 10 },
-  button: { borderRadius: 20, paddingVertical: 10, paddingHorizontal: 20, marginBottom: 10, alignItems: "center" },
-  nextButton: { backgroundColor: "#26572E" , alignItems: "center" },
-  clearButton: { backgroundColor: "#B3CF99" },
-  buttonText: { color: "white", fontWeight: "bold" },
-  clearButtonText: { color: "black", fontWeight: "bold" },
-  selectedDate: { marginBottom: 10 }
-});
 
 export default WeddingForm2;

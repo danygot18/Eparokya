@@ -1,33 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { View, Button, StyleSheet, Text, Alert, ScrollView } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { useSelector } from 'react-redux';
-import axios from 'axios';
+import React, { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { useSelector } from "react-redux";
+import axios from "axios";
 import baseURL from "../../../assets/common/baseUrl";
 
 const WeddingForm6 = ({ navigation, route }) => {
-  const { updatedWeddingData, certificates, userId, dateOfApplication, weddingDate, weddingTime, groomName, groomAddress, groomPhone, groomBirthDate, groomOccupation, groomReligion, groomFather, groomMother, brideName, brideAddress, bridePhone, brideBirthDate, brideOccupation, brideReligion, brideFather, brideMother, Ninong, Ninang } = route.params;
+  const { updatedWeddingData, certificates } = route.params;
+  const { user, token } = useSelector((state) => state.auth);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
 
-  useEffect(() => {
-    console.log('Route params:', route.params);
-  }, [route.params]);
+  console.log("Updated Wedding Data:", updatedWeddingData);
+  const [docs, setDocs] = useState({
+    brideNewBaptismalCertificate: null,
+    brideNewConfirmationCertificate: null,
+    brideMarriageLicense: null,
+    brideMarriageBans: null,
+    brideOrigCeNoMar: null,
+    brideOrigPSA: null,
+    permitFromtheParishOftheBride: null,
+    childBirthCertificate: null,
+    oneByOne: null,
+  });
 
-  const [brideNewBaptismalCertificate, setBrideNewBaptismalCertificate] = useState(null);
-  const [brideNewConfirmationCertificate, setBrideNewConfirmationCertificate] = useState(null);
-  const [brideMarriageLicense, setBrideMarriageLicense] = useState(null);
-  const [brideMarriageBans, setBrideMarriageBans] = useState(null);
-  const [brideOrigCeNoMar, setBrideOrigCeNoMar] = useState(null);
-  const [brideOrigPSA, setBrideOrigPSA] = useState(null);
-  const [permitFromtheParishOftheBride, setPermitFromtheParishOftheBride] = useState(null);
-  const [childBirthCertificate, setChildBirthCertificate] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const { user, token } = useSelector(state => state.auth);
+  const requiredBride = [
+    "brideNewBaptismalCertificate",
+    "brideNewConfirmationCertificate",
+    "brideMarriageLicense",
+    "brideMarriageBans",
+    "brideOrigCeNoMar",
+    "brideOrigPSA",
+    "permitFromtheParishOftheBride",
+    "oneByOne",
+  ];
 
-  const pickDocument = async (setFile) => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert("Permission required", "Camera roll permissions are needed to select images.");
+  const handleImagePick = async (field) => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission required", "Camera roll permissions are needed.");
       return;
     }
 
@@ -38,205 +59,237 @@ const WeddingForm6 = ({ navigation, route }) => {
     });
 
     if (!result.canceled) {
-      setFile(result.assets[0].uri);
+      setDocs((prev) => ({ ...prev, [field]: result.assets[0].uri }));
     }
   };
 
   const handleSubmit = async () => {
-    if (!brideNewBaptismalCertificate || !brideNewConfirmationCertificate || !brideMarriageLicense || !brideMarriageBans || !brideOrigCeNoMar || !brideOrigPSA || !permitFromtheParishOftheBride) {
-      setError('Please upload all required certificates.');
-      return;
-    }
-
-    const formData = new FormData();
-
-    formData.append("userId", userId || "");
-    formData.append("dateOfApplication", new Date(updatedWeddingData.dateOfApplication).toISOString());
-    formData.append("weddingDate", new Date(updatedWeddingData.weddingDate).toISOString());
-    formData.append("weddingTime", updatedWeddingData.weddingTime || "");
-    formData.append("groomName", updatedWeddingData.groomName || "");
-    formData.append("groomAddress", JSON.stringify({
-      street: updatedWeddingData.groomAddress?.street || "",
-      zip: updatedWeddingData.groomAddress?.zip || "",
-      city: updatedWeddingData.groomAddress?.city || "",
-    }));
-    formData.append("groomPhone", updatedWeddingData.groomPhone || "");
-    formData.append("groomBirthDate", new Date(updatedWeddingData.groomBirthDate).toISOString());
-    formData.append("groomOccupation", updatedWeddingData.groomOccupation || "");
-    formData.append("groomReligion", updatedWeddingData.groomReligion || "");
-    formData.append("groomFather", updatedWeddingData.groomFather || "");
-    formData.append("groomMother", updatedWeddingData.groomMother || "");
-    formData.append("brideName", updatedWeddingData.brideName || "");
-    formData.append("brideAddress", JSON.stringify({
-      street: updatedWeddingData.brideAddress?.street || "",
-      zip: updatedWeddingData.brideAddress?.zip || "",
-      city: updatedWeddingData.brideAddress?.city || "",
-    }));
-    formData.append("bridePhone", updatedWeddingData.bridePhone || "");
-    formData.append("brideBirthDate", new Date(updatedWeddingData.brideBirthDate).toISOString());
-    formData.append("brideOccupation", updatedWeddingData.brideOccupation || "");
-    formData.append("brideReligion", updatedWeddingData.brideReligion || "");
-    formData.append("brideFather", updatedWeddingData.brideFather || "");
-    formData.append("brideMother", updatedWeddingData.brideMother || "");
-    formData.append("Ninong", JSON.stringify(updatedWeddingData.Ninong || []));
-    formData.append("Ninang", JSON.stringify(updatedWeddingData.Ninang || []));
-
-
-
-    formData.append('GroomNewBaptismalCertificate', {
-      uri: certificates.GroomNewBaptismalCertificate.uri,
-      type: certificates.GroomNewBaptismalCertificate.type,
-      name: certificates.GroomNewBaptismalCertificate.name,
-    });
-    formData.append('GroomNewConfirmationCertificate', {
-      uri: certificates.GroomNewConfirmationCertificate.uri,
-      type: certificates.GroomNewConfirmationCertificate.type,
-      name: certificates.GroomNewConfirmationCertificate.name,
-    });
-    formData.append('GroomMarriageLicense', {
-      uri: certificates.GroomMarriageLicense.uri,
-      type: certificates.GroomMarriageLicense.type,
-      name: certificates.GroomMarriageLicense.name,
-    });
-    formData.append('GroomMarriageBans', {
-      uri: certificates.GroomMarriageBans.uri,
-      type: certificates.GroomMarriageBans.type,
-      name: certificates.GroomMarriageBans.name,
-    });
-    formData.append('GroomOrigCeNoMar', {
-      uri: certificates.GroomOrigCeNoMar.uri,
-      type: certificates.GroomOrigCeNoMar.type,
-      name: certificates.GroomOrigCeNoMar.name,
-    });
-    formData.append('GroomOrigPSA', {
-      uri: certificates.GroomOrigPSA.uri,
-      type: certificates.GroomOrigPSA.type,
-      name: certificates.GroomOrigPSA.name,
-    });
-
-    formData.append('BrideNewBaptismalCertificate', {
-      uri: brideNewBaptismalCertificate,
-      type: 'image/jpeg',
-      name: 'brideNewBaptismalCertificate.jpg',
-    });
-    formData.append('BrideNewConfirmationCertificate', {
-      uri: brideNewConfirmationCertificate,
-      type: 'image/jpeg',
-      name: 'brideNewConfirmationCertificate.jpg',
-    });
-    formData.append('BrideMarriageLicense', {
-      uri: brideMarriageLicense,
-      type: 'image/jpeg',
-      name: 'brideMarriageLicense.jpg',
-    });
-    formData.append('BrideMarriageBans', {
-      uri: brideMarriageBans,
-      type: 'image/jpeg',
-      name: 'brideMarriageBans.jpg',
-    });
-    formData.append('BrideOrigCeNoMar', {
-      uri: brideOrigCeNoMar,
-      type: 'image/jpeg',
-      name: 'brideOrigCeNoMar.jpg',
-    });
-    formData.append('BrideOrigPSA', {
-      uri: brideOrigPSA,
-      type: 'image/jpeg',
-      name: 'brideOrigPSA.jpg',
-    });
-    formData.append('PermitFromtheParishOftheBride', {
-      uri: permitFromtheParishOftheBride,
-      type: 'image/jpeg',
-      name: 'permitFromtheParishOftheBride.jpg',
-    });
-    if (childBirthCertificate) {
-      formData.append('ChildBirthCertificate', {
-        uri: childBirthCertificate,
-        type: 'image/jpeg',
-        name: 'childBirthCertificate.jpg',
-      });
-    }
+    // Prevent multiple submissions
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+    setError("");
 
     try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      };
-
-      await axios.post(`${baseURL}/submitWeddingForm`, formData, config);
-      Alert.alert("Success", "Wedding form submitted successfully!");
-      navigation.navigate('Profile');
-    } catch (error) {
-      console.error('Error submitting wedding form:', error);
-
-      if (error.response) {
-        console.error('Response Data:', error.response.data);
-        setError(`Error: ${error.response.data.message}`);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-        setError('No response from server. Please check your internet connection or server status.');
-      } else {
-        console.error('Error setting up request:', error.message);
-        setError(`Request setup error: ${error.message}`);
+      // Validate required documents
+      const missingDocs = requiredBride.filter((field) => !docs[field]);
+      if (missingDocs.length > 0) {
+        const missingNames = missingDocs
+          .map((field) => field.replace(/([A-Z])/g, " $1").trim())
+          .join(", ");
+        throw new Error(
+          `Please upload these required documents: ${missingNames}`
+        );
       }
+
+      // Prepare FormData
+      const formData = new FormData();
+
+      // Add wedding data (stringify nested objects)
+      Object.entries(updatedWeddingData).forEach(([key, value]) => {
+        if (value === null || value === undefined) return;
+
+        formData.append(
+          key,
+          typeof value === "object" && !(value instanceof File)
+            ? JSON.stringify(value)
+            : value
+        );
+      });
+
+      // Add all certificate files
+      Object.entries(certificates).forEach(([key, uri]) => {
+        if (uri) {
+          formData.append(key, {
+            uri,
+            type: "image/jpeg",
+            name: `${key}.jpg`,
+          });
+        }
+      });
+
+      // Add all bride document files
+      Object.entries(docs).forEach(([key, uri]) => {
+        if (uri) {
+          formData.append(key, {
+            uri,
+            type: "image/jpeg",
+            name: `${key}.jpg`,
+          });
+        }
+      });
+
+      // Add user context
+      formData.append("submittedBy", user._id);
+      formData.append("submissionDate", new Date().toISOString());
+
+      // Submit to server
+      const response = await axios.post(`${baseURL}/weddings`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        timeout: 30000, // 30 seconds timeout
+      });
+
+      // Handle success
+      if (response.data.success) {
+        Alert.alert(
+          "Submission Successful",
+          "Your wedding application has been submitted successfully.",
+          [
+            {
+              text: "OK",
+              onPress: () =>
+                navigation.navigate("Profile", {
+                  refresh: true,
+                }),
+            },
+          ]
+        );
+      } else {
+        throw new Error(response.data.message || "Submission failed");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+
+      // Handle specific error cases
+      let errorMessage = "Submission failed. Please try again.";
+      if (error.response) {
+        // Server responded with error status
+        errorMessage = error.response.data?.message || errorMessage;
+      } else if (error.request) {
+        // Request was made but no response
+        errorMessage = "Network error. Please check your connection.";
+      } else if (error.message.includes("timeout")) {
+        errorMessage = "Request timeout. Please try again.";
+      } else {
+        errorMessage = error.message || errorMessage;
+      }
+
+      setError(errorMessage);
+      Alert.alert("Submission Error", errorMessage);
+    } finally {
+      // Reset submission state
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
-  const clearForm = () => {
-    setBrideNewBaptismalCertificate(null);
-    setBrideNewConfirmationCertificate(null);
-    setBrideMarriageLicense(null);
-    setBrideMarriageBans(null);
-    setBrideOrigCeNoMar(null);
-    setBrideOrigPSA(null);
-    setPermitFromtheParishOftheBride(null);
-    setChildBirthCertificate(null);
-    setError('');
+  const clearAll = () => {
+    setDocs((prev) =>
+      Object.fromEntries(Object.keys(prev).map((k) => [k, null]))
+    );
+    setError("");
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      {error && <Text style={styles.error}>{error}</Text>}
+    <ScrollView contentContainerStyle={styles.container}>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <Button title="Upload Bride New Baptismal Certificate" onPress={() => pickDocument(setBrideNewBaptismalCertificate)} />
-      {brideNewBaptismalCertificate && <Text>Uploaded: {brideNewBaptismalCertificate ? brideNewBaptismalCertificate.split('/').pop() : ''}</Text>}
+      {Object.entries(docs).map(([field, uri]) => (
+        <View key={field} style={styles.uploadContainer}>
+          <TouchableOpacity
+            onPress={() => handleImagePick(field)}
+            style={styles.uploadButton}
+          >
+            <Text style={styles.uploadButtonText}>
+              Upload {field.replace(/([A-Z])/g, " $1").trim()}
+              {requiredBride.includes(field) ? " *" : ""}
+            </Text>
+          </TouchableOpacity>
+          {uri && (
+            <Image
+              source={{ uri }}
+              style={styles.imagePreview}
+              resizeMode="cover"
+            />
+          )}
+        </View>
+      ))}
 
-      <Button title="Upload Bride New Confirmation Certificate" onPress={() => pickDocument(setBrideNewConfirmationCertificate)} />
-      {brideNewConfirmationCertificate && <Text>Uploaded: {brideNewConfirmationCertificate ? brideNewConfirmationCertificate.split('/').pop() : ''}</Text>}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, styles.nextButton]}
+          onPress={handleSubmit}
+          disabled={isSubmitting}
+        >
+          <Text style={styles.buttonText}>
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Text>
+        </TouchableOpacity>
 
-      <Button title="Upload Bride Marriage License" onPress={() => pickDocument(setBrideMarriageLicense)} />
-      {brideMarriageLicense && <Text>Uploaded: {brideMarriageLicense ? brideMarriageLicense.split('/').pop() : ''}</Text>}
-
-      <Button title="Upload Bride Marriage Bans" onPress={() => pickDocument(setBrideMarriageBans)} />
-      {brideMarriageBans && <Text>Uploaded: {brideMarriageBans ? brideMarriageBans.split('/').pop() : ''}</Text>}
-
-      <Button title="Upload Bride Original Certificate of No Marriage" onPress={() => pickDocument(setBrideOrigCeNoMar)} />
-      {brideOrigCeNoMar && <Text>Uploaded: {brideOrigCeNoMar ? brideOrigCeNoMar.split('/').pop() : ''}</Text>}
-
-      <Button title="Upload Bride Original PSA" onPress={() => pickDocument(setBrideOrigPSA)} />
-      {brideOrigPSA && <Text>Uploaded: {brideOrigPSA ? brideOrigPSA.split('/').pop() : ''}</Text>}
-
-      <Button title="Upload Permit From the Parish Of the Bride" onPress={() => pickDocument(setPermitFromtheParishOftheBride)} />
-      {permitFromtheParishOftheBride && <Text>Uploaded: {permitFromtheParishOftheBride ? permitFromtheParishOftheBride.split('/').pop() : ''}</Text>}
-
-      <Button title="Upload Child Birth Certificate (if applicable)" onPress={() => pickDocument(setChildBirthCertificate)} />
-      {childBirthCertificate && <Text>Uploaded: {childBirthCertificate ? childBirthCertificate.split('/').pop() : ''}</Text>}
-
-      <Button title="Submit" onPress={handleSubmit} />
-      <Button title="Clear Form" onPress={clearForm} />
+        <TouchableOpacity
+          style={[styles.button, styles.clearButton]}
+          onPress={clearAll}
+        >
+          <Text style={styles.clearButtonText}>Clear</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
+  container: {
     padding: 20,
+    alignItems: "center",
+  },
+  uploadContainer: {
+    marginBottom: 20,
+    alignItems: "center",
+    width: "100%",
   },
   error: {
-    color: 'red',
+    color: "red",
     marginBottom: 10,
+    textAlign: "center",
+  },
+  uploadButton: {
+    backgroundColor: "#26572E",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    width: "100%",
+  },
+  uploadButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  imagePreview: {
+    width: 200,
+    height: 200,
+    marginTop: 10,
+    borderRadius: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 20,
+  },
+  button: {
+    flex: 1,
+    borderRadius: 20,
+    paddingVertical: 12,
+    marginHorizontal: 5,
+    alignItems: "center",
+  },
+  nextButton: {
+    backgroundColor: "#26572E",
+  },
+  clearButton: {
+    backgroundColor: "#B3CF99",
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  clearButtonText: {
+    color: "black",
+    fontWeight: "bold",
   },
 });
 

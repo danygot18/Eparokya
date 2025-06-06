@@ -16,7 +16,7 @@ const WeddingForm = ({ navigation }) => {
   const { user, token } = useSelector(state => state.auth);
 
   const onDateChange = (setter, setShowPicker) => (event, selectedDate) => {
-    setShowPicker(false); // Hide the picker after selection
+    setShowPicker(false); 
     if (selectedDate) {
       setter(selectedDate);
     }
@@ -34,6 +34,7 @@ const WeddingForm = ({ navigation }) => {
       weddingTime: formattedWeddingTime,
     });
   };
+  
 
   const clearFields = () => {
     setDateOfApplication(new Date());

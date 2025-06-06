@@ -5,7 +5,7 @@ const FuneralSchema = new mongoose.Schema({
   name: { type: String, required: true },
 
   dateOfDeath: { type: Date, required: true },
-  personStatus: { type: String, enum: ['Dalaga/Binata', 'May Asawa, Biyuda'], required: false },
+  personStatus: { type: String, enum: ['Dalaga/Binata', 'May Asawa', 'Biyuda'], required: false },
   age: { type: String, required: true },
 
   contactPerson: { type: String, required: true },

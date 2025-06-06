@@ -1,47 +1,63 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, ScrollView, TouchableOpacity, Alert, Image, StyleSheet } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
-import * as ImagePicker from 'expo-image-picker';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import baseURL from '../../../assets/common/baseUrl';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+} from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Picker } from "@react-native-picker/picker";
+import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import baseURL from "../../../assets/common/baseUrl";
+import { Image } from "react-native";
+
+const marriageStatusOptions = ["Simbahan", "Civil", "Nat", "Others"];
 
 const BaptismForm = ({ navigation }) => {
   const [baptismDate, setBaptismDate] = useState(new Date());
   const [baptismTime, setBaptismTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [phone, setPhone] = useState('');
-  const [ninong, setNinong] = useState([]);
-  const [ninang, setNinang] = useState([]);
+  const [phone, setPhone] = useState("");
+  const [ninong, setNinong] = useState({ name: "", address: "", religion: "" });
+  const [ninang, setNinang] = useState({ name: "", address: "", religion: "" });
+  const [certificateNoRecord, setCertificateNoRecord] = useState(null);
+  const [showChildDOBPicker, setShowChildDOBPicker] = useState(false);
+  const [showBaptismDatePicker, setShowBaptismDatePicker] = useState(false);
+  const [showBaptismTimePicker, setShowBaptismTimePicker] = useState(false);
 
-  const [child, setChild] = useState({ fullName: '', dateOfBirth: new Date(), placeOfBirth: '', gender: '' });
-  const [parents, setParents] = useState({ fatherFullName: '', placeOfFathersBirth: '', motherFullName: '', placeOfMothersBirth: '', address: '', marriageStatus: '' });
+  const [child, setChild] = useState({
+    fullName: "",
+    dateOfBirth: new Date(),
+    placeOfBirth: "",
+    gender: "",
+  });
+
+  const [parents, setParents] = useState({
+    fatherFullName: "",
+    placeOfFathersBirth: "",
+    motherFullName: "",
+    placeOfMothersBirth: "",
+    address: "",
+    marriageStatus: "",
+    customMarriageStatus: "",
+  });
+
   const [NinongGodparents, setNinongGodparents] = useState([]);
   const [NinangGodparents, setNinangGodparents] = useState([]);
-  const [error, setError] = useState('');
-  const [userId, setUserId] = useState(null);
+  const [error, setError] = useState("");
+  const { user, token } = useSelector((state) => state.auth);
 
+  // Image states (unchanged)
   const [birthCertificate, setBirthCertificate] = useState(null);
   const [marriageCertificate, setMarriageCertificate] = useState(null);
   const [baptismPermit, setBaptismPermit] = useState(null);
-
-  const { user, token } = useSelector(state => state.auth);
-
-  // useEffect(() => {
-  //   if (!token) {
-  //     Alert.alert('Error', 'Token is missing. Please log in again.');
-  //     navigation.navigate('LoginPage');
-  //     return;
-  //   }
-  //   axios.get(`${baseURL}/profile`, { headers: { Authorization: `Bearer ${token}` } })
-  //     .then(({ data }) => setUserId(data.user._id))
-  //     .catch(() => {
-  //       Alert.alert('Error', 'Unable to retrieve user data.');
-  //       navigation.navigate('LoginPage');
-  //     });
-  // }, []);
 
   const pickImage = async (setImage) => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -55,330 +71,707 @@ const BaptismForm = ({ navigation }) => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!phone || !child.fullName || !child.dateOfBirth || !parents.fatherFullName || !parents.motherFullName || !birthCertificate || !marriageCertificate || !baptismPermit) {
-      setError('Please fill in all the required fields.');
-      return;
-    }
-
-    let formData = new FormData();
-    formData.append('baptismDate', baptismDate.toISOString());
-    formData.append('baptismTime', baptismTime.toISOString());
-    formData.append('phone', phone);
-    formData.append('child', JSON.stringify(child));
-    formData.append('parents', JSON.stringify(parents));
-    formData.append('ninong', JSON.stringify(ninong));
-    formData.append('ninang', JSON.stringify(ninang));
-    formData.append('NinongGodparents', JSON.stringify(NinongGodparents));
-    formData.append('NinangGodparents', JSON.stringify(NinangGodparents));
-
-    // Append images if they exist
-    if (birthCertificate) {
-      formData.append('birthCertificate', {
-        uri: birthCertificate,
-        name: 'birth_certificate.jpg',
-        type: 'image/jpeg',
-      });
-    }
-
-    if (marriageCertificate) {
-      formData.append('marriageCertificate', {
-        uri: marriageCertificate,
-        name: 'marriage_certificate.jpg',
-        type: 'image/jpeg',
-      });
-    }
-
-    if (baptismPermit) {
-      formData.append('baptismPermit', {
-        uri: baptismPermit,
-        name: 'baptism_permit.jpg',
-        type: 'image/jpeg',
-      });
-    }
-
-    try {
-      const response = await axios.post(`${baseURL}/baptismCreate`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      if (response.status === 201) {
-        Alert.alert('Success', 'Baptism form submitted successfully.');
-        navigation.navigate('Home');
-      } else {
-        setError('Failed to submit form. Please try again.');
-      }
-    } catch (err) {
-      console.error('Error submitting form:', err);
-      setError('An error occurred. Please try again later.');
-    }
-  };
-
   const addGodparent = (type) => {
-    if (type === 'ninong') {
-      setNinongGodparents([...NinongGodparents, { name: '', address: '', religion: '' }]);
-    } else {
-      setNinangGodparents([...NinangGodparents, { name: '', address: '', religion: '' }]);
+    if (type === "ninong" && NinongGodparents.length < 6) {
+      setNinongGodparents([
+        ...NinongGodparents,
+        { name: "", address: "", religion: "" },
+      ]);
+    } else if (type === "ninang" && NinangGodparents.length < 6) {
+      setNinangGodparents([
+        ...NinangGodparents,
+        { name: "", address: "", religion: "" },
+      ]);
     }
   };
 
   const removeGodparent = (type, index) => {
-    if (type === 'ninong') {
+    if (type === "ninong") {
       setNinongGodparents(NinongGodparents.filter((_, i) => i !== index));
     } else {
       setNinangGodparents(NinangGodparents.filter((_, i) => i !== index));
     }
   };
+  const ImagePreview = ({ uri, label }) => (
+    <View style={{ marginTop: 10 }}>
+      <Text style={styles.fileName}>{label}:</Text>
+      <Image
+        source={{ uri }}
+        style={{ width: 100, height: 100, borderRadius: 10 }}
+        resizeMode="cover"
+      />
+    </View>
+  );
+  const getAgeFromDOB = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    const hasBirthdayPassedThisYear =
+      today.getMonth() > birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() &&
+        today.getDate() >= birthDate.getDate());
+
+    if (!hasBirthdayPassedThisYear) {
+      age--;
+    }
+
+    return age;
+  };
+
+  const handleSubmit = async () => {
+    const childAge = getAgeFromDOB(child.dateOfBirth);
+
+    if (childAge >= 3 && !baptismPermit && !certificateNoRecord) {
+      setError(
+        "For children 3 years or older, a baptism permit or certificate of no record is required."
+      );
+      return;
+    }
+
+    if (
+      !phone ||
+      !child.fullName ||
+      !child.dateOfBirth ||
+      !parents.fatherFullName ||
+      !parents.motherFullName ||
+      !parents.address ||
+      (!parents.marriageStatus && !parents.customMarriageStatus) ||
+      !birthCertificate ||
+      !marriageCertificate
+    ) {
+      setError("Please fill in all the required fields.");
+      return;
+    }
+
+    const parentsData = {
+      ...parents,
+      marriageStatus:
+        parents.marriageStatus === "Others"
+          ? parents.customMarriageStatus
+          : parents.marriageStatus,
+    };
+
+    const childToSend = {
+      ...child,
+      dateOfBirth: child.dateOfBirth ? child.dateOfBirth.toISOString() : null,
+    };
+
+    let formData = new FormData();
+    formData.append("baptismDate", baptismDate.toISOString());
+    formData.append("baptismTime", baptismTime.toISOString());
+    formData.append("phone", phone);
+    formData.append("child", JSON.stringify(childToSend));
+    formData.append("parents", JSON.stringify(parentsData));
+    formData.append("ninong", JSON.stringify(ninong));
+    formData.append("ninang", JSON.stringify(ninang));
+    formData.append("NinongGodparents", JSON.stringify(NinongGodparents));
+    formData.append("NinangGodparents", JSON.stringify(NinangGodparents));
+
+    formData.append("birthCertificate", {
+      uri: birthCertificate,
+      name: "birth_certificate.jpg",
+      type: "image/jpeg",
+    });
+    formData.append("marriageCertificate", {
+      uri: marriageCertificate,
+      name: "marriage_certificate.jpg",
+      type: "image/jpeg",
+    });
+    formData.append("baptismPermit", {
+      uri: baptismPermit,
+      name: "baptism_permit.jpg",
+      type: "image/jpeg",
+    });
+    formData.append("certificateOfNoRecordBaptism", {
+      uri: certificateNoRecord,
+      name: "certificate_no_record.jpg",
+      type: "image/jpeg",
+    });
+
+    try {
+      const response = await axios.post(`${baseURL}/baptismCreate`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 201) {
+        Alert.alert("Success", "Baptism form submitted successfully.");
+        setPhone("");
+        setChild({ fullName: "", dateOfBirth: "" });
+        setParents({
+          fatherFullName: "",
+          motherFullName: "",
+          address: "",
+          marriageStatus: "",
+          customMarriageStatus: "",
+        });
+        setNinong({ fullName: "", address: "" });
+        setNinang({ fullName: "", address: "" });
+        setNinongGodparents([{ fullName: "", address: "" }]);
+        setNinangGodparents([{ fullName: "", address: "" }]);
+        setBirthCertificate(null);
+        setMarriageCertificate(null);
+        setBaptismPermit(null);
+        setCertificateNoRecord(null);
+        setError(null);
+        navigation.navigate("Home");
+      } else {
+        setError("Failed to submit form. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error submitting form:", err);
+      setError("An error occurred. Please try again later.");
+    }
+  };
+
+  const onChildDateChange = (event, selectedDate) => {
+    setShowChildDOBPicker(false);
+    if (selectedDate) {
+      setChild({ ...child, dateOfBirth: selectedDate });
+    }
+  };
+
+  const onBaptismDateChange = (event, selectedDate) => {
+    setShowBaptismDatePicker(false);
+    if (selectedDate) {
+      setBaptismDate(selectedDate);
+    }
+  };
+
+  const onBaptismTimeChange = (event, selectedTime) => {
+    setShowBaptismTimePicker(false);
+    if (selectedTime) {
+      setBaptismTime(selectedTime);
+    }
+  };
+
+  const formatTime12Hour = (date) => {
+    if (!date) return "";
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+    const minutesStr = minutes < 10 ? `0${minutes}` : minutes;
+    return `${hours}:${minutesStr}${ampm}`;
+  };
 
   return (
     <ScrollView contentContainerStyle={{ padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Baptism Form</Text>
-      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
+      <Text style={styles.header}>Baptism Form</Text>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <Text>Contact Number</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
+      {/* Contact Number */}
+      <View style={styles.section}>
+        <Text style={styles.label}>Contact Number *</Text>
+        <TextInput
+          style={styles.input}
+          keyboardType="phone-pad"
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="Enter contact number"
+        />
+      </View>
 
-      <Text>Buong Pangalang ng Bibinyagan</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={child.fullName} onChangeText={(text) => setChild({ ...child, fullName: text })} />
+      {/* Child Details */}
+      <View style={styles.section}>
+        <Text style={styles.subHeader}>Child Details</Text>
 
-      <Text>Araw ng Binyag</Text>
-      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-        <TextInput editable={false} value={baptismDate.toDateString()} style={{ borderWidth: 1, padding: 10 }} />
-      </TouchableOpacity>
+        <Text style={styles.label}>Full Name of Child *</Text>
+        <TextInput
+          style={styles.input}
+          value={child.fullName}
+          onChangeText={(text) => setChild({ ...child, fullName: text })}
+          placeholder="Enter child's full name"
+        />
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={child.dateOfBirth || new Date()}
+            mode="date"
+            display="default"
+            onChange={onChildDateChange}
+          />
+        )}
+
+        <TouchableOpacity onPress={() => setShowChildDOBPicker(true)}>
+          <TextInput
+            editable={false}
+            value={child.dateOfBirth ? child.dateOfBirth.toDateString() : ""}
+            style={styles.input}
+            placeholder="Select date of birth"
+          />
+        </TouchableOpacity>
+        {showChildDOBPicker && (
+          <DateTimePicker
+            value={child.dateOfBirth || new Date()}
+            mode="date"
+            display="default"
+            onChange={onChildDateChange}
+          />
+        )}
+
+        <Text style={styles.label}>Place of Birth</Text>
+        <TextInput
+          style={styles.input}
+          value={child.placeOfBirth}
+          onChangeText={(text) => setChild({ ...child, placeOfBirth: text })}
+          placeholder="Enter place of birth"
+        />
+
+        <Text style={styles.label}>Gender</Text>
+        <Picker
+          selectedValue={child.gender}
+          onValueChange={(itemValue) =>
+            setChild({ ...child, gender: itemValue })
+          }
+          style={styles.picker}
+        >
+          <Picker.Item label="Select Gender" value="" />
+          <Picker.Item label="Male" value="Male" />
+          <Picker.Item label="Female" value="Female" />
+        </Picker>
+      </View>
+
+      {/* Baptism Date & Time */}
+      <View style={styles.section}>
+        <Text style={styles.label}>Baptism Date *</Text>
+        <TouchableOpacity onPress={() => setShowBaptismDatePicker(true)}>
+          <TextInput
+            editable={false}
+            value={baptismDate.toDateString()}
+            style={styles.input}
+            placeholder="Select baptism date"
+          />
+        </TouchableOpacity>
+        {showBaptismDatePicker && (
+          <DateTimePicker
+            value={baptismDate}
+            mode="date"
+            display="default"
+            onChange={onBaptismDateChange}
+          />
+        )}
+
+        <Text style={styles.label}>Baptism Time *</Text>
+        <TouchableOpacity onPress={() => setShowBaptismTimePicker(true)}>
+          <TextInput
+            editable={false}
+            value={formatTime12Hour(baptismTime)}
+            style={styles.input}
+            placeholder="Select baptism time"
+          />
+        </TouchableOpacity>
+        {showBaptismTimePicker && (
+          <DateTimePicker
+            value={baptismTime}
+            mode="time"
+            display="default"
+            onChange={onBaptismTimeChange}
+          />
+        )}
+      </View>
+
+      {/* Parents Details */}
+      <View style={styles.section}>
+        <Text style={styles.subHeader}>Parents Details</Text>
+
+        <Text style={styles.label}>Father's Full Name *</Text>
+        <TextInput
+          style={styles.input}
+          value={parents.fatherFullName}
+          onChangeText={(text) =>
+            setParents({ ...parents, fatherFullName: text })
+          }
+          placeholder="Enter father's full name"
+        />
+
+        <Text style={styles.label}>Place of Father's Birth</Text>
+        <TextInput
+          style={styles.input}
+          value={parents.placeOfFathersBirth}
+          onChangeText={(text) =>
+            setParents({ ...parents, placeOfFathersBirth: text })
+          }
+          placeholder="Enter place of father's birth"
+        />
+
+        <Text style={styles.label}>Mother's Full Name *</Text>
+        <TextInput
+          style={styles.input}
+          value={parents.motherFullName}
+          onChangeText={(text) =>
+            setParents({ ...parents, motherFullName: text })
+          }
+          placeholder="Enter mother's full name"
+        />
+
+        <Text style={styles.label}>Place of Mother's Birth</Text>
+        <TextInput
+          style={styles.input}
+          value={parents.placeOfMothersBirth}
+          onChangeText={(text) =>
+            setParents({ ...parents, placeOfMothersBirth: text })
+          }
+          placeholder="Enter place of mother's birth"
+        />
+
+        {/* Remove barangay and city pickers here */}
+
+        <Text style={styles.label}>Address *</Text>
+        <TextInput
+          style={styles.input}
+          value={parents.address}
+          onChangeText={(text) => setParents({ ...parents, address: text })}
+          placeholder="Enter address"
+        />
+
+        <Text style={styles.label}>Marriage Status *</Text>
+        <Picker
+          selectedValue={parents.marriageStatus}
+          onValueChange={(value) =>
+            setParents({ ...parents, marriageStatus: value })
+          }
+          style={styles.picker}
+        >
+          <Picker.Item label="Select Marriage Status" value="" />
+          {marriageStatusOptions.map((status, i) => (
+            <Picker.Item key={i} label={status} value={status} />
+          ))}
+        </Picker>
+        {parents.marriageStatus === "Others" && (
+          <TextInput
+            style={styles.input}
+            placeholder="Specify Marriage Status"
+            value={parents.customMarriageStatus}
+            onChangeText={(text) =>
+              setParents({ ...parents, customMarriageStatus: text })
+            }
+          />
+        )}
+      </View>
+
+      {/* Principal Sponsor: Ninong */}
+      <View style={styles.section}>
+        <Text style={styles.subHeader}>
+          Ninong (Principal Godfather) Details *
+        </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Name"
+          value={ninong.name}
+          onChangeText={(text) => setNinong({ ...ninong, name: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Address"
+          value={ninong.address}
+          onChangeText={(text) => setNinong({ ...ninong, address: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Religion"
+          value={ninong.religion}
+          onChangeText={(text) => setNinong({ ...ninong, religion: text })}
+        />
+      </View>
+
+      {/* Principal Sponsor: Ninang */}
+      <View style={styles.section}>
+        <Text style={styles.subHeader}>
+          Ninang (Principal Godmother) Details *
+        </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Name"
+          value={ninang.name}
+          onChangeText={(text) => setNinang({ ...ninang, name: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Address"
+          value={ninang.address}
+          onChangeText={(text) => setNinang({ ...ninang, address: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Religion"
+          value={ninang.religion}
+          onChangeText={(text) => setNinang({ ...ninang, religion: text })}
+        />
+      </View>
+
+      {/* Secondary Sponsors: NinongGodparents */}
+      <View style={styles.section}>
+        <Text style={styles.subHeader}>Secondary Ninong Godparents</Text>
+        {NinongGodparents.map((godparent, index) => (
+          <View key={index} style={styles.inlineGroup}>
+            <TextInput
+              style={[styles.input, styles.flex1]}
+              placeholder="Name"
+              value={godparent.name}
+              onChangeText={(text) => {
+                const newList = [...NinongGodparents];
+                newList[index].name = text;
+                setNinongGodparents(newList);
+              }}
+            />
+            <TextInput
+              style={[styles.input, styles.flex1]}
+              placeholder="Address"
+              value={godparent.address}
+              onChangeText={(text) => {
+                const newList = [...NinongGodparents];
+                newList[index].address = text;
+                setNinongGodparents(newList);
+              }}
+            />
+            <TextInput
+              style={[styles.input, styles.flex1]}
+              placeholder="Religion"
+              value={godparent.religion}
+              onChangeText={(text) => {
+                const newList = [...NinongGodparents];
+                newList[index].religion = text;
+                setNinongGodparents(newList);
+              }}
+            />
+            <TouchableOpacity
+              onPress={() => removeGodparent("ninong", index)}
+              style={[styles.removeBtn, { backgroundColor: "#26572E" }]}
+            >
+              <Text style={{ color: "white" }}>Remove</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+
+        <TouchableOpacity
+          onPress={() => addGodparent("ninong")}
+          style={[
+            styles.addBtn,
+            {
+              backgroundColor:
+                NinongGodparents.length >= 6 ? "gray" : "#26572E",
+            },
+          ]}
+          disabled={NinongGodparents.length >= 6}
+        >
+          <Text style={{ color: "white" }}>Add Ninong Godparent</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Secondary Sponsors: NinangGodparents */}
+      <View style={styles.section}>
+        <Text style={styles.subHeader}>Secondary Ninang Godparents</Text>
+        {NinangGodparents.map((godparent, index) => (
+          <View key={index} style={styles.inlineGroup}>
+            <TextInput
+              style={[styles.input, styles.flex1]}
+              placeholder="Name"
+              value={godparent.name}
+              onChangeText={(text) => {
+                const newList = [...NinangGodparents];
+                newList[index].name = text;
+                setNinangGodparents(newList);
+              }}
+            />
+            <TextInput
+              style={[styles.input, styles.flex1]}
+              placeholder="Address"
+              value={godparent.address}
+              onChangeText={(text) => {
+                const newList = [...NinangGodparents];
+                newList[index].address = text;
+                setNinangGodparents(newList);
+              }}
+            />
+            <TextInput
+              style={[styles.input, styles.flex1]}
+              placeholder="Religion"
+              value={godparent.religion}
+              onChangeText={(text) => {
+                const newList = [...NinangGodparents];
+                newList[index].religion = text;
+                setNinangGodparents(newList);
+              }}
+            />
+            <TouchableOpacity
+              onPress={() => removeGodparent("ninang", index)}
+              style={[styles.removeBtn, { backgroundColor: "#26572E" }]}
+            >
+              <Text style={{ color: "white" }}>Remove</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+
+        <TouchableOpacity
+          onPress={() => addGodparent("ninang")}
+          style={[
+            styles.addBtn,
+            {
+              backgroundColor:
+                NinangGodparents.length >= 6 ? "gray" : "#26572E",
+            },
+          ]}
+          disabled={NinangGodparents.length >= 6}
+        >
+          <Text style={{ color: "white" }}>Add Ninang Godparent</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Document Uploads */}
+      <View style={styles.section}>
+        <Text style={styles.subHeader}>Upload Documents *</Text>
+
+        {/* --- REQUIRED: Birth Certificate --- */}
+        <Button
+          title="Select Birth Certificate"
+          onPress={() => pickImage(setBirthCertificate)}
+          color="#007AFF" // Use same color as submit for consistency
+        />
+        {birthCertificate && (
+          <ImagePreview uri={birthCertificate} label="Birth Certificate" />
+        )}
+
+        {/* --- REQUIRED: Marriage Certificate --- */}
+        <Button
+          title="Select Marriage Certificate"
+          onPress={() => pickImage(setMarriageCertificate)}
+          color="#007AFF"
+        />
+        {marriageCertificate && (
+          <ImagePreview
+            uri={marriageCertificate}
+            label="Marriage Certificate"
+          />
+        )}
+
+        {/* --- CONDITIONALLY REQUIRED: Baptism Permit --- */}
+        <Button
+          title="Select Baptism Permit"
+          onPress={() => pickImage(setBaptismPermit)}
+          color="#007AFF"
+        />
+        {baptismPermit && (
+          <ImagePreview uri={baptismPermit} label="Baptism Permit" />
+        )}
+
+        {/* OPTIONAL: Certificate of No Record of Baptism */}
+        <Button
+          title="Select Certificate of No Record of Baptism"
+          onPress={() => pickImage(setCertificateNoRecord)}
+          color="#007AFF"
+        />
+        {certificateNoRecord && (
+          <ImagePreview
+            uri={certificateNoRecord}
+            label="Certificate of No Record of Baptism"
+          />
+        )}
+      </View>
+
+      {/* Submit Button */}
+      <View style={{ marginVertical: 20 }}>
+        <Button title="Submit Form" onPress={handleSubmit} />
+      </View>
+
+      {/* Date & Time Pickers */}
       {showDatePicker && (
         <DateTimePicker
-          value={baptismDate}
+          value={child.dateOfBirth || new Date()}
           mode="date"
           display="default"
-          onChange={(event, date) => {
+          onChange={(event, selectedDate) => {
             setShowDatePicker(false);
-            if (date) setBaptismDate(date);
+            if (selectedDate) {
+              // Determine which date is being picked: child's DOB or baptismDate
+              if (child.dateOfBirth) {
+                setChild({ ...child, dateOfBirth: selectedDate });
+              } else {
+                setBaptismDate(selectedDate);
+              }
+            }
           }}
         />
       )}
-
-      <Text>Oras ng Binyag</Text>
-      <TouchableOpacity onPress={() => setShowTimePicker(true)}>
-        <TextInput editable={false} value={baptismTime.toLocaleTimeString()} style={{ borderWidth: 1, padding: 10 }} />
-      </TouchableOpacity>
       {showTimePicker && (
         <DateTimePicker
           value={baptismTime}
           mode="time"
           display="default"
-          onChange={(event, time) => {
+          onChange={(event, selectedTime) => {
             setShowTimePicker(false);
-            if (time) setBaptismTime(time);
+            if (selectedTime) setBaptismTime(selectedTime);
           }}
         />
       )}
-
-      <Text>Araw ng kapanganakan</Text>
-      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-        <TextInput editable={false} value={child.dateOfBirth.toDateString()} style={{ borderWidth: 1, padding: 10 }} />
-      </TouchableOpacity>
-      {showDatePicker && (
-        <DateTimePicker
-          value={child.dateOfBirth}
-          mode="date"
-          display="default"
-          onChange={(event, date) => {
-            setShowDatePicker(false);
-            if (date) setChild({ ...child, dateOfBirth: date });
-          }}
-        />
-      )}
-
-      <Text>Lugar kung saan ipinanganak</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={child.placeOfBirth} onChangeText={(text) => setChild({ ...child, placeOfBirth: text })} />
-
-      <Text>Kasarian</Text>
-      <Picker selectedValue={child.gender} onValueChange={(itemValue) => setChild({ ...child, gender: itemValue })}>
-        <Picker.Item label="Pumili ng kasarian" value="" />
-        <Picker.Item label="Male" value="Male" />
-        <Picker.Item label="Female" value="Female" />
-      </Picker>
-
-      <Text>Pangalan ng Ama</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={parents.fatherFullName} onChangeText={(text) => setParents({ ...parents, fatherFullName: text })} />
-
-      <Text>Lugar ng kapanganakan</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={parents.placeOfFathersBirth} onChangeText={(text) => setParents({ ...parents, placeOfFathersBirth: text })} />
-
-      <Text>Pangalan ng Ina (noong dalaga pa)</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={parents.motherFullName} onChangeText={(text) => setParents({ ...parents, motherFullName: text })} />
-
-      <Text>Lugar ng kapanganakan</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={parents.placeOfMothersBirth} onChangeText={(text) => setParents({ ...parents, placeOfMothersBirth: text })} />
-
-      <Text>Tirahan</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={parents.address} onChangeText={(text) => setParents({ ...parents, address: text })} />
-
-      <Text>Saan Kasal</Text>
-      <Picker selectedValue={parents.marriageStatus} onValueChange={(itemValue) => setParents({ ...parents, marriageStatus: itemValue })}>
-        <Picker.Item label="Select Marriage Status" value="" />
-        <Picker.Item label="Simbahan" value="Simbahan" />
-        <Picker.Item label="Civil" value="Civil" />
-        <Picker.Item label="Nat" value="Nat" />
-      </Picker>
-
-      <Text>Ninong Full Name</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninong.name} onChangeText={(text) => setNinong({ ...ninong, name: text })} />
-
-      <Text>Ninong Address</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninong.address} onChangeText={(text) => setNinong({ ...ninong, address: text })} />
-
-      <Text>Ninong Religion</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninong.religion} onChangeText={(text) => setNinong({ ...ninong, religion: text })} />
-
-      <Text>Ninang Full Name</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninang.name} onChangeText={(text) => setNinang({ ...ninang, name: text })} />
-
-      <Text>Ninang Address</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninang.address} onChangeText={(text) => setNinang({ ...ninang, address: text })} />
-
-      <Text>Ninang Religion</Text>
-      <TextInput style={{ borderWidth: 1, padding: 10 }} value={ninang.religion} onChangeText={(text) => setNinang({ ...ninang, religion: text })} />
-
-      <Text>Ninong</Text>
-      {NinongGodparents.map((godparent, index) => (
-        <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TextInput style={{ borderWidth: 1, padding: 10, flex: 1 }} value={godparent.name} onChangeText={(text) => {
-            let updated = [...NinongGodparents];
-            updated[index].name = text;
-            setNinongGodparents(updated);
-          }} />
-          {/* <Button title="Remove" onPress={() => removeGodparent('ninong', index)} /> */}
-          <TouchableOpacity onPress={() => removeGodparent('ninong')} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
-            <Text style={{ color: 'white', fontWeight: 'bold' }}>Remove</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-      <TouchableOpacity onPress={() => addGodparent('ninong')} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
-        <Text style={{ color: 'white', fontWeight: 'bold' }}>ADD NINONG</Text>
-      </TouchableOpacity>
-
-      <Text>Ninang</Text>
-      {NinangGodparents.map((godparent, index) => (
-        <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TextInput style={{ borderWidth: 1, padding: 10, flex: 1 }} value={godparent.name} onChangeText={(text) => {
-            let updated = [...NinangGodparents];
-            updated[index].name = text;
-            setNinangGodparents(updated);
-          }} />
-          {/* <Button title="Remove" onPress={() => removeGodparent('ninang', index)} /> */}
-          <TouchableOpacity onPress={() => removeGodparent('ninang')} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
-            <Text style={{ color: 'white', fontWeight: 'bold' }}>Remove</Text>
-          </TouchableOpacity>
-
-        </View>
-      ))}
-      <TouchableOpacity onPress={() => addGodparent('ninang')} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
-        <Text style={{ color: 'white', fontWeight: 'bold' }}>ADD NINANG</Text>
-      </TouchableOpacity>
-
-      {/* Image Pickers */}
-      <Text>Birth Certificate</Text>
-      <TouchableOpacity onPress={() => pickImage(setBirthCertificate)}>
-        <View style={{ borderWidth: 1, padding: 10, alignItems: 'center' }}>
-          {birthCertificate ? <Image source={{ uri: birthCertificate }} style={{ width: 100, height: 100 }} /> : <Text>Pick an image</Text>}
-        </View>
-      </TouchableOpacity>
-
-      <Text>Marriage Certificate</Text>
-      <TouchableOpacity onPress={() => pickImage(setMarriageCertificate)}>
-        <View style={{ borderWidth: 1, padding: 10, alignItems: 'center' }}>
-          {marriageCertificate ? <Image source={{ uri: marriageCertificate }} style={{ width: 100, height: 100 }} /> : <Text>Pick an image</Text>}
-        </View>
-      </TouchableOpacity>
-
-      <Text>Baptism Permit</Text>
-      <TouchableOpacity onPress={() => pickImage(setBaptismPermit)}>
-        <View style={{ borderWidth: 1, padding: 10, alignItems: 'center' }}>
-          {baptismPermit ? <Image source={{ uri: baptismPermit }} style={{ width: 100, height: 100 }} /> : <Text>Pick an image</Text>}
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={handleSubmit} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
-        <Text style={{ color: 'white', fontWeight: 'bold' }}>Submit</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  pickerContainer: {
+  section: { marginBottom: 20 },
+  header: {
+    fontSize: 26,
+    fontWeight: "bold",
     marginBottom: 20,
-    alignItems: 'center',
+    color: "#333",
   },
-  selectButton: {
-    backgroundColor: '#E8E8E8',
-    padding: 12,
-    borderRadius: 25,
-    width: 250,
-    alignItems: 'center',
+  subHeader: {
+    subHeader: { fontSize: 18, fontWeight: "600", marginBottom: 10 },
   },
-  buttonText: {
-    color: '#000',
-    fontSize: 16,
-  },
-  selectedDate: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  error: {
-    color: 'red',
+  label: { marginBottom: 6, fontWeight: "600" },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     marginBottom: 10,
   },
-  nextButton: {
-    backgroundColor: '#26572E',
+  picker: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  error: {
+    color: "red",
+    marginBottom: 12,
+  },
+  inlineGroup: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
+  flex1: {
+    flex: 1,
+    marginRight: 4,
+  },
+  addBtn: {
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  removeBtn: {
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 5,
+    alignItems: "center",
+  },
+  submitBtn: {
     padding: 15,
-    borderRadius: 25,
-    width: 250,
-    alignItems: 'center',
+    borderRadius: 5,
     marginTop: 20,
   },
-  nextButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
+  fileName: {
+    marginVertical: 4,
+    fontStyle: "italic",
+    color: "#666",
   },
-  clearButton: {
-    backgroundColor: '#B3CF99',
-    padding: 15,
-    borderRadius: 25,
-    width: 250,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  clearButtonText: {
-    color: '#000000',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-
-  submitButton: {
-    backgroundColor: '#26572E',
-    padding: 15,
-    borderRadius: 25,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  addButton: {
-    backgroundColor: '#26572E',
-    padding: 12,
-    borderRadius: 25,
-    alignItems: 'center',
-    marginTop: 10,
-  }
 });
 
 export default BaptismForm;

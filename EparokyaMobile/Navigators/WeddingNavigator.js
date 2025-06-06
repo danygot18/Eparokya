@@ -3,6 +3,9 @@ import { createStackNavigator } from "@react-navigation/stack";
 import WeddingForm from "../Screens/Forms/Wedding/WeddingForm";
 import WeddingForm2 from "../Screens/Forms/Wedding/WeddingForm2";
 import WeddingForm3 from "../Screens/Forms/Wedding/WeddingForm3";
+import WeddingForm4 from "../Screens/Forms/Wedding/WeddingForm3";
+import WeddingForm5 from "../Screens/Forms/Wedding/WeddingForm3";
+import WeddingForm6 from "../Screens/Forms/Wedding/WeddingForm3";
 import WeddingFormContainer from "../Screens/Forms/Wedding/WeddingFormContainer";
 //import WeddingForm5 from "../Screens/User/Wedding/WeddingForm5";
 
@@ -29,12 +32,30 @@ const WeddingNavigator = () => {
         component={WeddingForm2}
         options={{ title: "Wedding Form 2" }}
       />
-        <Stack.Screen
+      <Stack.Screen
         name="WeddingForm3"
         component={WeddingForm3}
         options={{ title: "Wedding Form 3" }}
       />
-        <Stack.Screen
+
+      <Stack.Screen
+        name="WeddingForm4"
+        component={WeddingForm4}
+        options={{ title: "Wedding Form 4" }}
+      />
+
+      <Stack.Screen
+        name="WeddingForm5"
+        component={WeddingForm5}
+        options={{ title: "Wedding Form 5" }}
+      />
+
+      <Stack.Screen
+        name="WeddingForm6"
+        component={WeddingForm6}
+        options={{ title: "Wedding Form 6" }}
+      />
+      <Stack.Screen
         name="WeddingFormContainer"
         component={WeddingFormContainer}
         options={{ title: "Wedding Form Container" }}

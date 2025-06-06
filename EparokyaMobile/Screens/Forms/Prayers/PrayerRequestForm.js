@@ -1,64 +1,75 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, ScrollView, TouchableOpacity } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
-import axios from 'axios';
-import baseURL from '../../../assets/common/baseUrl';
-import { useSelector } from 'react-redux';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Picker } from "@react-native-picker/picker";
+import axios from "axios";
+import baseURL from "../../../assets/common/baseUrl";
+import { useSelector } from "react-redux";
+import TermsAndConditionsModal from "../../../Screens/TermsAndConditionsModal";
 
 const PrayerRequestForm = ({ navigation }) => {
-    const [formData, setFormData] = useState({
-        offerrorsName: '',
-        prayerType: '',
-        prayerRequestDate: '',
-        Intentions: [{ name: '' }],
+  const [formData, setFormData] = useState({
+    offerrorsName: "",
+    prayerType: "",
+    prayerRequestDate: "",
+    Intentions: [{ name: "" }],
+  });
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const { user, token } = useSelector((state) => state.auth);
+  const [showTermsModal, setShowTermsModal] = useState(false); 
+
+  const handleChange = (value, field) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleIntentionChange = (value, index) => {
+    const updatedIntentions = [...formData.Intentions];
+    updatedIntentions[index].name = value;
+    setFormData((prev) => ({
+      ...prev,
+      Intentions: updatedIntentions,
+    }));
+  };
+
+  const handleAddIntention = () => {
+    setFormData((prev) => ({
+      ...prev,
+      Intentions: [...prev.Intentions, { name: "" }],
+    }));
+  };
+
+  const handleRemoveIntention = (index) => {
+    if (formData.Intentions.length > 1) {
+      setFormData((prev) => ({
+        ...prev,
+        Intentions: prev.Intentions.filter((_, i) => i !== index),
+      }));
+    }
+  };
+
+  const handleClear = () => {
+    setFormData({
+      offerrorsName: "",
+      prayerType: "",
+      prayerRequestDate: "",
+      Intentions: [{ name: "" }],
     });
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const { user, token } = useSelector(state => state.auth);
+  };
 
-    const handleChange = (value, field) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value,
-        }));
-    };
-
-    const handleIntentionChange = (value, index) => {
-        const updatedIntentions = [...formData.Intentions];
-        updatedIntentions[index].name = value;
-        setFormData(prev => ({
-            ...prev,
-            Intentions: updatedIntentions,
-        }));
-    };
-
-    const handleAddIntention = () => {
-        setFormData(prev => ({
-            ...prev,
-            Intentions: [...prev.Intentions, { name: '' }],
-        }));
-    };
-
-    const handleRemoveIntention = index => {
-        if (formData.Intentions.length > 1) {
-            setFormData(prev => ({
-                ...prev,
-                Intentions: prev.Intentions.filter((_, i) => i !== index),
-            }));
-        }
-    };
-
-    const handleClear = () => {
-        setFormData({
-            offerrorsName: '',
-            prayerType: '',
-            prayerRequestDate: '',
-            Intentions: [{ name: '' }],
-        });
-    };
-
-    const handleSubmit = async () => {
-        if (!formData.offerrorsName || !formData.prayerType || !formData.prayerRequestDate) {
+  const handleSubmit = async () => {
+    if (!formData.offerrorsName || !formData.prayerType || !formData.prayerRequestDate) {
             Alert.alert('Error', 'Please fill out all required fields!');
             return;
         }
@@ -74,78 +85,125 @@ const PrayerRequestForm = ({ navigation }) => {
         }
     };
 
-    return (
-        <ScrollView style={{ padding: 20 }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Prayer Request</Text>
+  return (
+    <ScrollView style={{ padding: 20 }}>
+      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>
+        Prayer Request
+      </Text>
 
-            <Text>Full Name</Text>
-            <TextInput
-                value={formData.offerrorsName}
-                onChangeText={value => handleChange(value, 'offerrorsName')}
-                style={{ borderBottomWidth: 1, marginBottom: 10 }}
-            />
+      <Text>Full Name</Text>
+      <TextInput
+        value={formData.offerrorsName}
+        onChangeText={(value) => handleChange(value, "offerrorsName")}
+        style={{ borderBottomWidth: 1, marginBottom: 10 }}
+      />
 
-            <Text>Prayer Type</Text>
-            <Picker
-                selectedValue={formData.prayerType}
-                onValueChange={(value) => handleChange(value, 'prayerType')}
-                style={{ borderBottomWidth: 1, marginBottom: 10 }}
-            >
-                <Picker.Item label="Select Prayer Type" value="" />
-                <Picker.Item label="Eternal Repose(Patay)" value="Eternal Repose(Patay)" />
-                <Picker.Item label="Thanks Giving(Pasasalamat)" value="Thanks Giving(Pasasalamat)" />
-                <Picker.Item label="Special Intentions(Natatanging Kahilingan)" value="Special Intentions(Natatanging Kahilingan)" />
-            </Picker>
+      <Text>Prayer Type</Text>
+      <Picker
+        selectedValue={formData.prayerType}
+        onValueChange={(value) => handleChange(value, "prayerType")}
+        style={{ borderBottomWidth: 1, marginBottom: 10 }}
+      >
+        <Picker.Item label="Select Prayer Type" value="" />
+        <Picker.Item
+          label="Eternal Repose(Patay)"
+          value="Eternal Repose(Patay)"
+        />
+        <Picker.Item
+          label="Thanks Giving(Pasasalamat)"
+          value="Thanks Giving(Pasasalamat)"
+        />
+        <Picker.Item
+          label="Special Intentions(Natatanging Kahilingan)"
+          value="Special Intentions(Natatanging Kahilingan)"
+        />
+      </Picker>
 
-            <Text>Prayer Request Date</Text>
-            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                <TextInput
-                    editable={false}
-                    value={formData.prayerRequestDate ? new Date(formData.prayerRequestDate).toLocaleDateString() : ''}
-                    style={{ borderWidth: 1, padding: 10 }}
-                />
-            </TouchableOpacity>
-            {showDatePicker && (
-                <DateTimePicker
-                    value={formData.prayerRequestDate ? new Date(formData.prayerRequestDate) : new Date()}
-                    mode="date"
-                    display="default"
-                    onChange={(event, date) => {
-                        setShowDatePicker(false);
-                        if (date) handleChange(date.toISOString(), 'prayerRequestDate');
-                    }}
-                />
-            )}
+      <Text>Prayer Request Date</Text>
+      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+        <TextInput
+          editable={false}
+          value={
+            formData.prayerRequestDate
+              ? new Date(formData.prayerRequestDate).toLocaleDateString()
+              : ""
+          }
+          style={{ borderWidth: 1, padding: 10 }}
+        />
+      </TouchableOpacity>
+      {showDatePicker && (
+        <DateTimePicker
+          value={
+            formData.prayerRequestDate
+              ? new Date(formData.prayerRequestDate)
+              : new Date()
+          }
+          mode="date"
+          display="default"
+          onChange={(event, date) => {
+            setShowDatePicker(false);
+            if (date) handleChange(date.toISOString(), "prayerRequestDate");
+          }}
+        />
+      )}
 
-            <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 10 }}>Special Intentions</Text>
-            {formData.Intentions.map((intention, index) => (
-                <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TextInput
-                        value={intention.name}
-                        onChangeText={value => handleIntentionChange(value, index)}
-                        style={{ borderBottomWidth: 1, flex: 1, marginBottom: 10 }}
-                        placeholder='Enter Intention'
-                    />
-                    <TouchableOpacity onPress={() => handleRemoveIntention(index)}>
-                        <Text style={{ color: 'red', marginLeft: 10 }}>Remove</Text>
-                    </TouchableOpacity>
-                </View>
-            ))}
-            <TouchableOpacity onPress={handleAddIntention} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
-                <Text style={{ color: 'white', fontWeight: 'bold' }}>Add Intention</Text>
-            </TouchableOpacity>
+      <Text style={{ fontSize: 18, fontWeight: "bold", marginTop: 10 }}>
+        Special Intentions
+      </Text>
+      {formData.Intentions.map((intention, index) => (
+        <View
+          key={index}
+          style={{ flexDirection: "row", alignItems: "center" }}
+        >
+          <TextInput
+            value={intention.name}
+            onChangeText={(value) => handleIntentionChange(value, index)}
+            style={{ borderBottomWidth: 1, flex: 1, marginBottom: 10 }}
+            placeholder="Enter Intention"
+          />
+          <TouchableOpacity onPress={() => handleRemoveIntention(index)}>
+            <Text style={{ color: "red", marginLeft: 10 }}>Remove</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+      <TouchableOpacity
+        onPress={handleAddIntention}
+        style={{
+          backgroundColor: "#26572E",
+          borderRadius: 8,
+          padding: 10,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "white", fontWeight: "bold" }}>
+          Add Intention
+        </Text>
+      </TouchableOpacity>
 
-            <View style={{ marginTop: 20 }}>
+        <View style={{ marginTop: 20 }}>
                 <TouchableOpacity onPress={handleClear} style={{ backgroundColor: '#B3CF99', borderRadius: 8, padding: 10, alignItems: 'center', marginBottom: 10 }}>
                     <Text style={{ color: 'black', fontWeight: 'bold' }}>Clear All Fields</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={handleSubmit} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
+                {/* Instead of calling handleSubmit here, open the terms modal */}
+                <TouchableOpacity onPress={() => setShowTermsModal(true)} style={{ backgroundColor: '#26572E', borderRadius: 8, padding: 10, alignItems: 'center' }}>
                     <Text style={{ color: 'white', fontWeight: 'bold' }}>Submit</Text>
                 </TouchableOpacity>
             </View>
-        </ScrollView>
-    );
+
+            {/* Terms and Conditions Modal */}
+           <TermsAndConditionsModal
+                isVisible={showTermsModal} 
+                onAgree={() => {
+                    setShowTermsModal(false);
+                    handleSubmit();  
+                }}
+                onCancel={() => setShowTermsModal(false)}
+            />
+      
+          
+    </ScrollView>
+  );
 };
 
 export default PrayerRequestForm;

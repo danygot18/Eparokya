@@ -57,7 +57,7 @@ const FormsNavigator = () => {
 
       <Stack.Screen
         name="WeddingForm2"
-        component={WeddingForm2}
+        component={WeddingForm2}  
         options={{
           headerShown: false,
         }}
@@ -71,7 +71,7 @@ const FormsNavigator = () => {
         }}
       />
       <Stack.Screen
-        name="WeddingForm4"
+        name="WeddingForm4"   
         component={WeddingForm4}
         options={{
           headerShown: false,

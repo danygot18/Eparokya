@@ -25,6 +25,12 @@
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
     "@reduxjs/toolkit": "^2.5.0",
+    "@tamagui/config": "^1.126.14",
+    "@tamagui/core": "^1.126.14",
+    "@tamagui/lucide-icons": "^1.126.14",
+    "@tamagui/select": "^1.126.14",
+    "@tamagui/tooltip": "^1.126.14",
+    "@tamagui/web": "^1.126.14",
     "@ui-kitten/components": "^5.3.1",
     "@ui-kitten/eva-icons": "^5.3.1",
     "axios": "^1.7.7",
@@ -80,10 +86,13 @@
     "redux-thunk": "^3.1.0",
     "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.13",
-    "sync-storage": "^0.4.2"
+    "sync-storage": "^0.4.2",
+    "typescript": "~5.3.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@tamagui/babel-plugin": "^1.126.14",
+    "tamagui": "^1.126.14"
   },
   "private": true
 }

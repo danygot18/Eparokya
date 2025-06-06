@@ -1,90 +1,56 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-// import Home from './Navigators/Home';
-import Header from './Shared/Header';
+import React, { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { NativeBaseProvider, extendTheme, } from "native-base";
-// import ProductContainer from './Screens/Product/ProductContainer';
-// import DrawerNavigation from './Navigators/DrawerNavigator';
-import Auth from './Context/Store/Auth';
-import DrawerNavigator from './Navigators/DrawerNavigator';
+import { NativeBaseProvider, extendTheme } from 'native-base';
 
-import { Provider } from "react-redux";
-// import store from "./Redux/store";
-import SyncStorage from 'sync-storage'
-import Main from './Main';
-
-import { persistor, store } from "./State/store";
-import { setTheme } from "./State/preferenceSlice";
+import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import 'react-native-gesture-handler';
-import 'react-native-reanimated';
+
 import { socket } from './socket';
 import { registerForPushNotificationsAsync, setupNotificationListener } from './service/notification';
-import { useEffect } from 'react';
 
-const theme = extendTheme({ colors: newColorTheme });
+import { persistor, store } from './State/store';
+import Main from './Main';
+import { createTamagui,TamaguiProvider, View } from 'tamagui'
+import { defaultConfig } from '@tamagui/config/v4'
+
+const config = createTamagui(defaultConfig)
+
 const newColorTheme = {
   brand: {
-    900: "#8287af",
-    800: "#7c83db",
-    700: "#b3bef6",
+    900: '#8287af',
+    800: '#7c83db',
+    700: '#b3bef6',
   },
 };
 
-
+const theme = extendTheme({ colors: newColorTheme });
 
 export default function App() {
   useEffect(() => {
-    // Get Push Notification Token and Register with Socket.IO
     registerForPushNotificationsAsync().then((token) => {
       if (token) {
-        socket.emit("register_push_token", { token });
+        socket.emit('register_push_token', { token });
       }
     });
 
-    // Setup Push Notification Listener
     setupNotificationListener();
   }, []);
 
   return (
-    //changes CODE:4/2/2025
-    // <Provider store={store}>
-    //   <PersistGate loading={null} persistor={persistor}>
-    //     {/* <Header /> */}
-    //     {/* <DrawerNavigator /> */}
-    //     <NativeBaseProvider theme={theme}>
-    //       <Main />
-    //     </NativeBaseProvider>
-    //     {/* <Main /> */}
-    //     {/* <Toast /> */}
-    //   </PersistGate>
-    // </Provider>
-
-    //New Code
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <NativeBaseProvider theme={theme}>
-          <NavigationContainer>
-            <Main />
-          </NavigationContainer>
-        </NativeBaseProvider>
+        <TamaguiProvider config={config} defaultTheme="light">
+          <NativeBaseProvider theme={theme}>
+            <NavigationContainer>
+              <Main />
+            </NavigationContainer>
+            <StatusBar style="auto" />
+          </NativeBaseProvider>
+        </TamaguiProvider>
       </PersistGate>
     </Provider>
-
-    // <Provider store={store}>
-    //   <PersistGate loading={null} persistor={persistor}>
-    //     <NativeBaseProvider theme={theme}>
-    //       <ApplicationProvider {...eva} theme={eva.light}>
-    //         {/* <Header /> */}
-    //         {/* <DrawerNavigator /> */}
-    //         <Main />
-    //         {/* <Toast /> */}
-    //       </ApplicationProvider>
-    //     </NativeBaseProvider>
-    //   </PersistGate>
-    // </Provider>
-
   );
 }
 
