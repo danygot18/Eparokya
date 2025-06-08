@@ -1,6 +1,7 @@
 const PrayerWall = require("../../models/PrayerWall/prayerWall");
 const mongoose = require("mongoose");
 const profanity = require("leo-profanity");
+const sendEmail = require('../../utils/sendEmail');
 
 exports.submitPrayerRequest = async (req, res) => {
   try {
@@ -26,6 +27,49 @@ exports.submitPrayerRequest = async (req, res) => {
     });
 
     const savedPrayer = await prayer.save();
+
+    const userEmail = req.user.email;
+    const htmlMessage = `
+  <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f9f9f9; color: #333;">
+    <!-- Greeting -->
+    <p style="font-size: 16px;">Good Day!</p>
+
+    <!-- Body -->
+    <p style="font-size: 16px;">
+      Thank you for submitting your prayer intention to the <strong>E:Parokya Prayer Wall</strong>.
+      We have received your request and our team will review it shortly before it appears publicly.
+    </p>
+
+    <!-- Prayer Details Section -->
+    <h3 style="margin-top: 20px;">Prayer Details</h3>
+    <ul style="list-style: none; padding: 0;">
+      <li><strong>Title:</strong> ${title || "Untitled"}</li>
+      <li><strong>Prayer Request:</strong> ${prayerRequest}</li>
+      <li><strong>Contact:</strong> ${contact || "No contact provided"}</li>
+      <li><strong>Sharing Option:</strong> ${prayerWallSharing ? "Shared" : "Private"}</li>
+    </ul>
+
+    <!-- Closing -->
+    <p style="margin-top: 20px; font-size: 16px;">
+      We are one with you in prayer. May God's grace guide and comfort you always.
+    </p>
+    
+    <!-- Footer -->
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
+    <footer style="font-size: 14px; color: #777;">
+      <p><strong>E:Parokya</strong><br>
+      Saint Joseph Parish – Taguig<br>
+      This is an automated email. Please do not reply.</p>
+    </footer>
+  </div>
+`;
+
+
+    await sendEmail({
+      email: userEmail,
+      subject: "Your Prayer Wall Request Has Been Submitted!",
+      message: htmlMessage,
+    });
 
     res.status(201).json({ success: true, prayer: savedPrayer });
   } catch (error) {
@@ -248,7 +292,7 @@ exports.getMySubmittedPrayers = async (req, res) => {
 
     const totalPrayers = await PrayerWall.countDocuments({
       userId: userId,
-      isDeletedByUser: { $ne: true }, 
+      isDeletedByUser: { $ne: true },
     });
 
     res.status(200).json({
@@ -277,7 +321,7 @@ exports.softDeletePrayer = async (req, res) => {
 
     prayer.isDeletedByUser = true;
 
-    await prayer.save(); 
+    await prayer.save();
 
     res.status(200).json({
       success: true,

@@ -7,6 +7,7 @@ const User = require('../../models/user');
 const { body, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const leoProfanity = require('leo-profanity');
+const sendEmail = require('../../utils/sendEmail');
 
 // exports.createPrayerRequestIntention = async (req, res) => {
 //     console.log("Received Data:", req.body);
@@ -108,6 +109,49 @@ exports.createPrayerRequestIntention = async (req, res) => {
         });
 
         await newPrayerRequest.save();
+
+        const userEmail = req.user.email;
+        const htmlMessage = `
+  <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f9f9f9; color: #333;">
+    <!-- Greeting -->
+    <p style="font-size: 16px;">Good Day!</p>
+
+    <!-- Body -->
+    <p style="font-size: 16px;">
+      Thank you for submitting your prayer request through the <strong>E:Parokya</strong>.
+      Your prayer has been received and will be reviewed by our team shortly.
+    </p>
+
+    <!-- Prayer Request Details Section -->
+    <h3 style="margin-top: 20px;">Prayer Details</h3>
+    <ul style="list-style: none; padding: 0;">
+      <li><strong>📖 Prayer Type:</strong> ${prayerType}</li>
+      ${prayerType === "Others" ? `<li><strong>Custom Prayer:</strong> ${addPrayer}</li>` : ""}
+      <li><strong>Description:</strong> ${prayerDescription}</li>
+      <li><strong>Intentions:</strong> ${Intentions?.join(", ") || "None listed"}</li>
+    </ul>
+
+    <!-- Closing -->
+    <p style="margin-top: 20px; font-size: 16px;">
+      May you feel the warmth of our prayers and the grace of God in your journey.
+    </p>
+
+    <!-- Footer -->
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
+    <footer style="font-size: 14px; color: #777;">
+      <p><strong>E:Parokya</strong><br>
+      Saint Joseph Parish – Taguig<br>
+      This is an automated email confirmation. Please do not reply.</p>
+    </footer>
+  </div>
+`;
+
+
+        await sendEmail({
+            email: userEmail,
+            subject: "Your Prayer Request Has Been Submitted!",
+            message: htmlMessage,
+        });
 
         // Find all Admins
         const admins = await User.find({ isAdmin: true }, '_id');
@@ -212,7 +256,7 @@ exports.markPrayerRequestIntentionAsDone = async (req, res) => {
 
         if (userId) {
             console.log("User ID for Notification:", userId);
-            
+
             const newNotification = new Notification({
                 user: userId,
                 message: "Your prayer request has been marked as done by the admin.",

@@ -2,7 +2,7 @@ const Counseling = require('../../models/counseling');
 const mongoose = require('mongoose');
 const Priest = require('../../models/Priest/priest');
 const User = require('../../models/user');
-
+const sendEmail = require('../../utils/sendEmail');
 
 exports.createCounseling = async (req, res) => {
   try {
@@ -36,6 +36,52 @@ exports.createCounseling = async (req, res) => {
     });
 
     const savedCounseling = await newCounseling.save();
+
+    const userEmail = req.user.email;
+const htmlMessage = `
+  <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f9f9f9; color: #333;">
+    <!-- Greeting -->
+    <p style="font-size: 16px;">Good Day!</p>
+
+    <!-- Body -->
+    <p style="font-size: 16px;">
+      Thank you for submitting your counseling request to <strong>E:Parokya</strong>.<br>
+      We have received your request and our team will review it shortly. You will be notified once your counseling session is confirmed or if further information is needed.
+    </p>
+
+    <!-- Counseling Details Section -->
+    <h3 style="margin-top: 20px;">Counseling Request Details</h3>
+    <ul style="list-style: none; padding: 0;">
+      <li><strong>Person:</strong> ${person}</li>
+      <li><strong>Purpose:</strong> ${purpose}</li>
+      <li><strong>Contact Person:</strong> ${contactPerson}</li>
+      <li><strong>Contact Number:</strong> ${contactNumber}</li>
+      <li><strong>Address:</strong> ${address?.street || ""}, ${address?.baranggay || ""}, ${address?.city || ""}</li>
+      <li><strong>Date:</strong> ${counselingDate}</li>
+      <li><strong>Time:</strong> ${counselingTime}</li>
+    </ul>
+
+    <!-- Closing -->
+    <p style="margin-top: 20px; font-size: 16px;">
+      Thank you for reaching out. We are here to support you.
+    </p>
+    
+    <!-- Footer -->
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
+    <footer style="font-size: 14px; color: #777;">
+      <p><strong>E:Parokya</strong><br>
+      Saint Joseph Parish – Taguig<br>
+      This is an automated email. Please do not reply.</p>
+    </footer>
+  </div>
+`;
+
+await sendEmail({
+  email: userEmail,
+  subject: "Your Counseling Request Has Been Submitted!",
+  message: htmlMessage,
+});
+
     res.status(201).json({ message: 'Counseling request created successfully', counseling: savedCounseling });
   } catch (error) {
     console.error('Error creating counseling request:', error);

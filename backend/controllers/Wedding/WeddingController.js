@@ -3,6 +3,7 @@ const { Wedding } = require('../../models/weddings');
 const User = require('../../models/user');
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
+const sendEmail = require('../../utils/sendEmail');
 
 const uploadToCloudinary = async (file, folder) => {
   if (!file) throw new Error("File is required for upload.");
@@ -164,6 +165,35 @@ exports.submitWeddingForm = async (req, res) => {
     });
 
     await newWeddingForm.save();
+
+const userEmail = user.email;
+const htmlMessage = `
+  <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f9f9f9; color: #333;">
+    <p style="font-size: 16px;">Good Day!</p>
+    <p style="font-size: 16px;">
+      Thank you for submitting your wedding application to <strong>E:Parokya</strong>.<br>
+      We have received your request and our team will review it shortly. You will be notified once your wedding schedule is confirmed.
+    </p>
+    <h3 style="margin-top: 20px;">Wedding Details</h3>
+    <ul style="list-style: none; padding: 0;">
+      <li><strong>Wedding Date:</strong> ${weddingDate}</li>
+      <li><strong>Wedding Time:</strong> ${weddingTime}</li>
+      <li><strong>Groom Name:</strong> ${groomName}</li>
+      <li><strong>Groom Phone:</strong> ${groomPhone}</li>
+      <li><strong>Bride Name:</strong> ${brideName}</li>
+      <li><strong>Bride Phone:</strong> ${bridePhone}</li>
+      <li><strong>Wedding Theme:</strong> ${weddingTheme}</li>
+    </ul>
+    <br />
+    <p style="color: gray;">This is an automated confirmation from E:Parokya. Please do not reply.</p>
+  </div>
+`;
+
+await sendEmail({
+  email: userEmail,
+  subject: "Your Wedding Application Has Been Submitted!",
+  message: htmlMessage,
+});
 
     res.status(201).json({
       message: "Wedding form submitted successfully!",

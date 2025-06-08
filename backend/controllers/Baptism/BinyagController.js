@@ -3,6 +3,8 @@ const Baptism = require("../../models/Binyag");
 const mongoose = require("mongoose");
 const cloudinary = require('cloudinary').v2;
 const User = require('../../models/user');
+const sendEmail = require('../../utils/sendEmail');
+
 // Submit Baptism Form
 
 
@@ -114,15 +116,59 @@ exports.submitBaptismForm = async (req, res) => {
 
     await newBaptismForm.save();
 
+
+    const userEmail = user.email;
+    const htmlMessage = `
+  <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f9f9f9; color: #333;">
+    <!-- Greeting -->
+    <p style="font-size: 16px;">Good Day!</p>
+
+    <!-- Body -->
+    <p style="font-size: 16px;">
+      Thank you for submitting your baptism application to <strong>E:Parokya</strong>.<br>
+      We have received your request and our team will review it shortly. You will be notified once your baptism schedule is confirmed.
+    </p>
+
+    <!-- Baptism Details Section -->
+    <h3 style="margin-top: 20px;">Baptism Details</h3>
+    <ul style="list-style: none; padding: 0;">
+      <li><strong>Date:</strong> ${baptismDate}</li>
+      <li><strong>Time:</strong> ${baptismTime}</li>
+      <li><strong>Phone:</strong> ${phone}</li>
+      <li><strong>Child:</strong> ${typeof child === "string" ? JSON.parse(child).name : child.name}</li>
+      <li><strong>Parents:</strong> ${typeof parents === "string" ? JSON.parse(parents).father + " & " + JSON.parse(parents).mother : parents.father + " & " + parents.mother}</li>
+    </ul>
+
+    <!-- Closing -->
+    <p style="margin-top: 20px; font-size: 16px;">
+      Thank you for reaching out. We are here to support you.
+    </p>
+    
+    <!-- Footer -->
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
+    <footer style="font-size: 14px; color: #777;">
+      <p><strong>E:Parokya</strong><br>
+      Saint Joseph Parish – Taguig<br>
+      This is an automated email. Please do not reply.</p>
+    </footer>
+  </div>
+`;
+
+    await sendEmail({
+      email: userEmail,
+      subject: "Your Baptism Application Has Been Submitted!",
+      message: htmlMessage,
+    });
+
     res.status(201).json({
       message: "Baptism form submitted successfully!",
       baptismForm: newBaptismForm,
     });
   } catch (error) {
     console.error("Error submitting baptism form:", error);
-    res.status(500).json({ 
-      message: "An error occurred during submission.", 
-      error: error.message 
+    res.status(500).json({
+      message: "An error occurred during submission.",
+      error: error.message
     });
   }
 };
