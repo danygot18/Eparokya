@@ -39,8 +39,49 @@ const houseBlessingSchema = new mongoose.Schema({
         },
     },
     
+    // Property details
+    propertyType: {
+        type: String,
+        required: true,
+        enum: ['House', 'Apartment', 'Condominium', 'Building', 'Store', 'Office', 'Others']
+    },
+    customPropertyType: {
+        type: String,
+        required: function() {
+            return this.propertyType === 'Others';
+        }
+    },
+    floors: {
+        type: Number,
+        required: true,
+        min: 1,
+        default: 1
+    },
+    rooms: {
+        type: Number,
+        required: true,
+        min: 1,
+        default: 1
+    },
+    propertySize: {
+        type: String,
+        enum: ['Small (below 50 sqm)', 'Medium (50-100 sqm)', 'Large (100-200 sqm)', 'Extra Large (above 200 sqm)'],
+        required: true
+    },
+    isNewConstruction: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+    
     blessingDate: { type: Date, required: true },
-    blessingTime: { type: String, required: true, },
+    blessingTime: { type: String, required: true },
+    
+    // Special requests or notes
+    specialRequests: {
+        type: String,
+        maxlength: 500
+    },
 
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     confirmedAt: {

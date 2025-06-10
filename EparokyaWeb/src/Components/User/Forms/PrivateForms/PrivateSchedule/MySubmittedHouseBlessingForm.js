@@ -47,7 +47,7 @@ const MySubmittedHouseBlessingForm = () => {
                     position: toast.POSITION.TOP_RIGHT,
                     autoClose: 3000,
                 });
-                navigate("/user/profile");
+                navigate("/user/SubmittedHouseBlessingList");
             }
         } catch (err) {
             toast.error(
@@ -64,7 +64,6 @@ const MySubmittedHouseBlessingForm = () => {
       return <Loader />; 
     }
 
-
     return (
         <div className="wedding-details-page">
             <GuestSideBar />
@@ -79,6 +78,27 @@ const MySubmittedHouseBlessingForm = () => {
                         <div className="house-details-item">
                             <p><strong>Contact Number:</strong> {blessingDetails?.contactNumber || "N/A"}</p>
                         </div>
+                        
+                        {/* Property Details Section */}
+                        <div className="house-details-item">
+                            <p><strong>Property Type:</strong> {blessingDetails?.propertyType === 'Others' 
+                                ? blessingDetails?.customPropertyType 
+                                : blessingDetails?.propertyType || "N/A"}</p>
+                        </div>
+                        <div className="house-details-item">
+                            <p><strong>Floors:</strong> {blessingDetails?.floors || "N/A"}</p>
+                        </div>
+                        <div className="house-details-item">
+                            <p><strong>Rooms:</strong> {blessingDetails?.rooms || "N/A"}</p>
+                        </div>
+                        <div className="house-details-item">
+                            <p><strong>Property Size:</strong> {blessingDetails?.propertySize || "N/A"}</p>
+                        </div>
+                        <div className="house-details-item">
+                            <p><strong>New Construction:</strong> {blessingDetails?.isNewConstruction ? "Yes" : "No"}</p>
+                        </div>
+                        
+                        {/* Address Section */}
                         <div className="house-details-item">
                             <p>
                                 <strong>Address:</strong>{" "}
@@ -95,6 +115,8 @@ const MySubmittedHouseBlessingForm = () => {
                                     : (blessingDetails?.address?.city || "")}
                             </p>
                         </div>
+                        
+                        {/* Blessing Details Section */}
                         <div className="house-details-item">
                             <p><strong>Blessing Date:</strong> {blessingDetails?.blessingDate ? new Date(blessingDetails.blessingDate).toLocaleDateString() : "N/A"}</p>
                         </div>
@@ -107,6 +129,13 @@ const MySubmittedHouseBlessingForm = () => {
                         <div className="house-details-item">
                             <p><strong>Confirmed At:</strong> {blessingDetails?.confirmedAt ? new Date(blessingDetails.confirmedAt).toLocaleDateString() : "N/A"}</p>
                         </div>
+                        
+                        {/* Special Requests */}
+                        {blessingDetails?.specialRequests && (
+                            <div className="house-details-item">
+                                <p><strong>Special Requests:</strong> {blessingDetails.specialRequests}</p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Admin Comments Section */}
