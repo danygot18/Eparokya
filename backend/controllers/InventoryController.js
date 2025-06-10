@@ -1,5 +1,7 @@
 const Inventory = require('../models/Inventory.js');
 const ErrorHandler = require('../helpers/error-handler.js');
+const User = require("../models/user");
+
 
 // Create new inventory item => /api/v1/inventory/new
 const createInventoryItem = async (req, res, next) => {
@@ -159,13 +161,63 @@ const getLowStockItems = async (req, res, next) => {
 };
 
 // Borrow inventory item => /api/v1/inventory/:id/borrow
+// const borrowInventoryItem = async (req, res, next) => {
+//   try {
+//     const { quantity } = req.body;
+//     const userId = req.user._id; // Assuming you have user authentication
+
+//     if (!quantity || quantity <= 0) {
+//       return next(new ErrorHandler('Please enter a valid quantity', 400));
+//     }
+
+//     const inventoryItem = await Inventory.findById(req.params.id);
+//     if (!inventoryItem) {
+//       return next(new ErrorHandler('Inventory item not found', 404));
+//     }
+
+//     if (inventoryItem.availableQuantity < quantity) {
+//       return next(new ErrorHandler('Not enough items available', 400));
+//     }
+
+//     // Update available quantity
+//     inventoryItem.availableQuantity -= quantity;
+    
+//     // Add to borrow history
+//     inventoryItem.borrowHistory.push({
+//       user: userId,
+//       quantity,
+//       status: 'borrowed'
+//     });
+
+//     await inventoryItem.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: 'Item borrowed successfully',
+//       inventoryItem
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+// updated
 const borrowInventoryItem = async (req, res, next) => {
   try {
     const { quantity } = req.body;
-    const userId = req.user._id; // Assuming you have user authentication
+    const userId = req.user._id; 
 
     if (!quantity || quantity <= 0) {
       return next(new ErrorHandler('Please enter a valid quantity', 400));
+    }
+    const user = await User.findById(userId);
+
+    const hasAllowedRole = user.ministryRoles.some(role =>
+      ['Coordinator', 'Assistant Coordinator'].includes(role.role)
+    );
+
+    if (!hasAllowedRole) {
+      return next(new ErrorHandler('Only Coordinators or Assistant Coordinators can request to borrow items.', 403));
     }
 
     const inventoryItem = await Inventory.findById(req.params.id);
@@ -177,27 +229,28 @@ const borrowInventoryItem = async (req, res, next) => {
       return next(new ErrorHandler('Not enough items available', 400));
     }
 
-    // Update available quantity
-    inventoryItem.availableQuantity -= quantity;
-    
-    // Add to borrow history
+    // Do NOT deduct availableQuantity yet; wait for admin approval
+
+    // Add to borrow history with status "pending"
     inventoryItem.borrowHistory.push({
       user: userId,
       quantity,
-      status: 'borrowed'
+      status: 'pending', // waiting for admin approval
+      requestedAt: Date.now()
     });
 
     await inventoryItem.save();
 
     res.status(200).json({
       success: true,
-      message: 'Item borrowed successfully',
+      message: 'Borrow request submitted and is pending admin approval.',
       inventoryItem
     });
   } catch (error) {
     next(error);
   }
 };
+
 
 // Return inventory item => /api/v1/inventory/:id/return
 const returnInventoryItem = async (req, res, next) => {

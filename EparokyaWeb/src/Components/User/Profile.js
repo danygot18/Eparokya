@@ -95,37 +95,64 @@ const Profile = () => {
   
                 <Divider sx={{ my: 3, borderColor: 'divider' }} />
   
-                <Grid container spacing={2}>
-                  {[
-                    { label: 'Edit Profile', path: '/UpdateProfile' },
-                    { label: 'Change Password', path: '/password/update' },
-                    { label: 'View Forms', path: '/user/SubmittedFormsNavigation' },
-                    { label: 'Prayer Wall', path: '/user/SubmittedPrayerWallList' },
-                    { label: 'Feedback', path: '/user/submittedFeedback' }
-                  ].map((item, index) => (
-                    <Grid item xs={12} key={index}>
-                      <Button
-                        component={Link}
-                        to={item.path}
-                        fullWidth
-                        variant="outlined"
-                        color="success"
-                        sx={{
-                          justifyContent: 'flex-start',
-                          py: 1.5,
-                          borderRadius: 2,
-                          textTransform: 'none',
-                          '&:hover': {
-                            backgroundColor: 'success.light',
-                            color: 'success.main'
-                          }
-                        }}
-                      >
-                        {item.label}
-                      </Button>
-                    </Grid>
-                  ))}
-                </Grid>
+              <Grid container spacing={2}>
+      {[
+        { label: 'Edit Profile', path: '/UpdateProfile' },
+        { label: 'Change Password', path: '/password/update' },
+        { label: 'View Forms', path: '/user/SubmittedFormsNavigation' },
+        { label: 'Prayer Wall', path: '/user/SubmittedPrayerWallList' },
+        { label: 'Feedback', path: '/user/submittedFeedback' }
+      ].map((item, index) => (
+        <Grid item xs={12} key={index}>
+          <Button
+            component={Link}
+            to={item.path}
+            fullWidth
+            variant="outlined"
+            color="success"
+            sx={{
+              justifyContent: 'flex-start',
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: 'success.light',
+                color: 'success.main'
+              }
+            }}
+          >
+            {item.label}
+          </Button>
+        </Grid>
+      ))}
+
+      {/* Conditionally render Request Ministry Item button */}
+      {user?.ministryRoles?.some(
+        (role) => role.role === 'Coordinator' || role.role === 'Assistant Coordinator'
+      ) && (
+        <Grid item xs={12}>
+          <Button
+            component={Link}
+            to="/user/RequestItem"
+            fullWidth
+            variant="contained"
+            color="success"
+            sx={{
+              justifyContent: 'flex-start',
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: 'none',
+              backgroundColor: 'success.main',
+              '&:hover': {
+                backgroundColor: 'success.dark'
+              }
+            }}
+          >
+            Request Ministry Item
+          </Button>
+        </Grid>
+      )}
+    </Grid>
               </Card>
             </Grid>
   

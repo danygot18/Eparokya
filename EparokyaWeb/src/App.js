@@ -218,6 +218,10 @@ import InventoryList from "./Components/Admin/Inventory/Inventory";
 import InventoryForm from "./Components/Admin/Inventory/InventoryForm";
 import InventoryUpdate from "./Components/Admin/Inventory/InventoryEdit";
 
+
+// User Inventory Form
+import UserInventoryForm from "./Components/User/InventoryForm";
+
 function Layout() {
   const location = useLocation(); // Now inside Router
   const isDashboard = location.pathname.startsWith("/admin");
@@ -305,6 +309,10 @@ function App() {
           element={<MinistryCalendar />}
           exact="true"
         />
+
+        <Route path="/user/RequestItem" element={<UserInventoryForm />} exact="true" />
+
+
         <Route
           path="/user/NavigationForms"
           element={<NavigationForms />}
@@ -645,7 +653,7 @@ function App() {
           path="/admin/memberDirectoryEditDetails/:id"
           element={
             <ProtectedRoute isAdmin={true}>
-              <MemberDirectoryEditDetails/>
+              <MemberDirectoryEditDetails />
             </ProtectedRoute>
           }
         />

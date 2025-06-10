@@ -103,7 +103,6 @@ app.use("/api/v1", require("./routes/MassForms/massWedding"));
 
 // app.use("/api/v1", require("./routes/Announcement/AnnouncementComment"));
 // app.use("/api/v1", require("./routes/Announcement/ministryAnnouncement"));
-app.use("/api/v1", require("./routes/post"));
 
 // Events & Scheduling
 
