@@ -77,17 +77,22 @@ exports.getUserHouseBlessingRequests = async (req, res) => {
     }
 };
 
+
 exports.createPriestComment = async (req, res) => {
     try {
         const { blessingId } = req.params;
-        const { name } = req.body; 
+        const { priestId } = req.body;
 
-        if (!name) {
-            return res.status(400).json({ message: "Priest name is required." });
+        if (!priestId) {
+            return res.status(400).json({ message: "Priest ID is required." });
         }
 
         if (!mongoose.Types.ObjectId.isValid(blessingId)) {
             return res.status(400).json({ message: "Invalid house blessing ID format." });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(priestId)) {
+            return res.status(400).json({ message: "Invalid priest ID format." });
         }
 
         const houseBlessing = await HouseBlessing.findById(blessingId);
@@ -95,13 +100,21 @@ exports.createPriestComment = async (req, res) => {
             return res.status(404).json({ message: "House blessing not found." });
         }
 
-        houseBlessing.priest = name;
+        const priest = await Priest.findById(priestId);
+        if (!priest) {
+            return res.status(404).json({ message: "Priest not found." });
+        }
+
+        houseBlessing.priest = priest._id;
 
         await houseBlessing.save();
 
-        res.status(200).json({ message: "Priest added successfully.", priest: houseBlessing.priest });
+        res.status(200).json({
+            message: "Priest assigned successfully.",
+            priest: houseBlessing.priest
+        });
     } catch (error) {
-        console.error("Error adding priest:", error);
+        console.error("Error assigning priest:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 };
@@ -278,10 +291,11 @@ exports.getMySubmittedForms = async (req, res) => {
 // Get House Blessing Form Details by ID
 exports.getHouseBlessingFormById = async (req, res) => {
     try {
-        const { formId } = req.params; 
+        const { formId } = req.params;
 
         const houseBlessingForm = await HouseBlessing.findById(formId)
-            .populate('userId', 'name email') 
+            .populate('userId', 'name email')
+            .populate('priest', 'fullName') // ✅ Add this line
             .lean();
 
         if (!houseBlessingForm) {
@@ -295,6 +309,7 @@ exports.getHouseBlessingFormById = async (req, res) => {
     }
 };
 
+
 // Get House Blessing by ID
 exports.getHouseBlessingById = async (req, res) => {
     try {
@@ -304,7 +319,9 @@ exports.getHouseBlessingById = async (req, res) => {
             return res.status(400).json({ message: "Invalid blessing ID format." });
         }
 
-        const houseBlessing = await HouseBlessing.findById(blessingId).populate('userId', 'name email');
+        const houseBlessing = await HouseBlessing.findById(blessingId)
+            .populate('userId', 'name email')
+            .populate('priest', 'fullName'); // ✅ Add this line
 
         if (!houseBlessing) {
             return res.status(404).json({ message: "House Blessing not found." });
@@ -316,6 +333,7 @@ exports.getHouseBlessingById = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch house blessing by ID' });
     }
 };
+
 
 // Get Confirmed House Blessing Requests
 exports.getConfirmedHouseBlessing = async (req, res) => {

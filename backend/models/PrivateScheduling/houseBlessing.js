@@ -66,7 +66,7 @@ const houseBlessingSchema = new mongoose.Schema({
     propertySize: {
         type: String,
         enum: ['Small (below 50 sqm)', 'Medium (50-100 sqm)', 'Large (100-200 sqm)', 'Extra Large (above 200 sqm)'],
-        required: true
+        required: false
     },
     isNewConstruction: {
         type: Boolean,
@@ -120,7 +120,7 @@ const houseBlessingSchema = new mongoose.Schema({
         reason: { type: String },
     },
 
-    priest: { type: mongoose.Schema.Types.ObjectId, ref: 'priest' },
+    priest: { type: mongoose.Schema.Types.ObjectId, ref: 'Priest' },
     termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
 });
 

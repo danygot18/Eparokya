@@ -112,65 +112,157 @@ exports.getMessages = async (req, res) => {
 // };
 
 // Controller to get a list of chat users for a specific user
+// exports.getChatUsers = async (req, res) => {
+//     const { userId } = req.params;
+//     console.log(userId)
+
+//     try {
+//         if (!mongoose.Types.ObjectId.isValid(userId)) {
+//             return res.status(400).json({ error: "Invalid User ID." });
+//         }
+
+//         const users = await Chat.aggregate([
+//             {
+//                 $match: {
+//                     $or: [
+//                         { user: new mongoose.Types.ObjectId(userId) },
+//                         { sender: new mongoose.Types.ObjectId(userId) },
+//                     ],
+//                 },
+//             },
+//             {
+//                 $sort: { last_message_delivered_at: -1 }, // Sort by last_message_delivered_at in descending order
+//             },
+//             {
+//                 $group: {
+//                     _id: {
+//                         $cond: {
+//                             if: { $eq: ["$user", new mongoose.Types.ObjectId(userId)] },
+//                             then: "$sender",
+//                             else: "$user",
+//                         },
+//                     },
+//                     lastMessage: { $first: "$last_message" }, // Use the first message after sorting (most recent)
+//                     lastMessageAt: { $first: "$last_message_delivered_at" }, // Use the first timestamp after sorting
+//                 },
+//             },
+//             {
+//                 $lookup: {
+//                     from: "users",
+//                     localField: "_id",
+//                     foreignField: "_id",
+//                     as: "userDetails",
+//                 },
+//             },
+//             {
+//                 $unwind: "$userDetails",
+//             },
+//             {
+//                 $project: {
+//                     _id: 0,
+//                     id: "$userDetails._id",
+//                     name: "$userDetails.name",
+//                     email: "$userDetails.email",
+//                     avatar: "$userDetails.profile.avatar.url",
+//                     lastMessage: 1,
+//                     lastMessageAt: 1,
+//                 },
+//             },
+//             {
+//                 $sort: { lastMessageAt: -1 }, // Sort the final result by lastMessageAt
+//             },
+//         ]);
+
+//         res.status(200).json({ success: true, users });
+//     } catch (error) {
+//         console.error("Error fetching chat users:", error);
+//         res.status(500).json({ error: "Could not fetch chat users." });
+//     }
+// };
+
+//enw
 exports.getChatUsers = async (req, res) => {
     const { userId } = req.params;
-    console.log(userId)
 
     try {
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ error: "Invalid User ID." });
         }
 
+        const objectId = new mongoose.Types.ObjectId(userId);
+
         const users = await Chat.aggregate([
             {
                 $match: {
                     $or: [
-                        { user: new mongoose.Types.ObjectId(userId) },
-                        { sender: new mongoose.Types.ObjectId(userId) },
-                    ],
-                },
+                        { user: objectId },
+                        { sender: objectId }
+                    ]
+                }
             },
             {
-                $sort: { last_message_delivered_at: -1 }, // Sort by last_message_delivered_at in descending order
+                $addFields: {
+                    otherUser: {
+                        $cond: {
+                            if: { $eq: ["$user", objectId] },
+                            then: "$sender",
+                            else: "$user"
+                        }
+                    }
+                }
+            },
+            {
+                $sort: { createdAt: -1 }
             },
             {
                 $group: {
-                    _id: {
-                        $cond: {
-                            if: { $eq: ["$user", new mongoose.Types.ObjectId(userId)] },
-                            then: "$sender",
-                            else: "$user",
-                        },
-                    },
-                    lastMessage: { $first: "$last_message" }, // Use the first message after sorting (most recent)
-                    lastMessageAt: { $first: "$last_message_delivered_at" }, // Use the first timestamp after sorting
-                },
+                    _id: "$otherUser",
+                    lastMessage: { $first: "$message" },
+                    lastMessageAt: { $first: "$createdAt" },
+                    lastMessageSenderId: { $first: "$sender" }
+                }
             },
             {
                 $lookup: {
                     from: "users",
                     localField: "_id",
                     foreignField: "_id",
-                    as: "userDetails",
-                },
+                    as: "userDetails"
+                }
             },
             {
-                $unwind: "$userDetails",
+                $unwind: "$userDetails"
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "lastMessageSenderId",
+                    foreignField: "_id",
+                    as: "lastMessageSender"
+                }
+            },
+            {
+                $unwind: "$lastMessageSender"
             },
             {
                 $project: {
-                    _id: 0,
                     id: "$userDetails._id",
                     name: "$userDetails.name",
                     email: "$userDetails.email",
                     avatar: "$userDetails.profile.avatar.url",
                     lastMessage: 1,
                     lastMessageAt: 1,
-                },
+                    lastMessageSender: {
+                        id: "$lastMessageSender._id",
+                        name: "$lastMessageSender.name",
+                        email: "$lastMessageSender.email",
+                        avatar: "$lastMessageSender.profile.avatar.url"
+                    }
+                }
             },
             {
-                $sort: { lastMessageAt: -1 }, // Sort the final result by lastMessageAt
-            },
+                $sort: { lastMessageAt: -1 }
+            }
         ]);
 
         res.status(200).json({ success: true, users });
@@ -179,6 +271,7 @@ exports.getChatUsers = async (req, res) => {
         res.status(500).json({ error: "Could not fetch chat users." });
     }
 };
+
 
 // exports.getChatUsers = async (req, res) => {
 //     const { userId } = req.params;
