@@ -15,7 +15,7 @@ import {
   Paper,
   Typography,
   styled,
-  Chip
+  Chip,
 } from '@mui/material';
 import { CheckCircleOutline, HighlightOff } from '@mui/icons-material';
 import { toast } from 'react-toastify';

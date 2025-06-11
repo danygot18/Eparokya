@@ -723,40 +723,7 @@ const BaptismDetails = () => {
                 </div>
 
                 {/* Cancelling Reason Section */}
-                {baptismDetails?.binyagStatus === "Cancelled" && baptismDetails?.cancellingReason ? (
-                    <div className="house-comments-section">
-                        <h2>Cancellation Details</h2>
-                        <div className="admin-comment">
-                            <p><strong>Cancelled By:</strong> {baptismDetails.cancellingReason.user === "Admin" ? "Admin" : baptismDetails.cancellingReason.user}</p>
-                            <p><strong>Reason:</strong> {baptismDetails.cancellingReason.reason || "No reason provided."}</p>
-                        </div>
-                    </div>
-                ) : null}
 
-                {/* Cancel Button */}
-                <div className="button-container">
-                    <button onClick={() => setShowCancelModal(true)}>Cancel Baptism</button>
-                </div>
-
-                {/* Cancellation Modal */}
-                {showCancelModal && (
-                    <div className="modal-overlay">
-                        <div className="modal">
-                            <h3>Cancel Baptism</h3>
-                            <p>Please provide a reason for cancellation:</p>
-                            <textarea
-                                value={cancelReason}
-                                onChange={(e) => setCancelReason(e.target.value)}
-                                placeholder="Enter reason..."
-                                className="modal-textarea"
-                            />
-                            <div className="modal-buttons">
-                                <button onClick={handleCancel}>Confirm Cancel</button>
-                                <button onClick={() => setShowCancelModal(false)}>Back</button>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
 
             </div>
@@ -783,6 +750,61 @@ const BaptismDetails = () => {
                 >
                     {baptismDetails?.binyagStatus === "Confirmed" ? "Confirmed Baptism" : "Confirm Baptism"}
                 </button>
+                {baptismDetails?.binyagStatus === "Cancelled" && baptismDetails?.cancellingReason ? (
+                    <div className="house-comments-section">
+                        <h2>Cancellation Details</h2>
+                        <div className="admin-comment">
+                            <p><strong>Cancelled By:</strong> {baptismDetails.cancellingReason.user === "Admin" ? "Admin" : baptismDetails.cancellingReason.user}</p>
+                            <p><strong>Reason:</strong> {baptismDetails.cancellingReason.reason || "No reason provided."}</p>
+                        </div>
+                    </div>
+                ) : null}
+
+                {/* Cancel Button */}
+                <div className="button-container">
+                    <button onClick={() => setShowCancelModal(true)}>Cancel Baptism</button>
+                </div>
+
+                {/* Cancellation Modal */}
+                {/* {showCancelModal && (
+                    <div >
+                        <div className="modal">
+                            <h3>Cancel Baptism</h3>
+                            <p>Please provide a reason for cancellation:</p>
+                            <textarea
+                                value={cancelReason}
+                                onChange={(e) => setCancelReason(e.target.value)}
+                                placeholder="Enter reason..."
+                                className="modal-textarea"
+                            />
+                            <div className="modal-buttons">
+                                <button onClick={handleCancel}>Confirm Cancel</button>
+                                <button onClick={() => setShowCancelModal(false)}>Back</button>
+                            </div>
+                        </div>
+                    </div>
+                )} */}
+                <Dialog open={showCancelModal} onClose={() => setShowCancelModal(false)} size="md">
+                    <DialogTitle>Cancel Baptism</DialogTitle>
+                    <DialogContent>
+                        <Typography>Please provide a reason for cancellation:</Typography>
+                        <textarea
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                            placeholder="Enter reason..."
+                            className="modal-textarea"
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCancel} color="primary" variant="outlined" disabled={!cancelReason.trim()}>
+                            Confirm
+                        </Button>
+                        <Button onClick={() => setShowCancelModal(false)} color="error" variant="outlined">
+                            Back
+                        </Button>
+                    </DialogActions>
+
+                </Dialog>
                 <Dialog open={showConfirmDialog} onClose={() => setShowConfirmDialog(false)}>
                     <DialogTitle>Confirm Baptism</DialogTitle>
                     <DialogContent>
