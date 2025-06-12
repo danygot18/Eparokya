@@ -1,252 +1,214 @@
 import React, { useEffect, useState } from "react";
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
-  ActivityIndicator, 
-  StyleSheet, 
-  TextInput 
-} from "react-native";
+import { FlatList } from "react-native";
+import { YStack, XStack, Text, Input, Card, Button, Spinner } from "tamagui";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import baseURL from "../../../assets/common/baseUrl";
 
-const SubmittedWeddingList = () => {
-    const [weddingForms, setWeddingForms] = useState([]);
-    const [filteredForms, setFilteredForms] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [activeFilter, setActiveFilter] = useState("All");
-    const [searchTerm, setSearchTerm] = useState("");
-    const navigation = useNavigation();
-
-    useEffect(() => {
-        fetchMySubmittedForms();
-    }, []);
-
-    const fetchMySubmittedForms = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(
-                `${baseURL}/getAllUserSubmittedWedding`,
-                { withCredentials: true }
-            );
-
-            if (response.data && Array.isArray(response.data.forms)) {
-                setWeddingForms(response.data.forms);
-                setFilteredForms(response.data.forms);
-            } else {
-                setWeddingForms([]);
-                setFilteredForms([]);
-            }
-        } catch (error) {
-            console.error("Error fetching wedding forms:", error);
-            setError(err.response?.data?.message ||"Unable to fetch wedding forms.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const filterForms = (status) => {
-        setActiveFilter(status);
-        let filtered = weddingForms;
-        
-        if (status !== "All") {
-            filtered = filtered.filter((form) => form.weddingStatus === status);
-        }
-        
-        if (searchTerm) {
-            filtered = filtered.filter((form) => 
-                form.brideName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                form.groomName?.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
-        
-        setFilteredForms(filtered);
-    };
-
-    useEffect(() => {
-        filterForms(activeFilter);
-    }, [activeFilter, searchTerm, weddingForms]);
-
-    const handleCardClick = (weddingId) => {
-        navigation.navigate("SubmittedWeddingForm", { weddingId });
-    };
-
-    if (loading) {
-        return <ActivityIndicator style={styles.loader} size="large" color="#0000ff" />;
-    }
-
-    if (error) {
-        return <Text style={styles.error}>{error}</Text>;
-    }
-
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>My Submitted Wedding Forms</Text>
-
-            {/* Filter Buttons */}
-            <View style={styles.filterContainer}>
-                {["All", "Pending", "Confirmed", "Declined"].map((status) => (
-                    <TouchableOpacity
-                        key={status}
-                        style={[
-                            styles.filterButton,
-                            activeFilter === status && styles.activeFilterButton
-                        ]}
-                        onPress={() => filterForms(status)}
-                    >
-                        <Text style={[
-                            styles.filterText,
-                            activeFilter === status && styles.activeFilterText
-                        ]}>
-                            {status}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-
-            {/* Search Input */}
-            <TextInput
-                placeholder="Search by Bride or Groom Name"
-                value={searchTerm}
-                onChangeText={setSearchTerm}
-                style={styles.searchInput}
-            />
-
-            {filteredForms.length === 0 ? (
-                <Text style={styles.noRecords}>No submitted wedding forms found.</Text>
-            ) : (
-                <FlatList
-                    data={filteredForms}
-                    keyExtractor={(item) => item._id}
-                    renderItem={({ item, index }) => {
-                        const statusColor =
-                            item.weddingStatus === "Confirmed" ? "#4caf50" :
-                            item.weddingStatus === "Declined" ? "#ff5722" : "#ffd700";
-
-                        return (
-                            <TouchableOpacity
-                                style={[styles.card, { borderLeftColor: statusColor }]}
-                                onPress={() => handleCardClick(item._id)}
-                            >
-                                <View style={styles.cardHeader}>
-                                    <Text style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-                                        {item.weddingStatus ?? "Unknown"}
-                                    </Text>
-                                    <Text style={styles.cardTitle}>
-                                        Record #{index + 1}: {item.brideName ?? "Unknown Bride"} & {item.groomName ?? "Unknown Groom"}
-                                    </Text>
-                                </View>
-                                <View style={styles.cardDetails}>
-                                    <Text><Text style={styles.bold}>Wedding Date:</Text> {item.weddingDate ? new Date(item.weddingDate).toLocaleDateString() : "N/A"}</Text>
-                                    <Text><Text style={styles.bold}>Wedding Time:</Text> {item.weddingTime ?? "N/A"}</Text>
-                                    <Text><Text style={styles.bold}>Bride Contact:</Text> {item.bridePhone ?? "N/A"} | <Text style={styles.bold}>Groom Contact:</Text> {item.groomPhone ?? "N/A"}</Text>
-                                </View>
-                            </TouchableOpacity>
-                        );
-                    }}
-                />
-            )}
-        </View>
-    );
+const statusColors = {
+  Confirmed: "#4caf50",
+  Declined: "#ff5722",
+  Pending: "#ffd700",
+  All: "#e0e0e0",
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-        backgroundColor: "#fff",
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 20,
-        textAlign: "center",
-    },
-    loader: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    error: {
-        color: "red",
-        fontSize: 16,
-        textAlign: "center",
-        marginTop: 20,
-    },
-    noRecords: {
-        fontSize: 16,
-        textAlign: "center",
-        marginTop: 20,
-    },
-    card: {
-        backgroundColor: "#f9f9f9",
-        padding: 15,
-        marginVertical: 8,
-        borderRadius: 8,
-        borderLeftWidth: 6,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    cardHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 10,
-    },
-    statusBadge: {
-        paddingVertical: 4,
-        paddingHorizontal: 8,
-        borderRadius: 4,
-        color: "white",
-        fontWeight: "bold",
-    },
-    cardTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        flex: 1,
-        marginLeft: 10,
-    },
-    cardDetails: {
-        marginTop: 5,
-    },
-    bold: {
-        fontWeight: "bold",
-    },
-    filterContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 15,
-    },
-    filterButton: {
-        padding: 10,
-        borderRadius: 5,
-        backgroundColor: "#e0e0e0",
-    },
-    activeFilterButton: {
-        backgroundColor: "#4caf50",
-    },
-    filterText: {
-        color: "#333",
-        fontWeight: "bold",
-    },
-    activeFilterText: {
-        color: "white",
-    },
-    searchInput: {
-        height: 40,
-        borderColor: "#ddd",
-        borderWidth: 1,
-        borderRadius: 5,
-        paddingHorizontal: 10,
-        marginBottom: 15,
-        backgroundColor: "#fff",
-    },
-});
+const SubmittedWeddingList = () => {
+  const [weddingForms, setWeddingForms] = useState([]);
+  const [filteredForms, setFilteredForms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    fetchMySubmittedForms();
+  }, []);
+
+  const fetchMySubmittedForms = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `${baseURL}/getAllUserSubmittedWedding`,
+        { withCredentials: true }
+      );
+      if (response.data && Array.isArray(response.data.forms)) {
+        setWeddingForms(response.data.forms);
+        setFilteredForms(response.data.forms);
+      } else {
+        setWeddingForms([]);
+        setFilteredForms([]);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to fetch wedding forms.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterForms = (status) => {
+    setActiveFilter(status);
+    let filtered = weddingForms;
+
+    if (status !== "All") {
+      filtered = filtered.filter((form) => form.weddingStatus === status);
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (form) =>
+          form.brideName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          form.groomName?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredForms(filtered);
+  };
+
+  useEffect(() => {
+    filterForms(activeFilter);
+    // eslint-disable-next-line
+  }, [activeFilter, searchTerm, weddingForms]);
+
+  const handleCardClick = (weddingId) => {
+    navigation.navigate("SubmittedWeddingDetails", { weddingId });
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A";
+    const [hour, minute] = timeString.split(":");
+    const date = new Date();
+    date.setHours(Number(hour), Number(minute));
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  
+  if (loading) {
+    return (
+      <YStack flex={1} alignItems="center" justifyContent="center" bg="#fff">
+        <Spinner size="large" color="#154314" />
+      </YStack>
+    );
+  }
+
+  if (error) {
+    return (
+      <YStack flex={1} alignItems="center" justifyContent="center" bg="#fff">
+        <Text color="#d32f2f" fontSize={16}>{error}</Text>
+      </YStack>
+    );
+  }
+
+  return (
+    <YStack flex={1} bg="#f4f4f4" p="$4" space="$3">
+      <Text fontSize={24} fontWeight="bold" textAlign="center" mb="$2">
+        My Submitted Wedding Forms
+      </Text>
+
+      {/* Filter Buttons */}
+      <XStack space="$2" justifyContent="center" mb="$2">
+        {["All", "Pending", "Confirmed", "Declined"].map((status) => (
+          <Button
+            key={status}
+            size="$3"
+            backgroundColor={activeFilter === status ? statusColors[status] : "#e0e0e0"}
+            color={activeFilter === status ? "#fff" : "#333"}
+            fontWeight="bold"
+            onPress={() => filterForms(status)}
+            borderRadius={8}
+          >
+            {status}
+          </Button>
+        ))}
+      </XStack>
+
+      {/* Search Input */}
+      <Input
+        placeholder="Search by Bride or Groom Name"
+        value={searchTerm}
+        onChangeText={setSearchTerm}
+        backgroundColor="#fff"
+        borderRadius={8}
+        mb="$2"
+      />
+
+      {filteredForms.length === 0 ? (
+        <Text textAlign="center" color="#888" mt="$4">
+          No submitted wedding forms found.
+        </Text>
+      ) : (
+<FlatList
+  data={filteredForms}
+  keyExtractor={(item) => item._id}
+  showsVerticalScrollIndicator={false}
+  renderItem={({ item, index }) => {
+    const statusColor =
+      item.weddingStatus === "Confirmed"
+        ? "#4caf50"
+        : item.weddingStatus === "Declined"
+        ? "#ff5722"
+        : "#ffd700";
+    return (
+      <Card
+        key={item._id}
+        p="$3"
+        mb="$3"
+        borderRadius={12}
+        backgroundColor="#fff"
+        borderWidth={2}
+        borderColor={statusColor}
+        onPress={() => handleCardClick(item._id)} // <-- updated navigation
+        pressStyle={{ opacity: 0.9 }}
+      >
+        <XStack alignItems="center" justifyContent="space-between" mb="$2">
+          <Text
+            backgroundColor={statusColor}
+            color="#fff"
+            px="$2"
+            py={4}
+            borderRadius={6}
+            fontWeight="bold"
+            fontSize={13}
+          >
+            {item.weddingStatus ?? "Unknown"}
+          </Text>
+          <Text fontSize={18} fontWeight="bold" ml="$2" flex={1}>
+            Record #{index + 1}: {item.brideName ?? "Unknown Bride"} & {item.groomName ?? "Unknown Groom"}
+          </Text>
+        </XStack>
+        <YStack space="$1" ml="$2">
+          <Text>
+            <Text fontWeight="bold">Wedding Date:</Text> {formatDate(item.weddingDate)}
+          </Text>
+          <Text>
+            <Text fontWeight="bold">Wedding Time:</Text> {formatTime(item.weddingTime)}
+          </Text>
+          <Text>
+            <Text fontWeight="bold">Bride Contact:</Text> {item.bridePhone ?? "N/A"} |{" "}
+            <Text fontWeight="bold">Groom Contact:</Text> {item.groomPhone ?? "N/A"}
+          </Text>
+        </YStack>
+      </Card>
+    );
+  }}
+        />
+      )}
+    </YStack>
+  );
+};
 
 export default SubmittedWeddingList;

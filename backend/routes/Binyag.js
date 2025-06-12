@@ -20,8 +20,6 @@ router.post(
   BaptismController.submitBaptismForm
 );
 
-
-// router.get('/mySubmittedForms', isAuthenticatedUser, BaptismController.getMySubmittedForms);
 router.get('/confirmedBaptism', BaptismController.getConfirmedBaptisms);
 router.get('/getBaptismChecklist/:baptismId', BaptismController.getBaptismChecklist);
 

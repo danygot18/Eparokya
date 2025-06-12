@@ -1,44 +1,26 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-
-} from "react-native";
-import { Container } from "native-base";
+import { ScrollView } from "react-native";
+import { YStack, XStack, Text, Card, Avatar, Button } from "tamagui";
 import axios from "axios";
 import baseURL from "../../assets/common/baseUrl";
 import { useFocusEffect } from "@react-navigation/native";
-import SyncStorage from "sync-storage";
 import { useDispatch, useSelector } from "react-redux";
-import { logoutAction } from "../../Redux/Actions/userActions";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import FormContainer from "../../Shared/Form/FormContainer";
-import * as ImagePicker from "expo-image-picker";
-
 import { removeAuth } from "../../State/authSlice";
 
 const UserProfile = ({ navigation }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
   const dispatch = useDispatch();
-  const { user, token } = useSelector(state => state.auth);
+  const { token } = useSelector((state) => state.auth);
 
   const defaultImage = "https://rb.gy/hnb4yc";
 
   const getProfile = async () => {
-    console.log(token)
     if (!token) {
-      // setIsAuthenticated(false);
       navigation.navigate("Login");
       return;
     }
-
     try {
       const config = {
         headers: {
@@ -47,11 +29,7 @@ const UserProfile = ({ navigation }) => {
       };
       const { data } = await axios.get(`${baseURL}/profile`, config);
       setUserProfile(data?.user);
-      console.log(data?.user)
-      console.log(data?.user.ministryRoles)
     } catch (error) {
-      console.error(error);
-      // setIsAuthenticated(false);
       navigation.navigate("Login");
     } finally {
       setLoading(false);
@@ -60,170 +38,172 @@ const UserProfile = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      setIsAuthenticated(true);
       setLoading(false);
       getProfile();
-      console.log(token)
     }, [])
   );
 
   const handleLogout = async () => {
-    dispatch(removeAuth())
+    dispatch(removeAuth());
     navigation.navigate("Login");
-
   };
 
+  if (loading || !userProfile) {
+    return (
+      <YStack flex={1} alignItems="center" justifyContent="center" bg="#fff">
+        <Text fontSize={18}>Loading...</Text>
+      </YStack>
+    );
+  }
+
   return (
+    <ScrollView style={{ flex: 1, backgroundColor: "#f4f4f4" }}>
+      <YStack space="$4" p="$4" alignItems="center">
+        {/* Profile Header: Avatar, Name, Joined Date aligned horizontally */}
+        <XStack alignItems="center" space="$4" mb="$2">
+          <Avatar circular size="$8">
+            <Avatar.Image
+              source={{ uri: userProfile?.avatar?.url || defaultImage }}
+              style={{ width: 100, height: 100, borderRadius: 50 }}
+            />
+          </Avatar>
+          <YStack>
+            <Text fontSize={24} fontWeight="bold">
+              {userProfile?.name}
+            </Text>
+            <Text color="#888" fontSize={14}>
+              Joined: {userProfile?.createdAt?.slice(0, 10)}
+            </Text>
+          </YStack>
+        </XStack>
 
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.profileSection}>
-        {selectedImage ? (
-          <Image
-            source={{ uri: selectedImage }}
-            style={styles.profileImage}
-          />
-        ) : (
-          <Image
-            source={{ uri: userProfile?.avatar?.url || defaultImage }}
-            style={styles.profileImage}
-          />
-        )}
-        <View style={styles.nameContainer}>
-          <Text style={styles.profileName}>{userProfile?.name}</Text>
-          <Text style={styles.joinedLabel}>
-            Joined: {userProfile?.createdAt?.slice(0, 10)}
-          </Text>
-        </View>
-      </View>
-
-      {/* User Info */}
-      <View style={styles.infoContainer}>
-        <MaterialIcons name="email" size={24} color="#333" />
-        <Text style={styles.infoText}>{userProfile?.email}</Text>
-      </View>
-      <View style={styles.infoContainer}>
-        <MaterialIcons name="phone" size={24} color="#333" />
-        <Text style={styles.infoText}>{userProfile?.phone}</Text>
-      </View>
-      <View style={styles.infoContainer}>
-        <MaterialIcons name="info" size={24} color="#333" />
-        <Text style={styles.infoText}>{userProfile?.birthDate}</Text>
-      </View>
-      <View style={styles.infoContainer}>
-        <MaterialIcons name="info" size={24} color="#333" />
-        <Text style={styles.infoText}>{userProfile?.preference}</Text>
-      </View>
-      <View style={styles.infoContainer}>
-        <MaterialIcons name="home" size={24} color="#333" />
-        <Text style={styles.infoText}>
-          {userProfile?.address?.city || "No city"},
-          {userProfile?.address?.barangay || "No barangay"},
-          {userProfile?.address?.zip || "No zip"},
-          {userProfile?.country || "No country"}
-        </Text>
-      </View>
-
-      {/* Display Ministry Category */}
-      <View style={styles.infoContainer}>
-        <MaterialIcons name="group" size={24} color="#333" />
-        <View style={{ marginLeft: 10 }}>
-          {userProfile?.ministryRoles?.length > 0
-            ? userProfile.ministryRoles.map((role, index) => (
-              <Text key={index} style={styles.infoText}>
-                {`Ministry: ${role.ministry.name}\n`}
-                {`Role: ${role.role}\n`}
-                {`Start Year: ${role.startYear}\n`}
-                {`End Year: ${role.endYear}\n`}
+        {/* Info Cards */}
+        <YStack space="$2" w="100%" maxWidth={400}>
+          <Card p="$3" borderRadius={12} backgroundColor="#f7f7f7">
+            <XStack alignItems="center" space="$2">
+              <MaterialIcons name="email" size={22} color="#26572E" />
+              <Text fontSize={16}>{userProfile?.email}</Text>
+            </XStack>
+          </Card>
+          <Card p="$3" borderRadius={12} backgroundColor="#f7f7f7">
+            <XStack alignItems="center" space="$2">
+              <MaterialIcons name="phone" size={22} color="#26572E" />
+              <Text fontSize={16}>{userProfile?.phone || "No phone"}</Text>
+            </XStack>
+          </Card>
+          <Card p="$3" borderRadius={12} backgroundColor="#f7f7f7">
+            <XStack alignItems="center" space="$2">
+              <MaterialIcons name="cake" size={22} color="#26572E" />
+              <Text fontSize={16}>
+                {userProfile?.birthDate || "No birth date"}
               </Text>
+            </XStack>
+          </Card>
+          <Card p="$3" borderRadius={12} backgroundColor="#f7f7f7">
+            <XStack alignItems="center" space="$2">
+              <MaterialIcons name="favorite" size={22} color="#26572E" />
+              <Text fontSize={16}>
+                {userProfile?.preference || "No preference"}
+              </Text>
+            </XStack>
+          </Card>
+          <Card p="$3" borderRadius={12} backgroundColor="#f7f7f7">
+            <XStack alignItems="flex-start" space="$2">
+              <MaterialIcons name="home" size={22} color="#26572E" />
+              {userProfile?.address ? (
+                <Text fontSize={16}>
+                  {[
+                    userProfile.address.BldgNameTower,
+                    userProfile.address.LotBlockPhaseHouseNo,
+                    userProfile.address.SubdivisionVillageZone,
+                    userProfile.address.Street,
+                    userProfile.address.District,
+                    userProfile.address.barangay === "Others"
+                      ? userProfile.address.customBarangay || "Others"
+                      : userProfile.address.barangay,
+                    userProfile.address.city === "Others"
+                      ? userProfile.address.customCity || "Others"
+                      : userProfile.address.city,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </Text>
+              ) : (
+                <Text fontSize={16}>No Address</Text>
+              )}
+            </XStack>
+          </Card>
+        </YStack>
+
+        <Card p="$3" borderRadius={12} backgroundColor="#f7f7f7" w="100%" >
+          <XStack alignItems="center" space="$2" mb="$2">
+            <MaterialIcons name="group" size={22} color="#26572E" />
+            <Text fontSize={16} fontWeight="bold">
+              Ministry Roles
+            </Text>
+          </XStack>
+          {userProfile?.ministryRoles?.length > 0 ? (
+            userProfile.ministryRoles.map((role, idx) => (
+              <YStack key={idx} mb="$2" ml="$4">
+                <Text fontSize={15}>
+                  Ministry: <Text fontWeight="bold">{role.ministry.name}</Text>
+                </Text>
+                <Text fontSize={15}>
+                  Role: <Text fontWeight="bold">{role.role}</Text>
+                </Text>
+                <Text fontSize={15}>
+                  Start Year: <Text fontWeight="bold">{role.startYear}</Text>
+                </Text>
+                <Text fontSize={15}>
+                  End Year:{" "}
+                  <Text fontWeight="bold">{role.endYear || "Present"}</Text>
+                </Text>
+              </YStack>
             ))
-            : <Text style={styles.infoText}>No ministry roles assigned</Text>}
-        </View>
-      </View>
+          ) : (
+            <Text color="#888" ml="$4">
+              No ministry roles assigned
+            </Text>
+          )}
+        </Card>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("UpdateProfile")}
-          style={styles.actionButton}
+        <XStack
+          space="$4"
+          mt="$4"
+          w="100%"
+          maxWidth={400}
+          justifyContent="center"
         >
-          <MaterialIcons name="app-registration" size={24} color="white" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => navigation.navigate("SubmittedForms")}
-          style={styles.actionButton}
-        >
-          <MaterialIcons name="summarize" size={24} color="white" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleLogout}
-          style={styles.actionButton}
-        >
-          <MaterialIcons name="logout" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+          <Button
+            circular
+            size="$5"
+            backgroundColor="#154314"
+            onPress={() => navigation.navigate("UpdateProfile")}
+            icon={
+              <MaterialIcons name="app-registration" size={28} color="#fff" />
+            }
+            aria-label="Edit Profile"
+          />
+          <Button
+            circular
+            size="$5"
+            backgroundColor="#154314"
+            onPress={() => navigation.navigate("SubmittedForms")}
+            icon={<MaterialIcons name="summarize" size={28} color="#fff" />}
+            aria-label="My Forms"
+          />
+          <Button
+            circular
+            size="$5"
+            backgroundColor="#d32f2f"
+            onPress={handleLogout}
+            icon={<MaterialIcons name="logout" size={28} color="#fff" />}
+            aria-label="Logout"
+          />
+        </XStack>
+      </YStack>
     </ScrollView>
-
   );
 };
-
-const styles = StyleSheet.create({
-  scrollContainer: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  profileSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginRight: 20,
-  },
-  nameContainer: {
-    justifyContent: "center",
-  },
-  profileName: {
-    fontSize: 24,
-    fontFamily: "Roboto",
-    fontWeight: "bold",
-    color: "#333",
-  },
-  joinedLabel: {
-    fontSize: 14,
-    color: "gray",
-  },
-  infoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-    width: "90%",
-    padding: 15,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-  },
-  infoText: {
-    marginLeft: 10,
-    fontFamily: "Roboto",
-    color: "#333",
-    fontSize: 16,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "90%",
-    marginTop: 30,
-  },
-  actionButton: {
-    backgroundColor: "#154314",
-    padding: 15,
-    borderRadius: 10,
-    width: "30%",
-    alignItems: "center",
-  },
-});
 
 export default UserProfile;

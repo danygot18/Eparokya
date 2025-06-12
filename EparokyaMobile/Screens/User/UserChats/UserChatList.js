@@ -56,7 +56,9 @@ const UserChatList = () => {
                                 <View style={styles.chatInfo}>
                                     <Text style={styles.username}>{item.name || item.email}</Text>
                                     <Text style={styles.timestamp}>
-                                        Last message: {new Date(item?.lastMessageAt || Date.now()).toLocaleString()}
+                                        {item?.lastMessageSender?.name}: {item?.lastMessage}
+                                        {"\n"}
+                                        Date message: {item?.lastMessageAt ? new Date(item.lastMessageAt).toLocaleString() : "N/A"}
                                     </Text>
                                 </View>
                             </Pressable>

@@ -33,8 +33,10 @@ import SubmittedCounselingForm from "../Screens/User/Counseling/MySubmittedCouns
 import SubmittedHouseBlessingForm from "../Screens/User/PrivateScheduling/MySubmittedHouseBlessingForm";
 
 // import SubmittedPrayerWall from "../Screens/User/Prayers/MySubmittedPrayerWall";
+import SubmittedWeddingDetails from "../Screens/User/Wedding/SubmittedWeddingDetails";
 
 import Calendar from "../Screens/Calendar/Calendar";
+
 // import Announcement from "../Screens/User/Announcement/AnnouncementPage";
 // import AnnouncementDetail from "../Screens/User/Announcement/AnnouncementDetail";
 
@@ -96,6 +98,14 @@ const UserNavigator = (props) => {
       <Stack.Screen
         name="SubmittedWeddingList"
         component={SubmittedWeddingList}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+       <Stack.Screen
+        name="SubmittedWeddingDetails"
+        component={SubmittedWeddingDetails}
         options={{
           headerShown: false,
         }}

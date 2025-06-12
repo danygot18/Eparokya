@@ -152,10 +152,10 @@ const userSchema = new mongoose.Schema({
     phone: {
         type: String,
     },
-    isAdmin: {
-        type: Boolean,
-        default: false,
-    },
+    // isAdmin: {
+    //     type: Boolean,
+    //     default: false,
+    // },
     civilStatus: {
         type: String,
         enum: [
