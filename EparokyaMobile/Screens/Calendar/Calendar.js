@@ -21,7 +21,7 @@ const CalendarComponent = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [markedDates, setMarkedDates] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
-  const [filterType, setFilterType] = useState("all"); // 'all', 'wedding', 'funeral'
+  const [filterType, setFilterType] = useState("all"); 
 
   const { user, token } = useSelector(state => state.auth)
   useEffect(() => {
@@ -70,7 +70,6 @@ const CalendarComponent = () => {
 
       const weddings = response.data;
       setConfirmedWeddings(weddings);
-      // console.log("Weddings:", weddings);
 
       const dates = { ...markedDates };
       for (const wedding of weddings) {
@@ -249,7 +248,7 @@ const calendarTheme = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#b3cf99",
+    backgroundColor: "#F2F0EF",
     padding: 16,
   },
   title: {
@@ -279,38 +278,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
   },
-  addButton: {
-    backgroundColor: "#ff6347",
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontSize: 24,
-  },
   filterContainer: {
     flexDirection: "row",
     justifyContent: "center",
     marginVertical: 10,
   },
-  filterButton: {
+filterButton: {
     marginHorizontal: 5,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 20,
-    backgroundColor: "#ccc",
+    borderRadius: 8, 
+    backgroundColor: "#e0e0e0",
   },
   activeFilter: {
-    backgroundColor: "#ff6347",
+    backgroundColor: "#bdbdbd",
   },
   filterText: {
-    color: "#fff",
+    color: "black",
+    fontWeight: "bold",
+  },
+  filterText: {
+    color: "black",
     fontWeight: "bold",
   },
 });

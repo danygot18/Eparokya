@@ -31,6 +31,7 @@ import Main from "./Main";
 import AdminNavigator from "./AdminNavigator";
 // import UserNavigator from "./UserNavigator";
 import CalendarComponent from "../Screens/Calendar/Calendar";
+import MinistryAnnouncement from "../Screens/User/MinistryAnnouncement";
 
 import Forms from "../Screens/User/UserForms";
 // import Announcement from "../Screens/User/Announcement/AnnouncementPage";
@@ -47,7 +48,6 @@ import SentimentReports from "../Screens/SentimentReports";
 import EventSentiment from "../Screens/../Screens/User/FeedbackForm.js/EventSentiment";
 import ActivitySentiment from "../Screens/../Screens/User/FeedbackForm.js/ActivitySentiment";
 import PriestSentiment from "../Screens/../Screens/User/FeedbackForm.js/PriestSentiment";
-
 
 import { useState } from "react";
 import NotificationUser from "../service/notificationUser";
@@ -89,41 +89,41 @@ function CustomDrawerContent(props) {
   const [activeFeedback, setActiveFeedback] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const { user } = useSelector((state) => state.auth);
-useEffect(() => {
-  const fetchActiveFeedback = async () => {
-    try {
-      const response = await axios.get(`${baseURL}/admin-selections/active`);
-      if (response.data && response.data.isActive) {
-        setActiveFeedback(response.data);
-        setModalVisible(true);
+  useEffect(() => {
+    const fetchActiveFeedback = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/admin-selections/active`);
+        if (response.data && response.data.isActive) {
+          setActiveFeedback(response.data);
+          setModalVisible(true);
+        }
+      } catch (error) {
+        console.error("Error fetching active feedback form:", error);
       }
-    } catch (error) {
-      console.error("Error fetching active feedback form:", error);
+    };
+    fetchActiveFeedback();
+  }, []);
+
+  const handleNavigateToSentiment = () => {
+    setModalVisible(false);
+    if (activeFeedback) {
+      let route = "";
+      switch (activeFeedback.category) {
+        case "priest":
+          route = "PriestSentiment";
+          break;
+        case "event":
+          route = "EventSentiment";
+          break;
+        case "activities":
+          route = "ActivitySentiment";
+          break;
+        default:
+          return;
+      }
+      props.navigation.navigate(route, { activeFeedback });
     }
   };
-  fetchActiveFeedback();
-}, []);
-
-const handleNavigateToSentiment = () => {
-  setModalVisible(false);
-  if (activeFeedback) {
-    let route = "";
-    switch (activeFeedback.category) {
-      case "priest":
-        route = "PriestSentiment";
-        break;
-      case "event":
-        route = "EventSentiment";
-        break;
-      case "activities":
-        route = "ActivitySentiment";
-        break;
-      default:
-        return;
-    }
-    props.navigation.navigate(route, { activeFeedback });
-  }
-};
   return (
     <DrawerContentScrollView {...props} safeArea>
       <VStack space="0" my="0" mx="0" bg="#154314">
@@ -346,6 +346,8 @@ const DrawerNavigator = () => {
         <Drawer.Screen name="Home" component={Main} />
         <Drawer.Screen name="Resource Page" component={ResourcePage} />
         <Drawer.Screen name="Member Directory" component={MemberDirectory} />
+        <Drawer.Screen name="Ministry Announcement" component={MinistryAnnouncement} />
+
         <Drawer.Screen name="Parish Priests" component={ParishPriests} />
 
         <Drawer.Screen name="Calendar" component={CalendarComponent} />
@@ -356,15 +358,9 @@ const DrawerNavigator = () => {
 
         <Drawer.Screen name="Profile" component={Profile} />
 
-        <Drawer.Screen
-          name="PriestSentiment"
-          component={PriestSentiment}
-        />
+        <Drawer.Screen name="PriestSentiment" component={PriestSentiment} />
         <Drawer.Screen name="EventSentiment" component={EventSentiment} />
-        <Drawer.Screen
-          name="ActivitySentiment"
-          component={ActivitySentiment}
-        />
+        <Drawer.Screen name="ActivitySentiment" component={ActivitySentiment} />
         <Drawer.Screen name="Feedback Reports" component={SentimentReports} />
       </Drawer.Navigator>
     </Box>
