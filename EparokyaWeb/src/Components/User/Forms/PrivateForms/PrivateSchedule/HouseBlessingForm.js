@@ -5,10 +5,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import MetaData from '../../../../Layout/MetaData';
 import { Box } from '@mui/material';
-import { Button, TextField, MenuItem, Typography } from '@mui/material';
-
-// import phLocations from 'philippines';
-// import { municipalities, searchBaranggay } from 'ph-geo-admin-divisions';
+import { Button, TextField, MenuItem, Typography, FormControlLabel, Checkbox } from '@mui/material';
 
 const HouseBlessingForm = () => {
     const [formData, setFormData] = useState({
@@ -16,6 +13,13 @@ const HouseBlessingForm = () => {
         contactNumber: '',
         blessingDate: '',
         blessingTime: '',
+        propertyType: '',
+        customPropertyType: '',
+        floors: 1,
+        rooms: 1,
+        propertySize: '',
+        isNewConstruction: false,
+        specialRequests: '',
         address: {
             BldgNameTower: '',
             LotBlockPhaseHouseNo: '',
@@ -68,6 +72,14 @@ const HouseBlessingForm = () => {
     const [customCity, setCustomCity] = useState('');
     const [customBarangay, setCustomBarangay] = useState('');
 
+    const propertyTypes = ['House', 'Apartment', 'Condominium', 'Building', 'Store', 'Office', 'Others'];
+    const propertySizes = [
+        'Small (below 50 sqm)',
+        'Medium (50-100 sqm)',
+        'Large (100-200 sqm)',
+        'Extra Large (above 200 sqm)'
+    ];
+
     const config = {
         withCredentials: true,
     };
@@ -94,10 +106,15 @@ const HouseBlessingForm = () => {
                 current = current[keys[i]];
             }
             current[keys[keys.length - 1]] = e.target.value;
-
-            console.log('Updated Form Data:', updated);
             return updated;
         });
+    };
+
+    const handleCheckboxChange = (e) => {
+        setFormData(prev => ({
+            ...prev,
+            [e.target.name]: e.target.checked
+        }));
     };
 
     const handleClear = () => {
@@ -106,32 +123,45 @@ const HouseBlessingForm = () => {
             contactNumber: '',
             blessingDate: '',
             blessingTime: '',
+            propertyType: '',
+            customPropertyType: '',
+            floors: 1,
+            rooms: 1,
+            propertySize: '',
+            isNewConstruction: false,
+            specialRequests: '',
             address: {
-                houseDetails: '',
-                block: '',
-                lot: '',
-                phase: '',
-                street: '',
-                barangay: '',
+                BldgNameTower: '',
+                LotBlockPhaseHouseNo: '',
+                SubdivisionVillageZone: '',
+                Street: '',
                 district: '',
+                barangay: '',
                 city: '',
             },
         });
+        setCustomCity('');
+        setCustomBarangay('');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const { fullName, contactNumber, blessingDate, blessingTime, address } = formData;
+        const { fullName, contactNumber, blessingDate, blessingTime, address, 
+                propertyType, floors, rooms, propertySize, isNewConstruction } = formData;
 
         if (!fullName || !contactNumber || !blessingDate || !blessingTime ||
-            !address.Street || !address.district || !address.barangay || !address.city
+            !address.Street || !address.district || !address.barangay || !address.city ||
+            !propertyType || !floors || !rooms || !propertySize || isNewConstruction === undefined
         ) {
             toast.error('Please fill out all required fields!');
             return;
         }
 
-        // console.log('Submission Data:', formData);
+        if (propertyType === 'Others' && !formData.customPropertyType) {
+            toast.error('Please specify the property type');
+            return;
+        }
 
         try {
             const submissionData = {
@@ -186,7 +216,6 @@ const HouseBlessingForm = () => {
         }
     };
 
-
     return (
         <Box display="flex">
             <MetaData title="House Blessing Form" />
@@ -195,12 +224,15 @@ const HouseBlessingForm = () => {
                 <Box flex={1} p={2}>
                     <form onSubmit={handleSubmit}>
                         <Typography variant="h4" gutterBottom>House Blessing Information</Typography>
+                        
+                        {/* Basic Information */}
                         <TextField
                             label="Full Name"
                             value={formData.fullName}
                             onChange={(e) => handleChange(e, 'fullName')}
                             fullWidth
                             margin="normal"
+                            required
                         />
                         <TextField
                             label="Contact Number"
@@ -208,24 +240,113 @@ const HouseBlessingForm = () => {
                             onChange={(e) => handleChange(e, 'contactNumber')}
                             fullWidth
                             margin="normal"
+                            required
                         />
+                        
+                        {/* Property Details */}
+                        <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>Property Details</Typography>
+                        
                         <TextField
-                            label="House Blessing Date"
+                            select
+                            label="Property Type"
+                            value={formData.propertyType}
+                            onChange={(e) => handleChange(e, 'propertyType')}
+                            fullWidth
+                            margin="normal"
+                            required
+                        >
+                            <MenuItem value="">Select property type</MenuItem>
+                            {propertyTypes.map((type, index) => (
+                                <MenuItem key={index} value={type}>{type}</MenuItem>
+                            ))}
+                        </TextField>
+                        
+                        {formData.propertyType === 'Others' && (
+                            <TextField
+                                label="Specify Property Type"
+                                value={formData.customPropertyType}
+                                onChange={(e) => handleChange(e, 'customPropertyType')}
+                                fullWidth
+                                margin="normal"
+                                required
+                            />
+                        )}
+                        
+                        <Box display="flex" gap={2}>
+                            <TextField
+                                label="Number of Floors"
+                                type="number"
+                                value={formData.floors}
+                                onChange={(e) => handleChange(e, 'floors')}
+                                margin="normal"
+                                required
+                                inputProps={{ min: 1 }}
+                                sx={{ flex: 1 }}
+                            />
+                            <TextField
+                                label="Number of Rooms"
+                                type="number"
+                                value={formData.rooms}
+                                onChange={(e) => handleChange(e, 'rooms')}
+                                margin="normal"
+                                required
+                                inputProps={{ min: 1 }}
+                                sx={{ flex: 1 }}
+                            />
+                        </Box>
+                        
+                        <TextField
+                            select
+                            label="Optional: Property Size"
+                            value={formData.propertySize}
+                            onChange={(e) => handleChange(e, 'propertySize')}
+                            fullWidth
+                            margin="normal"
+                            required
+                        >
+                            <MenuItem value="">Select property size</MenuItem>
+                            {propertySizes.map((size, index) => (
+                                <MenuItem key={index} value={size}>{size}</MenuItem>
+                            ))}
+                        </TextField>
+                        
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={formData.isNewConstruction}
+                                    onChange={handleCheckboxChange}
+                                    name="isNewConstruction"
+                                />
+                            }
+                            label="Is this a new construction?"
+                            sx={{ mt: 1 }}
+                        />
+                        
+                        {/* Blessing Details */}
+                        <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>Blessing Details</Typography>
+                        
+                        <TextField
+                            label="Blessing Date"
                             type="date"
                             value={formData.blessingDate}
                             onChange={(e) => handleChange(e, 'blessingDate')}
                             fullWidth
                             margin="normal"
                             InputLabelProps={{ shrink: true }}
+                            required
                         />
                         <TextField
-                            label="House Blessing Time (Format: 7:00AM)"
+                            label="Blessing Time (Format: 7:00AM)"
                             value={formData.blessingTime}
                             onChange={(e) => handleChange(e, 'blessingTime')}
                             fullWidth
                             margin="normal"
+                            required
                         />
-                        <Typography variant="h4" gutterBottom>Address</Typography>
+                        
+                        {/* Address */}
+                        <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>Address</Typography>
+                        
                         {['BldgNameTower', 'LotBlockPhaseHouseNo', 'SubdivisionVillageZone', 'Street', 'district'].map((field) => (
                             <TextField
                                 key={field}
@@ -234,8 +355,10 @@ const HouseBlessingForm = () => {
                                 onChange={(e) => handleChange(e, `address.${field}`)}
                                 fullWidth
                                 margin="normal"
+                                required={field === 'Street' || field === 'district'}
                             />
                         ))}
+                        
                         <TextField
                             select
                             label="City"
@@ -243,21 +366,25 @@ const HouseBlessingForm = () => {
                             onChange={handleCityChange}
                             fullWidth
                             margin="normal"
+                            required
                         >
                             <MenuItem value="">Select a city</MenuItem>
                             {cities.map((city, index) => (
                                 <MenuItem key={index} value={city}>{city}</MenuItem>
                             ))}
                         </TextField>
+                        
                         {formData.address.city === 'Others' && (
                             <TextField
-                                label="Add City"
+                                label="Specify City"
                                 value={customCity}
                                 onChange={(e) => setCustomCity(e.target.value)}
                                 fullWidth
                                 margin="normal"
+                                required
                             />
                         )}
+                        
                         <TextField
                             select
                             label="Barangay"
@@ -265,22 +392,38 @@ const HouseBlessingForm = () => {
                             onChange={handleBarangayChange}
                             fullWidth
                             margin="normal"
+                            required
                         >
-
                             <MenuItem value="">Select a barangay</MenuItem>
                             {barangays.map((barangay, index) => (
                                 <MenuItem key={index} value={barangay}>{barangay}</MenuItem>
                             ))}
                         </TextField>
+                        
                         {formData.address.barangay === 'Others' && (
                             <TextField
-                                label="Add Barangay"
+                                label="Specify Barangay"
                                 value={customBarangay}
                                 onChange={(e) => setCustomBarangay(e.target.value)}
                                 fullWidth
                                 margin="normal"
+                                required
                             />
                         )}
+                        
+                        {/* Special Requests */}
+                        <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>Additional Information</Typography>
+                        
+                        <TextField
+                            label="Special Requests (Optional)"
+                            value={formData.specialRequests}
+                            onChange={(e) => handleChange(e, 'specialRequests')}
+                            fullWidth
+                            margin="normal"
+                            multiline
+                            rows={4}
+                        />
+                        
                         <Box display="flex" justifyContent="flex-end" mt={4}>
                             <Button variant="outlined" onClick={handleClear} style={{ marginRight: '8px' }}>
                                 Clear All Fields

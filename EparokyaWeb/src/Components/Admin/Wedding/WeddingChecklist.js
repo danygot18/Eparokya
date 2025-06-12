@@ -18,6 +18,7 @@ import {
   Chip
 } from '@mui/material';
 import { CheckCircleOutline, HighlightOff } from '@mui/icons-material';
+import { toast } from 'react-toastify';
 
 const StyledButton = styled(Button)(({ theme, verified }) => ({
   backgroundColor: verified ? theme.palette.success.main : theme.palette.grey[500],
@@ -83,7 +84,7 @@ const WeddingChecklist = ({ weddingId }) => {
         })
         .then((res) => {
           if (res.data.checklist) {
-            setChecklist(res.data.checklist);
+            setChecklist(res.data.checklist);         
             // console.log(res.data)
           }
         })
@@ -111,11 +112,11 @@ const WeddingChecklist = ({ weddingId }) => {
         checklist,
         { withCredentials: true }
       );
-      alert('Checklist updated successfully!');
+      toast.success('Checklist updated successfully!');
       setIsModalOpen(false);
     } catch (err) {
       console.error('Error updating checklist:', err);
-      alert('Failed to update checklist.');
+      toast.error('Failed to update checklist.');
     }
   };
 

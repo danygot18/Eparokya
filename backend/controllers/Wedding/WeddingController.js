@@ -55,7 +55,7 @@ exports.submitWeddingForm = async (req, res) => {
       'dateOfApplication', 'weddingDate', 'weddingTime', 'groomName', 'groomAddress',
       'brideName', 'brideAddress', 'brideReligion', 'brideOccupation', 'brideBirthDate',
       'bridePhone', 'groomReligion', 'groomOccupation', 'groomBirthDate', 'groomPhone',
-      'groomFather', 'groomMother', 'brideFather', 'brideMother', 'weddingTheme' 
+      'groomFather', 'groomMother', 'brideFather', 'brideMother', 'weddingTheme'
     ];
 
     for (const field of requiredFields) {
@@ -107,7 +107,7 @@ exports.submitWeddingForm = async (req, res) => {
     // Handle address parsing and validation
     const groomAddressObject = typeof groomAddress === "string" ? JSON.parse(groomAddress) : groomAddress;
     const brideAddressObject = typeof brideAddress === "string" ? JSON.parse(brideAddress) : brideAddress;
-    
+
     if (!groomAddressObject.city) {
       return res.status(400).json({ message: "Groom's city is required." });
     }
@@ -120,7 +120,7 @@ exports.submitWeddingForm = async (req, res) => {
     if (groomAddressObject.barangay === "Others" && !groomAddressObject.customBarangay) {
       return res.status(400).json({ message: "Please provide a custom barangay for the groom." });
     }
-    
+
     if (!brideAddressObject.city) {
       return res.status(400).json({ message: "Bride's city is required." });
     }
@@ -201,9 +201,9 @@ await sendEmail({
     });
   } catch (error) {
     console.error("Error submitting wedding form:", error);
-    res.status(500).json({ 
-      message: "An error occurred during submission.", 
-      error: error.message 
+    res.status(500).json({
+      message: "An error occurred during submission.",
+      error: error.message
     });
   }
 };
@@ -512,21 +512,39 @@ exports.getMySubmittedForms = async (req, res) => {
 };
 
 exports.getWeddingFormById = async (req, res) => {
+  // try {
+  //   const { weddingId } = req.params;
+
+  //   const weddingForm = await Wedding.findById( weddingId )
+  //     .populate('userId', 'name email')
+  //     .lean();
+
+  //   if (!weddingForm) {
+  //     return res.status(404).json({ message: "Wedding form not found." });
+  //   }
+
+  //   res.status(200).json(weddingForm);
+  // } catch (error) {
+  //   console.error("Error fetching wedding form by ID:", error);
+  //   res.status(500).json({ message: "Server error", error: error.message });
+  // }
   try {
     const { weddingId } = req.params;
 
-    const weddingForm = await Wedding.findById( weddingId )
-      .populate('userId', 'name email')
-      .lean();
-
-    if (!weddingForm) {
-      return res.status(404).json({ message: "Wedding form not found." });
+    if (!mongoose.Types.ObjectId.isValid(weddingId)) {
+      return res.status(400).json({ message: "Invalid wedding ID format." });
     }
 
-    res.status(200).json(weddingForm);
+    const wedding = await Wedding.findById(weddingId).populate('userId', 'name email');
+
+    if (!wedding) {
+      return res.status(404).json({ message: "Wedding not found." });
+    }
+
+    res.status(200).json(wedding);
   } catch (error) {
-    console.error("Error fetching wedding form by ID:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Error fetching wedding by ID:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 

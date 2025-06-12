@@ -26,7 +26,6 @@ import { format } from "date-fns";
 
 const WeddingDetails = () => {
   const { weddingId } = useParams();
-  console.log("Wedding ID:", weddingId);
 
   const navigate = useNavigate();
   const [weddingDetails, setWeddingDetails] = useState(null);
@@ -78,7 +77,7 @@ const WeddingDetails = () => {
           { withCredentials: true }
         );
 
-        console.log("API Response:", response.data);
+        // console.log("API Response:", response.data);
         setWeddingDetails(response.data);
         setComments(response.data.comments || []);
 

@@ -89,7 +89,7 @@ const FuneralList = () => {
             );
             if (response.data && Array.isArray(response.data)) {
                 setFuneralForms(response.data);
-                console.log("Funeral Forms:", response.data);
+                // console.log("Funeral Forms:", response.data);
             } else {
                 setFuneralForms([]);
             }

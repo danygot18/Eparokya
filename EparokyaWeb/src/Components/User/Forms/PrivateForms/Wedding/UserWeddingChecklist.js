@@ -2,23 +2,56 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
     Box,
-    Typography,
+    Button,
     Card,
     CardContent,
+    Checkbox,
     Divider,
+    FormControlLabel,
     List,
     ListItem,
-    Chip,
-    Button,
-    Paper
+    ListItemText,
+    Modal,
+    Paper,
+    Typography,
+    styled,
+    Chip
 } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import { CheckCircleOutline, HighlightOff } from '@mui/icons-material';
+import { toast } from 'react-toastify';
 
+const StyledButton = styled(Button)(({ theme, verified }) => ({
+    backgroundColor: verified ? theme.palette.success.main : theme.palette.grey[500],
+    color: theme.palette.common.white,
+    minWidth: 120,
+    height: 40,
+    '&:hover': {
+        backgroundColor: verified ? theme.palette.success.dark : theme.palette.grey[600],
+    },
+    pointerEvents: 'none'
+}));
+
+const SectionCard = styled(Card)(({ theme }) => ({
+    marginBottom: theme.spacing(3),
+    boxShadow: theme.shadows[3]
+}));
+
+const VerificationChip = ({ verified }) => (
+    <Chip
+        icon={verified ? <CheckCircleOutline /> : <HighlightOff />}
+        label={verified ? "Verified" : "Unverified"}
+        color={verified ? "success" : "error"}
+        variant="outlined"
+        sx={{
+            minWidth: 120,
+            borderWidth: 2,
+            borderStyle: 'solid'
+        }}
+    />
+);
 
 const UserWeddingChecklist = ({ weddingId }) => {
     const [checklist, setChecklist] = useState({
-        PreMarriageSeminar: false,
         GroomNewBaptismalCertificate: false,
         GroomNewConfirmationCertificate: false,
         GroomMarriageLicense: false,
@@ -37,14 +70,12 @@ const UserWeddingChecklist = ({ weddingId }) => {
         BrideTwobyTwo: false,
         PermitFromtheParishOftheBride: false,
         ChildBirthCertificate: false,
-        PreMarriageSeminar1: false,
-        PreMarriageSeminar2: false,
-        PreMarriageSeminar3: false,
+        PreMarriageSeminar: false,
         CanonicalInterview: false,
         Confession: false,
     });
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // console.log(weddingId)
     useEffect(() => {
         if (weddingId) {
             axios
@@ -54,7 +85,7 @@ const UserWeddingChecklist = ({ weddingId }) => {
                 .then((res) => {
                     if (res.data.checklist) {
                         setChecklist(res.data.checklist);
-                        // console.log(res.data)
+                        console.log('Checklist fetched successfully:', res.data);
                     }
                 })
                 .catch((err) => {
@@ -62,48 +93,39 @@ const UserWeddingChecklist = ({ weddingId }) => {
                 });
         }
     }, [weddingId]);
-    const formatLabel = (key) => {
-        return key
-            .replace(/([A-Z])/g, ' $1')
-            .replace(/(\d+)/g, ' $1')
-            .trim();
+
+    const handleCheckboxChange = (name) => {
+        setChecklist((prevState) => ({
+            ...prevState,
+            [name]: !prevState[name],
+        }));
     };
 
-    // Group checklist items by category
-    const groomItems = [
-        'GroomNewBaptismalCertificate',
-        'GroomNewConfirmationCertificate',
-        'GroomMarriageLicense',
-        'GroomMarriageBans',
-        'GroomOrigCeNoMar',
-        'GroomOrigPSA',
-        'GroomOnebyOne',
-        'GroomTwobyTwo'
-    ];
+    const handleSave = async () => {
+        setIsModalOpen(true);
+    };
 
-    const brideItems = [
-        'BrideNewBaptismalCertificate',
-        'BrideNewConfirmationCertificate',
-        'BrideMarriageLicense',
-        'BrideMarriageBans',
-        'BrideOrigCeNoMar',
-        'BrideOrigPSA',
-        'BrideOnebyOne',
-        'BrideTwobyTwo'
-    ];
+    const confirmSave = async () => {
+        try {
+            await axios.put(
+                `${process.env.REACT_APP_API}/api/v1/updateWeddingChecklist/${weddingId}`,
+                checklist,
+                { withCredentials: true }
+            );
+            toast.success('Checklist updated successfully!');
+            setIsModalOpen(false);
+        } catch (err) {
+            console.error('Error updating checklist:', err);
+            toast.error('Failed to update checklist.');
+        }
+    };
 
-    const otherDocs = [
-        'PermitFromtheParishOftheBride',
-        'ChildBirthCertificate'
-    ];
+    const verifiedItems = Object.keys(checklist).filter(key => checklist[key]);
+    const unverifiedItems = Object.keys(checklist).filter(key => !checklist[key]);
 
-    const seminars = [
-        'PreMarriageSeminar1',
-        'PreMarriageSeminar2',
-        'PreMarriageSeminar3',
-        'CanonicalInterview',
-        'Confession'
-    ];
+    const formatLabel = (str) => {
+        return str.replace(/([A-Z])/g, ' $1').trim();
+    };
 
     return (
         <Box sx={{ p: 3 }}>
@@ -111,111 +133,213 @@ const UserWeddingChecklist = ({ weddingId }) => {
                 Wedding Checklist
             </Typography>
 
-            {/* Groom Checklist */}
-            <Card sx={{ mb: 3 }}>
+            <SectionCard>
                 <CardContent>
                     <Typography variant="h5" gutterBottom>
-                        Groom Documents
+                        Groom Checklist
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
                     <List>
-                        {groomItems.map((item) => (
-                            <ListItem key={item} sx={{ py: 1 }}>
-                                <Typography sx={{ flexGrow: 1 }}>
-                                    {formatLabel(item)}
-                                </Typography>
-                                <Chip
-                                    label={checklist[item] ? "Verified" : "Unverified"}
-                                    color={checklist[item] ? "success" : "default"}
-                                    icon={checklist[item] ? <CheckCircleIcon /> : <CancelIcon />}
-                                    variant="outlined"
-                                />
-                            </ListItem>
-                        ))}
+                        {Object.entries(checklist)
+                            .filter(([key]) => key.startsWith('Groom'))
+                            .map(([key, value]) => (
+                                <ListItem key={key} sx={{ py: 1 }}>
+                                    <Typography sx={{ flexGrow: 1 }}>
+                                        {formatLabel(key)}
+                                    </Typography>
+                                    <VerificationChip verified={value} />
+                                </ListItem>
+                            ))}
                     </List>
                 </CardContent>
-            </Card>
+            </SectionCard>
 
-            {/* Bride Checklist */}
-            <Card sx={{ mb: 3 }}>
+            <SectionCard>
                 <CardContent>
                     <Typography variant="h5" gutterBottom>
-                        Bride Documents
+                        Bride Checklist
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
                     <List>
-                        {brideItems.map((item) => (
-                            <ListItem key={item} sx={{ py: 1 }}>
-                                <Typography sx={{ flexGrow: 1 }}>
-                                    {formatLabel(item)}
-                                </Typography>
-                                <Chip
-                                    label={checklist[item] ? "Verified" : "Unverified"}
-                                    color={checklist[item] ? "success" : "default"}
-                                    icon={checklist[item] ? <CheckCircleIcon /> : <CancelIcon />}
-                                    variant="outlined"
-                                />
-                            </ListItem>
-                        ))}
+                        {Object.entries(checklist)
+                            .filter(([key]) => key.startsWith('Bride'))
+                            .map(([key, value]) => (
+                                <ListItem key={key} sx={{ py: 1 }}>
+                                    <Typography sx={{ flexGrow: 1 }}>
+                                        {formatLabel(key)}
+                                    </Typography>
+                                    <VerificationChip verified={value} />
+                                </ListItem>
+                            ))}
                     </List>
                 </CardContent>
-            </Card>
+            </SectionCard>
 
-            {/* Other Documents */}
-            <Card sx={{ mb: 3 }}>
+            <SectionCard>
                 <CardContent>
                     <Typography variant="h5" gutterBottom>
                         Other Documents
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
                     <List>
-                        {otherDocs.map((item) => (
-                            <ListItem key={item} sx={{ py: 1 }}>
-                                <Typography sx={{ flexGrow: 1 }}>
-                                    {formatLabel(item)}
-                                </Typography>
-                                <Chip
-                                    label={checklist[item] ? "Verified" : "Unverified"}
-                                    color={checklist[item] ? "success" : "default"}
-                                    icon={checklist[item] ? <CheckCircleIcon /> : <CancelIcon />}
-                                    variant="outlined"
-                                />
-                            </ListItem>
-                        ))}
+                        {Object.entries(checklist)
+                            .filter(([key]) =>
+                                key === 'PermitFromtheParishOftheBride' ||
+                                key === 'ChildBirthCertificate'
+                            )
+                            .map(([key, value]) => (
+                                <ListItem key={key} sx={{ py: 1 }}>
+                                    <Typography sx={{ flexGrow: 1 }}>
+                                        {formatLabel(key)}
+                                    </Typography>
+                                    <VerificationChip verified={value} />
+                                </ListItem>
+                            ))}
                     </List>
                 </CardContent>
-            </Card>
+            </SectionCard>
 
-            {/* Seminars */}
-            <Card sx={{ mb: 3 }}>
+            <SectionCard>
                 <CardContent>
                     <Typography variant="h5" gutterBottom>
-                        Seminars
+                        Seminar / Additional
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
                     <List>
-                        {seminars.map((item) => (
-                            <ListItem key={item} sx={{ py: 1 }}>
-                                <Typography sx={{ flexGrow: 1 }}>
-                                    {formatLabel(item)}
-                                </Typography>
-                                <Chip
-                                    label={checklist[item] ? "Verified" : "Unverified"}
-                                    color={checklist[item] ? "success" : "default"}
-                                    icon={checklist[item] ? <CheckCircleIcon /> : <CancelIcon />}
-                                    variant="outlined"
-                                />
-                            </ListItem>
-                        ))}
+                        {Object.entries(checklist)
+                            .filter(([key]) =>
+                                key === 'PreMarriageSeminar' ||
+                                key === 'CanonicalInterview' ||
+                                key === 'Confession'
+                            )
+                            .map(([key, value]) => (
+                                <ListItem key={key} sx={{ py: 1 }}>
+                                    <Typography sx={{ flexGrow: 1 }}>
+                                        {formatLabel(key)}
+                                    </Typography>
+                                    <VerificationChip verified={value} />
+                                </ListItem>
+                            ))}
                     </List>
                 </CardContent>
-            </Card>
+            </SectionCard>
+            {/* <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleSave}
+          size="large"
+          sx={{ minWidth: 200, height: 50 }}
+        >
+          Save Checklist
+        </Button>
+      </Box> */}
 
-            {/* Summary Paper */}
+            <Modal
+                open={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                aria-labelledby="checklist-confirmation-modal"
+            >
+                <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: { xs: '90%', sm: 500 },
+                    maxHeight: '80vh',
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    borderRadius: 1,
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}>
+                    <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+                        <Typography variant="h6" component="h2">
+                            Checklist Verification Confirmation
+                        </Typography>
+                    </Box>
 
+                    <Box sx={{ overflow: 'auto', flex: 1, p: 3 }}>
+                        <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'grey.100' }}>
+                            <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                Verified Documents
+                                <Chip
+                                    label={`${verifiedItems.length} items`}
+                                    size="small"
+                                    color="success"
+                                    sx={{ ml: 1 }}
+                                />
+                            </Typography>
+                            <List dense sx={{ maxHeight: 200, overflow: 'auto' }}>
+                                {verifiedItems.map((item) => (
+                                    <ListItem key={item} sx={{ py: 0.5 }}>
+                                        <ListItemText
+                                            primary={formatLabel(item)}
+                                            primaryTypographyProps={{ sx: { display: 'flex', alignItems: 'center' } }}
+                                        />
+                                        <CheckCircleOutline color="success" sx={{ ml: 1 }} />
+                                    </ListItem>
+                                ))}
+                                {verifiedItems.length === 0 && (
+                                    <ListItem>
+                                        <ListItemText primary="No documents verified yet" />
+                                    </ListItem>
+                                )}
+                            </List>
+                        </Paper>
+
+                        <Paper elevation={0} sx={{ p: 2, bgcolor: 'grey.100' }}>
+                            <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                Pending Documents
+                                <Chip
+                                    label={`${unverifiedItems.length} items`}
+                                    size="small"
+                                    color="error"
+                                    sx={{ ml: 1 }}
+                                />
+                            </Typography>
+                            <List dense sx={{ maxHeight: 200, overflow: 'auto' }}>
+                                {unverifiedItems.map((item) => (
+                                    <ListItem key={item} sx={{ py: 0.5 }}>
+                                        <ListItemText
+                                            primary={formatLabel(item)}
+                                            primaryTypographyProps={{ sx: { display: 'flex', alignItems: 'center' } }}
+                                        />
+                                        <HighlightOff color="error" sx={{ ml: 1 }} />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Paper>
+                    </Box>
+
+                    <Box sx={{
+                        p: 2,
+                        borderTop: '1px solid',
+                        borderColor: 'divider',
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: 2
+                    }}>
+                        <Button
+                            variant="outlined"
+                            onClick={() => setIsModalOpen(false)}
+                            sx={{ minWidth: 100 }}
+                        >
+                            Back
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={confirmSave}
+                            sx={{ minWidth: 150 }}
+                        >
+                            Confirm Save
+                        </Button>
+                    </Box>
+                </Box>
+            </Modal>
         </Box>
     );
 };
 
 export default UserWeddingChecklist;
-

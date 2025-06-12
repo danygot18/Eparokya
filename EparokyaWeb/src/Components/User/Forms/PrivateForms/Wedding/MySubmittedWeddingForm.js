@@ -16,7 +16,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  CircularProgress
+  CircularProgress,
+  Divider
 } from "@mui/material";
 import GuestSideBar from "../../../../GuestSideBar";
 import UserWeddingChecklist from "./UserWeddingChecklist";
@@ -42,6 +43,7 @@ const MyWeddingSubmittedForm = () => {
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
 
+
   useEffect(() => {
     const fetchWeddingDetails = async () => {
       try {
@@ -52,6 +54,7 @@ const MyWeddingSubmittedForm = () => {
 
         if (response.data) {
           setWeddingForms(response.data);
+          console.log(response.data)
         } else {
           setWeddingForms(null);
         }
@@ -195,9 +198,7 @@ const MyWeddingSubmittedForm = () => {
                       <Typography sx={{ flex: "1 1 200px" }}>
                         <strong>Wedding Time:</strong> {weddingForms.weddingTime || "N/A"}
                       </Typography>
-                      <Typography sx={{ flex: "1 1 200px" }}>
-                        <strong>Status:</strong> {weddingForms.status || "N/A"}
-                      </Typography>
+
                     </Box>
                   </CardContent>
                 </Card>
@@ -714,17 +715,27 @@ const MyWeddingSubmittedForm = () => {
             </Box>
           </Modal>
         </Paper>
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleCancelClick}
-            sx={{ px: 4, py: 2, ml: 2 }}
-            size="small"
-          >
-            Cancel Wedding Request
-          </Button>
-        </Box>
+        <Divider>
+          <Card>
+            <Typography variant="h5" sx={{ textAlign: "center", p: 2 }}>
+              Status
+            </Typography>
+            <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
+              {weddingForms.weddingStatus || "N/A"}
+            </Typography>
+          </Card>
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleCancelClick}
+              sx={{ px: 4, py: 2, ml: 2 }}
+              size="small"
+            >
+              Cancel Wedding Request
+            </Button>
+          </Box>
+        </Divider>
       </Box>
       <ToastContainer />
     </Box>

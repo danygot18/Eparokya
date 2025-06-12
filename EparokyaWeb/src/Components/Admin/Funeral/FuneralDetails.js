@@ -88,6 +88,7 @@ const FuneralDetails = () => {
                     { withCredentials: true }
                 );
                 setFuneralDetails(response.data);
+                console.log("data", response.data);
                 setComments(response.data.comments || []);
                 setUpdatedFuneralDate(response.data.funeralDate || "");
             } catch (err) {

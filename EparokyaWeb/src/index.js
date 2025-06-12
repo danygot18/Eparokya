@@ -8,6 +8,13 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './store';
 import { socket } from './socket/index';
+import './index.css'
+
+const CustomCloseButton = ({ closeToast }) => (
+  <button className="custom-close-button" onClick={closeToast}>
+    Close
+  </button>
+);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -62,7 +69,16 @@ const RootComponent = () => {
       <PersistGate loading={null} persistor={persistor}>
         <App />
       </PersistGate>
-      <ToastContainer />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
     </Provider>
   );
 };
