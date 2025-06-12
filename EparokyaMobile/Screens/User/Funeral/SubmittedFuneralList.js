@@ -20,15 +20,20 @@ const SubmittedFuneralList = () => {
         fetchMySubmittedForms();
     }, []);
 
-
     const fetchMySubmittedForms = async () => {
         try {
             setLoading(true);
             const response = await axios.get(`${baseURL}/getAllUserSubmittedFuneral`, {
                 withCredentials: true,
             });
-            setFuneralForms(response.data.forms || []);
-            setFilteredForms(response.data.forms || []);
+            // Sort by latest to oldest using createdAt (or fallback to funeralDate)
+            const sortedForms = (response.data.forms || []).sort((a, b) => {
+                const dateA = new Date(a.createdAt || a.funeralDate || 0);
+                const dateB = new Date(b.createdAt || b.funeralDate || 0);
+                return dateB - dateA;
+            });
+            setFuneralForms(sortedForms);
+            setFilteredForms(sortedForms);
         } catch (err) {
             setError(err.response?.data?.message || "Error fetching funeral forms.");
         } finally {

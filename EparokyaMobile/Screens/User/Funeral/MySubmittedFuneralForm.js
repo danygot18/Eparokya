@@ -10,12 +10,44 @@ import {
   HStack,
   Center,
   Spinner,
+  Badge,
+  useTheme,
 } from "native-base";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import baseURL from '../../../assets/common/baseUrl';
 
+const InfoRow = ({ label, value }) => (
+  <HStack alignItems="center" mb={1}>
+    <Text bold color="primary.700" fontSize="md" minW={120}>{label}</Text>
+    <Text fontSize="md" color="coolGray.800">{value}</Text>
+  </HStack>
+);
+
+const SectionBox = ({ title, children, icon, status }) => (
+  <Box
+    bg="white"
+    p={4}
+    borderRadius="xl"
+    shadow={2}
+    mb={3}
+    borderWidth={1}
+    borderColor="coolGray.200"
+  >
+    <HStack alignItems="center" mb={2} space={2}>
+      {icon}
+      <Heading size="md" color="primary.700">{title}</Heading>
+      {status && (
+        <Badge colorScheme={status === "Cancelled" ? "danger" : status === "Confirmed" ? "success" : "warning"} ml={2}>
+          {status}
+        </Badge>
+      )}
+    </HStack>
+    <Divider mb={2} />
+    {children}
+  </Box>
+);
 
 const MySubmittedFuneralForm = () => {
   const [funeralDetails, setFuneralDetails] = useState(null);
@@ -23,8 +55,9 @@ const MySubmittedFuneralForm = () => {
   const [error, setError] = useState(null);
   const navigation = useNavigation();
   const route = useRoute();
-  const { formId } = route.params || {}; 
+  const { formId } = route.params || {};
   const { user } = useSelector((state) => state.auth);
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchFuneralDetails = async () => {
@@ -34,7 +67,7 @@ const MySubmittedFuneralForm = () => {
           { withCredentials: true }
         );
         setFuneralDetails(response.data);
-        console.log('Funeral details:', response.data);
+        console.log("Funeral Details:", response.data);
       } catch (err) {
         setError("Failed to fetch funeral details.");
       } finally {
@@ -47,110 +80,147 @@ const MySubmittedFuneralForm = () => {
 
   const handleCancel = async () => {
     try {
-        await axios.put(
-            `${baseURL}/declineFuneral/${formId}`,
-            null,
-            {
-                headers: {
-                    Authorization: `Bearer ${user.token}`
-                },
-                withCredentials: true
-            }
-        );
-        Alert.alert("Success", "Funeral request cancelled.");
-        navigation.goBack();
+      await axios.put(
+        `${baseURL}/declineFuneral/${formId}`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`
+          },
+          withCredentials: true
+        }
+      );
+      Alert.alert("Success", "Funeral request cancelled.");
+      navigation.goBack();
     } catch (error) {
-        console.error('Error cancelling funeral request:', error);
-        Alert.alert("Error", "Failed to cancel the funeral request.");
+      Alert.alert("Error", "Failed to cancel the funeral request.");
     }
-};
+  };
 
-  if (loading) return <Center flex={1}><Spinner size="lg" /></Center>;
+  if (loading) return <Center flex={1}><Spinner size="lg" color="primary.500" /></Center>;
   if (error) return <Center flex={1}><Text color="red.500">{error}</Text></Center>;
 
   return (
-    <ScrollView flex={1} bg="white" p={4}>
+    <ScrollView flex={1} bg="coolGray.50" p={4}>
       <VStack space={4}>
         {/* Funeral Details Section */}
-        <Box bg="gray.100" p={4} borderRadius="lg">
-          <Heading size="md" mb={2}>Funeral Details</Heading>
-          <Divider />
-          <Text><Text bold>Name:</Text> {funeralDetails?.name || "N/A"}</Text>
-          <Text><Text bold>Age:</Text> {funeralDetails?.age || "N/A"}</Text>
-          <Text><Text bold>Contact Person:</Text> {funeralDetails?.contactPerson || "N/A"}</Text>
-          <Text><Text bold>Relationship:</Text> {funeralDetails?.relationship || "N/A"}</Text>
-          <Text><Text bold>Phone:</Text> {funeralDetails?.phone || "N/A"}</Text>
-          <Text><Text bold>Address:</Text> {funeralDetails?.address?.state || "N/A"}, {funeralDetails?.address?.country || "N/A"}, {funeralDetails?.address?.zip || "N/A"}</Text>
-          <Text><Text bold>Place of Death:</Text> {funeralDetails?.placeOfDeath || "N/A"}</Text>
-          <Text><Text bold>Funeral Date:</Text> {funeralDetails?.funeralDate ? new Date(funeralDetails.funeralDate).toLocaleDateString() : "N/A"}</Text>
-          <Text><Text bold>Time:</Text> {funeralDetails?.funeraltime || "N/A"}</Text>
-          <Text><Text bold>Service Type:</Text> {funeralDetails?.serviceType || "N/A"}</Text>
-          <Text><Text bold>Priest Visit:</Text> {funeralDetails?.priestVisit || "N/A"}</Text>
-          <Text><Text bold>Reason of Death:</Text> {funeralDetails?.reasonOfDeath || "N/A"}</Text>
-          <Text><Text bold>Funeral Mass Date:</Text> {funeralDetails?.funeralMassDate ? new Date(funeralDetails.funeralMassDate).toLocaleDateString() : "N/A"}</Text>
-          <Text><Text bold>Funeral Mass Time:</Text> {funeralDetails?.funeralMasstime || "N/A"}</Text>
-          <Text><Text bold>Funeral Mass:</Text> {funeralDetails?.funeralMass || "N/A"}</Text>
-          <Text><Text bold>Funeral Status:</Text> {funeralDetails?.funeralStatus || "N/A"}</Text>
-          <Text><Text bold>Confirmed At:</Text> {funeralDetails?.confirmedAt ? new Date(funeralDetails.confirmedAt).toLocaleDateString() : "N/A"}</Text>
-        </Box>
+        <SectionBox
+          title="Funeral Details"
+          icon={<Text fontSize="2xl" color="primary.600">⚰️</Text>}
+          status={funeralDetails?.funeralStatus}
+        >
+          <InfoRow label="Name:" value={funeralDetails?.name || "N/A"} />
+          <InfoRow label="Age:" value={funeralDetails?.age || "N/A"} />
+          <InfoRow label="Contact Person:" value={funeralDetails?.contactPerson || "N/A"} />
+          <InfoRow label="Relationship:" value={funeralDetails?.relationship || "N/A"} />
+          <InfoRow label="Phone:" value={funeralDetails?.phone || "N/A"} />
+          <InfoRow
+            label="Address:"
+            value={
+              [
+                funeralDetails?.address?.state,
+                funeralDetails?.address?.country,
+                funeralDetails?.address?.zip
+              ].filter(Boolean).join(", ") || "N/A"
+            }
+          />
+          <InfoRow label="Place of Death:" value={funeralDetails?.placeOfDeath || "N/A"} />
+          <InfoRow
+            label="Funeral Date:"
+            value={funeralDetails?.funeralDate ? new Date(funeralDetails.funeralDate).toLocaleDateString() : "N/A"}
+          />
+          <InfoRow label="Time:" value={funeralDetails?.funeraltime || "N/A"} />
+          <InfoRow label="Service Type:" value={funeralDetails?.serviceType || "N/A"} />
+          <InfoRow label="Priest Visit:" value={funeralDetails?.priestVisit || "N/A"} />
+          <InfoRow label="Reason of Death:" value={funeralDetails?.reasonOfDeath || "N/A"} />
+          <InfoRow
+            label="Funeral Mass Date:"
+            value={funeralDetails?.funeralMassDate ? new Date(funeralDetails.funeralMassDate).toLocaleDateString() : "N/A"}
+          />
+          <InfoRow label="Funeral Mass Time:" value={funeralDetails?.funeralMasstime || "N/A"} />
+          <InfoRow label="Funeral Mass:" value={funeralDetails?.funeralMass || "N/A"} />
+          <InfoRow label="Confirmed At:" value={funeralDetails?.confirmedAt ? new Date(funeralDetails.confirmedAt).toLocaleDateString() : "N/A"} />
+        </SectionBox>
 
         {/* Death Certificate Section */}
-        <Box bg="gray.100" p={4} borderRadius="lg">
-          <Heading size="md" mb={2}>Death Certificate</Heading>
-          <Divider />
+        <SectionBox
+          title="Death Certificate"
+          icon={<Text fontSize="2xl" color="primary.600">📄</Text>}
+        >
           {funeralDetails?.deathCertificate?.url ? (
             <Center>
               <Image
                 source={{ uri: funeralDetails.deathCertificate.url }}
-                style={{ width: 200, height: 200, resizeMode: "contain" }}
+                style={{ width: 220, height: 220, resizeMode: "contain", borderRadius: 12, marginVertical: 8 }}
               />
             </Center>
           ) : (
-            <Text>No death certificate uploaded.</Text>
+            <Text color="coolGray.500">No death certificate uploaded.</Text>
           )}
-        </Box>
+        </SectionBox>
 
         {/* Admin Comments Section */}
-        <Box bg="gray.100" p={4} borderRadius="lg">
-          <Heading size="md" mb={2}>Admin Comments</Heading>
-          <Divider />
+        <SectionBox
+          title="Admin Comments"
+          icon={<Text fontSize="2xl" color="primary.600">💬</Text>}
+        >
           {funeralDetails?.comments?.length > 0 ? (
             funeralDetails.comments.map((comment, index) => (
-              <Box key={index} p={2} bg="white" borderRadius="md" my={2}>
-                <Text><Text bold>Date:</Text> {new Date(comment?.createdAt).toLocaleDateString()}</Text>
-                <Text><Text bold>Comment:</Text> {comment?.selectedComment || "N/A"}</Text>
-                <Text><Text bold>Additional Comment:</Text> {comment?.additionalComment || "N/A"}</Text>
+              <Box key={index} p={3} bg="coolGray.100" borderRadius="md" mb={2}>
+                <InfoRow label="Date:" value={new Date(comment?.createdAt).toLocaleDateString()} />
+                <InfoRow label="Comment:" value={comment?.selectedComment || "N/A"} />
+                <InfoRow label="Additional:" value={comment?.additionalComment || "N/A"} />
               </Box>
             ))
           ) : (
-            <Text>No admin comments.</Text>
+            <Text color="coolGray.500">No admin comments.</Text>
           )}
-        </Box>
+        </SectionBox>
 
         {/* Updated Funeral Date Section */}
-        <Box bg="gray.100" p={4} borderRadius="lg">
-          <Heading size="md" mb={2}>Updated Funeral Date</Heading>
-          <Divider />
-          <Text><Text bold>Date:</Text> {funeralDetails?.adminRescheduled?.date 
-      ? new Date(funeralDetails.adminRescheduled.date).toLocaleDateString() : "N/A"}</Text>
+        <SectionBox
+          title="Updated Funeral Date"
+          icon={<Text fontSize="2xl" color="primary.600">📅</Text>}
+        >
+          <InfoRow
+            label="Date:"
+            value={
+              funeralDetails?.adminRescheduled?.date
+                ? new Date(funeralDetails.adminRescheduled.date).toLocaleDateString()
+                : "N/A"
+            }
+          />
           {funeralDetails?.adminRescheduled?.reason && (
-            <Box mt={2} p={2} bg="white" borderRadius="md">
-              <Heading size="sm">Reason for Rescheduling</Heading>
-              <Text>{funeralDetails.adminRescheduled.reason}</Text>
+            <Box mt={2} p={2} bg="coolGray.100" borderRadius="md">
+              <Text bold color="primary.700">Reason for Rescheduling</Text>
+              <Text color="coolGray.800">{funeralDetails.adminRescheduled.reason}</Text>
             </Box>
           )}
-        </Box>
+        </SectionBox>
 
         {/* Priest Section */}
-        <Box bg="gray.100" p={4} borderRadius="lg">
-          <Heading size="md" mb={2}>Assigned Priest</Heading>
-          <Divider />
-          <Text>{funeralDetails?.Priest?.name || "No priest assigned"}</Text>
-        </Box>
+        <SectionBox
+          title="Assigned Priest"
+          icon={<Text fontSize="2xl" color="primary.600">⛪</Text>}
+        >
+          <Text fontSize="md" color="coolGray.800">
+            {funeralDetails?.Priest?.fullName || "No priest assigned"}
+          </Text>
+        </SectionBox>
 
         {/* Cancel Button */}
         <Center>
-          <Button colorScheme="red" onPress={handleCancel}>Cancel Funeral Request</Button>
+          <Button
+            colorScheme="red"
+            onPress={handleCancel}
+            borderRadius="full"
+            px={8}
+            mt={2}
+            _text={{ fontWeight: "bold", fontSize: "md" }}
+            isDisabled={funeralDetails?.funeralStatus === "Cancelled"}
+          >
+            Cancel Funeral Request
+          </Button>
         </Center>
       </VStack>
     </ScrollView>
