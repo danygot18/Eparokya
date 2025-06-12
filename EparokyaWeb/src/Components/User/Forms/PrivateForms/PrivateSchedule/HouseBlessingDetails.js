@@ -56,7 +56,7 @@ const UserHouseBlessingsDetails = () => {
         const fetchBlessingDetails = async () => {
             try {
                 const response = await axios.get(
-                    `${process.env.REACT_APP_API}/api/v1/getHouseBlessing/${blessingId}`,
+                    `${process.env.REACT_APP_API}/api/v1/houseBlessing/getHouseBlessing/${blessingId}`,
                     { withCredentials: true }
                 );
                 setBlessingDetails(response.data.houseBlessing);
@@ -73,7 +73,7 @@ const UserHouseBlessingsDetails = () => {
         const fetchPriests = async () => {
             try {
                 const response = await axios.get(
-                    `${process.env.REACT_APP_API}/api/v1/getAvailablePriest`,
+                    `${process.env.REACT_APP_API}/api/v1/houseBlessing/getAvailablePriest`,
                     { withCredentials: true }
                 );
                 const fetchedPriests = Array.isArray(response.data.priests) 
@@ -93,7 +93,7 @@ const UserHouseBlessingsDetails = () => {
     const handleConfirm = async () => {
         try {
             await axios.post(
-                `${process.env.REACT_APP_API}/api/v1/${blessingId}/confirmBlessing`,
+                `${process.env.REACT_APP_API}/api/v1/houseBlessing/${blessingId}/confirmBlessing`,
                 {},
                 { withCredentials: true }
             );
@@ -111,7 +111,7 @@ const UserHouseBlessingsDetails = () => {
         }
         try {
             await axios.post(
-                `${process.env.REACT_APP_API}/api/v1/declineBlessing/${blessingId}`,
+                `${process.env.REACT_APP_API}/api/v1/houseBlessing/declineBlessing/${blessingId}`,
                 { reason: cancelReason },
                 { withCredentials: true }
             );
@@ -132,7 +132,7 @@ const UserHouseBlessingsDetails = () => {
         try {
             setLoading(true);
             const response = await axios.put(
-                `${process.env.REACT_APP_API}/api/v1/updateHouseBlessingDate/${blessingId}`,
+                `${process.env.REACT_APP_API}/api/v1/houseBlessing/updateHouseBlessingDate/${blessingId}`,
                 { newDate, reason },
                 { withCredentials: true }
             );
@@ -153,7 +153,7 @@ const UserHouseBlessingsDetails = () => {
         }
         try {
             const response = await axios.post(
-                `${process.env.REACT_APP_API}/api/v1/${blessingId}/commentBlessing`,
+                `${process.env.REACT_APP_API}/api/v1/houseBlessing/${blessingId}/commentBlessing`,
                 {
                     selectedComment: selectedComment || "",
                     additionalComment: additionalComment || "",
@@ -176,7 +176,7 @@ const UserHouseBlessingsDetails = () => {
         }
         try {
             const response = await axios.post(
-                `${process.env.REACT_APP_API}/api/v1/addPriestBlessing/${blessingId}`,
+                `${process.env.REACT_APP_API}/api/v1/houseBlessing/addPriestBlessing/${blessingId}`,
                 { priestId: selectedPriestId },
                 { withCredentials: true }
             );

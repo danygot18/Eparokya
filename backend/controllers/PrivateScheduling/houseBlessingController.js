@@ -222,17 +222,24 @@ exports.updateBlessingDate = async (req, res) => {
       return res.status(404).json({ message: "Blessing not found" });
     }
 
-    houseBlessing.blessingDate = newDate;
-    houseBlessing.adminRescheduled = { date: newDate, reason: reason };
+    // Just update the adminRescheduled field, not the original blessingDate
+    houseBlessing.adminRescheduled = {
+      date: newDate,
+      reason: reason,
+    };
 
     await houseBlessing.save();
 
-    return res.status(200).json({ message: "Blessing date updated successfully", houseBlessing });
+    return res.status(200).json({
+      message: "Blessing reschedule recorded successfully",
+      houseBlessing,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // Add Comment for Admin
 exports.addComment = async (req, res) => {
@@ -273,8 +280,6 @@ exports.addComment = async (req, res) => {
 exports.getMySubmittedForms = async (req, res) => {
     try {
       const userId = req.user.id;
-      console.log("Authenticated User ID:", userId);
-  
       const forms = await HouseBlessing.find({ userId: userId });
   
       if (!forms.length) {
@@ -295,7 +300,7 @@ exports.getHouseBlessingFormById = async (req, res) => {
 
         const houseBlessingForm = await HouseBlessing.findById(formId)
             .populate('userId', 'name email')
-            .populate('priest', 'fullName') // ✅ Add this line
+            .populate('priest', 'fullName')
             .lean();
 
         if (!houseBlessingForm) {

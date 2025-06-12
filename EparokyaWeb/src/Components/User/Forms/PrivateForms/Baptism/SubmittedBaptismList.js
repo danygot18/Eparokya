@@ -68,14 +68,18 @@ const SubmittedBaptismList = () => {
         fetchMySubmittedForms();
     }, []);
 
+    const config = {
+        withCredentials: true,
+    }
+
     const fetchMySubmittedForms = async () => {
         setLoading(true);
         try {
             const response = await axios.get(
                 `${process.env.REACT_APP_API}/api/v1/getAllUserSubmittedBaptism`,
-                { withCredentials: true }
+                config
             );
-
+            
             if (response.data && Array.isArray(response.data.forms)) {
                 setBaptismForms(response.data.forms);
             } else {
@@ -88,6 +92,7 @@ const SubmittedBaptismList = () => {
             setLoading(false);
         }
     };
+
     const groupByMonthYear = (forms) => {
         const grouped = {};
 

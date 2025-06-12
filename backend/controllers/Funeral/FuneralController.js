@@ -138,51 +138,51 @@ exports.createFuneral = async (req, res) => {
         await newFuneral.save();
         console.log('Funeral record saved successfully');
 
-        const user = await User.findById(userId);
-        if (user && user.email) {
-            const userEmail = user.email;
-            const htmlMessage = `
-  <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f9f9f9; color: #333;">
-    <!-- Greeting -->
-    <p style="font-size: 16px;">Good Day!</p>
+        // const user = await User.findById(userId);
+        //         if (user && user.email) {
+        //             const userEmail = user.email;
+        //             const htmlMessage = `
+        //   <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f9f9f9; color: #333;">
+        //     <!-- Greeting -->
+        //     <p style="font-size: 16px;">Good Day!</p>
 
-    <!-- Body -->
-    <p style="font-size: 16px;">
-      Thank you for submitting your funeral service request to <strong>E:Parokya</strong>.<br>
-      We have received your request and our team will review it shortly. You will be notified once your funeral schedule is confirmed.
-    </p>
+        //     <!-- Body -->
+        //     <p style="font-size: 16px;">
+        //       Thank you for submitting your funeral service request to <strong>E:Parokya</strong>.<br>
+        //       We have received your request and our team will review it shortly. You will be notified once your funeral schedule is confirmed.
+        //     </p>
 
-    <!-- Funeral Details Section -->
-    <h3 style="margin-top: 20px;">Funeral Details</h3>
-    <ul style="list-style: none; padding: 0;">
-      <li><strong>Name of Deceased:</strong> ${name}</li>
-      <li><strong>Contact Person:</strong> ${contactPerson}</li>
-      <li><strong>Phone:</strong> ${phone}</li>
-      <li><strong>Funeral Date:</strong> ${funeralDate}</li>
-      <li><strong>Funeral Time:</strong> ${funeraltime}</li>
-    </ul>
+        //     <!-- Funeral Details Section -->
+        //     <h3 style="margin-top: 20px;">Funeral Details</h3>
+        //     <ul style="list-style: none; padding: 0;">
+        //       <li><strong>Name of Deceased:</strong> ${name}</li>
+        //       <li><strong>Contact Person:</strong> ${contactPerson}</li>
+        //       <li><strong>Phone:</strong> ${phone}</li>
+        //       <li><strong>Funeral Date:</strong> ${funeralDate}</li>
+        //       <li><strong>Funeral Time:</strong> ${funeraltime}</li>
+        //     </ul>
 
-    <!-- Closing -->
-    <p style="margin-top: 20px; font-size: 16px;">
-      Thank you for reaching out. We are here to support you.
-    </p>
-    
-    <!-- Footer -->
-    <hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
-    <footer style="font-size: 14px; color: #777;">
-      <p><strong>E:Parokya</strong><br>
-      Saint Joseph Parish – Taguig<br>
-      This is an automated email. Please do not reply.</p>
-    </footer>
-  </div>
-`;
+        //     <!-- Closing -->
+        //     <p style="margin-top: 20px; font-size: 16px;">
+        //       Thank you for reaching out. We are here to support you.
+        //     </p>
 
-            await sendEmail({
-                email: userEmail,
-                subject: "Your Funeral Service Request Has Been Submitted!",
-                message: htmlMessage,
-            });
-        }
+        //     <!-- Footer -->
+        //     <hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
+        //     <footer style="font-size: 14px; color: #777;">
+        //       <p><strong>E:Parokya</strong><br>
+        //       Saint Joseph Parish – Taguig<br>
+        //       This is an automated email. Please do not reply.</p>
+        //     </footer>
+        //   </div>
+        // `;
+
+        //             await sendEmail({
+        //                 email: userEmail,
+        //                 subject: "Your Funeral Service Request Has Been Submitted!",
+        //                 message: htmlMessage,
+        //             });
+        //         }
 
         res.status(201).json({ message: 'Funeral record created successfully', funeral: newFuneral });
 
@@ -212,7 +212,9 @@ exports.getFunerals = async (req, res) => {
 exports.getFuneralById = async (req, res) => {
     try {
         const funeralId = req.params.funeralId;
-        const funeral = await Funeral.findById(funeralId).populate('userId', 'name email');
+        const funeral = await Funeral.findById(funeralId)
+            .populate('userId', 'name email')
+            .populate('Priest', 'fullName')
 
         if (!funeral) {
             return res.status(404).json({ message: "Funeral entry not found." });
@@ -471,6 +473,43 @@ exports.createComment = async (req, res) => {
 
 //  reschedule 
 
+exports.addAdminNotes = async (req, res) => {
+    try {
+        const { funeralId } = req.params;
+        const { priest, recordedBy, bookNumber, pageNumber, lineNumber } = req.body;
+
+        if (!priest && !recordedBy && !bookNumber && !pageNumber && !lineNumber) {
+            return res.status(400).json({ message: "Comment cannot be empty." });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(funeralId)) {
+            return res.status(400).json({ message: "Invalid funeral ID format." });
+        }
+
+        const funeral = await Funeral.findById(funeralId);
+        if (!funeral) {
+            return res.status(404).json({ message: "Funeral not found." });
+        }
+
+        const newadminNotes = {
+            priest: priest || "",
+            recordedBy: recordedBy || "",
+            bookNumber: bookNumber || "",
+            pageNumber: pageNumber || "",
+            lineNumber: lineNumber || "",
+            createdAt: new Date(),
+        };
+
+        funeral.adminNotes.push(newadminNotes);
+        await funeral.save();
+
+        res.status(200).json({ message: "Admin notes added.", adminNotes: newadminNotes });
+    } catch (error) {
+        console.error("Error adding admin notes:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 exports.createPriestComment = async (req, res) => {
     try {
         const { funeralId } = req.params;
@@ -490,7 +529,7 @@ exports.createPriestComment = async (req, res) => {
         if (!priest) {
             return res.status(404).json({ message: "Priest not found." });
         }
-        funeral.priest = priest._id;
+        funeral.Priest = priest._id;
         await funeral.save();
 
         res.status(200).json({ message: "Priest assigned successfully.", priest });
@@ -499,6 +538,7 @@ exports.createPriestComment = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
 exports.updateFuneralDate = async (req, res) => {
     try {
         const { funeralId } = req.params;
@@ -604,6 +644,7 @@ exports.getFuneralFormById = async (req, res) => {
 
         const funeralForm = await Funeral.findById(formId)
             .populate('userId', 'name email') // Populate user info
+            .populate('Priest', 'fullName') // Populate priest info
             .lean();
 
         if (!funeralForm) {

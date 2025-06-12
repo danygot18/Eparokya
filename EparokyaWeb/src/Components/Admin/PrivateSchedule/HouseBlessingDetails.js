@@ -59,6 +59,10 @@ const HouseBlessingsDetails = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
+    const [updatedHouseBlessingDate, setUpdatedHouseBlessingDate] = useState(
+      blessingDetails?.blessingDate || ""
+    );
+
   const predefinedComments = [
     "Confirmed",
     "Pending Confirmation",
@@ -70,7 +74,7 @@ const HouseBlessingsDetails = () => {
     const fetchBlessingDetails = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API}/api/v1/getHouseBlessing/${blessingId}`,
+          `${process.env.REACT_APP_API}/api/v1/houseBlessing/getHouseBlessing/${blessingId}`,
           { withCredentials: true }
         );
         setBlessingDetails(response.data.houseBlessing);
@@ -94,6 +98,7 @@ const HouseBlessingsDetails = () => {
           { withCredentials: true }
         );
         const fetchedPriests = response.data.priests;
+        console.log("Fetched priests:", fetchedPriests);
         const formattedPriests = Array.isArray(fetchedPriests)
           ? fetchedPriests
           : [fetchedPriests];
@@ -144,7 +149,7 @@ const HouseBlessingsDetails = () => {
   const handleConfirm = async () => {
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/${blessingId}/confirmBlessing`,
+        `${process.env.REACT_APP_API}/api/v1/houseBlessing/${blessingId}/confirmBlessing`,
         {},
         { withCredentials: true }
       );
@@ -171,7 +176,7 @@ const HouseBlessingsDetails = () => {
     }
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/declineBlessing/${blessingId}`,
+        `${process.env.REACT_APP_API}/api/v1/houseBlessing/declineBlessing/${blessingId}`,
         { reason: cancelReason },
         { withCredentials: true }
       );
@@ -198,15 +203,16 @@ const HouseBlessingsDetails = () => {
       });
       return;
     }
+    console.log("Updating blessing date:", newDate, reason);
 
     try {
       setLoading(true);
       const response = await axios.put(
-        `${process.env.REACT_APP_API}/api/v1/updateHouseBlessingDate/${blessingId}`,
+        `${process.env.REACT_APP_API}/api/v1/houseBlessing/updateHouseBlessingDate/${blessingId}`,
         { newDate, reason },
         { withCredentials: true }
       );
-
+      console.log("Response from update:", response.data);
       setBlessingDetails(prev => ({
         ...prev,
         blessingDate: newDate,
@@ -241,7 +247,7 @@ const HouseBlessingsDetails = () => {
     };
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/${blessingId}/commentBlessing`,
+        `${process.env.REACT_APP_API}/api/v1/houseBlessing/${blessingId}/commentBlessing`,
         commentData,
         { withCredentials: true }
       );
@@ -268,7 +274,7 @@ const HouseBlessingsDetails = () => {
     }
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/addPriestBlessing/${blessingId}`,
+        `${process.env.REACT_APP_API}/api/v1/houseBlessing/addPriestBlessing/${blessingId}`,
         { priestId: selectedPriestId },
         { withCredentials: true }
       );

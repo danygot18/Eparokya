@@ -4,7 +4,7 @@ const prayerRequestController = require('../../controllers/Prayers/prayerRequest
 const { isAuthenticatedUser, authorizeAdmin } = require('../../middleware/auth');
 
 router.post('/prayerRequestSubmit', prayerRequestController.createPrayerRequest);
-router.get('/getAllUserSubmittedPrayerWall', isAuthenticatedUser, prayerRequestController.getMySubmittedForms);
+router.get('/getMySubmittedPrayerRequestList', isAuthenticatedUser, prayerRequestController.getMySubmittedForms);
 
 router.get('/user/:userId', prayerRequestController.getUserPrayerRequests);
 router.get('/admin/getAllPrayerRequest', prayerRequestController.getAllPrayerRequests);

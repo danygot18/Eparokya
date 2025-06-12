@@ -81,7 +81,7 @@ const SubmittedHouseBlessingList = () => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `${process.env.REACT_APP_API}/api/v1/getAllUserSubmittedHouseBlessing`,
+                `${process.env.REACT_APP_API}/api/v1/houseBlessing/getAllUserSubmittedHouseBlessing`,
                 { withCredentials: true }
             );
             if (response.data && Array.isArray(response.data.forms)) {

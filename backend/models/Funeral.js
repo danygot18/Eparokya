@@ -128,13 +128,7 @@ const FuneralSchema = new mongoose.Schema({
     reason: { type: String },
   },
 
-  Priest: {
-    name: { type: mongoose.Schema.Types.ObjectId, ref: 'priest' },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-  },
+  Priest: { type: mongoose.Schema.Types.ObjectId, ref: 'Priest' },
 
   confirmedAt: {
     type: Date,

@@ -107,7 +107,7 @@ app.use("/api/v1", require("./routes/MassForms/massWedding"));
 // Events & Scheduling
 
 app.use("/api/v1", require("./routes/customEvent"));
-app.use("/api/v1", require("./routes/PrivateScheduling/houseBlessing"));
+app.use("/api/v1/houseBlessing", require("./routes/PrivateScheduling/houseBlessing"));
 
 // Resources
 app.use("/api/v1", require("./routes/Resources/resourceCategory"));

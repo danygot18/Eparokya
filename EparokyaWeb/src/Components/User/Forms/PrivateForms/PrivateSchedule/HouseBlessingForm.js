@@ -175,7 +175,7 @@ const HouseBlessingForm = () => {
             };
 
             const response = await axios.post(
-                `${process.env.REACT_APP_API}/api/v1/houseBlessingSubmit`,
+                `${process.env.REACT_APP_API}/api/v1/houseBlessing/houseBlessingSubmit`,
                 submissionData,
                 config
             );

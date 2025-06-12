@@ -42,7 +42,7 @@ const MySubmittedHouseBlessingForm = () => {
     const fetchBlessingDetails = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API}/api/v1/getHouseBlessingForm/${formId}`,
+          `${process.env.REACT_APP_API}/api/v1/houseBlessing/getHouseBlessingForm/${formId}`,
           { withCredentials: true }
         );
         setBlessingDetails(response.data);
@@ -69,7 +69,7 @@ const MySubmittedHouseBlessingForm = () => {
       if (!confirmCancel) return;
 
       const response = await axios.put(
-        `${process.env.REACT_APP_API}/api/v1/cancelHouseBlessing/${formId}`,
+        `${process.env.REACT_APP_API}/api/v1/houseBlessing/cancelHouseBlessing/${formId}`,
         {},
         { withCredentials: true }
       );
