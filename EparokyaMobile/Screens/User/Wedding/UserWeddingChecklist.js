@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from "react-native";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
+import baseURL from "../../../assets/common/baseUrl";
+
 
 const groomItems = [
   "GroomNewBaptismalCertificate",
@@ -53,13 +55,15 @@ const UserWeddingChecklist = ({ weddingId }) => {
   useEffect(() => {
     if (weddingId) {
       axios
-        .get(`${process.env.EXPO_PUBLIC_API || process.env.REACT_APP_API}/api/v1/getWeddingChecklist/${weddingId}`, {
+        .get(`${baseURL}/getWeddingChecklist/${weddingId}`, {
           withCredentials: true,
         })
         .then((res) => {
           if (res.data.checklist) {
             setChecklist(res.data.checklist);
+            
           }
+          console.log("Wedding Checklist:", res.data);
         })
         .catch((err) => {
           // handle error

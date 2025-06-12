@@ -105,8 +105,8 @@ const counselingSchema = new mongoose.Schema({
         reason: { type: String },
       },
 
-    priest: {
-        name: { type: mongoose.Schema.Types.ObjectId, ref: 'priest' },
+    Priest: {
+        name: { type: mongoose.Schema.Types.ObjectId, ref: 'Priest' },
         createdAt: {
           type: Date,
           default: Date.now,

@@ -1,8 +1,8 @@
-const Counseling = require('../../models/counseling');
-const mongoose = require('mongoose');
-const Priest = require('../../models/Priest/priest');
-const User = require('../../models/user');
-const sendEmail = require('../../utils/sendEmail');
+const Counseling = require("../../models/counseling");
+const mongoose = require("mongoose");
+const Priest = require("../../models/Priest/priest");
+const User = require("../../models/user");
+const sendEmail = require("../../utils/sendEmail");
 
 exports.createCounseling = async (req, res) => {
   try {
@@ -18,7 +18,7 @@ exports.createCounseling = async (req, res) => {
     } = req.body;
 
     if (!userId) {
-      return res.status(400).json({ error: 'User ID is required' });
+      return res.status(400).json({ error: "User ID is required" });
     }
     const newCounseling = new Counseling({
       person,
@@ -27,9 +27,10 @@ exports.createCounseling = async (req, res) => {
       contactNumber,
       address: {
         ...address,
-        customBarangay: address.baranggay === 'Others' ? address.customBarangay : undefined,
-        customCity: address.city === 'Others' ? address.customCity : undefined,
-    },
+        customBarangay:
+          address.baranggay === "Others" ? address.customBarangay : undefined,
+        customCity: address.city === "Others" ? address.customCity : undefined,
+      },
       counselingDate,
       counselingTime,
       userId,
@@ -38,7 +39,7 @@ exports.createCounseling = async (req, res) => {
     const savedCounseling = await newCounseling.save();
 
     const userEmail = req.user.email;
-const htmlMessage = `
+    const htmlMessage = `
   <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f9f9f9; color: #333;">
     <!-- Greeting -->
     <p style="font-size: 16px;">Good Day!</p>
@@ -56,7 +57,9 @@ const htmlMessage = `
       <li><strong>Purpose:</strong> ${purpose}</li>
       <li><strong>Contact Person:</strong> ${contactPerson}</li>
       <li><strong>Contact Number:</strong> ${contactNumber}</li>
-      <li><strong>Address:</strong> ${address?.street || ""}, ${address?.baranggay || ""}, ${address?.city || ""}</li>
+      <li><strong>Address:</strong> ${address?.street || ""}, ${
+      address?.baranggay || ""
+    }, ${address?.city || ""}</li>
       <li><strong>Date:</strong> ${counselingDate}</li>
       <li><strong>Time:</strong> ${counselingTime}</li>
     </ul>
@@ -76,16 +79,21 @@ const htmlMessage = `
   </div>
 `;
 
-await sendEmail({
-  email: userEmail,
-  subject: "Your Counseling Request Has Been Submitted!",
-  message: htmlMessage,
-});
+    await sendEmail({
+      email: userEmail,
+      subject: "Your Counseling Request Has Been Submitted!",
+      message: htmlMessage,
+    });
 
-    res.status(201).json({ message: 'Counseling request created successfully', counseling: savedCounseling });
+    res
+      .status(201)
+      .json({
+        message: "Counseling request created successfully",
+        counseling: savedCounseling,
+      });
   } catch (error) {
-    console.error('Error creating counseling request:', error);
-    res.status(500).json({ error: 'Failed to create counseling request' });
+    console.error("Error creating counseling request:", error);
+    res.status(500).json({ error: "Failed to create counseling request" });
   }
 };
 
@@ -95,18 +103,21 @@ exports.getUserCounselingRequests = async (req, res) => {
     const counselingRequests = await Counseling.find({ userId });
     res.status(200).json({ counselingRequests });
   } catch (error) {
-    console.error('Error fetching counseling requests:', error);
-    res.status(500).json({ error: 'Failed to fetch counseling requests' });
+    console.error("Error fetching counseling requests:", error);
+    res.status(500).json({ error: "Failed to fetch counseling requests" });
   }
 };
 
 exports.getAllCounselingRequests = async (req, res) => {
   try {
-    const counselingRequests = await Counseling.find().populate('userId', 'name email');
+    const counselingRequests = await Counseling.find().populate(
+      "userId",
+      "name email"
+    );
     res.status(200).json({ counselingRequests });
   } catch (error) {
-    console.error('Error fetching all counseling requests:', error);
-    res.status(500).json({ error: 'Failed to fetch counseling requests' });
+    console.error("Error fetching all counseling requests:", error);
+    res.status(500).json({ error: "Failed to fetch counseling requests" });
   }
 };
 
@@ -118,7 +129,9 @@ exports.getCounselingById = async (req, res) => {
       return res.status(400).json({ message: "Invalid counseling ID format." });
     }
 
-    const counseling = await Counseling.findById(counselingId).populate('userId', 'name email');
+    const counseling = await Counseling.findById(counselingId)
+      .populate("userId", "name email")
+      .populate("Priest", "fullName");
 
     if (!counseling) {
       return res.status(404).json({ message: "Counseling not found." });
@@ -126,8 +139,8 @@ exports.getCounselingById = async (req, res) => {
 
     res.status(200).json({ counseling });
   } catch (error) {
-    console.error('Error fetching counseling by ID:', error);
-    res.status(500).json({ error: 'Failed to fetch counseling by ID' });
+    console.error("Error fetching counseling by ID:", error);
+    res.status(500).json({ error: "Failed to fetch counseling by ID" });
   }
 };
 
@@ -194,39 +207,36 @@ exports.confirmCounseling = async (req, res) => {
 //   }
 // };
 
-
-
 // decline counseling with reason
 exports.declineCounseling = async (req, res) => {
   try {
-      const { reason } = req.body; 
-      const userId = req.user._id; 
-      const user = await User.findById(userId);
+    const { reason } = req.body;
+    const userId = req.user._id;
+    const user = await User.findById(userId);
 
-      if (!user) {
-          return res.status(404).json({ message: "User not found." });
-      }
-      const cancellingUser = user.isAdmin ? "Admin" : user.name;
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    const cancellingUser = user.isAdmin ? "Admin" : user.name;
 
-      const counseling = await Counseling.findByIdAndUpdate(
-          req.params.counselingId,
-          {
-              counselingStatus: "Cancelled",
-              cancellingReason: { user: cancellingUser, reason }, 
-          },
-          { new: true }
-      );
-      if (!counseling) {
-          return res.status(404).json({ message: "Counseling not found." });
-      }
+    const counseling = await Counseling.findByIdAndUpdate(
+      req.params.counselingId,
+      {
+        counselingStatus: "Cancelled",
+        cancellingReason: { user: cancellingUser, reason },
+      },
+      { new: true }
+    );
+    if (!counseling) {
+      return res.status(404).json({ message: "Counseling not found." });
+    }
 
-      res.json({ message: "Counseling cancelled successfully", counseling });
+    res.json({ message: "Counseling cancelled successfully", counseling });
   } catch (err) {
-      console.error("Error cancelling counseling:", err);
-      res.status(500).json({ message: "Server error." });
+    console.error("Error cancelling counseling:", err);
+    res.status(500).json({ message: "Server error." });
   }
 };
-
 
 exports.updateCounselingDate = async (req, res) => {
   try {
@@ -243,7 +253,9 @@ exports.updateCounselingDate = async (req, res) => {
 
     await counseling.save();
 
-    return res.status(200).json({ message: "Counseling date updated successfully", counseling });
+    return res
+      .status(200)
+      .json({ message: "Counseling date updated successfully", counseling });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -290,12 +302,15 @@ exports.addComment = async (req, res) => {
 exports.createPriestComment = async (req, res) => {
   try {
     const { counselingId } = req.params;
-    const { priestId } = req.body; 
+    const { priestId } = req.body;
 
     if (!priestId) {
       return res.status(400).json({ message: "Priest ID is required." });
     }
-    if (!mongoose.Types.ObjectId.isValid(counselingId) || !mongoose.Types.ObjectId.isValid(priestId)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(counselingId) ||
+      !mongoose.Types.ObjectId.isValid(priestId)
+    ) {
       return res.status(400).json({ message: "Invalid ID format." });
     }
     const counseling = await Counseling.findById(counselingId);
@@ -318,24 +333,25 @@ exports.createPriestComment = async (req, res) => {
 
 exports.getCounselingWithPriest = async (req, res) => {
   try {
-      const { counselingId } = req.params;
-      if (!mongoose.Types.ObjectId.isValid(counselingId)) {
-          return res.status(400).json({ message: "Invalid counseling ID format." });
-      }
-      const counseling = await Counseling.findById(counselingId).populate('priest');
-      if (!counseling) {
-          return res.status(404).json({ message: "Counseling not found." });
-      }
-      res.status(200).json({ success: true, counseling });
+    const { counselingId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(counselingId)) {
+      return res.status(400).json({ message: "Invalid counseling ID format." });
+    }
+    const counseling = await Counseling.findById(counselingId).populate(
+      "priest"
+    );
+    if (!counseling) {
+      return res.status(404).json({ message: "Counseling not found." });
+    }
+    res.status(200).json({ success: true, counseling });
   } catch (error) {
-      console.error("Error fetching counseling:", error);
-      res.status(500).json({ success: false, error: error.message });
+    console.error("Error fetching counseling:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
-
 // For user fetching
-exports.getMySubmittedForms = async (req, res) => { 
+exports.getMySubmittedForms = async (req, res) => {
   try {
     const userId = req.user.id;
     console.log("Authenticated User ID:", userId);
@@ -349,17 +365,19 @@ exports.getMySubmittedForms = async (req, res) => {
     res.status(200).json({ forms });
   } catch (error) {
     console.error("Error fetching submitted counseling forms:", error);
-    res.status(500).json({ message: "Failed to fetch submitted counseling forms." });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch submitted counseling forms." });
   }
 };
 
-// details 
+// details
 exports.getCounselingFormById = async (req, res) => {
   try {
     const { formId } = req.params;
 
     const counselingForm = await Counseling.findById(formId)
-      .populate('userId', 'name email')
+      .populate("userId", "name email")
       .lean();
 
     if (!counselingForm) {
@@ -373,10 +391,12 @@ exports.getCounselingFormById = async (req, res) => {
   }
 };
 
-// Confirmed Counseling: 
+// Confirmed Counseling:
 exports.getConfirmedCounseling = async (req, res) => {
   try {
-    const confirmedCounseling = await Counseling.find({ counselingStatus: 'Confirmed' });
+    const confirmedCounseling = await Counseling.find({
+      counselingStatus: "Confirmed",
+    });
     res.status(200).json(confirmedCounseling);
   } catch (error) {
     console.error("Error fetching confirmed counseling:", error);
@@ -397,13 +417,18 @@ exports.updateCounselingStatus = async (req, res) => {
     );
 
     if (!updatedCounseling) {
-      return res.status(404).json({ error: 'Counseling request not found' });
+      return res.status(404).json({ error: "Counseling request not found" });
     }
 
-    res.status(200).json({ message: 'Counseling status updated', counseling: updatedCounseling });
+    res
+      .status(200)
+      .json({
+        message: "Counseling status updated",
+        counseling: updatedCounseling,
+      });
   } catch (error) {
-    console.error('Error updating counseling status:', error);
-    res.status(500).json({ error: 'Failed to update counseling status' });
+    console.error("Error updating counseling status:", error);
+    res.status(500).json({ error: "Failed to update counseling status" });
   }
 };
 
@@ -411,11 +436,12 @@ exports.updateCounselingStatus = async (req, res) => {
 exports.addCommentToCounseling = async (req, res) => {
   try {
     const { id } = req.params;
-    const { priest, scheduledDate, selectedComment, additionalComment } = req.body;
+    const { priest, scheduledDate, selectedComment, additionalComment } =
+      req.body;
 
     const counseling = await Counseling.findById(id);
     if (!counseling) {
-      return res.status(404).json({ error: 'Counseling request not found' });
+      return res.status(404).json({ error: "Counseling request not found" });
     }
 
     counseling.comments.push({
@@ -426,10 +452,10 @@ exports.addCommentToCounseling = async (req, res) => {
     });
 
     await counseling.save();
-    res.status(200).json({ message: 'Comment added successfully', counseling });
+    res.status(200).json({ message: "Comment added successfully", counseling });
   } catch (error) {
-    console.error('Error adding comment:', error);
-    res.status(500).json({ error: 'Failed to add comment' });
+    console.error("Error adding comment:", error);
+    res.status(500).json({ error: "Failed to add comment" });
   }
 };
 
@@ -458,7 +484,8 @@ exports.getCounselingStatusCounts = async (req, res) => {
     ]);
     res.status(200).json(counts);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch counseling status counts", error });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch counseling status counts", error });
   }
 };
-
