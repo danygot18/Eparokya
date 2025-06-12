@@ -69,6 +69,7 @@ const WeddingForm = () => {
     previews: {},
   });
   const [isMarried, setIsMarried] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState(null);
   const config = {
     withCredentials: true,
@@ -243,7 +244,7 @@ const WeddingForm = () => {
   };
 
 
-  console.log("Form data:", formData);
+  // console.log("Form data:", formData);
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     const file = files[0];
@@ -339,10 +340,11 @@ const WeddingForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setIsSubmitting(true);
     if (isMarried) {
-    toast.error('Sorry, but a "Married" user cannot submit an application.');
-    return;
-  }
+      toast.error('Sorry, but a "Married" user cannot submit an application.');
+      return;
+    }
     // Required documents list
     const REQUIRED_DOCUMENTS = [
       'GroomNewBaptismalCertificate',
@@ -1774,7 +1776,9 @@ const WeddingForm = () => {
               </Row>
             </fieldset>
 
-          <button type="submit" disabled={isMarried}>Submit</button>
+            <button type="submit" disabled={isSubmitting || isMarried}>
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </button>
             <button type="button" onClick={handleClearFields}>
               Clear All Fields
             </button>

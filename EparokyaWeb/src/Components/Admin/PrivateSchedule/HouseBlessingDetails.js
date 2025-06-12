@@ -1,39 +1,61 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../../Layout/styles/style.css";
-import "./houseBlessing.css";
-import SideBar from "../SideBar";
 import { useParams } from "react-router-dom";
-import Modal from "react-modal";
-import DateTimePicker from "react-datetime-picker";
-import "react-datetime-picker/dist/DateTimePicker.css";
+import {
+  Box,
+  Typography,
+  Paper,
+  Stack,
+  Divider,
+  Chip,
+  Button,
+  Container,
+  Card,
+  CardContent,
+  CardHeader,
+  Avatar,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+  useTheme
+} from "@mui/material";
+import {
+  Home as HomeIcon,
+  CalendarToday as CalendarIcon,
+  Person as PersonIcon,
+  Comment as CommentIcon,
+  Info as InfoIcon,
+  Cancel as CancelIcon,
+  LocationOn as LocationIcon,
+  Check as CheckIcon,
+  Edit as EditIcon
+} from "@mui/icons-material";
+import SideBar from "../SideBar";
 import { toast, ToastContainer } from "react-toastify";
-
-Modal.setAppElement("#root");
+import dayjs from "dayjs";
 
 const HouseBlessingsDetails = () => {
   const { blessingId } = useParams();
   const [blessingDetails, setBlessingDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const theme = useTheme();
 
-  const [priest, setPriest] = useState("");
-
+  // Form states
   const [priestsList, setPriestsList] = useState([]);
   const [selectedPriestId, setSelectedPriestId] = useState("");
-
   const [selectedComment, setSelectedComment] = useState("");
-  const [rescheduledDate, setRescheduledDate] = useState("");
-  const [rescheduledReason, setRescheduledReason] = useState("");
   const [additionalComment, setAdditionalComment] = useState("");
   const [comments, setComments] = useState([]);
-
-  const [newDate, setNewDate] = useState("");
+  const [newDate, setNewDate] = useState(null);
   const [reason, setReason] = useState("");
-  const [updatedBlessingDate, setUpdatedBlessingDate] = useState(
-    blessingDetails?.blessingDate || ""
-  );
-
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
@@ -52,12 +74,14 @@ const HouseBlessingsDetails = () => {
           { withCredentials: true }
         );
         setBlessingDetails(response.data.houseBlessing);
-        console.log(response.data.houseBlessing);
+        console.log(response.data.houseBlessing)
         setComments(response.data.houseBlessing.comments || []);
-        setUpdatedBlessingDate(response.data.blessingDate);
-        setSelectedPriestId(response.data.counseling?.priest?._id || "");
+        setSelectedPriestId(response.data.houseBlessing?.priest?._id || "");
       } catch (err) {
         setError("Failed to fetch house blessing details.");
+        toast.error("Failed to load house blessing details", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
       } finally {
         setLoading(false);
       }
@@ -74,9 +98,7 @@ const HouseBlessingsDetails = () => {
           ? fetchedPriests
           : [fetchedPriests];
         setPriestsList(formattedPriests);
-        if (formattedPriests.length > 0) {
-          setSelectedPriestId(formattedPriests[0]._id);
-        }
+        
       } catch (err) {
         console.error("Failed to fetch priests:", err);
         setPriestsList([]);
@@ -87,23 +109,54 @@ const HouseBlessingsDetails = () => {
     fetchPriests();
   }, [blessingId]);
 
-  const handleConfirm = async (blessingId) => {
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "pending":
+        return "warning";
+      case "approved":
+      case "confirmed":
+        return "success";
+      case "rejected":
+      case "cancelled":
+        return "error";
+      case "rescheduled":
+        return "info";
+      default:
+        return "default";
+    }
+  };
+
+  const formatAddress = () => {
+    const address = blessingDetails?.address || {};
+    const parts = [
+      address.houseDetails,
+      address.block,
+      address.phase,
+      address.street,
+      address.district,
+      address.baranggay === "Others" ? address.customBarangay : address.baranggay,
+      address.city === "Others" ? address.customCity : address.city
+    ].filter(Boolean);
+
+    return parts.join(", ");
+  };
+
+  const handleConfirm = async () => {
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/${blessingId}/confirmBlessing`,
+        {},
         { withCredentials: true }
       );
       toast.success("House blessing confirmed successfully!", {
         position: toast.POSITION.TOP_RIGHT,
-        autoClose: 3000,
       });
+      setBlessingDetails(prev => ({ ...prev, blessingStatus: "Confirmed" }));
     } catch (error) {
       toast.error(
-        error.response?.data?.message ||
-          "Failed to confirm the house blessing.",
+        error.response?.data?.message || "Failed to confirm the house blessing.",
         {
           position: toast.POSITION.TOP_RIGHT,
-          autoClose: 3000,
         }
       );
     }
@@ -127,6 +180,7 @@ const HouseBlessingsDetails = () => {
         position: toast.POSITION.TOP_RIGHT,
       });
       setShowCancelModal(false);
+      setBlessingDetails(prev => ({ ...prev, blessingStatus: "Cancelled" }));
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Failed to cancel the house blessing.",
@@ -139,7 +193,9 @@ const HouseBlessingsDetails = () => {
 
   const handleUpdate = async () => {
     if (!newDate || !reason) {
-      alert("Please select a date and provide a reason.");
+      toast.error("Please select a date and provide a reason.", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
       return;
     }
 
@@ -147,14 +203,26 @@ const HouseBlessingsDetails = () => {
       setLoading(true);
       const response = await axios.put(
         `${process.env.REACT_APP_API}/api/v1/updateHouseBlessingDate/${blessingId}`,
-        { newDate, reason }
+        { newDate, reason },
+        { withCredentials: true }
       );
 
-      setUpdatedBlessingDate(response.data.blessingDate);
-      alert("Blessing date updated successfully!");
+      setBlessingDetails(prev => ({
+        ...prev,
+        blessingDate: newDate,
+        adminRescheduled: {
+          date: newDate,
+          reason: reason
+        }
+      }));
+      toast.success("Blessing date updated successfully!", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     } catch (error) {
       console.error("Error updating blessing date:", error);
-      alert("Failed to update blessing date.");
+      toast.error("Failed to update blessing date.", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     } finally {
       setLoading(false);
     }
@@ -162,7 +230,9 @@ const HouseBlessingsDetails = () => {
 
   const handleSubmitComment = async () => {
     if (!selectedComment && !additionalComment) {
-      alert("Please select or enter a comment.");
+      toast.error("Please select or enter a comment.", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
       return;
     }
     const commentData = {
@@ -170,30 +240,30 @@ const HouseBlessingsDetails = () => {
       additionalComment: additionalComment || "",
     };
     try {
-      const response = await fetch(
+      const response = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/${blessingId}/commentBlessing`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(commentData),
-        }
+        commentData,
+        { withCredentials: true }
       );
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to submit comment.");
-      }
-      alert("Comment submitted successfully!");
+      setComments(prev => [...prev, response.data.comment]);
+      toast.success("Comment submitted successfully!", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+      setSelectedComment("");
+      setAdditionalComment("");
     } catch (error) {
-      alert("Failed to submit comment.");
+      toast.error("Failed to submit comment.", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     }
   };
 
   const handleAddPriest = async () => {
     if (!selectedPriestId) {
-      alert("Please select a priest.");
+      toast.error("Please select a priest.", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
       return;
     }
     try {
@@ -204,310 +274,458 @@ const HouseBlessingsDetails = () => {
       );
       toast.success("Priest assigned successfully!", {
         position: toast.POSITION.TOP_RIGHT,
-        autoClose: 3000,
       });
-      setBlessingDetails((prev) => ({
+      setBlessingDetails(prev => ({
         ...prev,
-        priest:
-          priestsList.find((priest) => priest._id === selectedPriestId) || null,
+        priest: priestsList.find(priest => priest._id === selectedPriestId)
       }));
     } catch (error) {
       console.error("Error assigning priest:", error);
-      toast.error("Failed to assign priest.");
+      toast.error("Failed to assign priest.", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
 
   return (
-    <div className="wedding-details-page">
+    <Box sx={{ display: 'flex' }}>
       <SideBar />
-      <div className="house-details-content">
-        <div className="house-details-grid">
-          {/* House Details Box */}
-          <div className="house-details-box">
-            <h3>House Blessing Details</h3>
-            <div className="house-details-item">
-              <p>
-                <strong>Full Name:</strong> {blessingDetails?.fullName || "N/A"}
-              </p>
-            </div>
-            <div className="house-details-item">
-              <p>
-                <strong>Contact Number:</strong>{" "}
-                {blessingDetails?.contactNumber || "N/A"}
-              </p>
-            </div>
-            {/* <div className="house-details-item">
-                            <p><strong>Address:</strong>
-                                {blessingDetails?.address?.houseDetails || "N/A"},
-                                {blessingDetails?.address?.phase || "N/A"},
-                                {blessingDetails?.address?.street || "N/A"},
-                                {blessingDetails?.address?.baranggay === 'Others' ? blessingDetails?.address?.customBarangay || "N/A" : blessingDetails?.address?.baranggay || "N/A"},
-                                {blessingDetails?.address?.district || "N/A"},
-                                {blessingDetails?.address?.city === 'Others' ? blessingDetails?.address?.customCity || "N/A" : blessingDetails?.address?.city || "N/A"}
-                            </p>
-                        </div> */}
-
-            <div className="house-details-item">
-              <p>
-                <strong>Property Type:</strong>{" "}
-                {blessingDetails?.propertyType === "Others"
-                  ? blessingDetails?.customPropertyType
-                  : blessingDetails?.propertyType || "N/A"}
-              </p>
-            </div>
-            <div className="house-details-item">
-              <p>
-                <strong>Floors:</strong> {blessingDetails?.floors || "N/A"}
-              </p>
-            </div>
-            <div className="house-details-item">
-              <p>
-                <strong>Rooms:</strong> {blessingDetails?.rooms || "N/A"}
-              </p>
-            </div>
-            <div className="house-details-item">
-              <p>
-                <strong>Property Size:</strong>{" "}
-                {blessingDetails?.propertySize || "N/A"}
-              </p>
-            </div>
-            <div className="house-details-item">
-              <p>
-                <strong>New Construction:</strong>{" "}
-                {blessingDetails?.isNewConstruction ? "Yes" : "No"}
-              </p>
-            </div>
-
-            <div className="house-details-item">
-              <p>
-                <strong>House Details:</strong>{" "}
-                {blessingDetails?.address?.houseDetails || "N/A"}
-              </p>
-              <p>
-                <strong>Block:</strong>{" "}
-                {blessingDetails?.address?.block || "N/A"}
-              </p>
-              <p>
-                <strong>Phase:</strong>{" "}
-                {blessingDetails?.address?.phase || "N/A"}
-              </p>
-              <p>
-                <strong>Street:</strong>{" "}
-                {blessingDetails?.address?.street || "N/A"}
-              </p>
-              <p>
-                <strong>Barangay:</strong>{" "}
-                {blessingDetails?.address?.baranggay === "Others"
-                  ? blessingDetails?.address?.customBarangay || "N/A"
-                  : blessingDetails?.address?.baranggay || "N/A"}
-              </p>
-              <p>
-                <strong>District:</strong>{" "}
-                {blessingDetails?.address?.district || "N/A"}
-              </p>
-              <p>
-                <strong>City:</strong>{" "}
-                {blessingDetails?.address?.city === "Others"
-                  ? blessingDetails?.address?.customCity || "N/A"
-                  : blessingDetails?.address?.city || "N/A"}
-              </p>
-            </div>
-
-            <div className="house-details-item">
-              <p>
-                <strong>Blessing Date:</strong>{" "}
-                {blessingDetails?.blessingDate
-                  ? new Date(blessingDetails.blessingDate).toLocaleDateString()
-                  : "N/A"}
-              </p>
-            </div>
-            <div className="house-details-item">
-              <p>
-                <strong>Blessing Time:</strong>{" "}
-                {blessingDetails?.blessingTime || "N/A"}
-              </p>
-            </div>
-            <div className="house-details-item">
-              <p>
-                <strong>Blessing Status:</strong>{" "}
-                {blessingDetails?.blessingStatus || "N/A"}
-              </p>
-            </div>
-            <div className="house-details-item">
-              <p>
-                <strong>Confirmed At:</strong>{" "}
-                {blessingDetails?.confirmedAt
-                  ? new Date(blessingDetails.confirmedAt).toLocaleDateString()
-                  : "N/A"}
-              </p>
-            </div>
-          </div>
-
-          {/* Admin Comments Section */}
-          <div className="house-comments-section">
-            <h2>Admin Comments</h2>
-            {comments && comments.length > 0 ? (
-              comments.map((comment, index) => (
-                <div key={index} className="admin-comment">
-                  <p>
-                    <strong>Selected Comment:</strong>{" "}
-                    {comment?.selectedComment || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Additional Comment:</strong>{" "}
-                    {comment?.additionalComment || "N/A"}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p>No admin comments yet.</p>
-            )}
-          </div>
-
-          {/* Updated Blessing Date Section */}
-          <div className="blessing-date-box">
-            <h3>Updated Blessing Date</h3>
-            <p className="date">
-              {blessingDetails?.adminRescheduled?.date
-                ? new Date(
-                    blessingDetails.adminRescheduled.date
-                  ).toLocaleDateString()
-                : "N/A"}
-            </p>
-            {blessingDetails?.adminRescheduled?.reason && (
-              <div className="reschedule-reason">
-                <h3>Reason for Rescheduling</h3>
-                <p>{blessingDetails.adminRescheduled.reason}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Priest Section */}
-          <div className="house-comments-section">
-            <h2>Priest</h2>
-            <p>
-              <strong>Priest:</strong> {blessingDetails?.priest || "N/A"}
-            </p>
-          </div>
-
-          {/* Admin Section for Updating Blessing Date */}
-          <div className="house-section">
-            <h2>Select Updated Blessing Date:</h2>
-            <input
-              type="date"
-              value={newDate}
-              onChange={(e) => setNewDate(e.target.value)}
+      <Container maxWidth="lg" sx={{ py: 4, ml: { sm: '240px' } }}>
+        <Stack spacing={3}>
+          {/* Header with status */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h4" component="h1">
+              House Blessing Details
+            </Typography>
+            <Chip
+              label={blessingDetails?.blessingStatus || "N/A"}
+              color={getStatusColor(blessingDetails?.blessingStatus)}
+              size="medium"
             />
-            <label>Reason:</label>
-            <textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-            />
-          </div>
-          <div className="button-container">
-            <button onClick={handleUpdate} disabled={loading}>
-              {loading ? "Updating..." : "Update Blessing Date"}
-            </button>
-          </div>
+          </Box>
 
-          {/* Admin Comment Submission */}
-          <div className="house-section">
-            <h2>Submit Admin Comment</h2>
-            <select
-              value={selectedComment}
-              onChange={(e) => setSelectedComment(e.target.value)}
-            >
-              <option value="" disabled>
-                Select a comment
-              </option>
-              {predefinedComments.map((comment, index) => (
-                <option key={index} value={comment}>
-                  {comment}
-                </option>
-              ))}
-            </select>
-            <textarea
-              placeholder="Additional Comments"
-              value={additionalComment}
-              onChange={(e) => setAdditionalComment(e.target.value)}
-            />
-            <div className="button-container">
-              <button onClick={handleSubmitComment}>Submit Comment</button>
-            </div>
-          </div>
-
-          {/* Adding Priest */}
-          <div className="house-section">
-            <h2>Priest Name</h2>
-            <textarea
-              placeholder="Priest Name"
-              value={priest}
-              onChange={(e) => setPriest(e.target.value)}
-            />
-            <button onClick={handleAddPriest}>Add Priest</button>
-          </div>
-
-          {/* Cancelling Reason Section */}
-          {blessingDetails?.blessingStatus === "Cancelled" &&
-          blessingDetails?.cancellingReason ? (
-            <div className="house-comments-section">
-              <h2>Cancellation Details</h2>
-              <div className="admin-comment">
-                <p>
-                  <strong>Cancelled By:</strong>{" "}
-                  {blessingDetails.cancellingReason.user === "Admin"
-                    ? "Admin"
-                    : blessingDetails.cancellingReason.user}
-                </p>
-                <p>
-                  <strong>Reason:</strong>{" "}
-                  {blessingDetails.cancellingReason.reason ||
-                    "No reason provided."}
-                </p>
-              </div>
-            </div>
-          ) : null}
-
-          {/* Cancel Button */}
-          <div className="button-container">
-            <button onClick={() => setShowCancelModal(true)}>
-              Cancel House Blessing
-            </button>
-          </div>
-
-          {/* Cancellation Modal */}
-          {showCancelModal && (
-            <div className="modal-overlay">
-              <div className="modal">
-                <h3>Cancel House Blessing</h3>
-                <p>Please provide a reason for cancellation:</p>
-                <textarea
-                  value={cancelReason}
-                  onChange={(e) => setCancelReason(e.target.value)}
-                  placeholder="Enter reason..."
-                  className="modal-textarea"
+          {/* Main content grid */}
+          <Stack spacing={3} direction={{ xs: 'column', md: 'row' }} alignItems="flex-start">
+            {/* Left column */}
+            <Stack spacing={3} sx={{ flex: 2, minWidth: 0 }}>
+              {/* Applicant Information */}
+              <Card elevation={3}>
+                <CardHeader
+                  avatar={
+                    <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+                      <PersonIcon />
+                    </Avatar>
+                  }
+                  title="Applicant Information"
                 />
-                <div className="modal-buttons">
-                  <button onClick={handleCancel}>Confirm Cancel</button>
-                  <button onClick={() => setShowCancelModal(false)}>
-                    Back
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Full Name
+                      </Typography>
+                      <Typography>{blessingDetails?.fullName || "N/A"}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Contact Number
+                      </Typography>
+                      <Typography>{blessingDetails?.contactNumber || "N/A"}</Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
 
-          <div className="button-container">
-            <button onClick={() => handleConfirm(blessingId)}>
-              Confirm Blessing
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+              {/* Property Details */}
+              <Card elevation={3}>
+                <CardHeader
+                  avatar={
+                    <Avatar sx={{ bgcolor: theme.palette.secondary.main }}>
+                      <HomeIcon />
+                    </Avatar>
+                  }
+                  title="Property Details"
+                />
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Property Type
+                      </Typography>
+                      <Typography>
+                        {blessingDetails?.propertyType === "Others"
+                          ? blessingDetails?.customPropertyType
+                          : blessingDetails?.propertyType || "N/A"}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Floors
+                      </Typography>
+                      <Typography>{blessingDetails?.floors || "N/A"}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Rooms
+                      </Typography>
+                      <Typography>{blessingDetails?.rooms || "N/A"}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Property Size
+                      </Typography>
+                      <Typography>{blessingDetails?.propertySize || "N/A"}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        New Construction
+                      </Typography>
+                      <Typography>
+                        {blessingDetails?.isNewConstruction ? "Yes" : "No"}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              {/* Address */}
+              <Card elevation={3}>
+                <CardHeader
+                  avatar={
+                    <Avatar sx={{ bgcolor: theme.palette.info.main }}>
+                      <LocationIcon />
+                    </Avatar>
+                  }
+                  title="Property Address"
+                />
+                <CardContent>
+                  <Typography>{formatAddress() || "N/A"}</Typography>
+                </CardContent>
+              </Card>
+
+              {/* Blessing Details */}
+              <Card elevation={3}>
+                <CardHeader
+                  avatar={
+                    <Avatar sx={{ bgcolor: theme.palette.success.main }}>
+                      <CalendarIcon />
+                    </Avatar>
+                  }
+                  title="Blessing Details"
+                />
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Original Blessing Date
+                      </Typography>
+                      <Typography>
+                        {blessingDetails?.blessingDate
+                          ? new Date(blessingDetails.blessingDate).toLocaleDateString()
+                          : "N/A"}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Blessing Time
+                      </Typography>
+                      <Typography>{blessingDetails?.blessingTime || "N/A"}</Typography>
+                    </Box>
+                    {blessingDetails?.adminRescheduled?.date && (
+                      <Box>
+                        <Typography variant="subtitle2" color="textSecondary">
+                          Rescheduled Date
+                        </Typography>
+                        <Typography>
+                          {new Date(blessingDetails.adminRescheduled.date).toLocaleDateString()}
+                        </Typography>
+                        {blessingDetails.adminRescheduled.reason && (
+                          <>
+                            <Typography variant="subtitle2" color="textSecondary" mt={1}>
+                              Rescheduling Reason
+                            </Typography>
+                            <Typography>{blessingDetails.adminRescheduled.reason}</Typography>
+                          </>
+                        )}
+                      </Box>
+                    )}
+                    <Box>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Confirmed At
+                      </Typography>
+                      <Typography>
+                        {blessingDetails?.confirmedAt
+                          ? new Date(blessingDetails.confirmedAt).toLocaleDateString()
+                          : "N/A"}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Stack>
+
+            {/* Right column */}
+            <Stack spacing={3} sx={{ flex: 1, minWidth: 0 }}>
+              {/* Priest Information */}
+              <Card elevation={3}>
+                <CardHeader
+                  avatar={
+                    <Avatar sx={{ bgcolor: theme.palette.warning.main }}>
+                      <PersonIcon />
+                    </Avatar>
+                  }
+                  title="Assigned Priest"
+                />
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Typography>
+                      {blessingDetails?.priest?.name || "Not assigned yet"}
+                    </Typography>
+                    {priestsList.length > 0 && (
+                      <>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Select Priest</InputLabel>
+                          <Select
+                            value={selectedPriestId}
+                            onChange={(e) => setSelectedPriestId(e.target.value)}
+                            label="Select Priest"
+                          >
+                            {priestsList.map((priest) => (
+                              <MenuItem key={priest._id} value={priest._id}>
+                                {priest.fullName}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                        <Button
+                          variant="contained"
+                          startIcon={<PersonIcon />}
+                          onClick={handleAddPriest}
+                          fullWidth
+                        >
+                          Assign Priest
+                        </Button>
+                      </>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              {/* Admin Comments */}
+              <Card elevation={3}>
+                <CardHeader
+                  avatar={
+                    <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+                      <CommentIcon />
+                    </Avatar>
+                  }
+                  title="Admin Comments"
+                />
+                <CardContent>
+                  {comments.length > 0 ? (
+                    <Stack spacing={2}>
+                      {comments.map((comment, index) => (
+                        <Box key={index}>
+                          {comment.selectedComment && (
+                            <Box>
+                              <Typography variant="subtitle2" color="textSecondary">
+                                Selected Comment
+                              </Typography>
+                              <Typography>{comment.selectedComment}</Typography>
+                            </Box>
+                          )}
+                          {comment.additionalComment && (
+                            <Box mt={1}>
+                              <Typography variant="subtitle2" color="textSecondary">
+                                Additional Comment
+                              </Typography>
+                              <Typography>{comment.additionalComment}</Typography>
+                            </Box>
+                          )}
+                          {index < comments.length - 1 && <Divider sx={{ my: 2 }} />}
+                        </Box>
+                      ))}
+                    </Stack>
+                  ) : (
+                    <Typography>No admin comments yet.</Typography>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Add Comment */}
+              <Card elevation={3}>
+                <CardHeader
+                  avatar={
+                    <Avatar sx={{ bgcolor: theme.palette.info.main }}>
+                      <EditIcon />
+                    </Avatar>
+                  }
+                  title="Add Comment"
+                />
+                <CardContent>
+                  <Stack spacing={2}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Predefined Comments</InputLabel>
+                      <Select
+                        value={selectedComment}
+                        onChange={(e) => setSelectedComment(e.target.value)}
+                        label="Predefined Comments"
+                      >
+                        <MenuItem value="">
+                          <em>Select a comment</em>
+                        </MenuItem>
+                        {predefinedComments.map((comment, index) => (
+                          <MenuItem key={index} value={comment}>
+                            {comment}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <TextField
+                      label="Additional Comments"
+                      multiline
+                      rows={3}
+                      value={additionalComment}
+                      onChange={(e) => setAdditionalComment(e.target.value)}
+                      fullWidth
+                    />
+                    <Button
+                      variant="contained"
+                      startIcon={<CommentIcon />}
+                      onClick={handleSubmitComment}
+                      fullWidth
+                    >
+                      Submit Comment
+                    </Button>
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              {/* Reschedule Blessing */}
+              <Card elevation={3}>
+                <CardHeader
+                  avatar={
+                    <Avatar sx={{ bgcolor: theme.palette.success.main }}>
+                      <CalendarIcon />
+                    </Avatar>
+                  }
+                  title="Reschedule Blessing"
+                />
+                <CardContent>
+                  <Stack spacing={2}>
+                    {/* Replace DatePicker with native input */}
+                    <TextField
+                      label="New Blessing Date"
+                      type="date"
+                      value={newDate ? dayjs(newDate).format("YYYY-MM-DD") : ""}
+                      onChange={(e) => setNewDate(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Reason for Rescheduling"
+                      multiline
+                      rows={3}
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      fullWidth
+                    />
+                    <Button
+                      variant="contained"
+                      startIcon={<EditIcon />}
+                      onClick={handleUpdate}
+                      disabled={loading}
+                      fullWidth
+                    >
+                      {loading ? <CircularProgress size={24} /> : "Update Blessing Date"}
+                    </Button>
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons */}
+              <Stack spacing={2}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={<CheckIcon />}
+                  onClick={handleConfirm}
+                  fullWidth
+                  disabled={blessingDetails?.blessingStatus === "Confirmed"}
+                >
+                  Confirm Blessing
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  startIcon={<CancelIcon />}
+                  onClick={() => setShowCancelModal(true)}
+                  fullWidth
+                  disabled={blessingDetails?.blessingStatus === "Cancelled"}
+                >
+                  Cancel Blessing
+                </Button>
+              </Stack>
+            </Stack>
+          </Stack>
+        </Stack>
+      </Container>
+
+
+      {/* Cancel Confirmation Dialog */}
+      <Dialog
+        open={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+      >
+        <DialogTitle>Cancel House Blessing</DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom>
+            Please provide a reason for cancellation:
+          </Typography>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Cancellation Reason"
+            type="text"
+            fullWidth
+            variant="outlined"
+            multiline
+            rows={4}
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowCancelModal(false)}>Back</Button>
+          <Button
+            onClick={handleCancel}
+            color="error"
+            variant="contained"
+            disabled={!cancelReason.trim()}
+          >
+            Confirm Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <ToastContainer />
+    </Box>
   );
 };
 

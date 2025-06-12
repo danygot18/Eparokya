@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card, CardContent, Typography, Box, Paper, Button, Modal, Tabs, Tab } from "@mui/material";
+import { Card, CardContent, Typography, Box, Paper, Button, Modal, Tabs, Tab, Divider } from "@mui/material";
 import GuestSideBar from "../../../../GuestSideBar";
 import UserBaptismChecklist from "./UserBaptismChecklist";
 import "../../../../Layout/styles/style.css";
@@ -33,6 +33,7 @@ const MySubmittedBaptismForm = () => {
 
         if (response.data) {
           setBaptismDetails(response.data);
+          console.log("Baptism Details:", response.data);
         } else {
           setBaptismDetails(null);
         }
@@ -167,9 +168,7 @@ const MySubmittedBaptismForm = () => {
                       <Typography sx={{ flex: "1 1 200px" }}>
                         <strong>Contact Number:</strong> {baptismDetails.phone || "N/A"}
                       </Typography>
-                      <Typography sx={{ flex: "1 1 200px" }}>
-                        <strong>Status:</strong> {baptismDetails.binyagStatus || "N/A"}
-                      </Typography>
+
                     </Box>
                   </CardContent>
                 </Card>
@@ -299,7 +298,7 @@ const MySubmittedBaptismForm = () => {
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
                     {/* Required Documents */}
-                    {baptismDetails.Docs && (
+                    {/* {baptismDetails.map && (
                       <>
                         <Card sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
                           <CardContent>
@@ -373,83 +372,300 @@ const MySubmittedBaptismForm = () => {
                           </CardContent>
                         </Card>
                       </>
-                    )}
+                    )} */}
+                    {["birthCertificate", "marriageCertificate"].map((doc, index) => {
+                      const docUrl = baptismDetails?.Docs?.[doc]?.url;
+                      const docName = baptismDetails?.Docs?.[doc]?.name ||
+                        doc.replace(/([A-Z])/g, " $1")
+                          .replace(/^./, str => str.toUpperCase())
+                          .trim();
+                      const isImage = docUrl && /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(docUrl);
+
+                      return (
+                        <Card
+                          key={index}
+                          sx={{
+                            flex: "1 1 300px",
+                            maxWidth: "400px",
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            transition: "all 0.3s ease",
+                            "&:hover": {
+                              transform: "translateY(-2px)",
+                              boxShadow: 3
+                            }
+                          }}
+                        >
+                          <CardContent sx={{ flexGrow: 1 }}>
+                            <Typography
+                              variant="subtitle1"
+                              fontWeight="bold"
+                              sx={{ mb: 1 }}
+                            >
+                              {docName}
+                            </Typography>
+
+                            {docUrl ? (
+                              <>
+                                {isImage ? (
+                                  <>
+                                    <Box
+                                      component="img"
+                                      src={docUrl}
+                                      alt={docName}
+                                      sx={{
+                                        maxWidth: "100%",
+                                        maxHeight: 200,
+                                        width: 'auto',
+                                        height: 'auto',
+                                        objectFit: "contain",
+                                        cursor: "pointer",
+                                        borderRadius: 1,
+                                        mt: 1,
+                                        mx: "auto",
+                                        border: "1px solid",
+                                        borderColor: "divider",
+                                        boxShadow: 1,
+                                        "&:hover": {
+                                          boxShadow: 3
+                                        }
+                                      }}
+                                      onClick={() => openModal(docUrl)}
+                                    />
+                                    <Button
+                                      onClick={() => openModal(docUrl)}
+                                      variant="contained"
+                                      sx={{
+                                        mt: 2,
+                                        backgroundColor: "primary.light",
+                                        color: "primary.contrastText",
+                                        "&:hover": {
+                                          backgroundColor: "primary.main"
+                                        },
+                                        width: "100%"
+                                      }}
+                                    >
+                                      View Full Image
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <Box sx={{
+                                    width: '100%',
+                                    mt: 1,
+                                    mb: 2,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 2
+                                  }}>
+                                    <iframe
+                                      src={`${docUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                                      title={`${docName} Preview`}
+                                      style={{
+                                        width: '100%',
+                                        height: '200px',
+                                        border: '1px solid #ddd',
+                                        borderRadius: 4,
+                                        backgroundColor: '#f5f5f5'
+                                      }}
+                                    />
+                                    <Typography
+                                      variant="caption"
+                                      color="text.secondary"
+                                      sx={{ mt: 1 }}
+                                    >
+                                      {docName}
+                                    </Typography>
+                                    <Button
+                                      onClick={() => window.open(docUrl, "_blank")}
+                                      variant="contained"
+                                      sx={{
+                                        backgroundColor: "primary.light",
+                                        color: "primary.contrastText",
+                                        "&:hover": {
+                                          backgroundColor: "primary.main"
+                                        },
+                                        width: "100%"
+                                      }}
+                                    >
+                                      Open Full Document
+                                    </Button>
+                                  </Box>
+                                )}
+                              </>
+                            ) : (
+                              <Box sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                height: "100%",
+                                py: 4,
+                                border: "1px dashed",
+                                borderColor: "divider",
+                                borderRadius: 1
+                              }}>
+                                <Typography
+                                  color="text.secondary"
+                                  variant="body2"
+                                  sx={{ mb: 1 }}
+                                >
+                                  No document available
+                                </Typography>
+                              </Box>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
 
                     {/* Additional Documents */}
                     {baptismDetails.additionalDocs && (
-                      <>
-                        <Card sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
-                          <CardContent>
-                            <Typography variant="body1" fontWeight="bold">
-                              Baptism Permit:
-                            </Typography>
-                            {baptismDetails.additionalDocs.baptismPermit?.url ? (
-                              <>
-                                <Box
-                                  component="img"
-                                  src={baptismDetails.additionalDocs.baptismPermit.url}
-                                  alt="Baptism Permit"
-                                  sx={{
-                                    maxWidth: 150,
-                                    maxHeight: 150,
-                                    width: '100%',
-                                    objectFit: "contain",
-                                    cursor: "pointer",
-                                    borderRadius: 1,
-                                    mt: 1,
-                                  }}
-                                  onClick={() => openModal(baptismDetails.additionalDocs.baptismPermit.url)}
-                                />
-                                <Button
-                                  onClick={() => openModal(baptismDetails.additionalDocs.baptismPermit.url)}
-                                  variant="contained"
-                                  sx={{ mt: 1, backgroundColor: "#d5edd9", color: "black" }}
-                                >
-                                  View Full Image
-                                </Button>
-                              </>
-                            ) : (
-                              <Typography color="textSecondary">N/A</Typography>
-                            )}
-                          </CardContent>
-                        </Card>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                        {[
+                          {
+                            key: "baptismPermit",
+                            label: "Baptism Permit"
+                          },
+                          {
+                            key: "certificateOfNoRecordBaptism",
+                            label: "Certificate Of No Record Baptism"
+                          }
+                        ].map((doc, index) => {
+                          const docUrl = baptismDetails.additionalDocs[doc.key]?.url;
+                          const isImage = docUrl && /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(docUrl);
 
-                        <Card sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
-                          <CardContent>
-                            <Typography variant="body1" fontWeight="bold">
-                              Certificate Of No Record Baptism:
-                            </Typography>
-                            {baptismDetails.additionalDocs.certificateOfNoRecordBaptism?.url ? (
-                              <>
-                                <Box
-                                  component="img"
-                                  src={baptismDetails.additionalDocs.certificateOfNoRecordBaptism.url}
-                                  alt="Certificate Of No Record Baptism"
-                                  sx={{
-                                    maxWidth: 150,
-                                    maxHeight: 150,
-                                    width: '100%',
-                                    objectFit: "contain",
-                                    cursor: "pointer",
-                                    borderRadius: 1,
-                                    mt: 1,
-                                  }}
-                                  onClick={() => openModal(baptismDetails.additionalDocs.certificateOfNoRecordBaptism.url)}
-                                />
-                                <Button
-                                  onClick={() => openModal(baptismDetails.additionalDocs.certificateOfNoRecordBaptism.url)}
-                                  variant="contained"
-                                  sx={{ mt: 1, backgroundColor: "#d5edd9", color: "black" }}
+                          return (
+                            <Card
+                              key={index}
+                              sx={{
+                                flex: "1 1 300px",
+                                maxWidth: "400px",
+                                height: "100%",
+                                display: "flex",
+                                flexDirection: "column",
+                                transition: "all 0.3s ease",
+                                "&:hover": {
+                                  transform: "translateY(-2px)",
+                                  boxShadow: 3
+                                }
+                              }}
+                            >
+                              <CardContent sx={{ flexGrow: 1 }}>
+                                <Typography
+                                  variant="subtitle1"
+                                  fontWeight="bold"
+                                  sx={{ mb: 1 }}
                                 >
-                                  View Full Image
-                                </Button>
-                              </>
-                            ) : (
-                              <Typography color="textSecondary">N/A</Typography>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </>
+                                  {doc.label}
+                                </Typography>
+
+                                {docUrl ? (
+                                  <>
+                                    {isImage ? (
+                                      <>
+                                        <Box
+                                          component="img"
+                                          src={docUrl}
+                                          alt={doc.label}
+                                          sx={{
+                                            maxWidth: "100%",
+                                            maxHeight: 200,
+                                            width: 'auto',
+                                            height: 'auto',
+                                            objectFit: "contain",
+                                            cursor: "pointer",
+                                            borderRadius: 1,
+                                            mt: 1,
+                                            mx: "auto",
+                                            border: "1px solid",
+                                            borderColor: "divider",
+                                            boxShadow: 1,
+                                            "&:hover": {
+                                              boxShadow: 3
+                                            }
+                                          }}
+                                          onClick={() => openModal(docUrl)}
+                                        />
+                                        <Button
+                                          onClick={() => openModal(docUrl)}
+                                          variant="contained"
+                                          sx={{
+                                            mt: 2,
+                                            backgroundColor: "primary.light",
+                                            color: "primary.contrastText",
+                                            "&:hover": {
+                                              backgroundColor: "primary.main"
+                                            },
+                                            width: "100%"
+                                          }}
+                                        >
+                                          View Full Image
+                                        </Button>
+                                      </>
+                                    ) : (
+                                      <Box sx={{
+                                        width: '100%',
+                                        mt: 1,
+                                        mb: 2,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 2
+                                      }}>
+                                        <iframe
+                                          src={`${docUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                                          title={`${doc.label} Preview`}
+                                          style={{
+                                            width: '100%',
+                                            height: '200px',
+                                            border: '1px solid #ddd',
+                                            borderRadius: 4,
+                                            backgroundColor: '#f5f5f5'
+                                          }}
+                                        />
+                                        <Button
+                                          onClick={() => window.open(docUrl, "_blank")}
+                                          variant="contained"
+                                          sx={{
+                                            backgroundColor: "primary.light",
+                                            color: "primary.contrastText",
+                                            "&:hover": {
+                                              backgroundColor: "primary.main"
+                                            },
+                                            width: "100%"
+                                          }}
+                                        >
+                                          Open Full Document
+                                        </Button>
+                                      </Box>
+                                    )}
+                                  </>
+                                ) : (
+                                  <Box sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    height: "100%",
+                                    py: 4,
+                                    border: "1px dashed",
+                                    borderColor: "divider",
+                                    borderRadius: 1
+                                  }}>
+                                    <Typography
+                                      color="text.secondary"
+                                      variant="body2"
+                                      sx={{ mb: 1 }}
+                                    >
+                                      No document available
+                                    </Typography>
+                                  </Box>
+                                )}
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </Box>
                     )}
                   </Box>
                 </Box>
@@ -476,17 +692,28 @@ const MySubmittedBaptismForm = () => {
                       {baptismDetails.adminNotes?.length > 0 ? (
                         baptismDetails.adminNotes.map((note, index) => (
                           <Box key={index} sx={{ mb: 2 }}>
-                            <Typography><strong>Priest:</strong> {note.priest || "N/A"}</Typography>
-                            <Typography><strong>Recorded By:</strong> {note.recordedBy || "N/A"}</Typography>
-                            <Typography><strong>Book Number:</strong> {note.bookNumber || "N/A"}</Typography>
-                            <Typography><strong>Page Number:</strong> {note.pageNumber || "N/A"}</Typography>
-                            <Typography><strong>Line Number:</strong> {note.lineNumber || "N/A"}</Typography>
+                            <Typography>
+                              <strong>Priest:</strong> {note.priest?.fullName || "N/A"}
+                            </Typography>
+                            <Typography>
+                              <strong>Recorded By:</strong> {note.recordedBy || "N/A"}
+                            </Typography>
+                            <Typography>
+                              <strong>Book Number:</strong> {note.bookNumber || "N/A"}
+                            </Typography>
+                            <Typography>
+                              <strong>Page Number:</strong> {note.pageNumber || "N/A"}
+                            </Typography>
+                            <Typography>
+                              <strong>Line Number:</strong> {note.lineNumber || "N/A"}
+                            </Typography>
                           </Box>
                         ))
                       ) : (
                         <Typography>No admin notes available.</Typography>
                       )}
                     </CardContent>
+
                   </Card>
 
                   {/* Rescheduling */}
@@ -600,18 +827,30 @@ const MySubmittedBaptismForm = () => {
             </Box>
           </Modal>
         </Paper>
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 3, m: 3 }}>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleCancel}
-            sx={{ px: 4, py: 2 }}
-          >
-            Cancel Baptism Request
-          </Button>
-        </Box>
-      </Box>
-    </Box>
+        <Divider>
+          <Card>
+            <Typography variant="h5" sx={{ textAlign: "center", p: 2 }}>
+              Status
+            </Typography>
+            <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
+              {baptismDetails.binyagStatus || "N/A"}
+            </Typography>
+
+          </Card>
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 3, m: 3 }}>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleCancel}
+              sx={{ px: 4, py: 2 }}
+            >
+              Cancel Baptism Request
+            </Button>
+
+          </Box>
+        </Divider>
+      </Box >
+    </Box >
   );
 };
 

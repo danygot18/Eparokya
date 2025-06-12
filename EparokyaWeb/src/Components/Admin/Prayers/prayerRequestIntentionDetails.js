@@ -19,6 +19,7 @@ import {
   Stack
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { toast } from 'react-toastify';
 
 const PrayerRequestIntentionDetails = () => {
   const { prayerIntentionId } = useParams();
@@ -45,6 +46,7 @@ const PrayerRequestIntentionDetails = () => {
 
       setPrayerRequest({ ...prayerRequest, isDone: true });
       setShowModal(false);
+      toast.success("Successfully Mark as Prayed")
     } catch (error) {
       console.error('Error marking as prayed:', error);
     }

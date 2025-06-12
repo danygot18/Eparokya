@@ -139,6 +139,7 @@ const WeddingCalendar = () => {
   const fetchWeddings = useCallback(async () => {
     try {
       const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`);
+      console.log(data)
       const formatted = data.map(event => ({
         id: event._id,
         title: `${event.brideName} & ${event.groomName} Wedding`,

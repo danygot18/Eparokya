@@ -1,15 +1,28 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../../Layout/styles/style.css";
-import "./houseBlessing.css";
-import SideBar from "../SideBar";
 import { useParams } from "react-router-dom";
-import Modal from "react-modal";
-import DateTimePicker from "react-datetime-picker";
-import 'react-datetime-picker/dist/DateTimePicker.css';
 import { toast, ToastContainer } from 'react-toastify';
-
-Modal.setAppElement("#root");
+import {
+  Box,
+  Typography,
+  Paper,
+  Divider,
+  TextField,
+  Button,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Modal,
+  CircularProgress,
+  Stack,
+  Card,
+  CardContent,
+  Alert
+} from '@mui/material';
+import SideBar from "../SideBar";
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const UserHouseBlessingsDetails = () => {
     const { blessingId } = useParams();
@@ -17,20 +30,17 @@ const UserHouseBlessingsDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [priest, setPriest] = useState("");
-
     const [priestsList, setPriestsList] = useState([]);
     const [selectedPriestId, setSelectedPriestId] = useState("");
 
     const [selectedComment, setSelectedComment] = useState("");
-    const [rescheduledDate, setRescheduledDate] = useState("");
     const [rescheduledReason, setRescheduledReason] = useState("");
     const [additionalComment, setAdditionalComment] = useState("");
     const [comments, setComments] = useState([]);
 
-    const [newDate, setNewDate] = useState("");
+    const [newDate, setNewDate] = useState(null);
     const [reason, setReason] = useState("");
-    const [updatedBlessingDate, setUpdatedBlessingDate] = useState(blessingDetails?.blessingDate || "");
+    const [updatedBlessingDate, setUpdatedBlessingDate] = useState(null);
 
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancelReason, setCancelReason] = useState("");
@@ -51,9 +61,8 @@ const UserHouseBlessingsDetails = () => {
                 );
                 setBlessingDetails(response.data.houseBlessing);
                 setComments(response.data.houseBlessing.comments || []);
-                setUpdatedBlessingDate(response.data.blessingDate);
-                setSelectedPriestId(response.data.counseling?.priest?._id || "");
-
+                setUpdatedBlessingDate(new Date(response.data.blessingDate));
+                setSelectedPriestId(response.data.houseBlessing?.priest?._id || "");
             } catch (err) {
                 setError("Failed to fetch house blessing details.");
             } finally {
@@ -67,12 +76,10 @@ const UserHouseBlessingsDetails = () => {
                     `${process.env.REACT_APP_API}/api/v1/getAvailablePriest`,
                     { withCredentials: true }
                 );
-                const fetchedPriests = response.data.priests;
-                const formattedPriests = Array.isArray(fetchedPriests) ? fetchedPriests : [fetchedPriests];
-                setPriestsList(formattedPriests);
-                if (formattedPriests.length > 0) {
-                    setSelectedPriestId(formattedPriests[0]._id);
-                }
+                const fetchedPriests = Array.isArray(response.data.priests) 
+                    ? response.data.priests 
+                    : [response.data.priests];
+                setPriestsList(fetchedPriests);
             } catch (err) {
                 console.error("Failed to fetch priests:", err);
                 setPriestsList([]);
@@ -83,51 +90,42 @@ const UserHouseBlessingsDetails = () => {
         fetchPriests();
     }, [blessingId]);
 
-    const handleConfirm = async (blessingId) => {
+    const handleConfirm = async () => {
         try {
-            const response = await axios.post(
+            await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/${blessingId}/confirmBlessing`,
+                {},
                 { withCredentials: true }
             );
-            toast.success("House blessing confirmed successfully!", {
-                position: toast.POSITION.TOP_RIGHT,
-                autoClose: 3000,
-            });
+            toast.success("House blessing confirmed successfully!");
+            setBlessingDetails(prev => ({ ...prev, blessingStatus: "Confirmed" }));
         } catch (error) {
-            toast.error(
-                error.response?.data?.message || "Failed to confirm the house blessing.",
-                {
-                    position: toast.POSITION.TOP_RIGHT,
-                    autoClose: 3000,
-                }
-            );
+            toast.error(error.response?.data?.message || "Failed to confirm the house blessing.");
         }
     };
 
     const handleCancel = async () => {
         if (!cancelReason.trim()) {
-            toast.error("Please provide a cancellation reason.", { position: toast.POSITION.TOP_RIGHT });
+            toast.error("Please provide a cancellation reason.");
             return;
         }
         try {
-            const response = await axios.post(
+            await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/declineBlessing/${blessingId}`,
                 { reason: cancelReason },
                 { withCredentials: true }
             );
-
-            toast.success("House Blessing cancelled successfully!", { position: toast.POSITION.TOP_RIGHT });
+            toast.success("House Blessing cancelled successfully!");
             setShowCancelModal(false);
+            setBlessingDetails(prev => ({ ...prev, blessingStatus: "Cancelled" }));
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to cancel the house blessing.", {
-                position: toast.POSITION.TOP_RIGHT,
-            });
+            toast.error(error.response?.data?.message || "Failed to cancel the house blessing.");
         }
     };
 
     const handleUpdate = async () => {
         if (!newDate || !reason) {
-            alert("Please select a date and provide a reason.");
+            toast.error("Please select a date and provide a reason.");
             return;
         }
 
@@ -135,14 +133,14 @@ const UserHouseBlessingsDetails = () => {
             setLoading(true);
             const response = await axios.put(
                 `${process.env.REACT_APP_API}/api/v1/updateHouseBlessingDate/${blessingId}`,
-                { newDate, reason }
+                { newDate, reason },
+                { withCredentials: true }
             );
-
-            setUpdatedBlessingDate(response.data.blessingDate);
-            alert("Blessing date updated successfully!");
+            setUpdatedBlessingDate(newDate);
+            toast.success("Blessing date updated successfully!");
         } catch (error) {
             console.error("Error updating blessing date:", error);
-            alert("Failed to update blessing date.");
+            toast.error("Failed to update blessing date.");
         } finally {
             setLoading(false);
         }
@@ -150,38 +148,30 @@ const UserHouseBlessingsDetails = () => {
 
     const handleSubmitComment = async () => {
         if (!selectedComment && !additionalComment) {
-            alert("Please select or enter a comment.");
+            toast.error("Please select or enter a comment.");
             return;
         }
-        const commentData = {
-            selectedComment: selectedComment || "",
-            additionalComment: additionalComment || "",
-        };
         try {
-            const response = await fetch(
+            const response = await axios.post(
                 `${process.env.REACT_APP_API}/api/v1/${blessingId}/commentBlessing`,
                 {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(commentData),
-                }
+                    selectedComment: selectedComment || "",
+                    additionalComment: additionalComment || "",
+                },
+                { withCredentials: true }
             );
-
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to submit comment.");
-            }
-            alert("Comment submitted successfully!");
+            setComments(prev => [...prev, response.data.comment]);
+            toast.success("Comment submitted successfully!");
+            setSelectedComment("");
+            setAdditionalComment("");
         } catch (error) {
-            alert("Failed to submit comment.");
+            toast.error("Failed to submit comment.");
         }
     };
 
     const handleAddPriest = async () => {
         if (!selectedPriestId) {
-            alert("Please select a priest.");
+            toast.error("Please select a priest.");
             return;
         }
         try {
@@ -190,194 +180,307 @@ const UserHouseBlessingsDetails = () => {
                 { priestId: selectedPriestId },
                 { withCredentials: true }
             );
-            toast.success("Priest assigned successfully!", {
-                position: toast.POSITION.TOP_RIGHT,
-                autoClose: 3000,
-            });
+            const assignedPriest = priestsList.find(p => p._id === selectedPriestId);
             setBlessingDetails(prev => ({
                 ...prev,
-                priest: priestsList.find(priest => priest._id === selectedPriestId) || null
+                priest: assignedPriest
             }));
+            toast.success("Priest assigned successfully!");
         } catch (error) {
             console.error("Error assigning priest:", error);
             toast.error("Failed to assign priest.");
         }
     };
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
+    if (loading) return (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+            <CircularProgress />
+        </Box>
+    );
+
+    if (error) return (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+            <Alert severity="error">{error}</Alert>
+        </Box>
+    );
 
     return (
-        <div className="wedding-details-page">
+        <Box display="flex">
             <SideBar />
-            <div className="house-details-content">
-                <div className="house-details-grid">
-                    {/* House Details Box */}
-                    <div className="house-details-box">
-                        <h3>House Blessing Details</h3>
-                        <div className="house-details-item">
-                            <p><strong>Full Name:</strong> {blessingDetails?.fullName || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Contact Number:</strong> {blessingDetails?.contactNumber || "N/A"}</p>
-                        </div>
-                        {/* <div className="house-details-item">
-                            <p><strong>Address:</strong>
-                                {blessingDetails?.address?.houseDetails || "N/A"},
-                                {blessingDetails?.address?.phase || "N/A"},
-                                {blessingDetails?.address?.street || "N/A"},
-                                {blessingDetails?.address?.baranggay === 'Others' ? blessingDetails?.address?.customBarangay || "N/A" : blessingDetails?.address?.baranggay || "N/A"},
-                                {blessingDetails?.address?.district || "N/A"},
-                                {blessingDetails?.address?.city === 'Others' ? blessingDetails?.address?.customCity || "N/A" : blessingDetails?.address?.city || "N/A"}
-                            </p>
-                        </div> */}
+            <Box sx={{ flexGrow: 1, p: 3 }}>
+                <Typography variant="h4" gutterBottom>House Blessing Details</Typography>
+                
+                <Stack spacing={3}>
+                    {/* Blessing Details Card */}
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h5" gutterBottom>Blessing Information</Typography>
+                            <Divider sx={{ my: 2 }} />
+                            
+                            <Stack spacing={2}>
+                                <Box>
+                                    <Typography variant="subtitle1"><strong>Full Name:</strong> {blessingDetails?.fullName || "N/A"}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle1"><strong>Contact Number:</strong> {blessingDetails?.contactNumber || "N/A"}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle1"><strong>Address:</strong></Typography>
+                                    <Typography variant="body2">
+                                        {blessingDetails?.address?.BldgNameTower && `${blessingDetails.address.BldgNameTower}, `}
+                                        {blessingDetails?.address?.LotBlockPhaseHouseNo && `${blessingDetails.address.LotBlockPhaseHouseNo}, `}
+                                        {blessingDetails?.address?.SubdivisionVillageZone && `${blessingDetails.address.SubdivisionVillageZone}, `}
+                                        {blessingDetails?.address?.Street && `${blessingDetails.address.Street}, `}
+                                        {blessingDetails?.address?.district && `${blessingDetails.address.district}, `}
+                                        {blessingDetails?.address?.barangay === "Others"
+                                            ? (blessingDetails.address.customBarangay || "")
+                                            : (blessingDetails?.address?.barangay || "")}
+                                        {blessingDetails?.address?.city === "Others"
+                                            ? (blessingDetails.address.customCity ? `, ${blessingDetails.address.customCity}` : "")
+                                            : (blessingDetails?.address?.city ? `, ${blessingDetails.address.city}` : "")}
+                                    </Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle1"><strong>Blessing Date:</strong> {blessingDetails?.blessingDate ? new Date(blessingDetails.blessingDate).toLocaleDateString() : "N/A"}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle1"><strong>Blessing Time:</strong> {blessingDetails?.blessingTime || "N/A"}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle1"><strong>Status:</strong> {blessingDetails?.blessingStatus || "N/A"}</Typography>
+                                </Box>
+                                {blessingDetails?.confirmedAt && (
+                                    <Box>
+                                        <Typography variant="subtitle1"><strong>Confirmed At:</strong> {new Date(blessingDetails.confirmedAt).toLocaleDateString()}</Typography>
+                                    </Box>
+                                )}
+                            </Stack>
+                        </CardContent>
+                    </Card>
 
-                        <div className="house-details-item">
-                            <p><strong>House Details:</strong> {blessingDetails?.address?.houseDetails || "N/A"}</p>
-                            <p><strong>Block:</strong> {blessingDetails?.address?.block || "N/A"}</p>
-                            <p><strong>Phase:</strong> {blessingDetails?.address?.phase || "N/A"}</p>
-                            <p><strong>Street:</strong> {blessingDetails?.address?.street || "N/A"}</p>
-                            <p><strong>Barangay:</strong> {blessingDetails?.address?.baranggay === 'Others' ? blessingDetails?.address?.customBarangay || "N/A" : blessingDetails?.address?.baranggay || "N/A"}</p>
-                            <p><strong>District:</strong> {blessingDetails?.address?.district || "N/A"}</p>
-                            <p><strong>City:</strong> {blessingDetails?.address?.city === 'Others' ? blessingDetails?.address?.customCity || "N/A" : blessingDetails?.address?.city || "N/A"}</p>
-                        </div>
+                    {/* Admin Comments */}
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h5" gutterBottom>Admin Comments</Typography>
+                            <Divider sx={{ my: 2 }} />
+                            
+                            {comments.length > 0 ? (
+                                <Stack spacing={2}>
+                                    {comments.map((comment, index) => (
+                                        <Paper key={index} elevation={2} sx={{ p: 2 }}>
+                                            {comment.selectedComment && (
+                                                <Typography><strong>Comment:</strong> {comment.selectedComment}</Typography>
+                                            )}
+                                            {comment.additionalComment && (
+                                                <Typography><strong>Details:</strong> {comment.additionalComment}</Typography>
+                                            )}
+                                            <Typography variant="caption" color="text.secondary">
+                                                {new Date(comment.createdAt).toLocaleString()}
+                                            </Typography>
+                                        </Paper>
+                                    ))}
+                                </Stack>
+                            ) : (
+                                <Typography>No admin comments yet.</Typography>
+                            )}
+                        </CardContent>
+                    </Card>
 
-
-                        <div className="house-details-item">
-                            <p><strong>Blessing Date:</strong> {blessingDetails?.blessingDate ? new Date(blessingDetails.blessingDate).toLocaleDateString() : "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Blessing Time:</strong> {blessingDetails?.blessingTime || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Blessing Status:</strong> {blessingDetails?.blessingStatus || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Confirmed At:</strong> {blessingDetails?.confirmedAt ? new Date(blessingDetails.confirmedAt).toLocaleDateString() : "N/A"}</p>
-                        </div>
-                    </div>
-
-                    {/* Admin Comments Section */}
-                    <div className="house-comments-section">
-                        <h2>Admin Comments</h2>
-                        {(comments && comments.length > 0) ? (
-                            comments.map((comment, index) => (
-                                <div key={index} className="admin-comment">
-                                    <p><strong>Selected Comment:</strong> {comment?.selectedComment || "N/A"}</p>
-                                    <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No admin comments yet.</p>
-                        )}
-                    </div>
-
-                    {/* Updated Blessing Date Section */}
-                    <div className="blessing-date-box">
-                        <h3>Updated Blessing Date</h3>
-                        <p className="date">
-                            {blessingDetails?.adminRescheduled?.date ? new Date(blessingDetails.adminRescheduled.date).toLocaleDateString() : "N/A"}
-                        </p>
-                        {blessingDetails?.adminRescheduled?.reason && (
-                            <div className="reschedule-reason">
-                                <h3>Reason for Rescheduling</h3>
-                                <p>{blessingDetails.adminRescheduled.reason}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Priest Section */}
-                    <div className="house-comments-section">
-                        <h2>Priest</h2>
-                        <p><strong>Priest:</strong> {blessingDetails?.priest || "N/A"}</p>
-                    </div>
-
-                    {/* Admin Section for Updating Blessing Date */}
-                    <div className="house-section">
-                        <h2>Select Updated Blessing Date:</h2>
-                        <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
-                        <label>Reason:</label>
-                        <textarea value={reason} onChange={(e) => setReason(e.target.value)} />
-                    </div>
-                    <div className="button-container">
-                        <button onClick={handleUpdate} disabled={loading}>
-                            {loading ? "Updating..." : "Update Blessing Date"}
-                        </button></div>
-
-
-                    {/* Admin Comment Submission */}
-                    <div className="house-section">
-                        <h2>Submit Admin Comment</h2>
-                        <select value={selectedComment} onChange={(e) => setSelectedComment(e.target.value)}>
-                            <option value="" disabled>Select a comment</option>
-                            {predefinedComments.map((comment, index) => (
-                                <option key={index} value={comment}>{comment}</option>
-                            ))}
-                        </select>
-                        <textarea
-                            placeholder="Additional Comments"
-                            value={additionalComment}
-                            onChange={(e) => setAdditionalComment(e.target.value)}
-                        />
-                        <div className="button-container">
-                            <button onClick={handleSubmitComment}>Submit Comment</button>
-                        </div>
-                    </div>
-
-                    {/* Adding Priest */}
-                    <div className="house-section">
-                        <h2>Priest Name</h2>
-                        <textarea
-                            placeholder="Priest Name"
-                            value={priest}
-                            onChange={(e) => setPriest(e.target.value)}
-                        />
-                        <button onClick={handleAddPriest}>Add Priest</button>
-                    </div>
-
-                    {/* Cancelling Reason Section */}
-                    {blessingDetails?.blessingStatus === "Cancelled" && blessingDetails?.cancellingReason ? (
-                        <div className="house-comments-section">
-                            <h2>Cancellation Details</h2>
-                            <div className="admin-comment">
-                                <p><strong>Cancelled By:</strong> {blessingDetails.cancellingReason.user === "Admin" ? "Admin" : blessingDetails.cancellingReason.user}</p>
-                                <p><strong>Reason:</strong> {blessingDetails.cancellingReason.reason || "No reason provided."}</p>
-                            </div>
-                        </div>
-                    ) : null}
-
-                    {/* Cancel Button */}
-                    <div className="button-container">
-                        <button onClick={() => setShowCancelModal(true)}>Cancel House Blessing</button>
-                    </div>
-
-                    {/* Cancellation Modal */}
-                    {showCancelModal && (
-                        <div className="modal-overlay">
-                            <div className="modal">
-                                <h3>Cancel House Blessing</h3>
-                                <p>Please provide a reason for cancellation:</p>
-                                <textarea
-                                    value={cancelReason}
-                                    onChange={(e) => setCancelReason(e.target.value)}
-                                    placeholder="Enter reason..."
-                                    className="modal-textarea"
-                                />
-                                <div className="modal-buttons">
-                                    <button onClick={handleCancel}>Confirm Cancel</button>
-                                    <button onClick={() => setShowCancelModal(false)}>Back</button>
-                                </div>
-                            </div>
-                        </div>
+                    {/* Rescheduled Information */}
+                    {blessingDetails?.adminRescheduled && (
+                        <Card>
+                            <CardContent>
+                                <Typography variant="h5" gutterBottom>Rescheduled Information</Typography>
+                                <Divider sx={{ my: 2 }} />
+                                <Typography>
+                                    <strong>New Date:</strong> {new Date(blessingDetails.adminRescheduled.date).toLocaleDateString()}
+                                </Typography>
+                                {blessingDetails.adminRescheduled.reason && (
+                                    <Typography>
+                                        <strong>Reason:</strong> {blessingDetails.adminRescheduled.reason}
+                                    </Typography>
+                                )}
+                            </CardContent>
+                        </Card>
                     )}
 
-                    <div className="button-container">
-                        <button onClick={() => handleConfirm(blessingId)}>Confirm Blessing</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    {/* Priest Information */}
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h5" gutterBottom>Priest Information</Typography>
+                            <Divider sx={{ my: 2 }} />
+                            <Typography>
+                                <strong>Assigned Priest:</strong> {blessingDetails?.priest?.name || "N/A"}
+                            </Typography>
+                            
+                            <FormControl fullWidth sx={{ mt: 2 }}>
+                                <InputLabel>Select Priest</InputLabel>
+                                <Select
+                                    value={selectedPriestId}
+                                    onChange={(e) => setSelectedPriestId(e.target.value)}
+                                    label="Select Priest"
+                                >
+                                    {priestsList.map((priest) => (
+                                        <MenuItem key={priest._id} value={priest._id}>
+                                            {priest.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <Button 
+                                variant="contained" 
+                                onClick={handleAddPriest}
+                                sx={{ mt: 2 }}
+                            >
+                                Assign Priest
+                            </Button>
+                        </CardContent>
+                    </Card>
 
+                    {/* Admin Actions */}
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h5" gutterBottom>Admin Actions</Typography>
+                            <Divider sx={{ my: 2 }} />
+                            
+                            <Stack spacing={3}>
+                                {/* Update Date */}
+                                <Box>
+                                    <Typography variant="subtitle1" gutterBottom>Reschedule Blessing</Typography>
+                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                        <DatePicker
+                                            label="New Blessing Date"
+                                            value={newDate}
+                                            onChange={(newValue) => setNewDate(newValue)}
+                                            renderInput={(params) => <TextField {...params} fullWidth />}
+                                        />
+                                    </LocalizationProvider>
+                                    <TextField
+                                        label="Reason for Rescheduling"
+                                        value={reason}
+                                        onChange={(e) => setReason(e.target.value)}
+                                        fullWidth
+                                        multiline
+                                        rows={3}
+                                        sx={{ mt: 2 }}
+                                    />
+                                    <Button 
+                                        variant="contained" 
+                                        onClick={handleUpdate}
+                                        disabled={loading}
+                                        sx={{ mt: 2 }}
+                                    >
+                                        {loading ? <CircularProgress size={24} /> : "Update Date"}
+                                    </Button>
+                                </Box>
+
+                                {/* Add Comment */}
+                                <Box>
+                                    <Typography variant="subtitle1" gutterBottom>Add Comment</Typography>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Predefined Comments</InputLabel>
+                                        <Select
+                                            value={selectedComment}
+                                            onChange={(e) => setSelectedComment(e.target.value)}
+                                            label="Predefined Comments"
+                                        >
+                                            {predefinedComments.map((comment, index) => (
+                                                <MenuItem key={index} value={comment}>{comment}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                    <TextField
+                                        label="Additional Comments"
+                                        value={additionalComment}
+                                        onChange={(e) => setAdditionalComment(e.target.value)}
+                                        fullWidth
+                                        multiline
+                                        rows={3}
+                                        sx={{ mt: 2 }}
+                                    />
+                                    <Button 
+                                        variant="contained" 
+                                        onClick={handleSubmitComment}
+                                        sx={{ mt: 2 }}
+                                    >
+                                        Submit Comment
+                                    </Button>
+                                </Box>
+
+                                {/* Status Actions */}
+                                <Stack direction="row" spacing={2}>
+                                    {blessingDetails?.blessingStatus === "Pending" && (
+                                        <>
+                                            <Button 
+                                                variant="contained" 
+                                                color="success"
+                                                onClick={handleConfirm}
+                                            >
+                                                Confirm Blessing
+                                            </Button>
+                                            <Button 
+                                                variant="contained" 
+                                                color="error"
+                                                onClick={() => setShowCancelModal(true)}
+                                            >
+                                                Cancel Blessing
+                                            </Button>
+                                        </>
+                                    )}
+                                </Stack>
+                            </Stack>
+                        </CardContent>
+                    </Card>
+
+                    {/* Cancellation Modal */}
+                    <Modal
+                        open={showCancelModal}
+                        onClose={() => setShowCancelModal(false)}
+                        aria-labelledby="cancel-modal-title"
+                        aria-describedby="cancel-modal-description"
+                    >
+                        <Box sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: 400,
+                            bgcolor: 'background.paper',
+                            boxShadow: 24,
+                            p: 4,
+                            borderRadius: 1
+                        }}>
+                            <Typography id="cancel-modal-title" variant="h6" component="h2">
+                                Cancel House Blessing
+                            </Typography>
+                            <Typography id="cancel-modal-description" sx={{ mt: 2 }}>
+                                Please provide a reason for cancellation:
+                            </Typography>
+                            <TextField
+                                value={cancelReason}
+                                onChange={(e) => setCancelReason(e.target.value)}
+                                placeholder="Enter reason..."
+                                fullWidth
+                                multiline
+                                rows={4}
+                                sx={{ mt: 2 }}
+                            />
+                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                                <Button onClick={() => setShowCancelModal(false)}>Back</Button>
+                                <Button 
+                                    variant="contained" 
+                                    color="error"
+                                    onClick={handleCancel}
+                                >
+                                    Confirm Cancel
+                                </Button>
+                            </Box>
+                        </Box>
+                    </Modal>
+                </Stack>
+            </Box>
+            <ToastContainer />
+        </Box>
     );
 };
 

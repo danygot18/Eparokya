@@ -19,37 +19,37 @@ const weddingSchema = mongoose.Schema({
   groomName: { type: String, required: true },
   groomAddress: {
     BldgNameTower: { type: String, required: false },
-        LotBlockPhaseHouseNo: { type: String, required: false },
-        SubdivisionVillageZone: { type: String, required: false },
-        Street: { type: String, required: true },
-        District: { type: String, required: true },
-        barangay: {
-          type: String,
-          enum: [
-              'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
-              'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
-              'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
-              'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
-              'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
-              'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
-              'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan', 
-              'Others'
-          ],
-          required: true
-      },
-      customBarangay: {
-          type: String,
-          required: function() {
-              return this.barangay === 'Others'; 
-          }
-      },
-      city: { type: String, enum:['Taguig City', 'Others'],  required: true },
-      customCity: {
-          type: String,
-          required: function() {
-              return this.city === 'Others'; 
-          }
-      },
+    LotBlockPhaseHouseNo: { type: String, required: false },
+    SubdivisionVillageZone: { type: String, required: false },
+    Street: { type: String, required: true },
+    District: { type: String, required: true },
+    barangay: {
+      type: String,
+      enum: [
+        'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+        'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
+        'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
+        'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
+        'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
+        'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
+        'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan',
+        'Others'
+      ],
+      required: true
+    },
+    customBarangay: {
+      type: String,
+      required: function () {
+        return this.barangay === 'Others';
+      }
+    },
+    city: { type: String, enum: ['Taguig City', 'Others'], required: true },
+    customCity: {
+      type: String,
+      required: function () {
+        return this.city === 'Others';
+      }
+    },
 
   },
   groomPhone: { type: String, required: true },
@@ -61,39 +61,39 @@ const weddingSchema = mongoose.Schema({
 
   brideName: { type: String, required: true },
   brideAddress: {
-    
-     BldgNameTower: { type: String, required: false },
-        LotBlockPhaseHouseNo: { type: String, required: false },
-        SubdivisionVillageZone: { type: String, required: false },
-        Street: { type: String, required: true },
-        District: { type: String, required: true },
-        barangay: {
-          type: String,
-          enum: [
-              'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
-              'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
-              'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
-              'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
-              'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
-              'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
-              'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan', 
-              'Others'
-          ],
-          required: true
-      },
-      customBarangay: {
-          type: String,
-          required: function() {
-              return this.barangay === 'Others'; 
-          }
-      },
-      city: { type: String, enum:['Taguig City', 'Others'],  required: true },
-      customCity: {
-          type: String,
-          required: function() {
-              return this.city === 'Others'; 
-          }
-      },
+
+    BldgNameTower: { type: String, required: false },
+    LotBlockPhaseHouseNo: { type: String, required: false },
+    SubdivisionVillageZone: { type: String, required: false },
+    Street: { type: String, required: true },
+    District: { type: String, required: true },
+    barangay: {
+      type: String,
+      enum: [
+        'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+        'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
+        'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
+        'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
+        'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
+        'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
+        'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan',
+        'Others'
+      ],
+      required: true
+    },
+    customBarangay: {
+      type: String,
+      required: function () {
+        return this.barangay === 'Others';
+      }
+    },
+    city: { type: String, enum: ['Taguig City', 'Others'], required: true },
+    customCity: {
+      type: String,
+      required: function () {
+        return this.city === 'Others';
+      }
+    },
   },
   bridePhone: { type: String, required: true },
   brideBirthDate: { type: Date, required: true },
@@ -358,9 +358,12 @@ const weddingSchema = mongoose.Schema({
   ],
 
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  checklistId: { type: mongoose.Schema.Types.ObjectId, ref: 'WeddingChecklist' }, 
+  checklistId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'WeddingChecklist', // <- Must match exactly what you registered
+  },
   termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
-  
+
 }, { timestamps: true });
 
 weddingSchema.virtual('id').get(function () {

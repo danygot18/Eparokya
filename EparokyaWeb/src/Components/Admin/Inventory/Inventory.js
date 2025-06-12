@@ -28,6 +28,7 @@ import {
   Stack
 } from '@mui/material';
 import { Add, Delete, Edit, Warning, Search, Inventory, Person, History } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -57,6 +58,12 @@ const InventoryList = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+
+  const [pendingBorrows, setPendingBorrows] = useState([]);
+  const [pendingLoading, setPendingLoading] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [selectedBorrow, setSelectedBorrow] = useState(null);
 
   const categories = [
     'all',
@@ -94,6 +101,24 @@ const InventoryList = () => {
       setLoading(false);
     }
   };
+
+  const fetchPendingBorrows = async () => {
+    setPendingLoading(true);
+    try {
+      const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/inventory/borrows/pending`, {
+        withCredentials: true
+      });
+      setPendingBorrows(data.pendingBorrows);
+    } catch (err) {
+      toast.error('Failed to fetch pending borrows');
+    } finally {
+      setPendingLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPendingBorrows();
+  }, []);
 
   const deleteInventoryItem = async (id) => {
     try {
@@ -236,6 +261,47 @@ const InventoryList = () => {
     return { status: 'In Stock', color: 'success' };
   };
 
+  // Accept borrow
+  const handleAcceptBorrow = async (borrow) => {
+    try {
+      await axios.put(
+        `${process.env.REACT_APP_API}/api/v1/${borrow.itemId}/borrow/accept`,
+        { borrowId: borrow._id },
+        { withCredentials: true }
+      );
+      toast.success('Borrow request accepted');
+      fetchPendingBorrows();
+      fetchInventory();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to accept request');
+    }
+  };
+
+  // Open reject dialog
+  const handleRejectOpen = (borrow) => {
+    setSelectedBorrow(borrow);
+    setRejectReason('');
+    setRejectDialogOpen(true);
+  };
+
+  // Reject borrow
+  const handleRejectBorrow = async () => {
+    try {
+      await axios.put(
+        `${process.env.REACT_APP_API}/api/v1/${selectedBorrow.itemId}/borrow/reject`,
+        { borrowId: selectedBorrow._id, reason: rejectReason },
+        { withCredentials: true }
+      );
+      toast.success('Borrow request rejected');
+      setRejectDialogOpen(false);
+      setSelectedBorrow(null);
+      fetchPendingBorrows();
+      fetchInventory();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to reject request');
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <MetaData title="Inventory Management" />
@@ -289,6 +355,75 @@ const InventoryList = () => {
                   </Button>
                 </Box>
               </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Pending Borrow Requests Card */}
+          <Card sx={{ mb: 3 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Pending Borrow Requests
+              </Typography>
+              {pendingLoading ? (
+                <CircularProgress />
+              ) : pendingBorrows.length === 0 ? (
+                <Typography>No pending borrow requests.</Typography>
+              ) : (
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Item</TableCell>
+                        <TableCell>User</TableCell>
+                        <TableCell>Quantity</TableCell>
+                        <TableCell>Available</TableCell>
+                        <TableCell>Category</TableCell>
+                        <TableCell>Requested At</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell align="center">Action</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {pendingBorrows.map((borrow) => (
+                        <TableRow key={borrow._id}>
+                          <TableCell>{borrow.itemName}</TableCell>
+                          <TableCell>{borrow.user?.name || 'Unknown'}</TableCell>
+                          <TableCell>{borrow.quantity} {borrow.itemUnit}</TableCell>
+                          <TableCell>{borrow.itemAvailable} {borrow.itemUnit}</TableCell>
+                          <TableCell>{borrow.itemCategory}</TableCell>
+                          <TableCell>
+                            {borrow.requestedAt
+                              ? new Date(borrow.requestedAt).toLocaleString()
+                              : '-'}
+                          </TableCell>
+                          <TableCell>
+                            <Chip label="Pending" color="default" size="small" />
+                          </TableCell>
+                          <TableCell align="center">
+                            <Button
+                              color="success"
+                              size="small"
+                              variant="contained"
+                              sx={{ mr: 1 }}
+                              onClick={() => handleAcceptBorrow(borrow)}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              color="error"
+                              size="small"
+                              variant="outlined"
+                              onClick={() => handleRejectOpen(borrow)}
+                            >
+                              Reject
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
             </CardContent>
           </Card>
 
@@ -359,10 +494,10 @@ const InventoryList = () => {
                                   color="primary"
                                   onClick={() => navigate(`/admin/inventory/${item._id}`)}
                                   sx={{
-                                    borderRadius: 1, // ← make corners less rounded (1 = 4px)
-                                    padding: '6px 12px', // ← increase padding to make it less circular
+                                    borderRadius: 1,
+                                    padding: '6px 12px',
                                     '&:hover': {
-                                      backgroundColor: 'rgba(0, 0, 0, 0.08)', // customize as needed
+                                      backgroundColor: 'rgba(0, 0, 0, 0.08)',
                                     },
                                   }}
                                 >
@@ -382,10 +517,10 @@ const InventoryList = () => {
                                   onClick={() => handleBorrowOpen(item)}
                                   disabled={item.availableQuantity <= 0}
                                   sx={{
-                                    borderRadius: 1, // ← make corners less rounded (1 = 4px)
-                                    padding: '6px 12px', // ← increase padding to make it less circular
+                                    borderRadius: 1,
+                                    padding: '6px 12px',
                                     '&:hover': {
-                                      backgroundColor: 'rgba(0, 0, 0, 0.08)', // customize as needed
+                                      backgroundColor: 'rgba(0, 0, 0, 0.08)',
                                     },
                                   }}
                                 >
@@ -403,10 +538,10 @@ const InventoryList = () => {
                                   onClick={() => handleReturnOpen(item)}
                                   disabled={item.quantity === item.availableQuantity}
                                   sx={{
-                                    borderRadius: 1, // ← make corners less rounded (1 = 4px)
-                                    padding: '6px 12px', // ← increase padding to make it less circular
+                                    borderRadius: 1,
+                                    padding: '6px 12px',
                                     '&:hover': {
-                                      backgroundColor: 'rgba(0, 0, 0, 0.08)', // customize as needed
+                                      backgroundColor: 'rgba(0, 0, 0, 0.08)',
                                     },
                                   }}
                                 >
@@ -418,10 +553,10 @@ const InventoryList = () => {
                                   color="secondary"
                                   onClick={() => handleHistoryOpen(item)}
                                   sx={{
-                                    borderRadius: 1, // ← make corners less rounded (1 = 4px)
-                                    padding: '6px 12px', // ← increase padding to make it less circular
+                                    borderRadius: 1,
+                                    padding: '6px 12px',
                                     '&:hover': {
-                                      backgroundColor: 'rgba(0, 0, 0, 0.08)', // customize as needed
+                                      backgroundColor: 'rgba(0, 0, 0, 0.08)',
                                     },
                                   }}
                                 >
@@ -433,10 +568,10 @@ const InventoryList = () => {
                                   color="error"
                                   onClick={() => handleDeleteClick(item._id)}
                                   sx={{
-                                    borderRadius: 1, // ← make corners less rounded (1 = 4px)
-                                    padding: '6px 12px', // ← increase padding to make it less circular
+                                    borderRadius: 1,
+                                    padding: '6px 12px',
                                     '&:hover': {
-                                      backgroundColor: 'rgba(0, 0, 0, 0.08)', // customize as needed
+                                      backgroundColor: 'rgba(0, 0, 0, 0.08)',
                                     },
                                   }}
                                 >
@@ -464,6 +599,32 @@ const InventoryList = () => {
           )}
         </Container>
       </Box>
+
+      {/* Reject Reason Dialog */}
+      <Dialog open={rejectDialogOpen} onClose={() => setRejectDialogOpen(false)}>
+        <DialogTitle>Reject Borrow Request</DialogTitle>
+        <DialogContent>
+          <Typography gutterBottom>
+            Optionally provide a reason for rejection:
+          </Typography>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Reason"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRejectDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleRejectBorrow} color="error" variant="contained">
+            Reject
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
@@ -540,7 +701,8 @@ const InventoryList = () => {
               ?.filter(record => record.status === 'borrowed')
               .map(record => (
                 <MenuItem key={record._id} value={record._id}>
-                  Borrowed {record.quantity} on {new Date(record.borrowedAt).toLocaleDateString()}
+                  {record.user?.name ? `${record.user.name} - ` : ''}
+                  Borrowed {record.quantity} on {record.borrowedAt ? new Date(record.borrowedAt).toLocaleDateString() : 'N/A'}
                 </MenuItem>
               ))}
           </TextField>
@@ -599,12 +761,26 @@ const InventoryList = () => {
                       {record.returnedAt ? new Date(record.returnedAt).toLocaleString() : '-'}
                     </TableCell>
                     <TableCell align="center">
-                      {record.status === 'borrowed' ? (
+                      {record.status === 'rejected' ? (
+                        <>
+                          <Chip label="Rejected" color="error" size="small" />
+                          {record.rejectionReason && (
+                            <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
+                              Reason: {record.rejectionReason}
+                            </Typography>
+                          )}
+                        </>
+                      ) : record.status === 'pending' ? (
+                        <Chip label="Pending" color="default" size="small" />
+                      ) : record.status === 'borrowed' ? (
                         <Chip label="Borrowed" color="warning" size="small" />
                       ) : (
                         <Chip label="Returned" color="success" size="small" />
                       )}
                     </TableCell>
+
+
+
                   </TableRow>
                 ))}
               </TableBody>

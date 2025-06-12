@@ -297,7 +297,7 @@ const HouseBlessingForm = () => {
                         
                         <TextField
                             select
-                            label="Property Size"
+                            label="Optional: Property Size"
                             value={formData.propertySize}
                             onChange={(e) => handleChange(e, 'propertySize')}
                             fullWidth
