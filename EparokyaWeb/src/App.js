@@ -73,7 +73,9 @@ import MySubmittedHouseBlessingForm from "./Components/User/Forms/PrivateForms/P
 import SubmittedHouseBlessingList from "./Components/User/Forms/PrivateForms/PrivateSchedule/SubmittedHouseBlessingList";
 
 // import MySubmittedPrayerRequestForm from './Components/User/Forms/PrivateForms/Prayer/MySubmittedPrayerRequestForm';
-// import SubmittedPrayerRequestList from './Components/User/Forms/PrivateForms/Prayer/SubmittedPrayerRequestList';
+
+import SubmittedPrayerRequestList from "./Components/User/Forms/PrivateForms/Prayer/SubmittedPrayerRequestList";
+
 
 // import MySubmittedPrayerWallForm from './Components/User/Forms/PrivateForms/Prayer/MySubmittedPrayerWallForm';
 import SubmittedPrayerWallList from "./Components/User/PrayerWall/SubmittedPrayerWallList";
@@ -452,10 +454,10 @@ function App() {
           exact="true"
         />
 
-        {/*
-        <Route path="/user/SubmittedCounselingList" element={<SubmittedCounselingList />} exact="true" />
+        
+        {/* <Route path="/user/SubmittedCounselingList" element={<SubmittedCounselingList />} exact="true" /> */}
         <Route path="/user/SubmittedPrayerRequestList" element={<SubmittedPrayerRequestList />} exact="true" />
-        */}
+       
 
         <Route
           path="/user/UserBaptismChecklist"

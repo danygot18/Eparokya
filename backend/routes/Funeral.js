@@ -19,7 +19,7 @@ router.get('/stats/funeralsPerMonth',  isAuthenticatedUser, isAuthorized("admin"
 router.get('/stats/funeralStatusCount', isAuthenticatedUser, isAuthorized("admin"),  funeralController.getFuneralStatusCounts);
 
 router.post('/commentFuneral/:funeralId', funeralController.createComment);
-// router.post('/addPriest/:funeralId', funeralController.createPriestComment);
+router.post('/addPriest/:funeralId', funeralController.createPriestComment);
 router.post('/funeralAddPriest/:funeralId', funeralController.createPriestComment);
 router.put('/updateFuneralDate/:funeralId', funeralController.updateFuneralDate);
 

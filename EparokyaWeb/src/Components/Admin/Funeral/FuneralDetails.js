@@ -201,41 +201,34 @@ const FuneralDetails = () => {
         }
     };
 
-    const handleAdminNotes = async () => {
+    const handlePriestAdd = async () => {
         if (!selectedPriestId) {
             toast.error("Please select a priest.");
             return;
         }
 
-        const newAdminNote = {
-            priest: selectedPriestId,
-            recordedBy,
-            bookNumber,
-            pageNumber,
-            lineNumber,
+        const newPriest = {
+            priestId: selectedPriestId,
+
         };
 
         try {
             const response = await axios.post(
-                `${process.env.REACT_APP_API}/api/v1/adminAdditionalNotes/${funeralId}`,
-                newAdminNote,
+                `${process.env.REACT_APP_API}/api/v1/addPriest/${funeralId}`,
+                newPriest,
                 { withCredentials: true }
             );
 
             setFuneralDetails(prev => ({
                 ...prev,
-                adminNotes: [...(prev.adminNotes || []), response.data]
+                priests: [...(prev.priests || []), response.data]
             }));
 
-            setRecordedBy("");
-            setBookNumber("");
-            setPageNumber("");
-            setLineNumber("");
             setSelectedPriestId("");
 
-            toast.success("Additional notes submitted successfully!");
+            toast.success("Priest added successfully!");
         } catch (error) {
-            toast.error("Failed to submit additional notes.");
+            toast.error("Failed to add priest.");
         }
     };
 
@@ -473,9 +466,21 @@ const FuneralDetails = () => {
                                 </>
                             )}
                         </Paper>
+                        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+                                Priest Assigned
+                            </Typography>
+                            {funeralDetails?.Priest ? (
+                                <Typography>
+                                    {funeralDetails.Priest.fullName}
+                                </Typography>
+                            ) : (
+                                <Typography>No priest assigned yet.</Typography>
+                            )}
+                        </Paper>
 
                         {/* Additional Notes Section */}
-                        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+                        {/* <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
                             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
                                 Additional Notes
                             </Typography>
@@ -497,7 +502,7 @@ const FuneralDetails = () => {
                             ) : (
                                 <Typography>No additional notes available.</Typography>
                             )}
-                        </Paper>
+                        </Paper> */}
 
                         {/* Admin Actions Section */}
                         <Paper elevation={3} sx={{ p: 3 }}>
@@ -534,9 +539,33 @@ const FuneralDetails = () => {
                                     Update Funeral Date
                                 </Button>
                             </Box>
-
-                            {/* Add Additional Notes */}
                             <Box sx={{ mb: 3 }}>
+                                <FormControl fullWidth sx={{ mb: 2 }}>
+                                    <InputLabel>Select Priest</InputLabel>
+                                    <Select
+                                        value={selectedPriestId}
+                                        onChange={(e) => setSelectedPriestId(e.target.value)}
+                                        label="Select Priest"
+                                    >
+                                        {priestsList.map((priest) => (
+                                            <MenuItem key={priest._id} value={priest._id}>
+                                                {priest.title} {priest.fullName}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+
+                                <Button
+                                    variant="contained"
+                                    onClick={handlePriestAdd}
+                                    fullWidth
+                                    disabled={!selectedPriestId}
+                                >
+                                    Add Priest
+                                </Button>
+                            </Box>
+                            {/* Add Additional Notes */}
+                            {/* <Box sx={{ mb: 3 }}>
                                 <Typography variant="subtitle1" sx={{ mb: 1 }}>Add Additional Notes</Typography>
                                 <FormControl fullWidth sx={{ mb: 2 }}>
                                     <InputLabel>Select Priest</InputLabel>
@@ -588,7 +617,7 @@ const FuneralDetails = () => {
                                 >
                                     Add Notes
                                 </Button>
-                            </Box>
+                            </Box> */}
 
                             {/* Add Comment */}
                             <Box sx={{ mb: 3 }}>

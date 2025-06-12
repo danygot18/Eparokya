@@ -225,7 +225,7 @@ const MySubmittedFuneralForm = () => {
                         {activeTab === 2 && (
                             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                                 <div className="admin-comments-section">
-                                    <h3>Admin Comments</h3>
+                                    <h3>Admin Notes</h3>
                                     {comments && Array.isArray(comments) && comments.length > 0 ? (
                                         comments.map((comment, index) => (
 

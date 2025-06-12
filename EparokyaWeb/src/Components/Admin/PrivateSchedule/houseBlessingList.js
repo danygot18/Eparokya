@@ -18,7 +18,7 @@ const HouseBlessingList = () => {
     const fetchHouseBlessingForms = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllhouseBlessing`);
+            const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/houseBlessing/getAllhouseBlessing`);
             const forms = response.data.houseBlessingRequests || [];
             setHouseBlessingForms(forms);
             setFilteredForms(forms);
