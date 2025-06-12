@@ -16,10 +16,15 @@ const borrowSchema = new mongoose.Schema({
     default: Date.now
   },
   returnedAt: Date,
+  rejectedAt: Date,
+  rejectionReason: {
+    type: String,
+    default: ''
+  },
   status: {
     type: String,
-    enum: ['pending','borrowed', 'returned'],
-    default: 'borrowed'
+    enum: ['pending', 'borrowed', 'returned', 'rejected'],
+    default: 'pending'
   }
 });
 
@@ -52,7 +57,7 @@ const inventorySchema = new mongoose.Schema({
   },
   availableQuantity: {
     type: Number,
-    default: function() { return this.quantity; }
+    default: function () { return this.quantity; }
   },
   unit: {
     type: String,

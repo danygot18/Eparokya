@@ -17,6 +17,9 @@ const InventoryForm = () => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [borrowQuantity, setBorrowQuantity] = useState(1);
 
+    const [borrowedItems, setBorrowedItems] = useState([]);
+    const [returnedItems, setReturnedItems] = useState([]);
+
     const config = useMemo(() => ({ withCredentials: true }), []);
 
     useEffect(() => {
@@ -45,23 +48,41 @@ const InventoryForm = () => {
         role?.role === 'Coordinator' || role?.role === 'Assistant Coordinator'
     );
 
-
     useEffect(() => {
         const fetchInventory = async () => {
             setLoading(true);
             try {
-                const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/inventory`, {
-                    withCredentials: true
-                });
+                const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/inventory`, config);
                 setInventory(data.inventoryItems);
+
+                // Filter borrow history for current user
+                const borrowed = [];
+                const returned = [];
+
+                data.inventoryItems.forEach(item => {
+                    item.borrowHistory.forEach(record => {
+                        if (record.user === user?._id) {
+                            if (record.status === 'borrowed') {
+                                borrowed.push({ ...record, item });
+                            } else if (record.status === 'returned') {
+                                returned.push({ ...record, item });
+                            }
+                        }
+                    });
+                });
+
+                setBorrowedItems(borrowed);
+                setReturnedItems(returned);
+
             } catch (err) {
                 toast.error('Failed to fetch inventory');
             } finally {
                 setLoading(false);
             }
         };
-        fetchInventory();
-    }, []);
+
+        if (user?._id) fetchInventory();
+    }, [user, config]);
 
     const handleBorrowOpen = (item) => {
         setSelectedItem(item);
@@ -108,10 +129,82 @@ const InventoryForm = () => {
                 <Typography variant="h4" gutterBottom>
                     Request to Borrow Inventory
                 </Typography>
+
+                {/* === Currently Borrowed Items === */}
+                {borrowedItems.length > 0 && (
+                    <Box mt={4}>
+                        <Typography variant="h5" gutterBottom>
+                            Currently Borrowed Items
+                        </Typography>
+                        <TableContainer component={Card}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Item</TableCell>
+                                        <TableCell>Quantity</TableCell>
+                                        <TableCell>Borrowed At</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {borrowedItems.map((borrow, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{borrow.item.name}</TableCell>
+                                            <TableCell>
+                                                {borrow.quantity} {borrow.item.unit}
+                                            </TableCell>
+                                            <TableCell>
+                                                {new Date(borrow.borrowedAt).toLocaleDateString()}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Box>
+                )}
+
+                {/* === Returned Items === */}
+                {returnedItems.length > 0 && (
+                    <Box mt={4}>
+                        <Typography variant="h5" gutterBottom>
+                            Returned Items
+                        </Typography>
+                        <TableContainer component={Card}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Item</TableCell>
+                                        <TableCell>Quantity</TableCell>
+                                        <TableCell>Borrowed At</TableCell>
+                                        <TableCell>Returned At</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {returnedItems.map((borrow, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{borrow.item.name}</TableCell>
+                                            <TableCell>
+                                                {borrow.quantity} {borrow.item.unit}
+                                            </TableCell>
+                                            <TableCell>
+                                                {new Date(borrow.borrowedAt).toLocaleDateString()}
+                                            </TableCell>
+                                            <TableCell>
+                                                {new Date(borrow.returnedAt).toLocaleDateString()}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Box>
+                )}
+
+                {/* === Inventory Borrow Section === */}
                 {loading ? (
                     <CircularProgress />
                 ) : (
-                    <TableContainer component={Card}>
+                    <TableContainer component={Card} sx={{ mt: 4 }}>
                         <Table>
                             <TableHead>
                                 <TableRow>
@@ -165,7 +258,7 @@ const InventoryForm = () => {
                     </TableContainer>
                 )}
 
-                {/* Borrow Dialog */}
+                {/* === Borrow Dialog === */}
                 <Dialog open={openBorrowDialog} onClose={handleBorrowClose}>
                     <DialogTitle>Request to Borrow Item</DialogTitle>
                     <DialogContent>
@@ -207,6 +300,7 @@ const InventoryForm = () => {
             </Container>
         </Box>
     );
+
 };
 
 export default InventoryForm;

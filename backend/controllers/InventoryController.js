@@ -1,9 +1,10 @@
 const Inventory = require('../models/Inventory.js');
 const ErrorHandler = require('../helpers/error-handler.js');
 const User = require("../models/user");
+const sendEmail = require('../utils/sendEmail');
 
 
-// Create new inventory item => /api/v1/inventory/new
+// Create new inventory item
 const createInventoryItem = async (req, res, next) => {
   try {
     const inventoryItem = await Inventory.create(req.body);
@@ -16,33 +17,29 @@ const createInventoryItem = async (req, res, next) => {
   }
 };
 
-// Get all inventory items => /api/v1/inventory
+// Get all inventory items
 const getAllInventoryItems = async (req, res, next) => {
   try {
     const resPerPage = parseInt(req.query.perPage) || 10;
     const page = parseInt(req.query.page) || 1;
-    
-    // Build query
+
     const query = {};
-    
-    // Search functionality
+
     if (req.query.keyword) {
       query.$or = [
         { name: { $regex: req.query.keyword, $options: 'i' } },
         { description: { $regex: req.query.keyword, $options: 'i' } }
       ];
     }
-    
-    // Filter by category
+
     if (req.query.category) {
       query.category = req.query.category;
     }
-    
-    // Execute count query first
+
     const inventoryCount = await Inventory.countDocuments(query);
-    
-    // Get paginated results
+
     const inventoryItems = await Inventory.find(query)
+      .populate('borrowHistory.user', 'name email')
       .skip((resPerPage * page) - resPerPage)
       .limit(resPerPage);
 
@@ -59,10 +56,11 @@ const getAllInventoryItems = async (req, res, next) => {
   }
 };
 
-// Get single inventory item details => /api/v1/inventory/:id
+// Get single inventory item details 
 const getInventoryItem = async (req, res, next) => {
   try {
-    const inventoryItem = await Inventory.findById(req.params.id);
+    const inventoryItem = await Inventory.findById(req.params.id)
+      .populate('borrowHistory.user', 'name email');
 
     if (!inventoryItem) {
       return next(new ErrorHandler('Inventory item not found', 404));
@@ -77,7 +75,7 @@ const getInventoryItem = async (req, res, next) => {
   }
 };
 
-// Update inventory item => /api/v1/inventory/:id
+// Update inventory item 
 const updateInventoryItem = async (req, res, next) => {
   try {
     const id = req.params.id;
@@ -102,28 +100,27 @@ const updateInventoryItem = async (req, res, next) => {
   }
 };
 
+// try {
+//   let inventoryItem = await Inventory.findById(req.params.id);
 
-  // try {
-  //   let inventoryItem = await Inventory.findById(req.params.id);
+//   if (!inventoryItem) {
+//     return next(new ErrorHandler('Inventory item not found', 404));
+//   }
 
-  //   if (!inventoryItem) {
-  //     return next(new ErrorHandler('Inventory item not found', 404));
-  //   }
+//   inventoryItem = await Inventory.findByIdAndUpdate(req.params.id, req.body, {
+//     new: true,
+//     runValidators: true
+//   });
 
-  //   inventoryItem = await Inventory.findByIdAndUpdate(req.params.id, req.body, {
-  //     new: true,
-  //     runValidators: true
-  //   });
+//   res.status(200).json({
+//     success: true,
+//     inventoryItem
+//   });
+// } catch (error) {
+//   next(error);
+// }
 
-  //   res.status(200).json({
-  //     success: true,
-  //     inventoryItem
-  //   });
-  // } catch (error) {
-  //   next(error);
-  // }
-
-// Delete inventory item => /api/v1/inventory/:id
+// Delete inventory item 
 const deleteInventoryItem = async (req, res, next) => {
   try {
     const inventoryItem = await Inventory.findById(req.params.id);
@@ -143,7 +140,7 @@ const deleteInventoryItem = async (req, res, next) => {
   }
 };
 
-// Get low stock items => /api/v1/inventory/low-stock
+// Get low stock items 
 const getLowStockItems = async (req, res, next) => {
   try {
     const lowStockItems = await Inventory.find({
@@ -160,7 +157,7 @@ const getLowStockItems = async (req, res, next) => {
   }
 };
 
-// Borrow inventory item => /api/v1/inventory/:id/borrow
+// Borrow inventory item 
 // const borrowInventoryItem = async (req, res, next) => {
 //   try {
 //     const { quantity } = req.body;
@@ -181,7 +178,7 @@ const getLowStockItems = async (req, res, next) => {
 
 //     // Update available quantity
 //     inventoryItem.availableQuantity -= quantity;
-    
+
 //     // Add to borrow history
 //     inventoryItem.borrowHistory.push({
 //       user: userId,
@@ -205,11 +202,12 @@ const getLowStockItems = async (req, res, next) => {
 const borrowInventoryItem = async (req, res, next) => {
   try {
     const { quantity } = req.body;
-    const userId = req.user._id; 
+    const userId = req.user._id;
 
     if (!quantity || quantity <= 0) {
       return next(new ErrorHandler('Please enter a valid quantity', 400));
     }
+
     const user = await User.findById(userId);
 
     const hasAllowedRole = user.ministryRoles.some(role =>
@@ -228,14 +226,46 @@ const borrowInventoryItem = async (req, res, next) => {
     if (inventoryItem.availableQuantity < quantity) {
       return next(new ErrorHandler('Not enough items available', 400));
     }
+    const adminEmail = "eparokyasys@gmail.com";
+    const htmlMessage = `
+      <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f0f0f0; color: #333;">
+        <p style="font-size: 16px;">Hello Admin,</p>
 
-    // Do NOT deduct availableQuantity yet; wait for admin approval
+        <p style="font-size: 16px;">
+          A new inventory borrow request has been submitted by <strong>${req.user.name}</strong> (${req.user.email}).
+        </p>
 
-    // Add to borrow history with status "pending"
+        <h3 style="margin-top: 20px;">Borrow Request Details</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li><strong>Item:</strong> ${inventoryItem.name}</li>
+          <li><strong>Category:</strong> ${inventoryItem.category}</li>
+          <li><strong>Quantity Requested:</strong> ${quantity} ${inventoryItem.unit}</li>
+          <li><strong>Date Requested:</strong> ${new Date().toLocaleDateString()}</li>
+        </ul>
+
+        <p style="margin-top: 20px;">
+          Please log in to the <strong>E:Parokya</strong> admin panel to review and take action.
+        </p>
+
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
+        <footer style="font-size: 14px; color: #777;">
+          <p><strong>E:Parokya</strong><br>
+          Saint Joseph Parish – Taguig<br>
+          This is an automated email. Do not reply.</p>
+        </footer>
+      </div>
+    `;
+
+    await sendEmail({
+      email: adminEmail,
+      subject: "New Borrow Request Submitted",
+      message: htmlMessage,
+    });
+
     inventoryItem.borrowHistory.push({
       user: userId,
       quantity,
-      status: 'pending', // waiting for admin approval
+      status: 'pending', 
       requestedAt: Date.now()
     });
 
@@ -251,8 +281,7 @@ const borrowInventoryItem = async (req, res, next) => {
   }
 };
 
-
-// Return inventory item => /api/v1/inventory/:id/return
+// Return inventory item 
 const returnInventoryItem = async (req, res, next) => {
   try {
     const { borrowId, quantity } = req.body;
@@ -278,7 +307,7 @@ const returnInventoryItem = async (req, res, next) => {
 
     // Update available quantity
     inventoryItem.availableQuantity += quantity || borrowRecord.quantity;
-    
+
     // Update borrow record
     borrowRecord.status = 'returned';
     borrowRecord.returnedAt = Date.now();
@@ -298,7 +327,7 @@ const returnInventoryItem = async (req, res, next) => {
   }
 };
 
-// Get borrow history for an item => /api/v1/inventory/:id/borrow-history
+// Get borrow history for an item 
 const getBorrowHistory = async (req, res, next) => {
   try {
     const inventoryItem = await Inventory.findById(req.params.id)
@@ -317,6 +346,183 @@ const getBorrowHistory = async (req, res, next) => {
   }
 };
 
+
+
+// Accept a borrow request
+const acceptBorrowRequest = async (req, res, next) => {
+  try {
+    const { borrowId } = req.body;
+    const inventoryItem = await Inventory.findById(req.params.id).populate('borrowHistory.user'); 
+
+    if (!inventoryItem) {
+      return next(new ErrorHandler('Inventory item not found', 404));
+    }
+
+    const borrowRecord = inventoryItem.borrowHistory.id(borrowId);
+    if (!borrowRecord) {
+      return next(new ErrorHandler('Borrow record not found', 404));
+    }
+
+    if (borrowRecord.status !== 'pending') {
+      return next(new ErrorHandler('Borrow request is not pending', 400));
+    }
+
+    if (inventoryItem.availableQuantity < borrowRecord.quantity) {
+      return next(new ErrorHandler('Not enough items available to approve this request', 400));
+    }
+
+    borrowRecord.status = 'borrowed';
+    borrowRecord.borrowedAt = new Date();
+    inventoryItem.availableQuantity -= borrowRecord.quantity;
+
+    await inventoryItem.save();
+
+    const user = borrowRecord.user;
+    const htmlMessage = `
+      <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f0f0f0; color: #333;">
+        <p style="font-size: 16px;">Good day, ${user.fullname}!</p>
+
+        <p style="font-size: 16px;">
+          Your request to borrow the following inventory item has been <strong>approved</strong>:
+        </p>
+
+        <ul style="list-style: none; padding: 0;">
+          <li><strong>Item:</strong> ${inventoryItem.name}</li>
+          <li><strong>Category:</strong> ${inventoryItem.category}</li>
+          <li><strong>Quantity Approved:</strong> ${borrowRecord.quantity} ${inventoryItem.unit}</li>
+          <li><strong>Date Approved:</strong> ${new Date(borrowRecord.borrowedAt).toLocaleDateString()}</li>
+        </ul>
+
+        <p style="margin-top: 20px;">Please proceed to the office or contact the admin (0969 218 3484) if you have questions.</p>
+
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
+        <footer style="font-size: 14px; color: #777;">
+          <p><strong>E:Parokya</strong><br>
+          Saint Joseph Parish – Taguig<br>
+          This is an automated email. Do not reply.</p>
+        </footer>
+      </div>
+    `;
+
+    await sendEmail({
+      email: user.email,
+      subject: "Borrow Request Approved – E:Parokya Admin Inventory",
+      message: htmlMessage,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Borrow request approved and user notified via email.',
+      inventoryItem
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// Reject a borrow request
+const rejectBorrowRequest = async (req, res, next) => {
+  try {
+    const { borrowId, reason } = req.body;
+    const inventoryItem = await Inventory.findById(req.params.id);
+
+    if (!inventoryItem) {
+      return next(new ErrorHandler('Inventory item not found', 404));
+    }
+
+    const borrowRecord = inventoryItem.borrowHistory.id(borrowId);
+    if (!borrowRecord) {
+      return next(new ErrorHandler('Borrow record not found', 404));
+    }
+
+    if (borrowRecord.status !== 'pending') {
+      return next(new ErrorHandler('Borrow request is not pending', 400));
+    }
+
+    borrowRecord.status = 'rejected';
+    borrowRecord.rejectedAt = new Date();
+    borrowRecord.rejectionReason = reason || '';
+
+    await inventoryItem.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Borrow request rejected successfully',
+      inventoryItem
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// respond 
+const respondToBorrowRequest = async (req, res, next) => {
+  try {
+    const { borrowId, action, reason } = req.body;
+    const inventoryItem = await Inventory.findById(req.params.id);
+    if (!inventoryItem) return next(new ErrorHandler('Item not found', 404));
+
+    const borrowRecord = inventoryItem.borrowHistory.id(borrowId);
+    if (!borrowRecord) return next(new ErrorHandler('Borrow request not found', 404));
+
+    if (borrowRecord.status !== 'pending') {
+      return next(new ErrorHandler('Request already processed.', 400));
+    }
+
+    if (action === 'accept') {
+      borrowRecord.status = 'borrowed';
+      borrowRecord.borrowedAt = Date.now();
+      inventoryItem.availableQuantity -= borrowRecord.quantity;
+    } else if (action === 'reject') {
+      borrowRecord.status = 'rejected';
+      if (reason) borrowRecord.rejectionReason = reason;
+    } else {
+      return next(new ErrorHandler('Invalid action', 400));
+    }
+
+    await inventoryItem.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Request ${action}ed successfully`,
+      inventoryItem
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get all pending borrow requests across all inventory items
+const getAllPendingBorrows = async (req, res, next) => {
+  try {
+    const items = await Inventory.find({ "borrowHistory.status": "pending" })
+      .populate("borrowHistory.user", "name email")
+      .lean();
+
+    const pendingBorrows = [];
+    items.forEach(item => {
+      item.borrowHistory.forEach(record => {
+        if (record.status === "pending") {
+          pendingBorrows.push({
+            ...record,
+            itemId: item._id,
+            itemName: item.name,
+            itemUnit: item.unit,
+            itemAvailable: item.availableQuantity,
+            itemCategory: item.category,
+          });
+        }
+      });
+    });
+
+    res.status(200).json({ success: true, pendingBorrows });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 module.exports = {
   createInventoryItem,
   getAllInventoryItems,
@@ -326,5 +532,9 @@ module.exports = {
   getLowStockItems,
   borrowInventoryItem,
   returnInventoryItem,
-  getBorrowHistory
+  getBorrowHistory,
+  acceptBorrowRequest,
+  rejectBorrowRequest,
+  respondToBorrowRequest,
+  getAllPendingBorrows,
 };

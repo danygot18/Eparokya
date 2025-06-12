@@ -146,7 +146,6 @@ exports.createPrayerRequestIntention = async (req, res) => {
   </div>
 `;
 
-
         await sendEmail({
             email: userEmail,
             subject: "Your Prayer Request Has Been Submitted!",
@@ -169,7 +168,6 @@ exports.createPrayerRequestIntention = async (req, res) => {
 
         await Notification.insertMany(notifications);
 
-        // ✅ Emit Notification to Connected Admins (Socket.io)
         if (req.app.get("io")) {
             const io = req.app.get("io");
             io.emit("push-notification", {
