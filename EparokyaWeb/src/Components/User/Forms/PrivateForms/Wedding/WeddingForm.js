@@ -5,6 +5,7 @@ import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import GuestSidebar from "../../../../GuestSideBar";
 import MetaData from "../../../../Layout/MetaData";
 import ConfirmedWeddingModal from "./ConfirmedWeddingModal";
+import { Modal as BsModal } from "react-bootstrap";
 // import termsAndConditionsText from "../../../../Term";
 
 const WeddingForm = () => {
@@ -69,6 +70,7 @@ const WeddingForm = () => {
     previews: {},
   });
   const [isMarried, setIsMarried] = useState(false);
+  const [showMarriedDialog, setShowMarriedDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState(null);
   const config = {
@@ -172,9 +174,8 @@ const WeddingForm = () => {
         );
         setUser(response.data.user);
         if (response.data.user.civilStatus === "Married") {
-          alert(
-            "Sorry, but a 'Married' user cannot submit an application / Paumanhin. Ang kasal ay hindi na maaring magsagot ng applikasyon."
-          );
+          setIsMarried(true);
+          setShowMarriedDialog(true);
         }
       } catch (error) {
         console.error(
@@ -421,15 +422,36 @@ const WeddingForm = () => {
             width: "calc(100% - 270px)",
           }}
         >
+
+          {/* Married User Dialog */}
+          <BsModal
+            show={showMarriedDialog}
+            onHide={() => setShowMarriedDialog(false)}
+            centered
+            backdrop={false} // No gray overlay
+          >
+            <BsModal.Header closeButton>
+              <BsModal.Title>Notice</BsModal.Title>
+            </BsModal.Header>
+            <BsModal.Body>
+              <div style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>
+                Sorry, but a "Married" user cannot submit an application. <br />
+                Paumanhin, ang "kasal" ay hindi maaring mag-sagot ng applikasyon.
+              </div>
+            </BsModal.Body>
+            <BsModal.Footer style={{ justifyContent: "center" }}>
+              <Button variant="secondary" onClick={() => setShowMarriedDialog(false)}>
+                Close
+              </Button>
+            </BsModal.Footer>
+          </BsModal>
+
           {/* wedding calendar */}
-
-
           <form
             onSubmit={handleSubmit}
             encType="multipart/form-data"
             style={{ paddingLeft: "30px" }}
           >
-
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
 
               <div style={{ display: "flex", alignItems: "center", gap: "12px", maxWidth: "300px" }}>
@@ -458,22 +480,6 @@ const WeddingForm = () => {
 
 
             <h2>Wedding Form</h2>
-
-            {/* Warning message if user is married */}
-            {isMarried && (
-              <div
-                style={{
-                  color: "red",
-                  fontWeight: "bold",
-                  marginBottom: "10px",
-                }}
-              >
-                Sorry, but a "Married" user cannot submit an application. <br />
-                Paumanhin, ang "kasal" ay hindi maaring mag-sagot ng
-                applikasyon.
-              </div>
-            )}
-
             {/* Wedding Date & Time */}
             <Form.Group>
               <Form.Label>Date of Application</Form.Label>
@@ -729,8 +735,6 @@ const WeddingForm = () => {
                 </Col>
               </Row>
             </fieldset>
-
-
             {/* Bride's Information */}
             <fieldset className="form-group">
               <legend>Bride's Info</legend>

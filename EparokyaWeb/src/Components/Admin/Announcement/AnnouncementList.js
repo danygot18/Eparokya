@@ -209,16 +209,16 @@ const AdminAnnouncementList = () => {
             display: "grid",
             gridTemplateColumns: {
               xs: "1fr",
-              sm: "repeat(2, 1fr)",
-              md: "repeat(3, 1fr)",
-              lg: "repeat(4, 1fr)",
+              sm: "1fr",
+              md: "1fr 1fr", // Only two cards per row for md and up
             },
             gap: 3,
             width: "100%",
-            maxWidth: "1800px",
+            maxWidth: "1200px", // Adjust for better viewing
             mx: "auto",
           }}
         >
+
           {currentAnnouncements.map((announcement) => (
             <Card
               key={announcement._id}

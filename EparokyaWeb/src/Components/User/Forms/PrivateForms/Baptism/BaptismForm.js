@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import { Modal, Form, Row, Col } from "react-bootstrap";
+import {
+  Box,
+  Grid,
+  Typography,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  InputLabel,
+  FormControl,
+  Paper
+} from "@mui/material";
 import "./BaptismForm.css";
 import GuestSidebar from "../../../../GuestSideBar";
 import MetaData from "../../../../Layout/MetaData";
@@ -85,7 +100,6 @@ const BaptismForm = () => {
     current[keys[keys.length - 1]] = value;
     setFormData(updatedFormData);
   };
-
 
   const handleFileChange = (e, fieldName) => {
     const file = e.target.files[0];
@@ -290,7 +304,7 @@ const BaptismForm = () => {
   };
 
   return (
-    <div style={{ display: "flex" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f9f9f9" }}>
       <MetaData title="Baptism Form" />
       <TermsModal
         show={showTermsModal}
@@ -300,420 +314,416 @@ const BaptismForm = () => {
           setShowTermsModal(false);
         }}
       />
-      <div style={{ display: "flex", backgroundColor: "#f9f9f9", width: "100%" }}>
-        <GuestSidebar />
-        <div className="baptismForm-content">
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", maxWidth: "300px" }}>
-              <div>
-                <h2 style={{ fontSize: "1.2rem", margin: 0 }}>Click here to see Available Dates</h2>
-              </div>
-              <Button
-                variant="outline-secondary"
-                style={{
-                  border: "1px solid #aaa",
-                  background: "transparent",
-                  color: "#333",
-                  fontWeight: "bold",
-                  borderRadius: 6,
-                  padding: "4px 14px",
-                  fontSize: "0.95rem",
-                  boxShadow: "none"
-                }}
-                onClick={() => setShowOverlay(true)}
-              >
-                View Calendar
-              </Button>
-            </div>
-            <ConfirmedBaptismOverlay show={showOverlay} onClose={() => setShowOverlay(false)} />
-          </div>
-          <h2>Baptism Form</h2>
-          <Form onSubmit={handleSubmit}>
+      <GuestSidebar />
+      <Box sx={{ flex: 1, p: { xs: 1, md: 4 } }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, maxWidth: 300 }}>
+            <Typography variant="h6" sx={{ fontSize: "1.1rem" }}>
+              Click here to see Available Dates
+            </Typography>
+            <Button
+              variant="outlined"
+              color="secondary"
+              sx={{ fontWeight: "bold", borderRadius: 1, px: 2, fontSize: "0.95rem" }}
+              onClick={() => setShowOverlay(true)}
+            >
+              View Calendar
+            </Button>
+          </Box>
+          <ConfirmedBaptismOverlay show={showOverlay} onClose={() => setShowOverlay(false)} />
+        </Box>
+        <Paper elevation={2} sx={{ p: { xs: 2, md: 4 } }}>
+          <Typography variant="h4" gutterBottom>Baptism Form</Typography>
+          <Box component="form" onSubmit={handleSubmit} noValidate>
             {/* Baptism Date and Time */}
-            <Row className="mb-3">
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label>Araw ng Binyag (Monday Schedules are NOT Available) </Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={formData.baptismDate}
-                    onChange={(e) => handleChange(e, "baptismDate")}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label>Oras ng Binyag</Form.Label>
-                  <Form.Control
-                    type="time"
-                    value={formData.baptismTime}
-                    onChange={(e) => handleChange(e, "baptismTime")}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+            <Grid container spacing={2} mb={2}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Araw ng Binyag (Monday Schedules are NOT Available)"
+                  type="date"
+                  value={formData.baptismDate}
+                  onChange={(e) => handleChange(e, "baptismDate")}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Oras ng Binyag"
+                  type="time"
+                  value={formData.baptismTime}
+                  onChange={(e) => handleChange(e, "baptismTime")}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  required
+                />
+              </Grid>
+            </Grid>
 
             {/* Child Information */}
-            <h4 className="mt-4">Child Information</h4>
-            <Form.Group className="mb-3">
-              <Form.Label>Buong Pangalan ng Bibinyagan</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.child.fullName}
-                onChange={(e) => handleChange(e, "child.fullName")}
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Araw ng Kapanganakan, Lugar ng Kapanganakan, at Kasarian</Form.Label>
-              <Row>
-                <Col md={4}>
-                  <Form.Control
-                    type="date"
-                    value={formData.child.dateOfBirth}
-                    onChange={(e) => handleChange(e, "child.dateOfBirth")}
-                    required
-                  />
-                </Col>
-                <Col md={4}>
-                  <Form.Control
-                    type="text"
-                    value={formData.child.placeOfBirth}
-                    onChange={(e) => handleChange(e, "child.placeOfBirth")}
-                    placeholder="Lugar ng Kapanganakan"
-                    required
-                  />
-                </Col>
-                <Col md={4}>
-                  <Form.Select
+            <Typography variant="h6" mt={3}>Child Information</Typography>
+            <TextField
+              label="Buong Pangalan ng Bibinyagan"
+              value={formData.child.fullName}
+              onChange={(e) => handleChange(e, "child.fullName")}
+              fullWidth
+              required
+              sx={{ mb: 2, mt: 1 }}
+            />
+            <Grid container spacing={2} mb={2}>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Araw ng Kapanganakan"
+                  type="date"
+                  value={formData.child.dateOfBirth}
+                  onChange={(e) => handleChange(e, "child.dateOfBirth")}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Lugar ng Kapanganakan"
+                  value={formData.child.placeOfBirth}
+                  onChange={(e) => handleChange(e, "child.placeOfBirth")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth required>
+                  <InputLabel id="child-gender-label">Kasarian</InputLabel>
+                  <Select
+                    labelId="child-gender-label"
+                    label="Kasarian"
                     value={formData.child.gender}
                     onChange={(e) => handleChange(e, "child.gender")}
-                    required
                   >
-                    <option value="">-- Piliin ang Kasarian --</option>
-                    <option value="Male">Lalaki</option>
-                    <option value="Female">Babae</option>
-                  </Form.Select>
-                </Col>
-              </Row>
-            </Form.Group>
+                    <MenuItem value=""><em>-- Piliin ang Kasarian --</em></MenuItem>
+                    <MenuItem value="Male">Lalaki</MenuItem>
+                    <MenuItem value="Female">Babae</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
 
             {/* Parents Information */}
-            <h4 className="mt-4">Magulang ng Bibinyagan</h4>
-            <Form.Group className="mb-3">
-              <Form.Label>Buong Pangalan ng Ama at Lugar ng Kapanganakan</Form.Label>
-              <Row>
-                <Col md={6}>
-                  <Form.Control
-                    type="text"
-                    value={formData.parents.fatherFullName}
-                    onChange={(e) => handleChange(e, "parents.fatherFullName")}
-                    placeholder="Buong Pangalan ng Ama"
-                    required
-                  />
-                </Col>
-                <Col md={6}>
-                  <Form.Control
-                    type="text"
-                    value={formData.parents.placeOfFathersBirth}
-                    onChange={(e) => handleChange(e, "parents.placeOfFathersBirth")}
-                    placeholder="Lugar ng Kapanganakan"
-                    required
-                  />
-                </Col>
-              </Row>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Buong Pangalan ng Ina at Lugar ng Kapanganakan</Form.Label>
-              <Row>
-                <Col md={6}>
-                  <Form.Control
-                    type="text"
-                    value={formData.parents.motherFullName}
-                    onChange={(e) => handleChange(e, "parents.motherFullName")}
-                    placeholder="Buong Pangalan ng Ina"
-                    required
-                  />
-                </Col>
-                <Col md={6}>
-                  <Form.Control
-                    type="text"
-                    value={formData.parents.placeOfMothersBirth}
-                    onChange={(e) => handleChange(e, "parents.placeOfMothersBirth")}
-                    placeholder="Lugar ng Kapanganakan"
-                    required
-                  />
-                </Col>
-              </Row>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Tirahan, Contact Number, at Saan Kasal</Form.Label>
-              <Row>
-                <Col md={6}>
-                  <Form.Control
-                    type="text"
-                    value={formData.parents.address}
-                    onChange={(e) => handleChange(e, "parents.address")}
-                    placeholder="Tirahan"
-                    required
-                  />
-                </Col>
-                <Col md={3}>
-                  <Form.Control
-                    type="text"
-                    value={formData.phone}
-                    onChange={(e) => handleChange(e, "phone")}
-                    placeholder="Contact Number"
-                    required
-                  />
-                </Col>
-                <Col md={3}>
-                  <Form.Select
+            <Typography variant="h6" mt={3}>Magulang ng Bibinyagan</Typography>
+            <Grid container spacing={2} mb={2}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Buong Pangalan ng Ama"
+                  value={formData.parents.fatherFullName}
+                  onChange={(e) => handleChange(e, "parents.fatherFullName")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Lugar ng Kapanganakan (Ama)"
+                  value={formData.parents.placeOfFathersBirth}
+                  onChange={(e) => handleChange(e, "parents.placeOfFathersBirth")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Buong Pangalan ng Ina"
+                  value={formData.parents.motherFullName}
+                  onChange={(e) => handleChange(e, "parents.motherFullName")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Lugar ng Kapanganakan (Ina)"
+                  value={formData.parents.placeOfMothersBirth}
+                  onChange={(e) => handleChange(e, "parents.placeOfMothersBirth")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Tirahan"
+                  value={formData.parents.address}
+                  onChange={(e) => handleChange(e, "parents.address")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <TextField
+                  label="Contact Number"
+                  value={formData.phone}
+                  onChange={(e) => handleChange(e, "phone")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth required>
+                  <InputLabel id="marriage-status-label">Saan Kasal</InputLabel>
+                  <Select
+                    labelId="marriage-status-label"
+                    label="Saan Kasal"
                     value={formData.parents.marriageStatus}
                     onChange={(e) => handleChange(e, "parents.marriageStatus")}
-                    required
                   >
-                    <option value="">-- Saan Kasal --</option>
-                    <option value="Simbahan">Simbahan (Katoliko)</option>
-                    <option value="Civil">Civil (Huwes)</option>
-                    <option value="Nat">Nat (Hindi Kasal)</option>
-                  </Form.Select>
-                </Col>
-              </Row>
-            </Form.Group>
+                    <MenuItem value=""><em>-- Saan Kasal --</em></MenuItem>
+                    <MenuItem value="Simbahan">Simbahan (Katoliko)</MenuItem>
+                    <MenuItem value="Civil">Civil (Huwes)</MenuItem>
+                    <MenuItem value="Nat">Nat (Hindi Kasal)</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
 
             {/* Ninong */}
-            <h4 className="mt-4">Ninong</h4>
-            <Form.Group className="mb-3">
-              <Form.Label>Pangalan, Tirahan, at Relihiyon</Form.Label>
-              <Row>
-                <Col md={5}>
-                  <Form.Control
-                    type="text"
-                    value={formData.ninong.name}
-                    onChange={(e) => handleChange(e, "ninong.name")}
-                    placeholder="Pangalan"
-                    required
-                  />
-                </Col>
-                <Col md={5}>
-                  <Form.Control
-                    type="text"
-                    value={formData.ninong.address}
-                    onChange={(e) => handleChange(e, "ninong.address")}
-                    placeholder="Tirahan"
-                    required
-                  />
-                </Col>
-                <Col md={2}>
-                  <Form.Control
-                    type="text"
-                    value={formData.ninong.religion}
-                    onChange={(e) => handleChange(e, "ninong.religion")}
-                    placeholder="Relihiyon"
-                    required
-                  />
-                </Col>
-              </Row>
-            </Form.Group>
+            <Typography variant="h6" mt={3}>Ninong</Typography>
+            <Grid container spacing={2} mb={2}>
+              <Grid item xs={12} md={5}>
+                <TextField
+                  label="Pangalan"
+                  value={formData.ninong.name}
+                  onChange={(e) => handleChange(e, "ninong.name")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={5}>
+                <TextField
+                  label="Tirahan"
+                  value={formData.ninong.address}
+                  onChange={(e) => handleChange(e, "ninong.address")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <TextField
+                  label="Relihiyon"
+                  value={formData.ninong.religion}
+                  onChange={(e) => handleChange(e, "ninong.religion")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+            </Grid>
 
             {/* Ninang */}
-            <h4 className="mt-4">Ninang</h4>
-            <Form.Group className="mb-3">
-              <Form.Label>Pangalan, Tirahan, at Relihiyon</Form.Label>
-              <Row>
-                <Col md={5}>
-                  <Form.Control
-                    type="text"
-                    value={formData.ninang.name}
-                    onChange={(e) => handleChange(e, "ninang.name")}
-                    placeholder="Pangalan"
-                    required
-                  />
-                </Col>
-                <Col md={5}>
-                  <Form.Control
-                    type="text"
-                    value={formData.ninang.address}
-                    onChange={(e) => handleChange(e, "ninang.address")}
-                    placeholder="Tirahan"
-                    required
-                  />
-                </Col>
-                <Col md={2}>
-                  <Form.Control
-                    type="text"
-                    value={formData.ninang.religion}
-                    onChange={(e) => handleChange(e, "ninang.religion")}
-                    placeholder="Relihiyon"
-                    required
-                  />
-                </Col>
-              </Row>
-            </Form.Group>
+            <Typography variant="h6" mt={3}>Ninang</Typography>
+            <Grid container spacing={2} mb={2}>
+              <Grid item xs={12} md={5}>
+                <TextField
+                  label="Pangalan"
+                  value={formData.ninang.name}
+                  onChange={(e) => handleChange(e, "ninang.name")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={5}>
+                <TextField
+                  label="Tirahan"
+                  value={formData.ninang.address}
+                  onChange={(e) => handleChange(e, "ninang.address")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <TextField
+                  label="Relihiyon"
+                  value={formData.ninang.religion}
+                  onChange={(e) => handleChange(e, "ninang.religion")}
+                  fullWidth
+                  required
+                />
+              </Grid>
+            </Grid>
 
             {/* Secondary Ninong */}
-            <h4 className="mt-4">Secondary Ninong</h4>
+            <Typography variant="h6" mt={3}>Secondary Ninong</Typography>
             {NinongGodparents.map((godparent, index) => (
-              <Row key={`ninong-${index}`} className="mb-2">
-                <Col md={10}>
-                  <Form.Control
-                    type="text"
+              <Grid container spacing={2} mb={1} key={`ninong-${index}`}>
+                <Grid item xs={10}>
+                  <TextField
+                    label="Pangalan ng Ninong"
                     value={godparent.name}
                     onChange={(e) => handleGodparentChange('ninong', index, e.target.value)}
-                    placeholder="Pangalan ng Ninong"
+                    fullWidth
                   />
-                </Col>
-                <Col md={2} className="d-flex align-items-center">
+                </Grid>
+                <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
                   <Button
-                    variant="danger"
+                    variant="contained"
+                    color="error"
                     onClick={() => handleRemoveGodparent('ninong', index)}
+                    fullWidth
                   >
                     Remove
                   </Button>
-                </Col>
-              </Row>
+                </Grid>
+              </Grid>
             ))}
             <Button
-              variant="secondary"
+              variant="outlined"
+              color="secondary"
               onClick={() => handleAddGodparent('ninong')}
-              className="mb-4"
+              sx={{ mb: 3 }}
             >
               Add Secondary Ninong
             </Button>
 
             {/* Secondary Ninang */}
-            <h4 className="mt-4">Secondary Ninang</h4>
+            <Typography variant="h6" mt={3}>Secondary Ninang</Typography>
             {NinangGodparents.map((godparent, index) => (
-              <Row key={`ninang-${index}`} className="mb-2">
-                <Col md={10}>
-                  <Form.Control
-                    type="text"
+              <Grid container spacing={2} mb={1} key={`ninang-${index}`}>
+                <Grid item xs={10}>
+                  <TextField
+                    label="Pangalan ng Ninang"
                     value={godparent.name}
                     onChange={(e) => handleGodparentChange('ninang', index, e.target.value)}
-                    placeholder="Pangalan ng Ninang"
+                    fullWidth
                   />
-                </Col>
-                <Col md={2} className="d-flex align-items-center">
+                </Grid>
+                <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
                   <Button
-                    variant="danger"
+                    variant="contained"
+                    color="error"
                     onClick={() => handleRemoveGodparent('ninang', index)}
+                    fullWidth
                   >
                     Remove
                   </Button>
-                </Col>
-              </Row>
+                </Grid>
+              </Grid>
             ))}
             <Button
-              variant="secondary"
+              variant="outlined"
+              color="secondary"
               onClick={() => handleAddGodparent('ninang')}
-              className="mb-4"
+              sx={{ mb: 3 }}
             >
               Add Secondary Ninang
             </Button>
 
             {/* Required Documents */}
-            <h4 className="mt-4">Required Documents</h4>
-            <Form.Group className="mb-4">
-              <Form.Label className="fw-bold text-danger">Birth Certificate *</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) => handleFileChange(e, 'birthCertificate')}
-                accept="image/*,.pdf,.doc,.docx"
-                required
-              />
+            <Typography variant="h6" mt={3}>Required Documents</Typography>
+            <FormGroup sx={{ mb: 3 }}>
+              <InputLabel className="fw-bold text-danger">Birth Certificate *</InputLabel>
+              <Button variant="contained" component="label" sx={{ mb: 1 }}>
+                Upload Birth Certificate
+                <input
+                  type="file"
+                  hidden
+                  onChange={(e) => handleFileChange(e, 'birthCertificate')}
+                  accept="image/*,.pdf,.doc,.docx"
+                  required
+                />
+              </Button>
               <DocumentPreview
                 file={formData.documents.birthCertificate}
                 previewUrl={formData.previews.birthCertificate}
               />
-            </Form.Group>
-
-            <Form.Group className="mb-4">
-              <Form.Label className="fw-bold text-danger">Marriage Certificate *</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) => handleFileChange(e, 'marriageCertificate')}
-                accept="image/*,.pdf,.doc,.docx"
-                required
-              />
+            </FormGroup>
+            <FormGroup sx={{ mb: 3 }}>
+              <InputLabel className="fw-bold text-danger">Marriage Certificate *</InputLabel>
+              <Button variant="contained" component="label" sx={{ mb: 1 }}>
+                Upload Marriage Certificate
+                <input
+                  type="file"
+                  hidden
+                  onChange={(e) => handleFileChange(e, 'marriageCertificate')}
+                  accept="image/*,.pdf,.doc,.docx"
+                  required
+                />
+              </Button>
               <DocumentPreview
                 file={formData.documents.marriageCertificate}
                 previewUrl={formData.previews.marriageCertificate}
               />
-            </Form.Group>
+            </FormGroup>
 
             {/* Additional Documents */}
-            <h4 className="mt-4">Additional Documents</h4>
-
-            <Form.Group className="mb-4">
-              <Form.Label>Baptism Permit From:</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter issuing parish"
-                value={formData.additionalDocs.baptismPermitFrom}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  additionalDocs: {
-                    ...prev.additionalDocs,
-                    baptismPermitFrom: e.target.value
-                  }
-                }))}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-4">
-              <Form.Label>Baptism Permit (FOR NON-PARISHIONERS)</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) => handleFileChange(e, 'baptismPermit')}
-                accept="image/*,.pdf,.doc,.docx"
-              />
+            <Typography variant="h6" mt={3}>Additional Documents</Typography>
+            <TextField
+              label="Baptism Permit From"
+              placeholder="Enter issuing parish"
+              value={formData.additionalDocs.baptismPermitFrom}
+              onChange={(e) => setFormData(prev => ({
+                ...prev,
+                additionalDocs: {
+                  ...prev.additionalDocs,
+                  baptismPermitFrom: e.target.value
+                }
+              }))}
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <FormGroup sx={{ mb: 3 }}>
+              <InputLabel>Baptism Permit (FOR NON-PARISHIONERS)</InputLabel>
+              <Button variant="contained" component="label" sx={{ mb: 1 }}>
+                Upload Baptism Permit
+                <input
+                  type="file"
+                  hidden
+                  onChange={(e) => handleFileChange(e, 'baptismPermit')}
+                  accept="image/*,.pdf,.doc,.docx"
+                />
+              </Button>
               <DocumentPreview
                 file={formData.documents.baptismPermit}
                 previewUrl={formData.previews.baptismPermit}
               />
-            </Form.Group>
-
-            <Form.Group className="mb-4">
-              <Form.Label>Certificate Of No Record of Baptism (FOR 2 YEARS OLD AND ABOVE)</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) => handleFileChange(e, 'certificateOfNoRecordBaptism')}
-                accept="image/*,.pdf,.doc,.docx"
-              />
+            </FormGroup>
+            <FormGroup sx={{ mb: 3 }}>
+              <InputLabel>Certificate Of No Record of Baptism (FOR 2 YEARS OLD AND ABOVE)</InputLabel>
+              <Button variant="contained" component="label" sx={{ mb: 1 }}>
+                Upload Certificate
+                <input
+                  type="file"
+                  hidden
+                  onChange={(e) => handleFileChange(e, 'certificateOfNoRecordBaptism')}
+                  accept="image/*,.pdf,.doc,.docx"
+                />
+              </Button>
               <DocumentPreview
                 file={formData.documents.certificateOfNoRecordBaptism}
                 previewUrl={formData.previews.certificateOfNoRecordBaptism}
               />
-            </Form.Group>
+            </FormGroup>
 
-            <div className="d-flex justify-content-between align-items-center mt-4">
-              <Form.Check
-                type="checkbox"
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 4 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    required
+                  />
+                }
                 label="I agree to the terms and conditions"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                required
               />
               <Button
                 type="submit"
-                variant="primary"
-                size="lg"
+                variant="contained"
+                size="large"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </Button>
-            </div>
-          </Form>
-        </div>
-      </div>
-    </div>
+            </Box>
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
   );
 };
 

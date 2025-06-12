@@ -9,6 +9,7 @@ import Modal from "react-modal";
 import DateTimePicker from "react-datetime-picker";
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import { toast, ToastContainer } from 'react-toastify';
+import { Box, Paper, Typography, Grid, Button, TextField, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 
 Modal.setAppElement("#root");
 
@@ -216,205 +217,292 @@ const CounselingDetails = () => {
     if (error) return <div>Error: {error}</div>;
 
     return (
-        <div className="wedding-details-page">
+        <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f9f9f9" }}>
+            <ToastContainer />
             <SideBar />
-            <div className="house-details-content">
-                <div className="house-details-grid">
-                    {/* Counseling Details Box */}
-                    <div className="house-details-box">
-                        <h3>Counseling Details</h3>
-                        <div className="house-details-item">
-                            <p><strong>Full Name:</strong> {counselingDetails?.person?.fullName || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Date of Birth:</strong> {counselingDetails?.person?.dateOfBirth ? new Date(counselingDetails.person.dateOfBirth).toLocaleDateString() : "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Purpose:</strong> {counselingDetails?.purpose || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Contact Person:</strong> {counselingDetails?.contactPerson?.fullName || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Contact Number:</strong> {counselingDetails?.contactPerson?.contactNumber || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Relationship:</strong> {counselingDetails?.contactPerson?.relationship || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                        <p>
-                            <strong>Bldg Name/Tower:</strong> {counselingDetails?.address?.BldgNameTower || "N/A"}</p>
-                            <p><strong>Lot/Block/Phase/House No.:</strong> {counselingDetails?.address?.LotBlockPhaseHouseNo || "N/A"}</p>
-                            <p><strong>Subdivision/Village/Zone:</strong> {counselingDetails?.address?.SubdivisionVillageZone || "N/A"}</p>
-                            <p><strong>Street:</strong> {counselingDetails?.address?.Street || "N/A"}</p>
-                            <p><strong>Barangay:</strong> {counselingDetails?.address?.barangay === 'Others' ? counselingDetails?.address?.customBarangay || "N/A" : counselingDetails?.address?.barangay || "N/A"}</p>
-                            <p><strong>District:</strong> {counselingDetails?.address?.District || "N/A"}</p>
-                            <p><strong>City:</strong> {counselingDetails?.address?.city === 'Others' ? counselingDetails?.address?.customCity || "N/A" : counselingDetails?.address?.city || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Counseling Date:</strong> {counselingDetails?.counselingDate ? new Date(counselingDetails.counselingDate).toLocaleDateString() : "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Counseling Time:</strong> {counselingDetails?.counselingTime || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Counseling Status:</strong> {counselingDetails?.counselingStatus || "N/A"}</p>
-                        </div>
-                        <div className="house-details-item">
-                            <p><strong>Confirmed At:</strong> {counselingDetails?.confirmedAt ? new Date(counselingDetails.confirmedAt).toLocaleDateString() : "N/A"}</p>
-                        </div>
-                    </div>
+            <Box sx={{ flex: 1, p: { xs: 1, md: 4 } }}>
+                <Paper elevation={2} sx={{ p: { xs: 2, md: 4 }, maxWidth: 900, margin: "0 auto" }}>
+                    <Typography variant="h4" gutterBottom>Counseling Details</Typography>
+                    <Grid container spacing={2}>
+                        {/* Counseling Details */}
+                        <Grid item xs={12} md={6}>
+                            <Typography variant="subtitle1"><strong>Full Name:</strong> {counselingDetails?.person?.fullName || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Date of Birth:</strong> {counselingDetails?.person?.dateOfBirth ? new Date(counselingDetails.person.dateOfBirth).toLocaleDateString() : "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Purpose:</strong> {counselingDetails?.purpose || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Contact Person:</strong> {counselingDetails?.contactPerson?.fullName || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Contact Number:</strong> {counselingDetails?.contactPerson?.contactNumber || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Relationship:</strong> {counselingDetails?.contactPerson?.relationship || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Bldg Name/Tower:</strong> {counselingDetails?.address?.BldgNameTower || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Lot/Block/Phase/House No.:</strong> {counselingDetails?.address?.LotBlockPhaseHouseNo || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Subdivision/Village/Zone:</strong> {counselingDetails?.address?.SubdivisionVillageZone || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Street:</strong> {counselingDetails?.address?.Street || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Barangay:</strong> {counselingDetails?.address?.barangay === 'Others' ? counselingDetails?.address?.customBarangay || "N/A" : counselingDetails?.address?.barangay || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>District:</strong> {counselingDetails?.address?.District || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>City:</strong> {counselingDetails?.address?.city === 'Others' ? counselingDetails?.address?.customCity || "N/A" : counselingDetails?.address?.city || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Counseling Date:</strong> {counselingDetails?.counselingDate ? new Date(counselingDetails.counselingDate).toLocaleDateString() : "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Counseling Time:</strong> {counselingDetails?.counselingTime || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Counseling Status:</strong> {counselingDetails?.counselingStatus || "N/A"}</Typography>
+                            <Typography variant="subtitle1"><strong>Confirmed At:</strong> {counselingDetails?.confirmedAt ? new Date(counselingDetails.confirmedAt).toLocaleDateString() : "N/A"}</Typography>
+                        </Grid>
 
-                    {/* Admin Comments Section */}
-                    <div className="house-comments-section">
-                        <h2>Admin Comments</h2>
-                        {(comments && comments.length > 0) ? (
-                            comments.map((comment, index) => (
-                                <div key={index} className="admin-comment">
-                                    <p><strong>Selected Comment:</strong> {comment?.selectedComment || "N/A"}</p>
-                                    <p><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</p>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No admin comments yet.</p>
-                        )}
-                    </div>
+                        {/* Admin Comments */}
+                        <Grid item xs={12} md={6}>
+                            <Typography variant="h6" gutterBottom>Admin Comments</Typography>
+                            {(comments && comments.length > 0) ? (
+                                comments.map((comment, index) => (
+                                    <Paper key={index} sx={{ p: 2, mb: 1, bgcolor: "#f5f5f5" }}>
+                                        <Typography variant="body2"><strong>Selected Comment:</strong> {comment?.selectedComment || "N/A"}</Typography>
+                                        <Typography variant="body2"><strong>Additional Comment:</strong> {comment?.additionalComment || "N/A"}</Typography>
+                                    </Paper>
+                                ))
+                            ) : (
+                                <Typography variant="body2">No admin comments yet.</Typography>
+                            )}
+                        </Grid>
+                    </Grid>
 
-                    {/* Updated Counseling Date Section */}
-                    <div className="blessing-date-box">
-                        <h3>Updated Counseling Date</h3>
-                        <p className="date">
+                    {/* Updated Counseling Date */}
+                    <Box sx={{ mt: 3 }}>
+                        <Typography variant="h6">Updated Counseling Date</Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
                             {updatedCounselingDate ? new Date(updatedCounselingDate).toLocaleDateString() : "N/A"}
-                        </p>
+                        </Typography>
                         {counselingDetails?.adminRescheduled?.reason && (
-                            <div className="reschedule-reason">
-                                <h3>Reason for Rescheduling</h3>
-                                <p>{counselingDetails.adminRescheduled.reason}</p>
-                            </div>
+                            <Paper sx={{ p: 2, bgcolor: "#fffbe7" }}>
+                                <Typography variant="subtitle2">Reason for Rescheduling</Typography>
+                                <Typography variant="body2">{counselingDetails.adminRescheduled.reason}</Typography>
+                            </Paper>
                         )}
-                    </div>
+                    </Box>
 
                     {/* Priest Section */}
-                    <div className="house-comments-section">
-                        <h2>Assigned Priest</h2>
+                    <Box sx={{ mt: 3 }}>
+                        <Typography variant="h6">Assigned Priest</Typography>
                         {counselingDetails?.priest ? (
-                            <p><strong>{counselingDetails.priest.title} {counselingDetails.priest.fullName}</strong></p>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                <strong>{counselingDetails.priest.title} {counselingDetails.priest.fullName}</strong>
+                            </Typography>
                         ) : (
-                            <p>No priest assigned.</p>
+                            <Typography variant="body2" sx={{ mb: 1 }}>No priest assigned.</Typography>
                         )}
-                    </div>
+                    </Box>
 
-                    {/* Admin Section for Updating Counseling Date */}
-                    <div className="house-section">
-                        <h2>Select Updated Counseling Date:</h2>
-                        <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
-                        <label>Reason:</label>
-                        <textarea value={reason} onChange={(e) => setReason(e.target.value)} />
-                        <div className="button-container">
-                            <button onClick={handleUpdate} disabled={loading}>
-                                {loading ? "Updating..." : "Update Counseling Date"}
-                            </button>
-                        </div>
-                    </div>
+                    {/* Assign Priest */}
+                    <Box sx={{ mt: 2 }}>
+                        <Typography variant="h6">Assign Priest</Typography>
+                        <FormControl fullWidth sx={{ mb: 2 }}>
+                            <InputLabel id="priest-select-label">Select Priest</InputLabel>
+                            <Select
+                                labelId="priest-select-label"
+                                value={selectedPriestId}
+                                label="Select Priest"
+                                onChange={(e) => setSelectedPriestId(e.target.value)}
+                            >
+                                {priestsList.length > 0 ? (
+                                    priestsList.map((priest) => (
+                                        <MenuItem key={priest._id} value={priest._id}>
+                                            {priest.title} {priest.fullName}
+                                        </MenuItem>
+                                    ))
+                                ) : (
+                                    <MenuItem value="" disabled>No Priests Available</MenuItem>
+                                )}
+                            </Select>
+                        </FormControl>
+                        <Button variant="contained" color="primary" onClick={handleAddPriest}>
+                            Assign Priest
+                        </Button>
+                    </Box>
+
+                    {/* Update Counseling Date */}
+                    <Box sx={{ mt: 4 }}>
+                        <Typography variant="h6">Select Updated Counseling Date</Typography>
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid item xs={12} md={4}>
+                                <TextField
+                                    type="date"
+                                    label="New Date"
+                                    value={newDate}
+                                    onChange={(e) => setNewDate(e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={8}>
+                                <TextField
+                                    label="Reason"
+                                    value={reason}
+                                    onChange={(e) => setReason(e.target.value)}
+                                    fullWidth
+                                    multiline
+                                    minRows={2}
+                                />
+                            </Grid>
+                        </Grid>
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            sx={{ mt: 2 }}
+                            onClick={async () => {
+                                if (!newDate || !reason) {
+                                    toast.error("Please select a date and provide a reason.");
+                                    return;
+                                }
+                                try {
+                                    setLoading(true);
+                                    const response = await axios.put(
+                                        `${process.env.REACT_APP_API}/api/v1/updateCounselingDate/${counselingId}`,
+                                        { newDate, reason }
+                                    );
+                                    setUpdatedCounselingDate(response.data.counseling?.counselingDate || newDate);
+                                    toast.success("Counseling date updated successfully!");
+                                } catch (error) {
+                                    toast.error("Failed to update counseling date.");
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }}
+                            disabled={loading}
+                        >
+                            {loading ? "Updating..." : "Update Counseling Date"}
+                        </Button>
+                    </Box>
 
                     {/* Admin Comment Submission */}
-                    <div className="house-section">
-                        <h2>Submit Admin Comment</h2>
-                        <select
-                            value={selectedComment}
-                            onChange={(e) => setSelectedComment(e.target.value)}
-                        >
-                            <option value="" disabled>Select a comment</option>
-                            {predefinedComments.map((comment, index) => (
-                                <option key={index} value={comment}>{comment}</option>
-                            ))}
-                        </select>
-                        <textarea
+                    <Box sx={{ mt: 4 }}>
+                        <Typography variant="h6">Submit Admin Comment</Typography>
+                        <FormControl fullWidth sx={{ mb: 2 }}>
+                            <InputLabel id="comment-select-label">Select a comment</InputLabel>
+                            <Select
+                                labelId="comment-select-label"
+                                value={selectedComment}
+                                label="Select a comment"
+                                onChange={(e) => setSelectedComment(e.target.value)}
+                            >
+                                <MenuItem value="" disabled>Select a comment</MenuItem>
+                                {predefinedComments.map((comment, index) => (
+                                    <MenuItem key={index} value={comment}>{comment}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <TextField
+                            label="Additional Comments"
                             placeholder="Additional Comments"
                             value={additionalComment}
                             onChange={(e) => setAdditionalComment(e.target.value)}
+                            fullWidth
+                            multiline
+                            minRows={2}
+                            sx={{ mb: 2 }}
                         />
-                        <div className="button-container">
-                            <button onClick={handleSubmitComment}>Submit Comment</button>
-                        </div>
-                    </div>
-
-                    {/* Adding Priest */}
-                    <div className="house-section">
-                        <h2>Assign Priest</h2>
-                        <select
-                            value={selectedPriestId}
-                            onChange={(e) => setSelectedPriestId(e.target.value)}
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={async () => {
+                                if (!selectedComment && !additionalComment) {
+                                    toast.error("Please select or enter a comment.");
+                                    return;
+                                }
+                                const commentData = {
+                                    selectedComment: selectedComment || "",
+                                    additionalComment: additionalComment || "",
+                                };
+                                try {
+                                    const response = await fetch(
+                                        `${process.env.REACT_APP_API}/api/v1/${counselingId}/commentCounseling`,
+                                        {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify(commentData),
+                                        }
+                                    );
+                                    const data = await response.json();
+                                    if (!response.ok) {
+                                        throw new Error(data.message || "Failed to submit comment.");
+                                    }
+                                    toast.success("Comment submitted successfully!");
+                                } catch (error) {
+                                    toast.error("Failed to submit comment.");
+                                }
+                            }}
                         >
-                            {priestsList.length > 0 ? (
-                                priestsList.map((priest) => (
-                                    <option key={priest._id} value={priest._id}>
-                                        {priest.title} {priest.fullName}
-                                    </option>
-                                ))
-                            ) : (
-                                <option value="" disabled>No Priests Available</option>
-                            )}
-                        </select>
+                            Submit Comment
+                        </Button>
+                    </Box>
 
-
-
-
-                        <div className="button-container">
-                            <button onClick={handleAddPriest}>Assign Priest</button>
-                        </div>
-                    </div>
-
-                    {/* Cancelling Reason Section */}
-                    {counselingDetails?.counselingStatus === "Cancelled" && counselingDetails?.cancellingReason ? (
-                        <div className="house-comments-section">
-                            <h2>Cancellation Details</h2>
-                            <div className="admin-comment">
-                                <p><strong>Cancelled By:</strong> {counselingDetails.cancellingReason.user === "Admin" ? "Admin" : counselingDetails.cancellingReason.user}</p>
-                                <p><strong>Reason:</strong> {counselingDetails.cancellingReason.reason || "No reason provided."}</p>
-                            </div>
-                        </div>
-                    ) : null}
-
-                    {/* Cancel Button */}
-                    <div className="button-container">
-                        <button onClick={() => setShowCancelModal(true)}>Cancel Counseling</button>
-                    </div>
+                    {/* Cancel Counseling */}
+                    <Box sx={{ mt: 4 }}>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => setShowCancelModal(true)}
+                            sx={{ mr: 2 }}
+                        >
+                            Cancel Counseling
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => handleConfirm(counselingId)}
+                            sx={{ mr: 2 }}
+                            disabled={counselingDetails?.counselingStatus === "Confirmed"}
+                        >
+                            Confirm Counseling
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={() => navigate(`/adminChat/${counselingDetails?.userId?._id}/${counselingDetails?.userId?.email}`)}
+                        >
+                            Go to Admin Chat
+                        </Button>
+                    </Box>
 
                     {/* Cancellation Modal */}
                     {showCancelModal && (
-                        <div className="modal-overlay">
-                            <div className="modal">
-                                <h3>Cancel Counseling</h3>
-                                <p>Please provide a reason for cancellation:</p>
-                                <textarea
+                        <Box
+                            sx={{
+                                position: "fixed",
+                                top: 0, left: 0, width: "100vw", height: "100vh",
+                                bgcolor: "rgba(0,0,0,0.3)", zIndex: 1300,
+                                display: "flex", alignItems: "center", justifyContent: "center"
+                            }}
+                        >
+                            <Paper sx={{ p: 4, minWidth: 350 }}>
+                                <Typography variant="h6" gutterBottom>Cancel Counseling</Typography>
+                                <Typography variant="body2" gutterBottom>Please provide a reason for cancellation:</Typography>
+                                <TextField
                                     value={cancelReason}
                                     onChange={(e) => setCancelReason(e.target.value)}
                                     placeholder="Enter reason..."
-                                    className="modal-textarea"
+                                    fullWidth
+                                    multiline
+                                    minRows={2}
+                                    sx={{ mb: 2 }}
                                 />
-                                <div className="modal-buttons">
-                                    <button onClick={handleCancel}>Confirm Cancel</button>
-                                    <button onClick={() => setShowCancelModal(false)}>Back</button>
-                                </div>
-                            </div>
-                        </div>
+                                <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+                                    <Button variant="contained" color="error" onClick={handleCancel}>Confirm Cancel</Button>
+                                    <Button variant="outlined" onClick={() => setShowCancelModal(false)}>Back</Button>
+                                </Box>
+                            </Paper>
+                        </Box>
                     )}
 
-                    {/* Confirmation and Decline Buttons */}
-                    <div className="button-container">
-                        <button onClick={() => handleConfirm(counselingId)}>Confirm Counseling</button>
-                    </div>
-
-                    <div className="button-container">
-                        <button onClick={() => navigate(`/adminChat/${counselingDetails?.userId?._id}/${counselingDetails?.userId?.email}`)}>
-                            Go to Admin Chat
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+                    {/* Cancellation Details */}
+                    {counselingDetails?.counselingStatus === "Cancelled" && counselingDetails?.cancellingReason ? (
+                        <Box sx={{ mt: 4 }}>
+                            <Typography variant="h6">Cancellation Details</Typography>
+                            <Paper sx={{ p: 2, bgcolor: "#ffeaea" }}>
+                                <Typography variant="body2"><strong>Cancelled By:</strong> {counselingDetails.cancellingReason.user === "Admin" ? "Admin" : counselingDetails.cancellingReason.user}</Typography>
+                                <Typography variant="body2"><strong>Reason:</strong> {counselingDetails.cancellingReason.reason || "No reason provided."}</Typography>
+                            </Paper>
+                        </Box>
+                    ) : null}
+                </Paper>
+            </Box>
+        </Box>
     );
 };
 

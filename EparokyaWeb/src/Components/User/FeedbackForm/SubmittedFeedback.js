@@ -21,25 +21,25 @@ const SubmittedFeedback = () => {
 
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
-useEffect(() => {
-  const fetchSentiments = async () => {
-    try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API}/api/v1/mySubmittedEventSentiments`,
-        { withCredentials: true }
-      );
-      console.log("Fetched sentiments:", data);
-      data.sentiments.forEach((item) => {
-        console.log("Type:", item.eventTypeId?.name);
-      });
-      setSentiments(data.sentiments || []);
-    } catch (error) {
-      console.error("Failed to fetch sentiments", error);
-    }
-  };
+  useEffect(() => {
+    const fetchSentiments = async () => {
+      try {
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_API}/api/v1/mySubmittedEventSentiments`,
+          { withCredentials: true }
+        );
+        console.log("Fetched sentiments:", data);
+        data.sentiments.forEach((item) => {
+          console.log("Type:", item.eventTypeId?.name);
+        });
+        setSentiments(data.sentiments || []);
+      } catch (error) {
+        console.error("Failed to fetch sentiments", error);
+      }
+    };
 
-  fetchSentiments();
-}, []);
+    fetchSentiments();
+  }, []);
 
 
 
@@ -48,38 +48,38 @@ useEffect(() => {
     setTabValue(newValue);
   };
 
-//   const filterCategory = (category) => {
-//     if (category === "Activity") {
-//       return sentiments.filter((item) =>
-//         item.eventTypeId?.name?.toLowerCase().includes("activity")
-//       );
-//     }
-//     if (category === "Event") {
-//       return sentiments.filter((item) =>
-//         item.eventTypeId?.name?.toLowerCase().includes("event")
-//       );
-//     }
-//     if (category === "Priest") {
-//       return sentiments.filter((item) =>
-//         item.eventTypeId?.name?.toLowerCase().includes("priest")
-//       );
-//     }
-//     return sentiments;
-//   };
+  //   const filterCategory = (category) => {
+  //     if (category === "Activity") {
+  //       return sentiments.filter((item) =>
+  //         item.eventTypeId?.name?.toLowerCase().includes("activity")
+  //       );
+  //     }
+  //     if (category === "Event") {
+  //       return sentiments.filter((item) =>
+  //         item.eventTypeId?.name?.toLowerCase().includes("event")
+  //       );
+  //     }
+  //     if (category === "Priest") {
+  //       return sentiments.filter((item) =>
+  //         item.eventTypeId?.name?.toLowerCase().includes("priest")
+  //       );
+  //     }
+  //     return sentiments;
+  //   };
 
 
-const filterCategory = (category) => {
-  const lowerCategory = category.toLowerCase();
+  const filterCategory = (category) => {
+    const lowerCategory = category.toLowerCase();
 
-  return sentiments.filter((item) => {
-    const typeName = item?.eventTypeId?.name?.toLowerCase() || "";
-    return typeName.includes(lowerCategory);
-  });
-};
+    return sentiments.filter((item) => {
+      const typeName = item?.eventTypeId?.name?.toLowerCase() || "";
+      return typeName.includes(lowerCategory);
+    });
+  };
 
-//   const displayedFeedback = filterCategory(tabOptions[tabValue]);
+  //   const displayedFeedback = filterCategory(tabOptions[tabValue]);
 
-const displayedFeedback = sentiments;
+  const displayedFeedback = sentiments;
 
   return (
     <Box sx={{ p: 3 }}>
@@ -87,7 +87,7 @@ const displayedFeedback = sentiments;
         My Submitted Feedback
       </Typography>
 
-      <Tabs
+      {/* <Tabs
         value={tabValue}
         onChange={handleTabChange}
         centered
@@ -98,7 +98,7 @@ const displayedFeedback = sentiments;
         {tabOptions.map((label, index) => (
           <Tab key={index} label={label} />
         ))}
-      </Tabs>
+      </Tabs> */}
 
       <Stack spacing={3}>
         {displayedFeedback.length > 0 ? (
@@ -139,18 +139,26 @@ const displayedFeedback = sentiments;
 
                 <Box>
                   <Typography fontWeight={500}>Comment:</Typography>
-                 <Typography variant="body2" mb={1}>
-  "{item.commentSentiment?.comment || 'No comment provided'}"
-</Typography>
+                  <Typography variant="body2" mb={1}>
+                    {item.comment
+                      ? `"${item.comment}"`
+                      : "No comment provided"}
+                  </Typography>
 
 
                   <Typography variant="body2">
                     Rating: <strong>{item.commentSentiment.label}</strong>
                   </Typography>
                   <Typography variant="body2">
-                    Score: {item.commentSentiment.score}, Comparative:{" "}
-                    {item.commentSentiment.comparative}, Magnitude:{" "}
-                    {item.commentSentiment.magnitude}
+                    Score: {item.commentSentiment.score},
+                    Comparative:{" "}
+                    {typeof item.commentSentiment.comparative === "number"
+                      ? item.commentSentiment.comparative.toFixed(4)
+                      : item.commentSentiment.comparative},
+                    Magnitude:{" "}
+                    {typeof item.commentSentiment.magnitude === "number"
+                      ? item.commentSentiment.magnitude.toFixed(4)
+                      : item.commentSentiment.magnitude}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     Positive Words: {item.commentSentiment.positive?.join(", ") || "None"} | Negative Words:{" "}

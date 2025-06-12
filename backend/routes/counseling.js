@@ -3,7 +3,7 @@ const router = express.Router();
 const counselingController = require('../controllers/Counseling/counselingController'); 
 const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
 
-router.post('/counselingSubmit', counselingController.createCounseling);
+router.post('/counselingSubmit', isAuthenticatedUser, counselingController.createCounseling);
 router.get('/getAllcounseling', counselingController.getAllCounselingRequests);
 router.get('/getCounseling/:counselingId', counselingController.getCounselingById);
 

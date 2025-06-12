@@ -172,10 +172,10 @@ const ResourcePage = () => {
           prevResources.map((resource) =>
             resource._id === updatedResource._id
               ? {
-                  ...resource,
-                  bookmarkCount: updatedResource.bookmarkCount,
-                  isBookmarked: !resource.isBookmarked,
-                }
+                ...resource,
+                bookmarkCount: updatedResource.bookmarkCount,
+                isBookmarked: !resource.isBookmarked,
+              }
               : resource
           )
         );
@@ -290,7 +290,7 @@ const ResourcePage = () => {
                 <div
                   key={resource._id}
                   style={styles.resourceCard}
-                  onClick={() => openResourceModal(resource)} 
+                  onClick={() => openResourceModal(resource)}
                 >
                   <FaBookmark
                     style={{
@@ -300,7 +300,7 @@ const ResourcePage = () => {
                         : "gray",
                     }}
                     onClick={(e) => {
-                      e.stopPropagation(); 
+                      e.stopPropagation();
                       handleBookmark(resource._id);
                     }}
                   />
@@ -368,6 +368,22 @@ const ResourcePage = () => {
           onClose={closeResourceModal}
           resource={selectedResource}
         />
+      )}
+
+      {/* Reference Link Modal */}
+      {modalOpen && (
+        <div style={styles.modalOverlay} onClick={handleCloseModal}>
+          <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <FaTimes style={styles.closeIcon} onClick={handleCloseModal} />
+            <div style={styles.modalBody}>
+              <div style={styles.modalText}>
+                <a href={modalContent} target="_blank" rel="noopener noreferrer">
+                  {modalContent}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

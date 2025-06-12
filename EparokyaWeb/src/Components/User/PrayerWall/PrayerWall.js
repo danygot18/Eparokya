@@ -5,6 +5,8 @@ import "../../Layout/styles/style.css";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { CircularProgress } from "@mui/material";
 import Loader from "../../Layout/Loader";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PrayerWall = () => {
   const [prayers, setPrayers] = useState([]);
@@ -45,13 +47,13 @@ const PrayerWall = () => {
           `${process.env.REACT_APP_API}/api/v1/prayer-wall?page=${currentPage}&limit=${prayersPerPage}`,
           { withCredentials: true }
         );
-  
+
         const { prayers, total } = response.data;
-        
+
         setPrayers(
           prayers.map(prayer => ({
             ...prayer,
-            includedByUser: prayer.includedByUser || false, // Default to false if not present
+            includedByUser: prayer.includedByUser || false,
           }))
         );
         setTotalPrayers(total);
@@ -61,14 +63,14 @@ const PrayerWall = () => {
         setLoading(false);
       }
     };
-  
+
     fetchPrayers();
   }, [currentPage]);
-  
+
   const handleNewPrayerSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
-      alert("You must be logged in to post a prayer.");
+      toast.error("You must be logged in to post a prayer.");
       return;
     }
 
@@ -76,11 +78,11 @@ const PrayerWall = () => {
       const prayerData = { ...newPrayer, userId: user._id };
       await axios.post(`${process.env.REACT_APP_API}/api/v1/submitPrayer`, prayerData, config);
       setNewPrayer({ title: "", prayerRequest: "", prayerWallSharing: "anonymous", contact: "" });
-      alert("Successful! Please wait for the admin confirmation for your prayer to be posted");
+      toast.success("Successful! Please wait for the admin confirmation for your prayer to be posted");
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error posting prayer:", error);
-      alert("Failed to post prayer. Please try again.");
+      toast.error("Failed to post prayer. Please try again.");
     }
   };
 
@@ -98,7 +100,7 @@ const PrayerWall = () => {
             ? {
               ...prayer,
               likes: response.data.likes,
-              likedByUser: response.data.likedByUser, 
+              likedByUser: response.data.likedByUser,
             }
             : prayer
         )
@@ -114,24 +116,24 @@ const PrayerWall = () => {
       alert("You must be logged in to include a prayer.");
       return;
     }
-  
+
     try {
       setLoadingPrayerId(prayerId);
-  
+
       const response = await axios.put(
         `${process.env.REACT_APP_API}/api/v1/toggleInclude/${prayerId}`,
         {},
         { withCredentials: true }
       );
-  
+
       setPrayers((prevPrayers) =>
         prevPrayers.map((prayer) =>
           prayer._id === prayerId
             ? {
-                ...prayer,
-                includeCount: response.data.includeCount,
-                includedByUser: response.data.includedByUser, // Ensure we get this from backend
-              }
+              ...prayer,
+              includeCount: response.data.includeCount,
+              includedByUser: response.data.includedByUser, // Ensure we get this from backend
+            }
             : prayer
         )
       );
@@ -143,14 +145,15 @@ const PrayerWall = () => {
   };
 
   if (loading) {
-  return <Loader />;
-}
+    return <Loader />;
+  }
 
-  
-  
+
+
 
   return (
     <div className="prayer-wall-container">
+        <ToastContainer />
       <div >
         <GuestSidebar />
       </div>
@@ -289,15 +292,15 @@ const PrayerWall = () => {
                     onClick={() => handleInclude(prayer._id)}
                     disabled={prayer.includedByUser || loadingPrayerId === prayer._id}
                     style={{
-                      backgroundColor: "#6c757d", 
+                      backgroundColor: "#6c757d",
                       color: "white",
                       padding: "10px 20px",
                       fontSize: "1rem",
                       fontWeight: "bold",
                       border: "none",
                       borderRadius: "5px",
-                      width: "60%", 
-                      maxWidth: "300px", 
+                      width: "60%",
+                      maxWidth: "300px",
                       cursor: prayer.includedByUser ? "not-allowed" : "pointer",
                       textAlign: "center",
                       transition: "background-color 0.2s",
@@ -321,7 +324,7 @@ const PrayerWall = () => {
                       textAlign: "center",
                       fontWeight: "bold"
                     }}>
-                      ✅ You have already included this in your prayer.
+                      You have already included this in your prayer.
                     </div>
                   )}
                 </div>
