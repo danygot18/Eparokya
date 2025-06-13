@@ -10,20 +10,22 @@ const counselingSchema = new mongoose.Schema({
     contactPerson: {
         fullName: { type: String, required: false },
         contactNumber: { type: String, required: false },
-        relationship: { type: String, enum: [
-            'Mother/Nanay', 
-            'Father/Tatay', 
-            'Child/Anak', 
-            'Sibling/Kapatid', 
-            'Spouse/Asawa', 
-            'Stepparent', 
-            'Stepchild', 
-            'In-law',
-            'Godparent',
-            'Godchild', 
-            'Relative/Kamag-anak', 
-            'Guardian', 
-            'Friend/Kaibigan'], required: true },
+        relationship: {
+            type: String, enum: [
+                'Mother/Nanay',
+                'Father/Tatay',
+                'Child/Anak',
+                'Sibling/Kapatid',
+                'Spouse/Asawa',
+                'Stepparent',
+                'Stepchild',
+                'In-law',
+                'Godparent',
+                'Godchild',
+                'Relative/Kamag-anak',
+                'Guardian',
+                'Friend/Kaibigan'], required: true
+        },
     },
 
     contactNumber: { type: String, required: true },
@@ -34,32 +36,32 @@ const counselingSchema = new mongoose.Schema({
         Street: { type: String, required: true },
         District: { type: String, required: true },
         barangay: {
-          type: String,
-          enum: [
-              'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
-              'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
-              'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
-              'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
-              'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
-              'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
-              'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan', 
-              'Others'
-          ],
-          required: true
-      },
-      customBarangay: {
-          type: String,
-          required: function() {
-              return this.address.baranggay === 'Others'; 
-          }
-      },
-      city: { type: String, enum:['Taguig City', 'Others'],  required: true },
-      customCity: {
-          type: String,
-          required: function() {
-              return this.address.city === 'Others'; 
-          }
-      },
+            type: String,
+            enum: [
+                'Bagumbayan', 'Bambang', 'Calzada', 'Cembo', 'Central Bicutan',
+                'Central Signal Village', 'Comembo', 'East Rembo', 'Fort Bonifacio', 'Hagonoy',
+                'Ibayo-Tipas', 'Katuparan', 'Ligid-Tipas', 'Lower Bicutan', 'Maharlika Village',
+                'Napindan', 'New Lower Bicutan', 'North Daang Hari', 'North Signal Village', 'Palingon',
+                'Pembo', 'Pinagsama', 'Pitogo', 'Post Proper Northside', 'Post Proper Southside',
+                'Rizal', 'San Miguel', 'Santa Ana', 'South Cembo', 'South Daang Hari', 'South Signal Village',
+                'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan',
+                'Others'
+            ],
+            required: true
+        },
+        customBarangay: {
+            type: String,
+            required: function () {
+                return this.address.baranggay === 'Others';
+            }
+        },
+        city: { type: String, enum: ['Taguig City', 'Others'], required: true },
+        customCity: {
+            type: String,
+            required: function () {
+                return this.address.city === 'Others';
+            }
+        },
     },
 
     counselingDate: { type: Date, required: false },
@@ -98,21 +100,16 @@ const counselingSchema = new mongoose.Schema({
     adminRescheduled: {
         date: { type: Date },
         reason: { type: String },
-      },
+    },
 
-      cancellingReason: {
+    cancellingReason: {
         user: { type: String, enum: ['Admin, User'] },
         reason: { type: String },
-      },
+    },
 
-    Priest: {
-        name: { type: mongoose.Schema.Types.ObjectId, ref: 'Priest' },
-        createdAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },    
-      termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
+    Priest: { type: mongoose.Schema.Types.ObjectId, ref: 'Priest',  required: false}, // or true depending on your logic },
+
+    termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
 });
 
 module.exports = mongoose.model('counseling', counselingSchema);

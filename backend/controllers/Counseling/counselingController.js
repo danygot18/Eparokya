@@ -131,7 +131,7 @@ exports.getCounselingById = async (req, res) => {
 
     const counseling = await Counseling.findById(counselingId)
       .populate("userId", "name email")
-      .populate("Priest", "fullName");
+      .populate("Priest", "title fullName");
 
     if (!counseling) {
       return res.status(404).json({ message: "Counseling not found." });
@@ -321,7 +321,7 @@ exports.createPriestComment = async (req, res) => {
     if (!priest) {
       return res.status(404).json({ message: "Priest not found." });
     }
-    counseling.priest = priest._id;
+    counseling.Priest = priest._id;
     await counseling.save();
 
     res.status(200).json({ message: "Priest assigned successfully.", priest });
