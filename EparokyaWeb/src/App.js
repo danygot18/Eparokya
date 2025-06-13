@@ -53,7 +53,11 @@ import MassWeddingDetailsForm from "./Components/Admin/MassForms/MassWeddingDeta
 import MassBaptismDetailsForm from "./Components/Admin/MassForms/MassBaptismDetails";
 
 import SubmittedMassBaptismList from "./Components/User/Forms/MassForms/Baptism/MassBaptismList";
-// import SubmittedMassWeddingList from "./Components/User/Forms/MassForms/MassWeddingList";
+import UserSubmittedMassWeddingList from "./Components/User/Forms/MassForms/Wedding/MassWeddingList";
+import UserSubmittedMassWeddingDetails from "./Components/User/Forms/MassForms/Wedding/MassWeddingDetails";
+
+import UserSubmittedMassBaptismList from "./Components/User/Forms/MassForms/Baptism/MassBaptismList";
+import UserSubmittedMassBaptismDetails from "./Components/User/Forms/MassForms/Baptism/MassBaptismDetails";
 
 import MySubmittedWeddingForm from "./Components/User/Forms/PrivateForms/Wedding/MySubmittedWeddingForm";
 import SubmittedWeddingList from "./Components/User/Forms/PrivateForms/Wedding/SubmittedWeddingList";
@@ -75,7 +79,6 @@ import SubmittedHouseBlessingList from "./Components/User/Forms/PrivateForms/Pri
 // import MySubmittedPrayerRequestForm from './Components/User/Forms/PrivateForms/Prayer/MySubmittedPrayerRequestForm';
 
 import SubmittedPrayerRequestList from "./Components/User/Forms/PrivateForms/Prayer/SubmittedPrayerRequestList";
-
 
 // import MySubmittedPrayerWallForm from './Components/User/Forms/PrivateForms/Prayer/MySubmittedPrayerWallForm';
 import SubmittedPrayerWallList from "./Components/User/PrayerWall/SubmittedPrayerWallList";
@@ -220,12 +223,11 @@ import InventoryList from "./Components/Admin/Inventory/Inventory";
 import InventoryForm from "./Components/Admin/Inventory/InventoryForm";
 import InventoryUpdate from "./Components/Admin/Inventory/InventoryEdit";
 
-
 // User Inventory Form
 import UserInventoryForm from "./Components/User/InventoryForm";
 
 function Layout() {
-  const location = useLocation(); // Now inside Router
+  const location = useLocation();
   const isDashboard = location.pathname.startsWith("/admin");
 
   return (
@@ -312,8 +314,11 @@ function App() {
           exact="true"
         />
 
-        <Route path="/user/RequestItem" element={<UserInventoryForm />} exact="true" />
-
+        <Route
+          path="/user/RequestItem"
+          element={<UserInventoryForm />}
+          exact="true"
+        />
 
         <Route
           path="/user/NavigationForms"
@@ -387,6 +392,29 @@ function App() {
         />
 
         <Route
+          path="/user/MassSubmittedWeddingList"
+          element={<UserSubmittedMassWeddingList />}
+          exact="true"
+        />
+
+        <Route
+          path="/user/MassSubmittedWeddingDetails/:massWeddingId"
+          element={<UserSubmittedMassWeddingDetails />}
+          exact="true"
+        />
+
+        <Route
+          path="/user/MassSubmittedBaptismList"
+          element={<UserSubmittedMassBaptismList />}
+          exact="true"
+        />
+        <Route
+          path="/user/MassSubmittedBaptismDetails/:massBaptismId"
+          element={<UserSubmittedMassBaptismDetails />}
+          exact="true"
+        />
+
+        <Route
           path="/user/mySubmittedWeddingForm/:formId"
           element={<MySubmittedWeddingForm />}
           exact="true"
@@ -454,10 +482,12 @@ function App() {
           exact="true"
         />
 
-        
         {/* <Route path="/user/SubmittedCounselingList" element={<SubmittedCounselingList />} exact="true" /> */}
-        <Route path="/user/SubmittedPrayerRequestList" element={<SubmittedPrayerRequestList />} exact="true" />
-       
+        <Route
+          path="/user/SubmittedPrayerRequestList"
+          element={<SubmittedPrayerRequestList />}
+          exact="true"
+        />
 
         <Route
           path="/user/UserBaptismChecklist"

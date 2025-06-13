@@ -3,6 +3,7 @@ import axios from "axios";
 import SideBar from "./SideBar";
 import { Button, TextField, Typography, Stack, Paper, Box, Alert } from "@mui/material";
 import MetaData from "../Layout/MetaData";
+import { toast } from "react-toastify"
 
 const AdminLive = () => {
     const [embedCode, setEmbedCode] = useState("");
@@ -83,7 +84,7 @@ const AdminLive = () => {
                 description,
                 title
             });
-            alert("Live link updated!");
+            toast.success("Live link updated!");
             fetchLiveVideo();
         } catch (error) {
             console.error("Error updating live link", error);
@@ -95,7 +96,7 @@ const AdminLive = () => {
     const handleStopLive = async () => {
         try {
             await axios.delete(`${process.env.REACT_APP_API}/api/v1/live`);
-            alert("Live stream stopped!");
+            toast.warn("Live stream stopped!");
             setCurrentLive(null);
             setLiveUrl("");
             setEmbedCode("");

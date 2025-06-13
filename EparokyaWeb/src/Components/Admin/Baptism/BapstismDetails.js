@@ -733,7 +733,7 @@ const BaptismDetails = () => {
                 </button>
 
                 <button
-                    disabled={baptismDetails?.binyagStatus === "Confirmed"}
+                    disabled={baptismDetails?.binyagStatus === "Cancelled" || baptismDetails?.binyagStatus === "Confirmed"}
                     onClick={() => setShowConfirmDialog(true)}
                     style={{
                         backgroundColor: baptismDetails?.binyagStatus === "Confirmed" ? "#bdbdbd" : "#1976d2",
@@ -746,6 +746,7 @@ const BaptismDetails = () => {
                         fontSize: "16px",
                         marginTop: "10px"
                     }}
+                    
                 >
                     {baptismDetails?.binyagStatus === "Confirmed" ? "Confirmed Baptism" : "Confirm Baptism"}
                 </button>
@@ -763,7 +764,7 @@ const BaptismDetails = () => {
                 <div className="button-container">
                     <button
                         onClick={() => setShowCancelModal(true)}
-                        disabled={baptismDetails?.binyagStatus === "Cancelled"}
+                        disabled={baptismDetails?.binyagStatus === "Cancelled" || baptismDetails?.binyagStatus === "Confirmed"}
                         style={{
                             backgroundColor: baptismDetails?.binyagStatus === "Cancelled" ? "#bdbdbd" : "#d32f2f",
                             color: "#fff",

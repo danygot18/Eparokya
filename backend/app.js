@@ -8,8 +8,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const allowedOrigins = [
-  "*",
-  // "https://eparokya.vercel.app",
+  // "*",
+  "https://eparokya.vercel.app",
   "http://localhost:3000",
 ];
 
@@ -17,15 +17,15 @@ const allowedOrigins = [
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  // methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  // allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("tiny"));
-app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
-app.use("/api/v1", require("./routes/user"));
+app.use('/public', express.static('public'));
+// app.use("/api/v1", require("./routes/user"));
 app.use(errorHandler);
 
 // Create HTTP server and export
@@ -34,12 +34,14 @@ const server = http.createServer(app);
 // Create Socket.IO server
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST",],
-    credentials: true,
-  }
+    origin: "*",
+    // methods: ["GET", "POST",],
+    // credentials: true,
+  },
+  // pingTimeout: 60000,
+  // pingInterval: 25000,
+  // transports: ['websocket', 'polling']
 });
-
 
 
 app.use("/api/v1", require("./routes/user"));
@@ -98,8 +100,8 @@ app.use("/api/v1", require("./routes/counseling"));
 
 
 // MassForms
-app.use("/api/v1", require("./routes/MassForms/massBaptism"));
-app.use("/api/v1", require("./routes/MassForms/massWedding"));
+app.use("/api/v1/massBaptism", require("./routes/MassForms/massBaptism"));
+app.use("/api/v1/massWedding", require("./routes/MassForms/massWedding"));
 
 // app.use("/api/v1", require("./routes/Announcement/AnnouncementComment"));
 // app.use("/api/v1", require("./routes/Announcement/ministryAnnouncement"));
@@ -128,6 +130,8 @@ app.use("/api/v1", require("./routes/liveVideo"))
 // app.use("/api/v1/resource", require("./routes/Resources/resource"));
 
 // Chat Feature
+
+
 
 
 module.exports = { app, server, io };

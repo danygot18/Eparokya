@@ -143,7 +143,8 @@ exports.getCommentsWithReplies = async (req, res) => {
 
 exports.likeComment = async (req, res) => {
   const { commentId } = req.params;
-  const { userId } = req.body;
+  const userId = req.user.id;
+  console.log(userId)
 
   if (!userId) {
     return res.status(401).json({ message: 'Unauthorized' });

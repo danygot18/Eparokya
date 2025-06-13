@@ -7,6 +7,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { removeAuth } from "../../State/authSlice";
+import { format } from "date-fns";
 
 const UserProfile = ({ navigation }) => {
   const [userProfile, setUserProfile] = useState(null);
@@ -95,7 +96,9 @@ const UserProfile = ({ navigation }) => {
             <XStack alignItems="center" space="$2">
               <MaterialIcons name="cake" size={22} color="#26572E" />
               <Text fontSize={16}>
-                {userProfile?.birthDate || "No birth date"}
+                {userProfile?.birthDate
+                  ? format(new Date(userProfile.birthDate), "MMMM d, yyyy") // Example: June 14, 2025
+                  : "No birth date"}
               </Text>
             </XStack>
           </Card>

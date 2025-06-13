@@ -111,16 +111,8 @@ const Header = () => {
 
           <Button
             component={Link}
-            to="/biblePage"
-            sx={navButtonStyle("/biblePage") }
-          >
-          Readings
-          </Button>
-
-          <Button
-            component={Link}
-            to="/user/prayerRequestIntention"
-            sx={navButtonStyle("/user/prayerRequestIntention")}
+            to="/user/"
+            sx={navButtonStyle("/user/")}
           >
             Guides
           </Button>

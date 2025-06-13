@@ -57,9 +57,8 @@ exports.createCounseling = async (req, res) => {
       <li><strong>Purpose:</strong> ${purpose}</li>
       <li><strong>Contact Person:</strong> ${contactPerson}</li>
       <li><strong>Contact Number:</strong> ${contactNumber}</li>
-      <li><strong>Address:</strong> ${address?.street || ""}, ${
-      address?.baranggay || ""
-    }, ${address?.city || ""}</li>
+      <li><strong>Address:</strong> ${address?.street || ""}, ${address?.baranggay || ""
+      }, ${address?.city || ""}</li>
       <li><strong>Date:</strong> ${counselingDate}</li>
       <li><strong>Time:</strong> ${counselingTime}</li>
     </ul>
@@ -131,7 +130,7 @@ exports.getCounselingById = async (req, res) => {
 
     const counseling = await Counseling.findById(counselingId)
       .populate("userId", "name email")
-      .populate("Priest", "fullName");
+      .populate("Priest", "title fullName");
 
     if (!counseling) {
       return res.status(404).json({ message: "Counseling not found." });
@@ -213,11 +212,20 @@ exports.declineCounseling = async (req, res) => {
     const { reason } = req.body;
     const userId = req.user._id;
     const user = await User.findById(userId);
+    console.log(user)
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
-    const cancellingUser = user.isAdmin ? "Admin" : user.name;
+
+    // Set cancellingUser to "Admin" if admin, otherwise use user's full name or fallback to email
+    let cancellingUser;
+
+    if (user?.isAdmin == true) {
+      cancellingUser = "Admin";
+    } else {
+      cancellingUser = user.name;
+    }
 
     const counseling = await Counseling.findByIdAndUpdate(
       req.params.counselingId,
@@ -321,7 +329,7 @@ exports.createPriestComment = async (req, res) => {
     if (!priest) {
       return res.status(404).json({ message: "Priest not found." });
     }
-    counseling.priest = priest._id;
+    counseling.Priest = priest._id;
     await counseling.save();
 
     res.status(200).json({ message: "Priest assigned successfully.", priest });
@@ -378,6 +386,7 @@ exports.getCounselingFormById = async (req, res) => {
 
     const counselingForm = await Counseling.findById(formId)
       .populate("userId", "name email")
+      .populate("Priest", "title fullName")
       .lean();
 
     if (!counselingForm) {

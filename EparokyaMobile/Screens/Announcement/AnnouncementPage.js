@@ -9,6 +9,8 @@ import {
   TextInput,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -19,6 +21,82 @@ import { useSelector } from "react-redux";
 
 const { width } = Dimensions.get("window");
 
+const ImageSlider = ({ images }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef();
+
+  const onScroll = (event) => {
+    const slide = Math.round(
+      event.nativeEvent.contentOffset.x / width
+    );
+    setActiveIndex(slide);
+  };
+
+  return (
+    <View style={styles.sliderContainer}>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        ref={scrollRef}
+        style={styles.slider}
+      >
+        {images.map((img, idx) => (
+          <Image
+            key={idx}
+            source={{ uri: img.url }}
+            style={styles.sliderImage}
+          />
+        ))}
+      </ScrollView>
+      <View style={styles.sliderDots}>
+        {images.map((_, idx) => (
+          <View
+            key={idx}
+            style={[
+              styles.sliderDot,
+              idx === activeIndex && styles.sliderDotActive,
+            ]}
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
+
+// --- LikedCount component ---
+const LikedCount = ({ handleLike, item, user }) => {
+  const [likeCount, setLikeCount] = useState(item.likedBy?.length || 0);
+  const [isLiked, setIsLiked] = useState(item.likedBy?.includes(user?._id));
+
+  const toggleLike = async () => {
+    await handleLike(item._id);
+    setIsLiked(!isLiked);
+    setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+  };
+
+  useEffect(() => {
+    setLikeCount(item.likedBy?.length || 0);
+    setIsLiked(item.likedBy?.includes(user?._id));
+  }, [item.likedBy, user?._id]);
+
+  return (
+    <>
+      <TouchableOpacity onPress={toggleLike}>
+        <MaterialIcons
+          name="thumb-up"
+          size={22}
+          color={isLiked ? "#1976d2" : "#bbb"}
+        />
+      </TouchableOpacity>
+      <Text style={styles.countText}>{likeCount}</Text>
+    </>
+  );
+};
+
+// --- AnnouncementPage component ---
 const AnnouncementPage = ({ navigation }) => {
   const [announcements, setAnnouncements] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -27,39 +105,64 @@ const AnnouncementPage = ({ navigation }) => {
   const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [pinnedAnnouncement, setPinnedAnnouncement] = useState(null);
 
   const { user, token } = useSelector((state) => state.auth);
 
   const POSTS_PER_PAGE = 5;
 
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/getAllannouncementCategory`);
+      setCategories(response.data.categories);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  };
+
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${baseURL}/getAllAnnouncements`);
+      const all = response.data.announcements
+        .sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated))
+        .reverse();
+      const featured = all.filter(a => a.isFeatured === true);
+      const unfeatured = all.filter(a => !a.isFeatured);
+      setPinnedAnnouncement(featured);
+      setAnnouncements(unfeatured);
+      setFilteredAnnouncements(unfeatured);
+      setTotalPages(Math.ceil(unfeatured.length / POSTS_PER_PAGE));
+    } catch (err) {
+      console.error("Failed to fetch announcements:", err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([fetchAnnouncements(), fetchCategories()]);
+    setRefreshing(false);
+  };
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/getAllannouncementCategory`);
-        setCategories(response.data.categories);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    };
-
-    const fetchAnnouncements = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/getAllAnnouncements`);
-        // FILO: sort by dateCreated ASC (oldest first), then reverse for newest first
-        const sortedAnnouncements = response.data.announcements
-          .sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated))
-          .reverse();
-        setAnnouncements(sortedAnnouncements);
-        setFilteredAnnouncements(sortedAnnouncements);
-        setTotalPages(Math.ceil(sortedAnnouncements.length / POSTS_PER_PAGE));
-      } catch (err) {
-        console.error("Failed to fetch announcements:", err);
-      }
-    };
-
     fetchCategories();
     fetchAnnouncements();
   }, []);
+
+  const renderPinnedAnnouncement = () => {
+    if (!pinnedAnnouncement || pinnedAnnouncement.length === 0) return null;
+    return (
+      <View style={styles.pinnedContainer}>
+        <Text style={styles.pinnedLabel}>Featured Announcements</Text>
+        {pinnedAnnouncement.map(item => renderItem({ item }))}
+      </View>
+    );
+  };
 
   useEffect(() => {
     const filtered = announcements.filter((announcement) => {
@@ -69,11 +172,11 @@ const AnnouncementPage = ({ navigation }) => {
 
       const matchesSearch = searchTerm
         ? (announcement.name &&
-            announcement.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          (announcement.tags &&
-            announcement.tags.some((tag) =>
-              tag.toLowerCase().includes(searchTerm.toLowerCase())
-            ))
+          announcement.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (announcement.tags &&
+          announcement.tags.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase())
+          ))
         : true;
 
       return matchesCategory && matchesSearch;
@@ -101,9 +204,11 @@ const AnnouncementPage = ({ navigation }) => {
       });
       return;
     }
+    console.log(user)
+    const config = { withCredentials: true };
 
     try {
-      const config = { headers: { Authorization: `Bearer ${token}` } };
+
       const response = await axios.put(
         `${baseURL}/likeAnnouncement/${announcementId}`,
         {},
@@ -115,11 +220,11 @@ const AnnouncementPage = ({ navigation }) => {
         prevAnnouncements.map((announcement) =>
           announcement._id === announcementId
             ? {
-                ...announcement,
-                likedBy: isLikedNow
-                  ? [...announcement.likedBy, user._id]
-                  : announcement.likedBy.filter((uid) => uid !== user._id),
-              }
+              ...announcement,
+              likedBy: isLikedNow
+                ? [...announcement.likedBy, user._id]
+                : announcement.likedBy.filter((uid) => uid !== user._id),
+            }
             : announcement
         )
       );
@@ -270,94 +375,35 @@ const AnnouncementPage = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f8f8f8" }}>
+        <ActivityIndicator size="large" color="#388e3c" />
+        <Text style={{ marginTop: 10, color: "#388e3c" }}>Loading announcements...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
         data={getPaginatedData()}
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={
+          <>
+            {renderHeader()}
+            {renderPinnedAnnouncement()}
+          </>
+        }
         ListFooterComponent={renderFooter}
         contentContainerStyle={styles.flatListContent}
         showsVerticalScrollIndicator={false}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
       />
       <Toast />
     </View>
-  );
-};
-
-// Image slider for multiple images
-const ImageSlider = ({ images }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const scrollRef = useRef();
-
-  const onScroll = (event) => {
-    const slide = Math.round(
-      event.nativeEvent.contentOffset.x / width
-    );
-    setActiveIndex(slide);
-  };
-
-  return (
-    <View style={styles.sliderContainer}>
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        ref={scrollRef}
-        style={styles.slider}
-      >
-        {images.map((img, idx) => (
-          <Image
-            key={idx}
-            source={{ uri: img.url }}
-            style={styles.sliderImage}
-          />
-        ))}
-      </ScrollView>
-      <View style={styles.sliderDots}>
-        {images.map((_, idx) => (
-          <View
-            key={idx}
-            style={[
-              styles.sliderDot,
-              idx === activeIndex && styles.sliderDotActive,
-            ]}
-          />
-        ))}
-      </View>
-    </View>
-  );
-};
-
-const LikedCount = ({ handleLike, item, user }) => {
-  const [likeCount, setLikeCount] = useState(item.likedBy?.length || 0);
-  const [isLiked, setIsLiked] = useState(item.likedBy?.includes(user?._id));
-
-  const toggleLike = async () => {
-    await handleLike(item._id);
-    setIsLiked(!isLiked);
-    setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
-  };
-
-  useEffect(() => {
-    setLikeCount(item.likedBy?.length || 0);
-    setIsLiked(item.likedBy?.includes(user?._id));
-  }, [item.likedBy, user?._id]);
-
-  return (
-    <>
-      <TouchableOpacity onPress={toggleLike}>
-        <MaterialIcons
-          name="thumb-up"
-          size={22}
-          color={isLiked ? "#1976d2" : "#bbb"}
-        />
-      </TouchableOpacity>
-      <Text style={styles.countText}>{likeCount}</Text>
-    </>
   );
 };
 
@@ -538,6 +584,21 @@ const styles = StyleSheet.create({
   },
   sliderDotActive: {
     backgroundColor: "#388e3c",
+  },
+  pinnedContainer: {
+    backgroundColor: "#fffde7",
+    borderRadius: 10,
+    marginVertical: 10,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: "#ffe082",
+    elevation: 2,
+  },
+  pinnedLabel: {
+    color: "#ff9800",
+    fontWeight: "bold",
+    marginBottom: 4,
+    fontSize: 15,
   },
 });
 

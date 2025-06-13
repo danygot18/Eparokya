@@ -8,7 +8,8 @@ import {
   Linking,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView
+  SafeAreaView,
+  RefreshControl
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import baseURL from '../../assets/common/baseUrl';
@@ -16,19 +17,22 @@ import baseURL from '../../assets/common/baseUrl';
 const UserLive = () => {
   const [liveData, setLiveData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchLiveVideo = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/live`);
+      setLiveData(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching live video", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchLiveVideo = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/live`);
-        setLiveData(response.data);
-        console.log(response.data);
-      } catch (error) {
-        console.error("Error fetching live video", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchLiveVideo();
   }, []);
 
@@ -38,15 +42,24 @@ const UserLive = () => {
     }
   };
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchLiveVideo(); // Fixed: Call the correct function
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* MetaData component would need to be adapted for React Native */}
-      {/* You might use a Head component from a library like react-native-head */}
-
-      {/* Sidebar - You'll need to adapt GuestSideBar for React Native */}
-
-      {/* Main Content */}
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView 
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#0000ff"]}
+            tintColor="#0000ff"
+          />
+        }
+      >
         <Text style={styles.title}>Live Mass</Text>
 
         {loading ? (
@@ -54,7 +67,7 @@ const UserLive = () => {
         ) : liveData ? (
           <View style={styles.videoContainer}>
             <Text style={styles.description}>{liveData.description}</Text>
-            
+
             <View style={styles.videoWrapper}>
               <WebView
                 source={{ uri: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(liveData.url)}&show_text=false` }}
@@ -117,7 +130,7 @@ const styles = StyleSheet.create({
   },
   videoWrapper: {
     width: '100%',
-    aspectRatio: 16/9,
+    aspectRatio: 16 / 9,
     marginTop: 10,
     overflow: 'hidden',
   },

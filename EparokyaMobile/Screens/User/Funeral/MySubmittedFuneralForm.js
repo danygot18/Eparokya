@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, Image, Alert, TouchableOpacity, Modal } from "react-native";
+import { ScrollView, Image, Alert, TouchableOpacity, Modal, TextInput, StyleSheet, } from "react-native";
 import {
   Box,
   VStack,
@@ -12,7 +12,9 @@ import {
   Spinner,
   Badge,
   useTheme,
-  Linking
+  Linking,
+  View,
+
 } from "native-base";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
@@ -56,8 +58,8 @@ const SectionBox = ({ title, children, icon, status }) => (
             status === "Cancelled"
               ? "danger"
               : status === "Confirmed"
-              ? "success"
-              : "warning"
+                ? "success"
+                : "warning"
           }
           ml={2}
         >
@@ -83,6 +85,10 @@ const MySubmittedFuneralForm = () => {
   const [viewImageModal, setViewImageModal] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState(null);
 
+  const [showModal, setShowModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
+
   useEffect(() => {
     const fetchFuneralDetails = async () => {
       try {
@@ -102,17 +108,29 @@ const MySubmittedFuneralForm = () => {
   }, [formId]);
 
   const handleCancel = async () => {
+    setShowModal(true);
+  };
+
+  const submitCancel = async () => {
+    if (!cancelReason.trim()) {
+      Alert.alert("Error", "Please provide a reason for cancellation.");
+      return;
+    }
+    setCancelLoading(true);
     try {
-      await axios.put(`${baseURL}/declineFuneral/${formId}`, null, {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-        withCredentials: true,
-      });
+      await axios.post(
+        `${baseURL}/declineFuneral/${formId}`,
+        { reason: cancelReason },
+        { withCredentials: true }
+      );
+      setShowModal(false);
+      setCancelReason("");
       Alert.alert("Success", "Funeral request cancelled.");
       navigation.goBack();
     } catch (error) {
       Alert.alert("Error", "Failed to cancel the funeral request.");
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -354,8 +372,8 @@ const MySubmittedFuneralForm = () => {
             value={
               funeralDetails?.adminRescheduled?.date
                 ? new Date(
-                    funeralDetails.adminRescheduled.date
-                  ).toLocaleDateString()
+                  funeralDetails.adminRescheduled.date
+                ).toLocaleDateString()
                 : "N/A"
             }
           />
@@ -381,27 +399,126 @@ const MySubmittedFuneralForm = () => {
           }
         >
           <Text fontSize="md" color="coolGray.800">
-            {funeralDetails?.Priest?.fullName || "No priest assigned"}
+           {funeralDetails?.Priest?.title } {funeralDetails?.Priest?.fullName || "No priest assigned"}
           </Text>
         </SectionBox>
 
         {/* Cancel Button */}
-        <Center>
+        <Box p={4} borderRadius={8} >
           <Button
-            colorScheme="red"
+            style={[
+              styles.cancelButton,
+              (funeralDetails.funeralStatus === "Confirmed" || funeralDetails.funeralStatus === "Cancelled") && styles.cancelButtonDisabled
+            ]}
             onPress={handleCancel}
-            borderRadius="full"
-            px={8}
-            mt={2}
-            _text={{ fontWeight: "bold", fontSize: "md" }}
-            isDisabled={funeralDetails?.funeralStatus === "Cancelled"}
-          >
-            Cancel Funeral Request
+
+            disabled={
+              funeralDetails?.funeralStatus === "Cancelled" ||
+              funeralDetails?.funeralStatus === "Approved"
+            }>
+            <Text style={{ color: "#fff", textAlign: "center" }}>
+              Cancel Wedding
+            </Text>
+
           </Button>
-        </Center>
+        </Box>
+
+        {funeralDetails?.funeralStatus === "Cancelled" && (
+          <Box p={4} borderWidth={1} borderRadius={8} mt={4} mb={10} margin={10}>
+            <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+              Funeral has been cancelled.
+            </Text>
+            <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+              Reason: {funeralDetails?.funeralStatus?.reason || "N/A"}
+            </Text>
+            <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+              From: {funeralDetails?.funeralStatus?.user || "N/A"}
+            </Text>
+          </Box>
+        )}
+        <Modal
+          visible={showModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowModal(false)}
+        >
+          <View style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center"
+          }}>
+            <View style={{
+              backgroundColor: "#fff",
+              padding: 24,
+              borderRadius: 12,
+              width: "85%"
+            }}>
+              <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 12 }}>
+                Reason for Cancellation
+              </Text>
+              <TextInput
+                placeholder="Enter reason"
+                value={cancelReason}
+                onChangeText={setCancelReason}
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#ccc",
+                  borderRadius: 8,
+                  padding: 10,
+                  minHeight: 60,
+                  marginBottom: 16
+                }}
+                multiline
+              />
+              <HStack justifyContent="flex-end" space={2}>
+                <TouchableOpacity
+                  onPress={() => setShowModal(false)}
+                  style={{
+                    paddingVertical: 8,
+                    paddingHorizontal: 16,
+                    backgroundColor: "#eee",
+                    borderRadius: 8,
+                    marginRight: 8
+                  }}
+                  disabled={cancelLoading}
+                >
+                  <Text>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={submitCancel}
+                  style={{
+                    paddingVertical: 8,
+                    paddingHorizontal: 16,
+                    backgroundColor: "#d32f2f",
+                    borderRadius: 8
+                  }}
+                  disabled={cancelLoading}
+                >
+                  <Text style={{ color: "#fff" }}>
+                    {cancelLoading ? "Cancelling..." : "Submit"}
+                  </Text>
+                </TouchableOpacity>
+              </HStack>
+            </View>
+          </View>
+        </Modal>
+
       </VStack>
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  cancelButton: {
+    backgroundColor: "#e53935", // red
+    padding: 10,
+    borderRadius: 6,
+  },
+  cancelButtonDisabled: {
+    backgroundColor: "#ccc", // light gray when disabled
+  },
+}
+)
 
 export default MySubmittedFuneralForm;

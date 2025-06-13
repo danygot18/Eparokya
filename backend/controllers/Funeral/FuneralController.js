@@ -644,7 +644,7 @@ exports.getFuneralFormById = async (req, res) => {
 
         const funeralForm = await Funeral.findById(formId)
             .populate('userId', 'name email') // Populate user info
-            .populate('Priest', 'fullName') // Populate priest info
+            .populate('Priest', 'title fullName') // Populate priest info
             .lean();
 
         if (!funeralForm) {

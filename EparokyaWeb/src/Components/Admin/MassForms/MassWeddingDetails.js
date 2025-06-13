@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
 import SideBar from "../SideBar";
-import WeddingChecklist from "../Wedding/WeddingChecklist";
-
+import MassWeddingChecklist from "../MassForms/MassWeddingChecklist";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-// import Modal from 'react-modal';
+import { format } from "date-fns";
 import {
   Card,
   CardContent,
@@ -61,13 +59,22 @@ const WeddingDetails = () => {
   const [cancelReason, setCancelReason] = useState("");
 
   const formatDate = (date) =>
-    date ? new Date(date).toLocaleDateString() : "N/A";
+    date
+      ? new Date(date).toLocaleString(undefined, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "N/A";
 
   useEffect(() => {
     const fetchWeddingDetails = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API}/api/v1/getmassWeddingById/${massWeddingId}`,
+          `${process.env.REACT_APP_API}/api/v1/massWedding/getmassWeddingById/${massWeddingId}`,
           { withCredentials: true }
         );
 
@@ -153,7 +160,10 @@ const WeddingDetails = () => {
 
   const handleSubmitComment = async () => {
     if (!selectedComment && !additionalComment) {
-      alert("Please select or enter a comment.");
+      toast.error("Please select or enter a comment.", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+      });
       return;
     }
 
@@ -162,11 +172,9 @@ const WeddingDetails = () => {
       additionalComment: additionalComment || "",
     };
 
-    // console.log("Sending comment:", commentData);
-
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API}/api/v1/${massWeddingId}/commentWedding`,
+        `${process.env.REACT_APP_API}/api/v1/massWedding/${massWeddingId}/commentMassWedding`,
         {
           method: "POST",
           headers: {
@@ -178,16 +186,20 @@ const WeddingDetails = () => {
 
       const data = await response.json();
 
-      // console.log("Response from server:", data);
-
       if (!response.ok) {
         throw new Error(data.message || "Failed to submit comment.");
       }
 
-      alert("Comment submitted successfully!");
+      toast.success("Comment submitted successfully!", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+      });
     } catch (error) {
       console.error("Error submitting comment:", error);
-      alert("Failed to submit comment.");
+      toast.error("Failed to submit comment.", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+      });
     }
   };
 
@@ -209,23 +221,29 @@ const WeddingDetails = () => {
       };
 
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/updateAdditionalReq/${massWeddingId}`,
+        `${process.env.REACT_APP_API}/api/v1/massWedding/updateAdditionalMassReq/${massWeddingId}`,
         { additionalReq },
         { withCredentials: true }
       );
 
-      alert("Additional requirements updated successfully!");
+      toast.success("Additional requirements updated successfully!", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+      });
       setWeddingDetails(response.data.wedding);
     } catch (err) {
       console.error("Error updating additional requirements:", err);
-      alert("Failed to update additional requirements.");
+      toast.error("Failed to update additional requirements.", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+      });
     }
   };
 
   const handleConfirm = async (massWeddingId) => {
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/${massWeddingId}/confirmWedding`,
+        `${process.env.REACT_APP_API}/api/v1/massWedding/${massWeddingId}/confirmMassWedding`,
         { withCredentials: true }
       );
       console.log("Confirmation response:", response.data);
@@ -257,7 +275,7 @@ const WeddingDetails = () => {
     }
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/declineWedding/${massWeddingId}`,
+        `${process.env.REACT_APP_API}/api/v1/massWedding/declineMassWedding/${massWeddingId}`,
         { reason: cancelReason },
         { withCredentials: true }
       );
@@ -273,29 +291,6 @@ const WeddingDetails = () => {
           position: toast.POSITION.TOP_RIGHT,
         }
       );
-    }
-  };
-
-  const handleUpdate = async () => {
-    if (!newDate || !reason) {
-      alert("Please select a date and provide a reason.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await axios.put(
-        `${process.env.REACT_APP_API}/api/v1/updateWeddingDate/${weddingDetails._id}`,
-        { newDate, reason }
-      );
-
-      setUpdatedWeddingDate(response.data.wedding.weddingDate);
-      alert("Wedding date updated successfully!");
-    } catch (error) {
-      console.error("Error updating wedding date:", error);
-      alert("Failed to update wedding date.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -320,12 +315,15 @@ const WeddingDetails = () => {
               <Card>
                 <CardContent>
                   <Typography variant="h5" gutterBottom>
-                    Wedding Date and Time 
+                    Wedding Date and Time
                   </Typography>
                   <Typography>
                     <strong>Wedding Date and Time:</strong>{" "}
-                    {weddingDetails?.weddingDateTime?.dateTime
-                      ? formatDate(weddingDetails.weddingDateTime.dateTime)
+                    {weddingDetails?.weddingDateTime?.date
+                      ? `${format(
+                          new Date(weddingDetails.weddingDateTime.date),
+                          "MMMM dd, yyyy"
+                        )} at ${weddingDetails.weddingDateTime.time || "N/A"}`
                       : "N/A"}
                   </Typography>
                 </CardContent>
@@ -516,7 +514,7 @@ const WeddingDetails = () => {
             </Box>
           </div>
           <div className="Wedding-right-container">
-            <WeddingChecklist weddingId={massWeddingId} />
+            <MassWeddingChecklist massWeddingId={massWeddingId} />
             <Box
               sx={{ display: "flex", flexDirection: "column", gap: 3 }}
             ></Box>
@@ -675,9 +673,6 @@ const WeddingDetails = () => {
               <button onClick={updateAdditionalReq}>
                 Submit Additional Requirements
               </button>
-              <button onClick={handleUpdate} disabled={loading}>
-                {loading ? "Updating..." : "Update Wedding Date"}
-              </button>
             </div>
           </div>
 
@@ -703,23 +698,6 @@ const WeddingDetails = () => {
                 ))
               ) : (
                 <p>No admin comments yet.</p>
-              )}
-            </div>
-
-            {/* for Rescheduling */}
-            <div className="wedding-date-box">
-              <h3>Updated Wedding Date</h3>
-              <p className="date">
-                {updatedWeddingDate
-                  ? new Date(updatedWeddingDate).toLocaleDateString()
-                  : "N/A"}
-              </p>
-
-              {weddingDetails?.adminRescheduled?.reason && (
-                <div className="reschedule-reason">
-                  <h3>Reason for Rescheduling</h3>
-                  <p>{weddingDetails.adminRescheduled.reason}</p>
-                </div>
               )}
             </div>
 
@@ -807,24 +785,6 @@ const WeddingDetails = () => {
               <button onClick={handleSubmitComment}>Submit Comment</button>
             </div>
 
-            {/* Admin wedding Date  */}
-            <div className="admin-section">
-              <h2>Select Updated Wedding Date:</h2>
-              <input
-                type="date"
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
-              />
-              <label>Reason:</label>
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              />
-              <button onClick={handleUpdate} disabled={loading}>
-                {loading ? "Updating..." : "Update Wedding Date"}
-              </button>
-            </div>
-
             {/* Cancelling Reason Section */}
             {weddingDetails?.weddingStatus === "Cancelled" &&
             weddingDetails?.cancellingReason ? (
@@ -848,7 +808,13 @@ const WeddingDetails = () => {
 
             {/* Cancel Button */}
             <div className="button-container">
-              <button onClick={() => setShowCancelModal(true)}>
+              <button
+                onClick={() => setShowCancelModal(true)}
+                disabled={
+                  weddingDetails?.weddingStatus === "Confirmed" ||
+                  weddingDetails?.weddingStatus === "Cancelled"
+                }
+              >
                 Cancel Wedding
               </button>
             </div>
@@ -893,7 +859,13 @@ const WeddingDetails = () => {
                 Go to Admin Chat
               </button>
             </div>
-            <button onClick={() => handleConfirm(massWeddingId)}>
+            <button
+              onClick={() => handleConfirm(massWeddingId)}
+              disabled={
+                weddingDetails?.weddingStatus === "Confirmed" ||
+                weddingDetails?.weddingStatus === "Cancelled"
+              }
+            >
               Confirm Wedding
             </button>
           </div>

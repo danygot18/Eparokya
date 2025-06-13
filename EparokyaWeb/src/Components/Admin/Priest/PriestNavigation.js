@@ -65,7 +65,7 @@ const PriestNavigation = () => {
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`),
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`),
         axios.get(`${process.env.REACT_APP_API}/api/v1/getConfirmedCounseling`),
-        axios.get(`${process.env.REACT_APP_API}/api/v1/getConfirmedHouseBlessing`, config),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/houseBlessing/getConfirmedHouseBlessing`, config),
         axios.get(`${process.env.REACT_APP_API}/api/v1/getAllPrayerRequestIntention`),
       ]);
 

@@ -65,38 +65,36 @@ const MinistryCategoryDetails = () => {
     setImagePreview(URL.createObjectURL(file));
   };
 
-const handleDelete = async (announcementId) => {
-  if (!window.confirm("Are you sure you want to delete this announcement?")) return;
+  const handleDelete = async (announcementId) => {
+    if (!window.confirm("Are you sure you want to delete this announcement?"))
+      return;
 
-  try {
-    await axios.delete(
-      `${process.env.REACT_APP_API}/api/v1/deleteMinistryAnnouncement/${announcementId}`, 
-      config
-    );
+    try {
+      await axios.delete(
+        `${process.env.REACT_APP_API}/api/v1/deleteMinistryAnnouncement/${announcementId}`,
+        config
+      );
 
-    setAnnouncements((prev) => prev.filter((a) => a._id !== announcementId));
+      setAnnouncements((prev) => prev.filter((a) => a._id !== announcementId));
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
+    }
+  };
 
-  } catch (error) {
-    console.error("Error deleting announcement:", error);
-  }
-};
+  const handleEdit = (announcement) => {
+    setAnnouncementData({
+      title: announcement.title,
+      description: announcement.description,
+      tags: announcement.tags.join(", "),
+      notedBy: announcement.notedBy.join(", "),
+      isPinned: announcement.isPinned,
+      images: null,
+    });
 
-const handleEdit = (announcement) => {
-  setAnnouncementData({
-    title: announcement.title,
-    description: announcement.description,
-    tags: announcement.tags.join(", "),     
-    notedBy: announcement.notedBy.join(", "), 
-    isPinned: announcement.isPinned,
-    images: null,
-  });
-
-  setSelectedAnnouncement(announcement);
-  setIsEditMode(true);
-  setIsModalOpen(true);
-};
-
-
+    setSelectedAnnouncement(announcement);
+    setIsEditMode(true);
+    setIsModalOpen(true);
+  };
 
   const confirmPinToggle = (announcement) => {
     setSelectedAnnouncement(announcement);
@@ -126,8 +124,7 @@ const handleEdit = (announcement) => {
     }
   };
 
-
-   const handleSubmit = async () => {
+  const handleSubmit = async () => {
     if (
       !announcementData.title ||
       !announcementData.description ||
@@ -155,7 +152,6 @@ const handleEdit = (announcement) => {
       }
 
       if (isEditMode && selectedAnnouncement) {
-      
         await axios.put(
           `${process.env.REACT_APP_API}/api/v1/updateMinistryAnnouncement/${selectedAnnouncement._id}`,
           formData,
@@ -169,8 +165,12 @@ const handleEdit = (announcement) => {
                   ...ann,
                   title: announcementData.title,
                   description: announcementData.description,
-                  tags: announcementData.tags.split(",").map((tag) => tag.trim()),
-                  notedBy: announcementData.notedBy.split(",").map((noted) => noted.trim()),
+                  tags: announcementData.tags
+                    .split(",")
+                    .map((tag) => tag.trim()),
+                  notedBy: announcementData.notedBy
+                    .split(",")
+                    .map((noted) => noted.trim()),
                   isPinned: announcementData.isPinned,
                 }
               : ann
@@ -182,7 +182,6 @@ const handleEdit = (announcement) => {
           formData,
           { withCredentials: true }
         );
-       
       }
 
       setIsModalOpen(false);
@@ -202,30 +201,32 @@ const handleEdit = (announcement) => {
     }
   };
 
-
   const filteredUsers = users.filter((user) =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-     <div className="ministry-category-details">
+    <div className="ministry-category-details">
       <SideBar />
 
       <div className="ministryCategoryDetails-middlePane">
-        <button className="add-announcement-btn" onClick={() => {
-          setIsModalOpen(true);
-          setIsEditMode(false);
-          setAnnouncementData({
-            title: "",
-            description: "",
-            tags: "",
-            notedBy: "",
-            isPinned: false,
-            images: null,
-          });
-          setImagePreview(null);
-          setSelectedAnnouncement(null);
-        }}>
+        <button
+          className="add-announcement-btn"
+          onClick={() => {
+            setIsModalOpen(true);
+            setIsEditMode(false);
+            setAnnouncementData({
+              title: "",
+              description: "",
+              tags: "",
+              notedBy: "",
+              isPinned: false,
+              images: null,
+            });
+            setImagePreview(null);
+            setSelectedAnnouncement(null);
+          }}
+        >
           Add Announcement
         </button>
 
@@ -294,7 +295,7 @@ const handleEdit = (announcement) => {
             )}
             <div className="modal-buttons">
               <button className="submit-btn" onClick={handleSubmit}>
-                {isEditMode ? "Update" : "Submit"}
+                {isEditMode ? "Update" : "Add"}
               </button>
               <button
                 className="cancel-btn"
@@ -331,7 +332,16 @@ const handleEdit = (announcement) => {
                 style={{ position: "relative" }}
               >
                 {/* Edit & Delete icons at upper right */}
-                <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: "8px", cursor: "pointer" }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    display: "flex",
+                    gap: "8px",
+                    cursor: "pointer",
+                  }}
+                >
                   <FaEdit
                     title="Edit"
                     onClick={() => handleEdit(announcement)}

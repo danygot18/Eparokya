@@ -82,42 +82,42 @@ const PinnedAnnouncements = ({
   );
 };
 
-const ParishPriests = ({ priests }) => {
-  const [currentPriestIndex, setCurrentPriestIndex] = useState(0);
-  const itemsPerPage = 4;
+// const ParishPriests = ({ priests }) => {
+//   const [currentPriestIndex, setCurrentPriestIndex] = useState(0);
+//   const itemsPerPage = 4;
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentPriestIndex(
-        (prev) => (prev + 1) % Math.ceil(priests.length / itemsPerPage)
-      );
-    }, 4000);
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setCurrentPriestIndex(
+//         (prev) => (prev + 1) % Math.ceil(priests.length / itemsPerPage)
+//       );
+//     }, 4000);
 
-    return () => clearInterval(interval);
-  }, [priests]);
+//     return () => clearInterval(interval);
+//   }, [priests]);
 
-  const startIdx = currentPriestIndex * itemsPerPage;
-  const endIdx = startIdx + itemsPerPage;
-  const priestsToDisplay = priests.slice(startIdx, endIdx);
+//   const startIdx = currentPriestIndex * itemsPerPage;
+//   const endIdx = startIdx + itemsPerPage;
+//   const priestsToDisplay = priests.slice(startIdx, endIdx);
 
-  return (
-    <div style={styles.priestsContainer}>
-      <h2 style={styles.priestsTitle}>Parish Priests</h2>
-      <div style={styles.priestsGrid}>
-        {priestsToDisplay.map((priest) => (
-          <div key={priest._id} style={styles.priestBox}>
-            <img
-              src={priest.image?.url || "/placeholder-priest.png"}
-              alt={priest.nickName || "Priest"}
-              style={styles.priestImage}
-            />
-            <div style={styles.priestName}>{priest.nickName || "Unknown"}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div style={styles.priestsContainer}>
+//       <h2 style={styles.priestsTitle}>Parish Priests</h2>
+//       <div style={styles.priestsGrid}>
+//         {priestsToDisplay.map((priest) => (
+//           <div key={priest._id} style={styles.priestBox}>
+//             <img
+//               src={priest.image?.url || "/placeholder-priest.png"}
+//               alt={priest.nickName || "Priest"}
+//               style={styles.priestImage}
+//             />
+//             <div style={styles.priestName}>{priest.nickName || "Unknown"}</div>
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
 
 export const Home = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -158,7 +158,7 @@ export const Home = () => {
   useEffect(() => {
     fetchAnnouncements();
     fetchCategories();
-    fetchPriests();
+    // fetchPriests();
   }, []);
 
   const fetchAnnouncements = async () => {
@@ -197,18 +197,18 @@ export const Home = () => {
     }
   };
 
-  const fetchPriests = async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API}/api/v1/getAllPriest`
-      );
-      console.log("Priests API Response:", response.data);
-      setPriests(response.data.priests || []);
-    } catch (err) {
-      console.error("Error fetching priests:", err);
-      setPriests([]);
-    }
-  };
+  // const fetchPriests = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${process.env.REACT_APP_API}/api/v1/getAllPriest`
+  //     );
+  //     // console.log("Priests API Response:", response.data);
+  //     setPriests(response.data.priests || []);
+  //   } catch (err) {
+  //     console.error("Error fetching priests:", err);
+  //     setPriests([]);
+  //   }
+  // };
 
   const goNext = () => {
     const totalPages = Math.ceil(pinnedAnnouncements.length / itemsPerPage);
@@ -311,7 +311,7 @@ export const Home = () => {
           )}
 
           {/* Parish Priests */}
-          {priests.length > 0 && <ParishPriests priests={priests} />}
+          {/* {priests.length > 0 && <ParishPriests priests={priests} />} */}
 
           {/* Categories */}
           <div style={styles.categoriesContainer}>

@@ -1,18 +1,32 @@
 const adminDate = require('../models/adminDate');
 const mongoose = require('mongoose');
+const {massWedding}  = require("../models/MassForms/massWedding");
+
 
 exports.getAllDates = async (req, res) => {
-    try {
-        const dates = await adminDate.find();
-        const updatedDates = dates.map(date => ({
-            ...date.toObject(),
-            availableParticipants: date.calculateAvailable(), 
-        }));
+  try {
+    const dates = await adminDate.find();
 
-        res.status(200).json(updatedDates);
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to fetch dates', error });
-    }
+    const updatedDates = await Promise.all(
+      dates.map(async (date) => {
+        const confirmedCount = await massWedding.countDocuments({
+          weddingDateTime: date._id,
+          weddingStatus: "Confirmed",
+        });
+
+        return {
+          ...date.toObject(),
+          confirmedParticipants: confirmedCount,
+          availableParticipants: date.maxParticipants - confirmedCount,
+        };
+      })
+    );
+
+    res.status(200).json(updatedDates);
+  } catch (error) {
+    console.error("Failed to fetch dates with confirmed participants:", error);
+    res.status(500).json({ message: "Failed to fetch dates", error });
+  }
 };
 
 exports.getActiveDatesByCategory = async (req, res) => {
@@ -38,7 +52,6 @@ exports.getActiveDatesByCategory = async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch active dates', error });
     }
 };
-
 
 exports.createDate = async (req, res) => {
     const { category, date, time, maxParticipants } = req.body;

@@ -15,12 +15,13 @@ import {
   FormGroup,
   InputLabel,
   FormControl,
-  Paper
+  Paper,
 } from "@mui/material";
 import "./BaptismForm.css";
 import GuestSidebar from "../../../../GuestSideBar";
 import MetaData from "../../../../Layout/MetaData";
 import TermsModal from "../../../../TermsModal";
+import termsAndConditionsText from "../../../../TermsAndConditionText";
 import ConfirmedBaptismOverlay from "./ConfirmBaptismModal";
 
 const BaptismForm = () => {
@@ -56,12 +57,12 @@ const BaptismForm = () => {
       birthCertificate: null,
       marriageCertificate: null,
       baptismPermit: null,
-      certificateOfNoRecordBaptism: null
+      certificateOfNoRecordBaptism: null,
     },
     previews: {},
     additionalDocs: {
-      baptismPermitFrom: ""
-    }
+      baptismPermitFrom: "",
+    },
   });
 
   useEffect(() => {
@@ -79,8 +80,7 @@ const BaptismForm = () => {
     fetchUser();
 
     return () => {
-      // Clean up object URLs to avoid memory leaks
-      Object.values(formData.previews).forEach(url => {
+      Object.values(formData.previews).forEach((url) => {
         if (url) URL.revokeObjectURL(url);
       });
     };
@@ -105,47 +105,44 @@ const BaptismForm = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validation
-    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_SIZE = 10 * 1024 * 1024;
     const ALLOWED_TYPES = [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
     if (file.size > MAX_SIZE) {
       toast.error(`File too large (max 10MB): ${file.name}`);
-      e.target.value = ''; // Clear the file input
+      e.target.value = "";
       return;
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       toast.error(`Unsupported file type: ${file.type}`);
-      e.target.value = ''; // Clear the file input
+      e.target.value = "";
       return;
     }
 
-    // Create preview URL
     const fileUrl = URL.createObjectURL(file);
 
-    // Clean up previous preview URL if exists
     if (formData.previews[fieldName]) {
       URL.revokeObjectURL(formData.previews[fieldName]);
     }
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       documents: {
         ...prev.documents,
-        [fieldName]: file
+        [fieldName]: file,
       },
       previews: {
         ...prev.previews,
-        [fieldName]: fileUrl
-      }
+        [fieldName]: fileUrl,
+      },
     }));
   };
 
@@ -164,29 +161,41 @@ const BaptismForm = () => {
       const formDataObj = new FormData();
 
       // Append all form data
-      formDataObj.append('baptismDate', formData.baptismDate);
-      formDataObj.append('baptismTime', formData.baptismTime);
-      formDataObj.append('phone', formData.phone);
-      formDataObj.append('child', JSON.stringify(formData.child));
-      formDataObj.append('parents', JSON.stringify(formData.parents));
-      formDataObj.append('ninong', JSON.stringify(formData.ninong));
-      formDataObj.append('ninang', JSON.stringify(formData.ninang));
-      formDataObj.append('NinongGodparents', JSON.stringify(NinongGodparents));
-      formDataObj.append('NinangGodparents', JSON.stringify(NinangGodparents));
-      formDataObj.append('baptismPermitFrom', formData.additionalDocs.baptismPermitFrom);
+      formDataObj.append("baptismDate", formData.baptismDate);
+      formDataObj.append("baptismTime", formData.baptismTime);
+      formDataObj.append("phone", formData.phone);
+      formDataObj.append("child", JSON.stringify(formData.child));
+      formDataObj.append("parents", JSON.stringify(formData.parents));
+      formDataObj.append("ninong", JSON.stringify(formData.ninong));
+      formDataObj.append("ninang", JSON.stringify(formData.ninang));
+      formDataObj.append("NinongGodparents", JSON.stringify(NinongGodparents));
+      formDataObj.append("NinangGodparents", JSON.stringify(NinangGodparents));
+      formDataObj.append(
+        "baptismPermitFrom",
+        formData.additionalDocs.baptismPermitFrom
+      );
 
       // Append files if they exist
       if (formData.documents.birthCertificate) {
-        formDataObj.append('birthCertificate', formData.documents.birthCertificate);
+        formDataObj.append(
+          "birthCertificate",
+          formData.documents.birthCertificate
+        );
       }
       if (formData.documents.marriageCertificate) {
-        formDataObj.append('marriageCertificate', formData.documents.marriageCertificate);
+        formDataObj.append(
+          "marriageCertificate",
+          formData.documents.marriageCertificate
+        );
       }
       if (formData.documents.baptismPermit) {
-        formDataObj.append('baptismPermit', formData.documents.baptismPermit);
+        formDataObj.append("baptismPermit", formData.documents.baptismPermit);
       }
       if (formData.documents.certificateOfNoRecordBaptism) {
-        formDataObj.append('certificateOfNoRecordBaptism', formData.documents.certificateOfNoRecordBaptism);
+        formDataObj.append(
+          "certificateOfNoRecordBaptism",
+          formData.documents.certificateOfNoRecordBaptism
+        );
       }
 
       const response = await axios.post(
@@ -194,13 +203,13 @@ const BaptismForm = () => {
         formDataObj,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
-          withCredentials: true
+          withCredentials: true,
         }
       );
 
-      toast.success('Form submitted successfully!');
+      toast.success("Form submitted successfully!");
 
       // Reset form
       setFormData({
@@ -227,19 +236,21 @@ const BaptismForm = () => {
           birthCertificate: null,
           marriageCertificate: null,
           baptismPermit: null,
-          certificateOfNoRecordBaptism: null
+          certificateOfNoRecordBaptism: null,
         },
         previews: {},
         additionalDocs: {
-          baptismPermitFrom: ""
-        }
+          baptismPermitFrom: "",
+        },
       });
       setNinongGodparents([]);
       setNinangGodparents([]);
-
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error(error.response?.data?.message || 'Failed to submit form. Please try again.');
+      console.error("Error submitting form:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to submit form. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -248,7 +259,7 @@ const BaptismForm = () => {
   const DocumentPreview = ({ file, previewUrl }) => {
     if (!file || !previewUrl) return null;
 
-    return file.type.startsWith('image/') ? (
+    return file.type.startsWith("image/") ? (
       <div className="mt-2">
         <img
           src={previewUrl}
@@ -259,7 +270,10 @@ const BaptismForm = () => {
         <div className="text-muted small mt-1">{file.name}</div>
       </div>
     ) : (
-      <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px" }}>
+      <div
+        className="mt-2"
+        style={{ width: "100%", height: "300px", marginBottom: "30px" }}
+      >
         <iframe
           src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
           title="Document Preview"
@@ -276,7 +290,7 @@ const BaptismForm = () => {
   };
 
   const handleAddGodparent = (type) => {
-    if (type === 'ninong') {
+    if (type === "ninong") {
       setNinongGodparents([...NinongGodparents, { name: "" }]);
     } else {
       setNinangGodparents([...NinangGodparents, { name: "" }]);
@@ -284,7 +298,7 @@ const BaptismForm = () => {
   };
 
   const handleRemoveGodparent = (type, index) => {
-    if (type === 'ninong') {
+    if (type === "ninong") {
       setNinongGodparents(NinongGodparents.filter((_, i) => i !== index));
     } else {
       setNinangGodparents(NinangGodparents.filter((_, i) => i !== index));
@@ -292,7 +306,7 @@ const BaptismForm = () => {
   };
 
   const handleGodparentChange = (type, index, value) => {
-    if (type === 'ninong') {
+    if (type === "ninong") {
       const updated = [...NinongGodparents];
       updated[index].name = value;
       setNinongGodparents(updated);
@@ -302,6 +316,8 @@ const BaptismForm = () => {
       setNinangGodparents(updated);
     }
   };
+
+
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f9f9f9" }}>
@@ -317,23 +333,40 @@ const BaptismForm = () => {
       <GuestSidebar />
       <Box sx={{ flex: 1, p: { xs: 1, md: 4 } }}>
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, maxWidth: 300 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              maxWidth: 300,
+            }}
+          >
             <Typography variant="h6" sx={{ fontSize: "1.1rem" }}>
               Click here to see Available Dates
             </Typography>
             <Button
               variant="outlined"
               color="secondary"
-              sx={{ fontWeight: "bold", borderRadius: 1, px: 2, fontSize: "0.95rem" }}
+              sx={{
+                fontWeight: "bold",
+                borderRadius: 1,
+                px: 2,
+                fontSize: "0.95rem",
+              }}
               onClick={() => setShowOverlay(true)}
             >
               View Calendar
             </Button>
           </Box>
-          <ConfirmedBaptismOverlay show={showOverlay} onClose={() => setShowOverlay(false)} />
+          <ConfirmedBaptismOverlay
+            show={showOverlay}
+            onClose={() => setShowOverlay(false)}
+          />
         </Box>
         <Paper elevation={2} sx={{ p: { xs: 2, md: 4 } }}>
-          <Typography variant="h4" gutterBottom>Baptism Form</Typography>
+          <Typography variant="h4" gutterBottom>
+            Baptism Form
+          </Typography>
           <Box component="form" onSubmit={handleSubmit} noValidate>
             {/* Baptism Date and Time */}
             <Grid container spacing={2} mb={2}>
@@ -362,7 +395,9 @@ const BaptismForm = () => {
             </Grid>
 
             {/* Child Information */}
-            <Typography variant="h6" mt={3}>Child Information</Typography>
+            <Typography variant="h6" mt={3}>
+              Child Information
+            </Typography>
             <TextField
               label="Buong Pangalan ng Bibinyagan"
               value={formData.child.fullName}
@@ -401,7 +436,9 @@ const BaptismForm = () => {
                     value={formData.child.gender}
                     onChange={(e) => handleChange(e, "child.gender")}
                   >
-                    <MenuItem value=""><em>-- Piliin ang Kasarian --</em></MenuItem>
+                    <MenuItem value="">
+                      <em>-- Piliin ang Kasarian --</em>
+                    </MenuItem>
                     <MenuItem value="Male">Lalaki</MenuItem>
                     <MenuItem value="Female">Babae</MenuItem>
                   </Select>
@@ -410,7 +447,9 @@ const BaptismForm = () => {
             </Grid>
 
             {/* Parents Information */}
-            <Typography variant="h6" mt={3}>Magulang ng Bibinyagan</Typography>
+            <Typography variant="h6" mt={3}>
+              Magulang ng Bibinyagan
+            </Typography>
             <Grid container spacing={2} mb={2}>
               <Grid item xs={12} md={6}>
                 <TextField
@@ -425,7 +464,9 @@ const BaptismForm = () => {
                 <TextField
                   label="Lugar ng Kapanganakan (Ama)"
                   value={formData.parents.placeOfFathersBirth}
-                  onChange={(e) => handleChange(e, "parents.placeOfFathersBirth")}
+                  onChange={(e) =>
+                    handleChange(e, "parents.placeOfFathersBirth")
+                  }
                   fullWidth
                   required
                 />
@@ -443,7 +484,9 @@ const BaptismForm = () => {
                 <TextField
                   label="Lugar ng Kapanganakan (Ina)"
                   value={formData.parents.placeOfMothersBirth}
-                  onChange={(e) => handleChange(e, "parents.placeOfMothersBirth")}
+                  onChange={(e) =>
+                    handleChange(e, "parents.placeOfMothersBirth")
+                  }
                   fullWidth
                   required
                 />
@@ -475,7 +518,9 @@ const BaptismForm = () => {
                     value={formData.parents.marriageStatus}
                     onChange={(e) => handleChange(e, "parents.marriageStatus")}
                   >
-                    <MenuItem value=""><em>-- Saan Kasal --</em></MenuItem>
+                    <MenuItem value="">
+                      <em>-- Saan Kasal --</em>
+                    </MenuItem>
                     <MenuItem value="Simbahan">Simbahan (Katoliko)</MenuItem>
                     <MenuItem value="Civil">Civil (Huwes)</MenuItem>
                     <MenuItem value="Nat">Nat (Hindi Kasal)</MenuItem>
@@ -485,7 +530,9 @@ const BaptismForm = () => {
             </Grid>
 
             {/* Ninong */}
-            <Typography variant="h6" mt={3}>Ninong</Typography>
+            <Typography variant="h6" mt={3}>
+              Ninong
+            </Typography>
             <Grid container spacing={2} mb={2}>
               <Grid item xs={12} md={5}>
                 <TextField
@@ -517,7 +564,9 @@ const BaptismForm = () => {
             </Grid>
 
             {/* Ninang */}
-            <Typography variant="h6" mt={3}>Ninang</Typography>
+            <Typography variant="h6" mt={3}>
+              Ninang
+            </Typography>
             <Grid container spacing={2} mb={2}>
               <Grid item xs={12} md={5}>
                 <TextField
@@ -549,22 +598,30 @@ const BaptismForm = () => {
             </Grid>
 
             {/* Secondary Ninong */}
-            <Typography variant="h6" mt={3}>Secondary Ninong</Typography>
+            <Typography variant="h6" mt={3}>
+              Secondary Ninong
+            </Typography>
             {NinongGodparents.map((godparent, index) => (
               <Grid container spacing={2} mb={1} key={`ninong-${index}`}>
                 <Grid item xs={10}>
                   <TextField
                     label="Pangalan ng Ninong"
                     value={godparent.name}
-                    onChange={(e) => handleGodparentChange('ninong', index, e.target.value)}
+                    onChange={(e) =>
+                      handleGodparentChange("ninong", index, e.target.value)
+                    }
                     fullWidth
                   />
                 </Grid>
-                <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
+                <Grid
+                  item
+                  xs={2}
+                  sx={{ display: "flex", alignItems: "center" }}
+                >
                   <Button
                     variant="contained"
                     color="error"
-                    onClick={() => handleRemoveGodparent('ninong', index)}
+                    onClick={() => handleRemoveGodparent("ninong", index)}
                     fullWidth
                   >
                     Remove
@@ -575,29 +632,37 @@ const BaptismForm = () => {
             <Button
               variant="outlined"
               color="secondary"
-              onClick={() => handleAddGodparent('ninong')}
+              onClick={() => handleAddGodparent("ninong")}
               sx={{ mb: 3 }}
             >
               Add Secondary Ninong
             </Button>
 
             {/* Secondary Ninang */}
-            <Typography variant="h6" mt={3}>Secondary Ninang</Typography>
+            <Typography variant="h6" mt={3}>
+              Secondary Ninang
+            </Typography>
             {NinangGodparents.map((godparent, index) => (
               <Grid container spacing={2} mb={1} key={`ninang-${index}`}>
                 <Grid item xs={10}>
                   <TextField
                     label="Pangalan ng Ninang"
                     value={godparent.name}
-                    onChange={(e) => handleGodparentChange('ninang', index, e.target.value)}
+                    onChange={(e) =>
+                      handleGodparentChange("ninang", index, e.target.value)
+                    }
                     fullWidth
                   />
                 </Grid>
-                <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
+                <Grid
+                  item
+                  xs={2}
+                  sx={{ display: "flex", alignItems: "center" }}
+                >
                   <Button
                     variant="contained"
                     color="error"
-                    onClick={() => handleRemoveGodparent('ninang', index)}
+                    onClick={() => handleRemoveGodparent("ninang", index)}
                     fullWidth
                   >
                     Remove
@@ -608,22 +673,26 @@ const BaptismForm = () => {
             <Button
               variant="outlined"
               color="secondary"
-              onClick={() => handleAddGodparent('ninang')}
+              onClick={() => handleAddGodparent("ninang")}
               sx={{ mb: 3 }}
             >
               Add Secondary Ninang
             </Button>
 
             {/* Required Documents */}
-            <Typography variant="h6" mt={3}>Required Documents</Typography>
+            <Typography variant="h6" mt={3}>
+              Required Documents
+            </Typography>
             <FormGroup sx={{ mb: 3 }}>
-              <InputLabel className="fw-bold text-danger">Birth Certificate *</InputLabel>
+              <InputLabel className="fw-bold text-danger">
+                Birth Certificate *
+              </InputLabel>
               <Button variant="contained" component="label" sx={{ mb: 1 }}>
                 Upload Birth Certificate
                 <input
                   type="file"
                   hidden
-                  onChange={(e) => handleFileChange(e, 'birthCertificate')}
+                  onChange={(e) => handleFileChange(e, "birthCertificate")}
                   accept="image/*,.pdf,.doc,.docx"
                   required
                 />
@@ -634,13 +703,15 @@ const BaptismForm = () => {
               />
             </FormGroup>
             <FormGroup sx={{ mb: 3 }}>
-              <InputLabel className="fw-bold text-danger">Marriage Certificate *</InputLabel>
+              <InputLabel className="fw-bold text-danger">
+                Marriage Certificate *
+              </InputLabel>
               <Button variant="contained" component="label" sx={{ mb: 1 }}>
                 Upload Marriage Certificate
                 <input
                   type="file"
                   hidden
-                  onChange={(e) => handleFileChange(e, 'marriageCertificate')}
+                  onChange={(e) => handleFileChange(e, "marriageCertificate")}
                   accept="image/*,.pdf,.doc,.docx"
                   required
                 />
@@ -652,18 +723,22 @@ const BaptismForm = () => {
             </FormGroup>
 
             {/* Additional Documents */}
-            <Typography variant="h6" mt={3}>Additional Documents</Typography>
+            <Typography variant="h6" mt={3}>
+              Additional Documents
+            </Typography>
             <TextField
               label="Baptism Permit From"
               placeholder="Enter issuing parish"
               value={formData.additionalDocs.baptismPermitFrom}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                additionalDocs: {
-                  ...prev.additionalDocs,
-                  baptismPermitFrom: e.target.value
-                }
-              }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  additionalDocs: {
+                    ...prev.additionalDocs,
+                    baptismPermitFrom: e.target.value,
+                  },
+                }))
+              }
               fullWidth
               sx={{ mb: 2 }}
             />
@@ -674,7 +749,7 @@ const BaptismForm = () => {
                 <input
                   type="file"
                   hidden
-                  onChange={(e) => handleFileChange(e, 'baptismPermit')}
+                  onChange={(e) => handleFileChange(e, "baptismPermit")}
                   accept="image/*,.pdf,.doc,.docx"
                 />
               </Button>
@@ -684,13 +759,17 @@ const BaptismForm = () => {
               />
             </FormGroup>
             <FormGroup sx={{ mb: 3 }}>
-              <InputLabel>Certificate Of No Record of Baptism (FOR 2 YEARS OLD AND ABOVE)</InputLabel>
+              <InputLabel>
+                Certificate Of No Record of Baptism (FOR 2 YEARS OLD AND ABOVE)
+              </InputLabel>
               <Button variant="contained" component="label" sx={{ mb: 1 }}>
                 Upload Certificate
                 <input
                   type="file"
                   hidden
-                  onChange={(e) => handleFileChange(e, 'certificateOfNoRecordBaptism')}
+                  onChange={(e) =>
+                    handleFileChange(e, "certificateOfNoRecordBaptism")
+                  }
                   accept="image/*,.pdf,.doc,.docx"
                 />
               </Button>
@@ -700,25 +779,53 @@ const BaptismForm = () => {
               />
             </FormGroup>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 4 }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={agreedToTerms}
-                    onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    required
-                  />
-                }
-                label="I agree to the terms and conditions"
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </Button>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mt: 4,
+              }}
+            >
+    <FormControlLabel
+  control={
+    <Checkbox
+      checked={agreedToTerms}
+      onClick={(e) => {
+        if (!agreedToTerms) {
+          e.preventDefault(); // block direct toggle
+          setShowTermsModal(true); // open modal instead
+        } else {
+          setAgreedToTerms(false); // allow unchecking
+        }
+      }}
+      required
+    />
+  }
+  label="I agree to the terms and conditions"
+/>
+
+
+<Button
+  type="submit"
+  variant="contained"
+  size="large"
+  disabled={isSubmitting || !agreedToTerms} // Disable until agreed
+>
+  {isSubmitting ? "Submitting..." : "Submit"}
+</Button>
+
+{/* Terms and Conditions Modal */}
+<TermsModal
+  isOpen={showTermsModal}
+  onClose={() => setShowTermsModal(false)}
+  onAccept={() => {
+    setAgreedToTerms(true);
+    setShowTermsModal(false);
+  }}
+  termsText={termsAndConditionsText}
+/>
+
             </Box>
           </Box>
         </Paper>

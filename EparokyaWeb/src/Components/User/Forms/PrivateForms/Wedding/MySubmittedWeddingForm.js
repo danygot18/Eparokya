@@ -17,7 +17,8 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
-  Divider
+  Divider,
+  TextField
 } from "@mui/material";
 import GuestSideBar from "../../../../GuestSideBar";
 import UserWeddingChecklist from "./UserWeddingChecklist";
@@ -42,6 +43,7 @@ const MyWeddingSubmittedForm = () => {
   const [selectedImage, setSelectedImage] = useState("");
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
 
   useEffect(() => {
@@ -112,21 +114,23 @@ const MyWeddingSubmittedForm = () => {
   };
 
   const handleCancelWedding = async () => {
+    if (!cancelReason.trim()) {
+      toast.error("Please provide a reason for cancellation.");
+      return;
+    }
+
     setCancelLoading(true);
     try {
       await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/${weddingForms._id}/cancelWedding`,
-        null,
+        `${process.env.REACT_APP_API}/api/v1/declineWedding/${formId}`,
+        { reason: cancelReason },
         { withCredentials: true }
       );
       toast.success("Wedding cancelled successfully!");
-      navigate("/user/dashboard");
+
     } catch (error) {
       console.error("Error cancelling wedding:", error);
       toast.error("Failed to cancel the wedding.");
-    } finally {
-      setCancelLoading(false);
-      setOpenCancelDialog(false);
     }
   };
 
@@ -614,13 +618,27 @@ const MyWeddingSubmittedForm = () => {
             <DialogTitle id="alert-dialog-title">
               Confirm Cancellation
             </DialogTitle>
+
             <DialogContent>
               <Typography>
                 Are you sure you want to cancel this wedding request?
                 <br />
                 This action cannot be undone.
               </Typography>
+
+              {/* ✅ TextField for cancellation reason */}
+              <TextField
+                margin="dense"
+                label="Cancellation Reason"
+                type="text"
+                fullWidth
+                required
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                disabled={cancelLoading}
+              />
             </DialogContent>
+
             <DialogActions>
               <Button
                 onClick={handleCloseCancelDialog}
@@ -629,6 +647,7 @@ const MyWeddingSubmittedForm = () => {
               >
                 No, Keep It
               </Button>
+
               <Button
                 onClick={handleCancelWedding}
                 color="error"
@@ -639,6 +658,8 @@ const MyWeddingSubmittedForm = () => {
               </Button>
             </DialogActions>
           </Dialog>
+
+
 
           {/* Image Modal */}
           <Modal open={isModalOpen} onClose={closeModal}>
@@ -731,14 +752,33 @@ const MyWeddingSubmittedForm = () => {
               onClick={handleCancelClick}
               sx={{ px: 4, py: 2, ml: 2 }}
               size="small"
+              disabled={weddingForms.weddingStatus === "Cancelled" || weddingForms.weddingStatus === "Confirmed"}
             >
               Cancel Wedding Request
             </Button>
           </Box>
+          {weddingForms.weddingStatus === "Cancelled" &&
+            weddingForms?.cancellingReason && (
+              <Card sx={{ marginTop: 3 }}>
+                <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
+                  Cancelled: 
+                </Typography>
+                <Box>
+                  <Typography>
+                    <strong>Name:</strong> {weddingForms.cancellingReason.user}
+                  </Typography>
+                  <Typography>
+                    <strong>Reason :</strong> {weddingForms.cancellingReason.reason}
+                  </Typography>
+                </Box>
+              </Card>
+
+            )}
+
         </Divider>
-      </Box>
+      </Box >
       <ToastContainer />
-    </Box>
+    </Box >
   );
 };
 

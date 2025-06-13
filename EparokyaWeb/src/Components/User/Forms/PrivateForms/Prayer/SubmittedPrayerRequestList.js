@@ -80,6 +80,7 @@ const SubmittedPrayerRequestList = () => {
             );
             if (response.data && Array.isArray(response.data.forms)) {
                 setPrayerRequests(response.data.forms);
+                console.log(response.data.forms)
             } else {
                 setPrayerRequests([]);
             }

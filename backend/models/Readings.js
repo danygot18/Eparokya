@@ -1,8 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const ReadingSchema = new mongoose.Schema(
   {
     date: { type: Date, required: true, unique: true },
+    Title: { type: String, required: true },
     firstReading: { type: String, required: true },
     responsorialPsalm: { type: String, required: true },
     response: { type: String, required: true },
@@ -12,4 +13,4 @@ const ReadingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Reading', ReadingSchema);
+module.exports = mongoose.model("Reading", ReadingSchema);

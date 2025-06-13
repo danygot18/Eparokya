@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import axios from "axios";
 import baseURL from "../../../assets/common/baseUrl";
 
 const UserBaptismChecklist = ({ formId }) => {
-  const [checklist, setChecklist] = useState({
-    PhotocopyOfBirthCertificate: false,
-    PhotocopyOfMarriageCertificate: false,
-    BaptismalPermit: false,
-    CertificateOfNoRecordBaptism: false,
-    PreBaptismSeminar1: false,
-    PreBaptismSeminar2: false,
-  });
+  const [checklist, setChecklist] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,12 +12,14 @@ const UserBaptismChecklist = ({ formId }) => {
       axios
         .get(`${baseURL}/getBaptismChecklist/${formId}`, { withCredentials: true })
         .then((res) => {
-          if (res.data.checklist) {
+          if (res.data && res.data.checklist) {
             setChecklist(res.data.checklist);
+          } else {
+            setChecklist(null);
           }
         })
         .catch((err) => {
-          // handle error
+          setChecklist(null);
         })
         .finally(() => setLoading(false));
     }
@@ -38,6 +33,9 @@ const UserBaptismChecklist = ({ formId }) => {
     );
   }
 
+  // If no checklist data, show N/A for all fields
+  const getStatus = (val) => val === true ? "Checked" : val === false ? "Unchecked" : "N/A";
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Baptism Checklist</Text>
@@ -48,11 +46,11 @@ const UserBaptismChecklist = ({ formId }) => {
         <View
           style={[
             styles.statusBtn,
-            checklist.PhotocopyOfBirthCertificate ? styles.checked : styles.unchecked,
+            checklist?.PhotocopyOfBirthCertificate ? styles.checked : styles.unchecked,
           ]}
         >
           <Text style={styles.statusText}>
-            {checklist.PhotocopyOfBirthCertificate ? "Checked" : "Unchecked"}
+            {getStatus(checklist?.PhotocopyOfBirthCertificate)}
           </Text>
         </View>
       </View>
@@ -62,11 +60,11 @@ const UserBaptismChecklist = ({ formId }) => {
         <View
           style={[
             styles.statusBtn,
-            checklist.PhotocopyOfMarriageCertificate ? styles.checked : styles.unchecked,
+            checklist?.PhotocopyOfMarriageCertificate ? styles.checked : styles.unchecked,
           ]}
         >
           <Text style={styles.statusText}>
-            {checklist.PhotocopyOfMarriageCertificate ? "Checked" : "Unchecked"}
+            {getStatus(checklist?.PhotocopyOfMarriageCertificate)}
           </Text>
         </View>
       </View>
@@ -78,11 +76,11 @@ const UserBaptismChecklist = ({ formId }) => {
         <View
           style={[
             styles.statusBtn,
-            checklist.BaptismalPermit ? styles.checked : styles.unchecked,
+            checklist?.BaptismalPermit ? styles.checked : styles.unchecked,
           ]}
         >
           <Text style={styles.statusText}>
-            {checklist.BaptismalPermit ? "Checked" : "Unchecked"}
+            {getStatus(checklist?.BaptismalPermit)}
           </Text>
         </View>
       </View>
@@ -92,11 +90,11 @@ const UserBaptismChecklist = ({ formId }) => {
         <View
           style={[
             styles.statusBtn,
-            checklist.CertificateOfNoRecordBaptism ? styles.checked : styles.unchecked,
+            checklist?.CertificateOfNoRecordBaptism ? styles.checked : styles.unchecked,
           ]}
         >
           <Text style={styles.statusText}>
-            {checklist.CertificateOfNoRecordBaptism ? "Checked" : "Unchecked"}
+            {getStatus(checklist?.CertificateOfNoRecordBaptism)}
           </Text>
         </View>
       </View>
@@ -108,11 +106,11 @@ const UserBaptismChecklist = ({ formId }) => {
         <View
           style={[
             styles.statusBtn,
-            checklist.PreBaptismSeminar1 ? styles.checked : styles.unchecked,
+            checklist?.PreBaptismSeminar1 ? styles.checked : styles.unchecked,
           ]}
         >
           <Text style={styles.statusText}>
-            {checklist.PreBaptismSeminar1 ? "Checked" : "Unchecked"}
+            {getStatus(checklist?.PreBaptismSeminar1)}
           </Text>
         </View>
       </View>
@@ -122,11 +120,11 @@ const UserBaptismChecklist = ({ formId }) => {
         <View
           style={[
             styles.statusBtn,
-            checklist.PreBaptismSeminar2 ? styles.checked : styles.unchecked,
+            checklist?.PreBaptismSeminar2 ? styles.checked : styles.unchecked,
           ]}
         >
           <Text style={styles.statusText}>
-            {checklist.PreBaptismSeminar2 ? "Checked" : "Unchecked"}
+            {getStatus(checklist?.PreBaptismSeminar2)}
           </Text>
         </View>
       </View>

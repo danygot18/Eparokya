@@ -166,8 +166,8 @@ exports.submitWeddingForm = async (req, res) => {
 
     await newWeddingForm.save();
 
-const userEmail = user.email;
-const htmlMessage = `
+    const userEmail = user.email;
+    const htmlMessage = `
   <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f9f9f9; color: #333;">
     <p style="font-size: 16px;">Good Day!</p>
     <p style="font-size: 16px;">
@@ -189,11 +189,11 @@ const htmlMessage = `
   </div>
 `;
 
-await sendEmail({
-  email: userEmail,
-  subject: "Your Wedding Application Has Been Submitted!",
-  message: htmlMessage,
-});
+    await sendEmail({
+      email: userEmail,
+      subject: "Your Wedding Application Has Been Submitted!",
+      message: htmlMessage,
+    });
 
     res.status(201).json({
       message: "Wedding form submitted successfully!",
@@ -288,11 +288,20 @@ exports.declineWedding = async (req, res) => {
     const { reason } = req.body;
     const userId = req.user._id;
     const user = await User.findById(userId);
+    console.log(user);
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
-    const cancellingUser = user.isAdmin ? "Admin" : user.name;
+
+    // Set cancellingUser to "Admin" if admin, otherwise use user's name
+    let cancellingUser;
+
+    if (user?.isAdmin === true) {
+      cancellingUser = "Admin";
+    } else {
+      cancellingUser = user.name;
+    }
 
     const wedding = await Wedding.findByIdAndUpdate(
       req.params.weddingId,
@@ -302,6 +311,7 @@ exports.declineWedding = async (req, res) => {
       },
       { new: true }
     );
+
     if (!wedding) {
       return res.status(404).json({ message: "Wedding not found." });
     }
@@ -312,6 +322,7 @@ exports.declineWedding = async (req, res) => {
     res.status(500).json({ message: "Server error." });
   }
 };
+
 
 exports.updateWeddingDate = async (req, res) => {
   try {
@@ -512,22 +523,6 @@ exports.getMySubmittedForms = async (req, res) => {
 };
 
 exports.getWeddingFormById = async (req, res) => {
-  // try {
-  //   const { weddingId } = req.params;
-
-  //   const weddingForm = await Wedding.findById( weddingId )
-  //     .populate('userId', 'name email')
-  //     .lean();
-
-  //   if (!weddingForm) {
-  //     return res.status(404).json({ message: "Wedding form not found." });
-  //   }
-
-  //   res.status(200).json(weddingForm);
-  // } catch (error) {
-  //   console.error("Error fetching wedding form by ID:", error);
-  //   res.status(500).json({ message: "Server error", error: error.message });
-  // }
   try {
     const { weddingId } = req.params;
 
