@@ -48,7 +48,7 @@ const FuneralSchema = new mongoose.Schema({
       customBarangay: {
           type: String,
           required: function() {
-              return this.address.baranggay === 'Others'; 
+              return this.address.barangay === 'Others'; 
           }
       },
       city: { type: String, enum:['Taguig City', 'Others'],  required: true },

@@ -49,13 +49,8 @@ const PrayerWall = () => {
         );
 
         const { prayers, total } = response.data;
-
-        setPrayers(
-          prayers.map(prayer => ({
-            ...prayer,
-            includedByUser: prayer.includedByUser || false,
-          }))
-        );
+        console.log('Fetched prayers:', prayers);
+        setPrayers(prayers);
         setTotalPrayers(total);
         setLoading(false);
       } catch (error) {
@@ -149,11 +144,9 @@ const PrayerWall = () => {
   }
 
 
-
-
   return (
     <div className="prayer-wall-container">
-        <ToastContainer />
+      <ToastContainer />
       <div >
         <GuestSidebar />
       </div>

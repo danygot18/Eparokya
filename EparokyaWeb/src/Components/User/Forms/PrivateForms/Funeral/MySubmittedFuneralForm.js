@@ -167,10 +167,29 @@ const MySubmittedFuneralForm = () => {
                                                 {
                                                     label: "Address",
                                                     value: funeralDetails?.address
-                                                        ? `${funeralDetails.address.state || ""}, ${funeralDetails.address.country || ""}, ${funeralDetails.address.zip || ""}`
+                                                        ? [
+                                                            funeralDetails.address.BldgNameTower,
+                                                            funeralDetails.address.LotBlockPhaseHouseNo,
+                                                            funeralDetails.address.SubdivisionVillageZone,
+                                                            funeralDetails.address.Street,
+                                                            funeralDetails.address.District,
+                                                            funeralDetails.address.barangay === 'Others'
+                                                                ? funeralDetails.address.customBarangay
+                                                                : funeralDetails.address.barangay,
+                                                            funeralDetails.address.city === 'Others'
+                                                                ? funeralDetails.address.customCity
+                                                                : funeralDetails.address.city,
+                                                            funeralDetails.address.state,
+                                                            funeralDetails.address.zip,
+                                                            funeralDetails.address.country,
+                                                        ]
+                                                            .map((item) => item?.trim?.())
+                                                            .filter(Boolean)
+                                                            .join(', ')
                                                         : "N/A",
                                                     flex: "1 1 100%"
                                                 },
+
                                                 { label: "Place of Death", value: funeralDetails?.placeOfDeath },
                                                 { label: "Funeral Date", value: formatDate(funeralDetails?.funeralDate) },
                                                 { label: "Time", value: formatTime12Hour(funeralDetails?.funeraltime) },

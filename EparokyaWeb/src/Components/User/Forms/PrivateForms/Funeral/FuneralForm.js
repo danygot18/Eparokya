@@ -224,11 +224,12 @@ const FuneralForm = () => {
             formDataObj.append('address[District]', formData.address.District);
 
             // if Others
-            formDataObj.append('address[city]', formData.address.city === "Others" ? customCity : formData.address.city);
-            formDataObj.append('address[barangay]', formData.address.barangay === "Others" ? customBarangay : formData.address.barangay);
+            formDataObj.append('address[city]', formData.address.city === "Others" ? "Others" : formData.address.city);
+            formDataObj.append('address[customCity]', formData.address.city === "Others" ? customCity : "");
+            formDataObj.append('address[barangay]', formData.address.barangay === "Others" ? "Others" : formData.address.barangay);
+            formDataObj.append('address[customBarangay]', formData.address.barangay === "Others" ? customBarangay : "");
 
-            formDataObj.append('placingOfPall[by]', formData.placingOfPall.by);
-            formDataObj.append('placingOfPall[familyMembers]', JSON.stringify(formData.placingOfPall.familyMembers));
+            formDataObj.append('placingOfPall', JSON.stringify(formData.placingOfPall));
 
             formDataObj.append('name', formData.name);
             formDataObj.append('dateOfDeath', formData.dateOfDeath);
@@ -302,26 +303,41 @@ const FuneralForm = () => {
 
     const handleCityChange = (e) => {
         const selectedCity = e.target.value;
+
         setFormData((prev) => ({
             ...prev,
-            address: { ...prev.address, city: selectedCity, baranggay: '' },
+            address: {
+                ...prev.address,
+                city: selectedCity,       // Only 'Taguig City' or 'Others'
+                barangay: '',             // Reset barangay on city change
+            },
         }));
 
         if (selectedCity === 'Others') {
-            setCustomCity('');
+            setCustomCity(''); // prepare for custom input
+        } else {
+            setCustomCity(''); // clear customCity if Taguig is selected
         }
     };
 
     const handleBarangayChange = (e) => {
         const selectedBarangay = e.target.value;
+
         setFormData((prev) => ({
             ...prev,
-            address: { ...prev.address, barangay: selectedBarangay },
+            address: {
+                ...prev.address,
+                barangay: selectedBarangay, // only 'Others' or allowed enum values
+            },
         }));
+
         if (selectedBarangay === 'Others') {
             setCustomBarangay('');
+        } else {
+            setCustomBarangay(''); // clear custom if not 'Others'
         }
     };
+
 
     const handlePreview = (fieldName) => {
         const file = formData[fieldName][0];
@@ -403,7 +419,7 @@ const FuneralForm = () => {
                                         >
                                             <MenuItem value="">Select</MenuItem>
                                             <MenuItem value="Dalaga/Binata">Dalaga/Binata</MenuItem>
-                                            <MenuItem value="May Asawa, Biyuda">May Asawa</MenuItem>
+                                            <MenuItem value="May Asawa">May Asawa</MenuItem>
                                             <MenuItem value="Biyuda">Biyuda</MenuItem>
                                         </Select>
                                         <TextField
@@ -647,7 +663,7 @@ const FuneralForm = () => {
                                             required
                                             fullWidth
                                         />
-                                        
+
                                         <Box>
                                             <input
                                                 type="checkbox"

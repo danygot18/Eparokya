@@ -104,9 +104,6 @@ const EventSentimentDetails = () => {
         {/* Sentiment Metadata */}
         <Box sx={{ marginBottom: "20px" }}>
           <Typography variant="body1">
-            <strong>Sentiment ID:</strong> {sentiment._id}
-          </Typography>
-          <Typography variant="body1">
             <strong>User:</strong> {sentiment.userId?.name || "N/A"}{" "}
             {/* Access the name property */}
           </Typography>

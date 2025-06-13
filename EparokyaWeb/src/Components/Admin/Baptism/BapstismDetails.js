@@ -247,8 +247,6 @@ const BaptismDetails = () => {
         }
     };
 
-
-
     const handleConfirm = async () => {
         try {
             const response = await axios.post(
@@ -269,11 +267,12 @@ const BaptismDetails = () => {
             return;
         }
         try {
-            const response = await axios.post(
+            const response = await axios.put(
                 `${process.env.REACT_APP_API}/api/v1/declineBaptism/${baptismId}`,
                 { reason: cancelReason },
                 { withCredentials: true }
             );
+
 
             toast.success("Baptism cancelled successfully!", { position: toast.POSITION.TOP_RIGHT });
             setShowCancelModal(false);
@@ -762,28 +761,24 @@ const BaptismDetails = () => {
 
                 {/* Cancel Button */}
                 <div className="button-container">
-                    <button onClick={() => setShowCancelModal(true)}>Cancel Baptism</button>
+                    <button
+                        onClick={() => setShowCancelModal(true)}
+                        disabled={baptismDetails?.binyagStatus === "Cancelled"}
+                        style={{
+                            backgroundColor: baptismDetails?.binyagStatus === "Cancelled" ? "#bdbdbd" : "#d32f2f",
+                            color: "#fff",
+                            cursor: baptismDetails?.binyagStatus === "Cancelled" ? "not-allowed" : "pointer",
+                            border: "none",
+                            padding: "10px 24px",
+                            borderRadius: "4px",
+                            fontWeight: "bold",
+                            fontSize: "16px",
+                            marginTop: "10px"
+                        }}
+                    >
+                        Cancel Baptism
+                    </button>
                 </div>
-
-                {/* Cancellation Modal */}
-                {/* {showCancelModal && (
-                    <div >
-                        <div className="modal">
-                            <h3>Cancel Baptism</h3>
-                            <p>Please provide a reason for cancellation:</p>
-                            <textarea
-                                value={cancelReason}
-                                onChange={(e) => setCancelReason(e.target.value)}
-                                placeholder="Enter reason..."
-                                className="modal-textarea"
-                            />
-                            <div className="modal-buttons">
-                                <button onClick={handleCancel}>Confirm Cancel</button>
-                                <button onClick={() => setShowCancelModal(false)}>Back</button>
-                            </div>
-                        </div>
-                    </div>
-                )} */}
                 <Dialog open={showCancelModal} onClose={() => setShowCancelModal(false)} size="md">
                     <DialogTitle>Cancel Baptism</DialogTitle>
                     <DialogContent>

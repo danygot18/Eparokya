@@ -161,7 +161,6 @@ exports.getConfirmedPrayers = async (req, res) => {
   }
 };
 
-
 exports.toggleInclude = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -175,26 +174,21 @@ exports.toggleInclude = async (req, res) => {
 
     const isAlreadyIncluded = prayer.includeBy.includes(userId);
 
-    if (isAlreadyIncluded) {
-      // Remove user from includeBy array (uninclude)
-      prayer.includeBy = prayer.includeBy.filter(id => id.toString() !== userId.toString());
-    } else {
-      // Add user to includeBy array (include)
+    if (!isAlreadyIncluded) {
+      // Only add user if not already included
       prayer.includeBy.push(userId);
+      await prayer.save();
     }
-
-    await prayer.save();
 
     res.status(200).json({
       includeCount: prayer.includeBy.length,
-      includedByUser: !isAlreadyIncluded, // Return correct toggle state
+      includedByUser: true, // Always true after first include
     });
   } catch (error) {
-    console.error("Error toggling include:", error);
+    console.error("Error including prayer:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
-
 
 exports.toggleLike = async (req, res) => {
   const prayerId = req.params.prayerId;
@@ -226,7 +220,6 @@ exports.toggleLike = async (req, res) => {
   }
 };
 
-
 exports.getAllPrayers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -238,16 +231,33 @@ exports.getAllPrayers = async (req, res) => {
     }
 
     const prayers = await PrayerWall.find(query)
-      .populate("userId", "name _id")
+      .populate("userId", "name _id avatar")
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
 
     const total = await PrayerWall.countDocuments(query);
 
+    // Add likedByUser and includedByUser for each prayer
+   const userId = req.user?._id?.toString();
+
+const prayersWithUserFlags = prayers.map(prayer => {
+  const likedByUser = prayer.likedBy.some(id => id.toString() === userId);
+  const includedByUser = prayer.includeBy.some(id => id.toString() === userId);
+
+  return {
+    ...prayer.toObject(),
+    likedByUser,
+    includedByUser,
+    likes: prayer.likedBy.length,
+    includeCount: prayer.includeBy.length,
+    user: prayer.userId,
+  };
+});
+
     res.status(200).json({
       success: true,
-      prayers,
+      prayers: prayersWithUserFlags,
       total,
       currentPage: page,
     });
@@ -334,8 +344,6 @@ exports.softDeletePrayer = async (req, res) => {
   }
 };
 
-
-
 exports.approvePrayer = async (req, res) => {
   const { prayerId } = req.params;
 
@@ -359,7 +367,6 @@ exports.approvePrayer = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
-
 
 exports.rejectPrayer = async (req, res) => {
   try {

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./WeddinDetails.css";
 import "./wedding.css";
-
 import SideBar from "../SideBar";
 import WeddingChecklist from "./WeddingChecklist";
 import { useParams, useNavigate } from "react-router-dom";
@@ -23,6 +22,7 @@ import {
   CircularProgress
 } from "@mui/material";
 import { format } from "date-fns";
+import Loader from "../../Layout/Loader"
 
 const WeddingDetails = () => {
   const { weddingId } = useParams();
@@ -62,6 +62,7 @@ const WeddingDetails = () => {
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -264,6 +265,7 @@ const WeddingDetails = () => {
       return;
     }
     try {
+      setIsCancelling(true);
       const response = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/declineWedding/${weddingId}`,
         { reason: cancelReason },
@@ -274,6 +276,16 @@ const WeddingDetails = () => {
         position: toast.POSITION.TOP_RIGHT,
       });
       setShowCancelModal(false);
+
+      // Update weddingDetails state to reflect cancelled status
+      setWeddingDetails(prev => ({
+        ...prev,
+        weddingStatus: "Cancelled",
+        cancellingReason: {
+          user: "Admin",
+          reason: cancelReason,
+        },
+      }));
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Failed to cancel the wedding.",
@@ -281,6 +293,8 @@ const WeddingDetails = () => {
           position: toast.POSITION.TOP_RIGHT,
         }
       );
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -307,7 +321,7 @@ const WeddingDetails = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loader />;
 
   if (error) return <div>Error: {error}</div>;
 
@@ -821,17 +835,16 @@ const WeddingDetails = () => {
             <div className="wedding-date-box">
               <h3>Updated Wedding Date</h3>
               <p className="date">
-                {updatedWeddingDate
-                  ? new Date(updatedWeddingDate).toLocaleDateString()
+                {weddingDetails?.adminRescheduled?.date
+                  ? new Date(weddingDetails.adminRescheduled.date).toLocaleDateString()
                   : "N/A"}
               </p>
-
-              {weddingDetails?.adminRescheduled?.reason && (
-                <div className="reschedule-reason">
-                  <h3>Reason for Rescheduling</h3>
-                  <p>{weddingDetails.adminRescheduled.reason}</p>
-                </div>
-              )}
+              <p className="reason">
+                <strong>Reason:</strong>{" "}
+                {weddingDetails?.adminRescheduled?.reason
+                  ? weddingDetails.adminRescheduled.reason
+                  : "N/A"}
+              </p>
             </div>
 
             {/* For Additional Requirements */}
@@ -959,11 +972,18 @@ const WeddingDetails = () => {
 
             {/* Cancel Button */}
             <div className="button-container">
-              <button onClick={() => setShowCancelModal(true)}>
-                Cancel Wedding
+              <button
+                onClick={() => setShowCancelModal(true)}
+                disabled={
+                  isCancelling ||
+                  confirmLoading ||
+                  weddingDetails?.weddingStatus === "Cancelled"
+                }
+              >
+                {weddingDetails?.weddingStatus === "Cancelled" ? "Wedding Cancelled" : "Cancel Wedding"}
               </button>
-            </div>
 
+            </div>
             {/* Cancellation Modal */}
             {showCancelModal && (
               <div className="modal-overlay">
@@ -975,16 +995,55 @@ const WeddingDetails = () => {
                     onChange={(e) => setCancelReason(e.target.value)}
                     placeholder="Enter reason..."
                     className="modal-textarea"
+                    disabled={isCancelling}
                   />
                   <div className="modal-buttons">
-                    <button onClick={handleCancel}>Confirm Cancel</button>
-                    <button onClick={() => setShowCancelModal(false)}>
+                    <button onClick={handleCancel} disabled={isCancelling}>
+                      {isCancelling ? "Cancelling..." : "Confirm Cancel"}
+                    </button>
+                    <button
+                      onClick={() => setShowCancelModal(false)}
+                      disabled={isCancelling}
+                    >
                       Back
                     </button>
                   </div>
                 </div>
               </div>
             )}
+            {/* Confirm Button */}
+            <button
+              disabled={
+                weddingDetails?.weddingStatus === "Confirmed" ||
+                weddingDetails?.weddingStatus === "Cancelled" ||
+                isCancelling
+              }
+              onClick={() => setShowConfirmDialog(true)}
+              style={{
+                backgroundColor:
+                  weddingDetails?.weddingStatus === "Confirmed" || weddingDetails?.weddingStatus === "Cancelled"
+                    ? "#bdbdbd"
+                    : "#1976d2",
+                color: "#fff",
+                cursor:
+                  weddingDetails?.weddingStatus === "Confirmed" || weddingDetails?.weddingStatus === "Cancelled" || isCancelling
+                    ? "not-allowed"
+                    : "pointer",
+                border: "none",
+                padding: "10px 24px",
+                borderRadius: "4px",
+                fontWeight: "bold",
+                fontSize: "16px",
+                marginTop: "10px"
+              }}
+            >
+              {weddingDetails?.weddingStatus === "Confirmed"
+                ? "Confirmed Wedding"
+                : weddingDetails?.weddingStatus === "Cancelled"
+                  ? "Wedding Cancelled"
+                  : "Confirm Wedding"}
+            </button>
+
           </div>
           <div
             style={{
