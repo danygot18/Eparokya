@@ -97,18 +97,18 @@ io.on('connection', (socket) => {
     });
 });
 
-// Load sentiment analysis model
-let sentimentAnalyzer;
+// // Load sentiment analysis model
+// let sentimentAnalyzer;
 
-(async () => {
-    try {
-        const { pipeline } = await import('@xenova/transformers');
-        sentimentAnalyzer = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
-        console.log('🧠 Sentiment model loaded successfully!');
-    } catch (error) {
-        console.error("❌ Error loading sentiment model:", error);
-    }
-})();
+// (async () => {
+//     try {
+//         const { pipeline } = await import('@xenova/transformers');
+//         sentimentAnalyzer = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
+//         console.log('🧠 Sentiment model loaded successfully!');
+//     } catch (error) {
+//         console.error("❌ Error loading sentiment model:", error);
+//     }
+// })();
 
 
 
