@@ -33,11 +33,11 @@ const SubmittedWeddingList = () => {
         { withCredentials: true }
       );
       if (response.data && Array.isArray(response.data.forms)) {
-        setWeddingForms(response.data.forms);
-        setFilteredForms(response.data.forms);
-      } else {
-        setWeddingForms([]);
-        setFilteredForms([]);
+        const sortedForms = response.data.forms.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setWeddingForms(sortedForms);
+        setFilteredForms(sortedForms);
       }
     } catch (err) {
       setError(err.response?.data?.message || "Unable to fetch wedding forms.");
@@ -96,7 +96,6 @@ const SubmittedWeddingList = () => {
     });
   };
 
-  
   if (loading) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center" bg="#fff">
@@ -108,7 +107,9 @@ const SubmittedWeddingList = () => {
   if (error) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center" bg="#fff">
-        <Text color="#d32f2f" fontSize={16}>{error}</Text>
+        <Text color="#d32f2f" fontSize={16}>
+          {error}
+        </Text>
       </YStack>
     );
   }
@@ -125,7 +126,9 @@ const SubmittedWeddingList = () => {
           <Button
             key={status}
             size="$3"
-            backgroundColor={activeFilter === status ? statusColors[status] : "#e0e0e0"}
+            backgroundColor={
+              activeFilter === status ? statusColors[status] : "#e0e0e0"
+            }
             color={activeFilter === status ? "#fff" : "#333"}
             fontWeight="bold"
             onPress={() => filterForms(status)}
@@ -151,60 +154,69 @@ const SubmittedWeddingList = () => {
           No submitted wedding forms found.
         </Text>
       ) : (
-<FlatList
-  data={filteredForms}
-  keyExtractor={(item) => item._id}
-  showsVerticalScrollIndicator={false}
-  renderItem={({ item, index }) => {
-    const statusColor =
-      item.weddingStatus === "Confirmed"
-        ? "#4caf50"
-        : item.weddingStatus === "Declined"
-        ? "#ff5722"
-        : "#ffd700";
-    return (
-      <Card
-        key={item._id}
-        p="$3"
-        mb="$3"
-        borderRadius={12}
-        backgroundColor="#fff"
-        borderWidth={2}
-        borderColor={statusColor}
-        onPress={() => handleCardClick(item._id)} // <-- updated navigation
-        pressStyle={{ opacity: 0.9 }}
-      >
-        <XStack alignItems="center" justifyContent="space-between" mb="$2">
-          <Text
-            backgroundColor={statusColor}
-            color="#fff"
-            px="$2"
-            py={4}
-            borderRadius={6}
-            fontWeight="bold"
-            fontSize={13}
-          >
-            {item.weddingStatus ?? "Unknown"}
-          </Text>
-          <Text fontSize={18} fontWeight="bold" ml="$2" flex={1}>
-            Record #{index + 1}: {item.brideName ?? "Unknown Bride"} & {item.groomName ?? "Unknown Groom"}
-          </Text>
-        </XStack>
-        <YStack space="$1" ml="$2">
-          <Text>
-            <Text fontWeight="bold">Wedding Date:</Text> {formatDate(item.weddingDate)}
-          </Text>
-          <Text>
-            <Text fontWeight="bold">Wedding Time:</Text> {formatTime(item.weddingTime)}
-          </Text>
-          <Text>
-            <Text fontWeight="bold">Bride Contact:</Text> {item.bridePhone ?? "N/A"} |{" "}
-            <Text fontWeight="bold">Groom Contact:</Text> {item.groomPhone ?? "N/A"}
-          </Text>
-        </YStack>
-      </Card>
-    );
-  }}
+        <FlatList
+          data={filteredForms}
+          keyExtractor={(item) => item._id}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item, index }) => {
+            const statusColor =
+              item.weddingStatus === "Confirmed"
+                ? "#4caf50"
+                : item.weddingStatus === "Declined"
+                ? "#ff5722"
+                : "#ffd700";
+            return (
+              <Card
+                key={item._id}
+                p="$3"
+                mb="$3"
+                borderRadius={12}
+                backgroundColor="#fff"
+                borderWidth={2}
+                borderColor={statusColor}
+                onPress={() => handleCardClick(item._id)} // <-- updated navigation
+                pressStyle={{ opacity: 0.9 }}
+              >
+                <XStack
+                  alignItems="center"
+                  justifyContent="space-between"
+                  mb="$2"
+                >
+                  <Text
+                    backgroundColor={statusColor}
+                    color="#fff"
+                    px="$2"
+                    py={4}
+                    borderRadius={6}
+                    fontWeight="bold"
+                    fontSize={13}
+                  >
+                    {item.weddingStatus ?? "Unknown"}
+                  </Text>
+                  <Text fontSize={18} fontWeight="bold" ml="$2" flex={1}>
+                    Record #{index + 1}: {item.brideName ?? "Unknown Bride"} &{" "}
+                    {item.groomName ?? "Unknown Groom"}
+                  </Text>
+                </XStack>
+                <YStack space="$1" ml="$2">
+                  <Text>
+                    <Text fontWeight="bold">Wedding Date:</Text>{" "}
+                    {formatDate(item.weddingDate)}
+                  </Text>
+                  <Text>
+                    <Text fontWeight="bold">Wedding Time:</Text>{" "}
+                    {formatTime(item.weddingTime)}
+                  </Text>
+                  <Text>
+                    <Text fontWeight="bold">Bride Contact:</Text>{" "}
+                    {item.bridePhone ?? "N/A"} |{" "}
+                    <Text fontWeight="bold">Groom Contact:</Text>{" "}
+                    {item.groomPhone ?? "N/A"}
+                  </Text>
+                </YStack>
+              </Card>
+            );
+          }}
         />
       )}
     </YStack>

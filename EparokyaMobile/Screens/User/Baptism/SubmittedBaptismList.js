@@ -16,35 +16,37 @@ const SubmittedBaptismList = () => {
   const navigation = useNavigation();
   const { user, token } = useSelector((state) => state.auth);
 
-  console.log(baseURL);
+
   useEffect(() => {
     fetchMySubmittedForms();
   }, []);
 
-  const fetchMySubmittedForms = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `${baseURL}/getAllUserSubmittedBaptism`,
-        { withCredentials: true }
+ const fetchMySubmittedForms = async () => {
+  setLoading(true);
+  try {
+    const response = await axios.get(
+      `${baseURL}/getAllUserSubmittedBaptism`,
+      { withCredentials: true }
+    );
+
+    if (response.data && Array.isArray(response.data.forms)) {
+      const sortedForms = response.data.forms.sort(
+        (a, b) => new Date(b.baptismDate) - new Date(a.baptismDate)
       );
-
-      console.log("API Response:", response.data);
-
-      if (response.data && Array.isArray(response.data.forms)) {
-        setBaptismForms(response.data.forms);
-        setFilteredForms(response.data.forms);
-      } else {
-        setBaptismForms([]);
-        setFilteredForms([]);
-      }
-    } catch (error) {
-      console.error("Error fetching baptism forms:", error);
-      setError(err.response?.data?.message || "No baptism forms.");
-    } finally {
-      setLoading(false);
+      setBaptismForms(sortedForms);
+      setFilteredForms(sortedForms);
+    } else {
+      setBaptismForms([]);
+      setFilteredForms([]);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching baptism forms:", error);
+    setError(error.response?.data?.message || "No baptism forms.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const filterForms = (status) => {
     setActiveFilter(status);

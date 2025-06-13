@@ -14,6 +14,7 @@ import axios from "axios";
 import { useRoute } from "@react-navigation/native";
 import baseURL from "../../../assets/common/baseUrl";
 import UserWeddingChecklist from "./UserWeddingChecklist";
+import { Linking } from "react-native";
 
 const imageFields = [
   { label: "Groom Baptismal Certificate", key: "GroomNewBaptismalCertificate" },
@@ -81,6 +82,13 @@ const SubmittedWeddingDetails = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelLoading, setCancelLoading] = useState(false);
+
+  const [viewImageModal, setViewImageModal] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState(null);
+
+  const isImage = (url) => {
+    return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
+  };
 
   useEffect(() => {
     fetchWedding();
@@ -281,19 +289,87 @@ const SubmittedWeddingDetails = () => {
                 <Text style={{ fontWeight: "bold", marginBottom: 8 }}>
                   {label}
                 </Text>
-                <Image
-                  source={{ uri: img.url }}
-                  style={{
-                    width: "100%",
-                    height: 200,
-                    borderRadius: 10,
-                    backgroundColor: "#eee",
+                <TouchableOpacity
+                  onPress={() => {
+                    if (isImage(img.url)) {
+                      setModalImageUrl(img.url);
+                      setViewImageModal(true);
+                    } else {
+                      Linking.openURL(img.url);
+                    }
                   }}
-                  resizeMode="contain"
-                />
+                  activeOpacity={0.8}
+                >
+                  {isImage(img.url) ? (
+                    <Image
+                      source={{ uri: img.url }}
+                      style={{
+                        width: "100%",
+                        height: 200,
+                        borderRadius: 10,
+                        backgroundColor: "#eee",
+                      }}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <View
+                      style={{
+                        width: "100%",
+                        height: 200,
+                        borderRadius: 10,
+                        backgroundColor: "#eee",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Text style={{ color: "#154314", fontWeight: "bold" }}>
+                        View File
+                      </Text>
+                      <Text
+                        style={{ color: "#888", fontSize: 12, marginTop: 4 }}
+                      >
+                        (Tap to open)
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
               </View>
             );
           })}
+
+          {/* Image Modal */}
+          <Modal
+            visible={viewImageModal}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setViewImageModal(false)}
+          >
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "rgba(0,0,0,0.8)",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <TouchableOpacity
+                style={{ position: "absolute", top: 40, right: 30, zIndex: 2 }}
+                onPress={() => setViewImageModal(false)}
+              >
+                <Text style={{ color: "#fff", fontSize: 22 }}>✕</Text>
+              </TouchableOpacity>
+              <Image
+                source={{ uri: modalImageUrl }}
+                style={{
+                  width: "90%",
+                  height: "70%",
+                  borderRadius: 12,
+                  resizeMode: "contain",
+                  backgroundColor: "#fff",
+                }}
+              />
+            </View>
+          </Modal>
         </ScrollView>
       )}
 

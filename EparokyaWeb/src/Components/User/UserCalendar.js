@@ -139,7 +139,6 @@ const UserCalendar = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const fetchAllEvents = useCallback(async () => {
-
     try {
       const [weddingEvents, baptismEvents, funeralEvents, customEvents] =
         await Promise.all([
@@ -181,11 +180,10 @@ const UserCalendar = () => {
           start: new Date(event.customeventDate),
           end: new Date(event.customeventDate),
           type: "Custom",
-
         })),
       ];
-      setEvents(formattedEvents);
 
+      setEvents(formattedEvents);
     } catch (error) {
       console.error("Error fetching events:", error);
       setErrorMessage("Failed to load events. Please try again.");
@@ -193,7 +191,6 @@ const UserCalendar = () => {
       setLoading(false);
     }
   }, []);
-
 
   useEffect(() => {
     fetchAllEvents();
@@ -207,8 +204,8 @@ const UserCalendar = () => {
     style: {
       backgroundColor:
         event.type === 'Wedding' ? '#FFD700' :
-          event.type === 'Baptism' ? '#4CAF50' :
-            event.type === 'Funeral' ? '#F44336' : '#9C27B0',
+        event.type === 'Baptism' ? '#4CAF50' :
+        event.type === 'Funeral' ? '#F44336' : '#9C27B0',
       color: 'white',
       borderRadius: '4px',
       border: 'none',
@@ -221,24 +218,25 @@ const UserCalendar = () => {
   if (loading) {
     return <Loader />;
   }
+
   return (
-    <Box sx={{
-      display: 'flex',
+    <Box sx={{ 
+      display: 'flex', 
       height: '100vh',
       flexDirection: isMobile ? 'column' : 'row'
     }}>
       {!isMobile && <GuestSideBar style={{ width: '20%', minWidth: '200px' }} />}
-
-      <Box sx={{
-        fontFamily: 'Helvetica, sans-serif',
-        flex: 1,
+      
+      <Box sx={{ 
+        fontFamily: 'Helvetica, sans-serif', 
+        flex: 1, 
         p: isMobile ? 2 : 3,
         overflow: 'auto'
       }}>
         <Metadata title="User Calendar" />
-        <Typography variant="h4" sx={{
-          mb: 2,
-          fontWeight: 'bold',
+        <Typography variant="h4" sx={{ 
+          mb: 2, 
+          fontWeight: 'bold', 
           color: 'success.main',
           fontSize: isMobile ? '1.5rem' : '2rem'
         }}>
@@ -251,10 +249,10 @@ const UserCalendar = () => {
           </Typography>
         )}
 
-        <Paper elevation={3} sx={{
-          height: isMobile ? '500px' : '700px',
-          p: isMobile ? 1 : 2,
-          borderRadius: 2
+        <Paper elevation={3} sx={{ 
+          height: isMobile ? '500px' : '700px', 
+          p: isMobile ? 1 : 2, 
+          borderRadius: 2 
         }}>
           <Calendar
             localizer={localizer}
@@ -278,13 +276,13 @@ const UserCalendar = () => {
         </Paper>
 
         {selectedEvent && (
-          <Paper elevation={3} sx={{
-            mt: 3,
-            p: isMobile ? 2 : 3,
-            borderRadius: 2
+          <Paper elevation={3} sx={{ 
+            mt: 3, 
+            p: isMobile ? 2 : 3, 
+            borderRadius: 2 
           }}>
-            <Typography variant="h6" sx={{
-              mb: 2,
+            <Typography variant="h6" sx={{ 
+              mb: 2, 
               fontWeight: 'bold',
               fontSize: isMobile ? '1.1rem' : '1.25rem'
             }}>
@@ -311,7 +309,7 @@ const UserCalendar = () => {
               )}
               {selectedEvent.type === 'Funeral' && (
                 <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                  <strong>Name:</strong> {selectedEvent.name || 'N/A'}
+                  <strong>Name:</strong> {selectedEvent.name ? `${selectedEvent.name.firstName || ''} ${selectedEvent.name.lastName || ''}` : 'N/A'}
                 </Typography>
               )}
               {selectedEvent.type === 'Custom' && (
