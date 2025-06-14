@@ -58,7 +58,7 @@ router.get('/getUserMassWeddingForm/:massWeddingId', isAuthenticatedUser, MassWe
 router.get('/getmassWeddingById/:massWeddingId',  MassWeddingFormController.getWeddingById);
 
 router.post('/:massWeddingId/confirmMassWedding', isAuthenticatedUser, isAuthorized("admin"),  MassWeddingFormController.confirmWedding);
-router.post('/declineMassWedding/:massWeddingId', isAuthenticatedUser, isAuthorized("admin"), MassWeddingFormController.declineWedding);
+router.post('/declineMassWedding/:massWeddingId', isAuthenticatedUser,  MassWeddingFormController.declineWedding);
 
 //wedding dates
 // router.get('/weddingdates', MassWeddingFormController.getWeddingSummary)

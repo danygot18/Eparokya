@@ -295,7 +295,7 @@ const MinistryCategoryDetails = () => {
             )}
             <div className="modal-buttons">
               <button className="submit-btn" onClick={handleSubmit}>
-                {isEditMode ? "Update" : "Submit"}
+                {isEditMode ? "Update" : "Add"}
               </button>
               <button
                 className="cancel-btn"

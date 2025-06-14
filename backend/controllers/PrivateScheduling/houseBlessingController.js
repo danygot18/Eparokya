@@ -1,4 +1,4 @@
-const HouseBlessing = require('../../models/PrivateScheduling/houseBlessing'); 
+    const HouseBlessing = require('../../models/PrivateScheduling/houseBlessing'); 
 const mongoose = require('mongoose');
 const Priest = require('../../models/Priest/priest'); 
 const User = require('../../models/user');
