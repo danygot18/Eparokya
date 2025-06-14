@@ -194,6 +194,7 @@ const MinistryCalendar = () => {
         customeventTime: event.customeventTime || null,
       }));
       setEvents(formattedEvents);
+      console.log(formattedEvents)
     } catch (error) {
       setEvents([]);
     } finally {

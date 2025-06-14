@@ -21,7 +21,6 @@ import { useSelector } from "react-redux";
 
 const { width } = Dimensions.get("window");
 
-// --- ImageSlider component ---
 const ImageSlider = ({ images }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef();
@@ -108,28 +107,11 @@ const AnnouncementPage = ({ navigation }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [pinnedAnnouncement, setPinnedAnnouncement] = useState(null);
 
   const { user, token } = useSelector((state) => state.auth);
 
   const POSTS_PER_PAGE = 5;
-
-  const fetchAnnouncements = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${baseURL}/getAllAnnouncements`);
-      const sortedAnnouncements = response.data.announcements
-        .sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated))
-        .reverse();
-      setAnnouncements(sortedAnnouncements);
-      setFilteredAnnouncements(sortedAnnouncements);
-      setTotalPages(Math.ceil(sortedAnnouncements.length / POSTS_PER_PAGE));
-    } catch (err) {
-      console.error("Failed to fetch announcements:", err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
 
   const fetchCategories = async () => {
     try {
@@ -140,16 +122,47 @@ const AnnouncementPage = ({ navigation }) => {
     }
   };
 
-  const onRefresh = () => {
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${baseURL}/getAllAnnouncements`);
+      const all = response.data.announcements
+        .sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated))
+        .reverse();
+      const featured = all.filter(a => a.isFeatured === true);
+      const unfeatured = all.filter(a => !a.isFeatured);
+      setPinnedAnnouncement(featured);
+      setAnnouncements(unfeatured);
+      setFilteredAnnouncements(unfeatured);
+      setTotalPages(Math.ceil(unfeatured.length / POSTS_PER_PAGE));
+    } catch (err) {
+      console.error("Failed to fetch announcements:", err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = async () => {
     setRefreshing(true);
-    fetchAnnouncements();
-    fetchCategories();
+    await Promise.all([fetchAnnouncements(), fetchCategories()]);
+    setRefreshing(false);
   };
 
   useEffect(() => {
     fetchCategories();
     fetchAnnouncements();
   }, []);
+
+  const renderPinnedAnnouncement = () => {
+    if (!pinnedAnnouncement || pinnedAnnouncement.length === 0) return null;
+    return (
+      <View style={styles.pinnedContainer}>
+        <Text style={styles.pinnedLabel}>Featured Announcements</Text>
+        {pinnedAnnouncement.map(item => renderItem({ item }))}
+      </View>
+    );
+  };
 
   useEffect(() => {
     const filtered = announcements.filter((announcement) => {
@@ -159,11 +172,11 @@ const AnnouncementPage = ({ navigation }) => {
 
       const matchesSearch = searchTerm
         ? (announcement.name &&
-            announcement.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          (announcement.tags &&
-            announcement.tags.some((tag) =>
-              tag.toLowerCase().includes(searchTerm.toLowerCase())
-            ))
+          announcement.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (announcement.tags &&
+          announcement.tags.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase())
+          ))
         : true;
 
       return matchesCategory && matchesSearch;
@@ -195,7 +208,7 @@ const AnnouncementPage = ({ navigation }) => {
     const config = { withCredentials: true };
 
     try {
-      
+
       const response = await axios.put(
         `${baseURL}/likeAnnouncement/${announcementId}`,
         {},
@@ -207,11 +220,11 @@ const AnnouncementPage = ({ navigation }) => {
         prevAnnouncements.map((announcement) =>
           announcement._id === announcementId
             ? {
-                ...announcement,
-                likedBy: isLikedNow
-                  ? [...announcement.likedBy, user._id]
-                  : announcement.likedBy.filter((uid) => uid !== user._id),
-              }
+              ...announcement,
+              likedBy: isLikedNow
+                ? [...announcement.likedBy, user._id]
+                : announcement.likedBy.filter((uid) => uid !== user._id),
+            }
             : announcement
         )
       );
@@ -377,19 +390,17 @@ const AnnouncementPage = ({ navigation }) => {
         data={getPaginatedData()}
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={
+          <>
+            {renderHeader()}
+            {renderPinnedAnnouncement()}
+          </>
+        }
         ListFooterComponent={renderFooter}
         contentContainerStyle={styles.flatListContent}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={["#388e3c"]}
-            tintColor="#388e3c"
-            progressBackgroundColor="#ffffff"
-          />
-        }
+        onRefresh={onRefresh}
+        refreshing={refreshing}
       />
       <Toast />
     </View>
@@ -573,6 +584,21 @@ const styles = StyleSheet.create({
   },
   sliderDotActive: {
     backgroundColor: "#388e3c",
+  },
+  pinnedContainer: {
+    backgroundColor: "#fffde7",
+    borderRadius: 10,
+    marginVertical: 10,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: "#ffe082",
+    elevation: 2,
+  },
+  pinnedLabel: {
+    color: "#ff9800",
+    fontWeight: "bold",
+    marginBottom: 4,
+    fontSize: 15,
   },
 });
 
