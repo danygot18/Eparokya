@@ -257,7 +257,6 @@ const FuneralList = () => {
                                                             try {
                                                                 const rawTime = item.funeraltime;
 
-                                                                // If it's just a time string like "12:41", create a full date with today's date
                                                                 let date;
                                                                 if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
                                                                     const today = new Date();

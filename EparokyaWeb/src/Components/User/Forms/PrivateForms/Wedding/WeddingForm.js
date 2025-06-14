@@ -132,7 +132,7 @@ const WeddingForm = () => {
     required,
     value,
     preview,
-    onChange
+    onChange,
   }) => (
     <Form.Group className="mb-3">
       <Form.Label>
@@ -147,12 +147,12 @@ const WeddingForm = () => {
       />
       {preview && (
         <div className="mt-2">
-          {value?.type?.startsWith('image/') ? (
+          {value?.type?.startsWith("image/") ? (
             <img
               src={preview}
               alt="Preview"
               className="img-thumbnail"
-              style={{ maxHeight: '100px' }}
+              style={{ maxHeight: "100px" }}
             />
           ) : (
             <div className="border p-2">
@@ -244,7 +244,6 @@ const WeddingForm = () => {
     });
   };
 
-
   // console.log("Form data:", formData);
   const handleFileChange = (e) => {
     const { name, files } = e.target;
@@ -255,11 +254,11 @@ const WeddingForm = () => {
     // Validate file
     const MAX_SIZE = 10 * 1024 * 1024;
     const ALLOWED_TYPES = [
-      'image/jpeg',
-      'image/png',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      "image/jpeg",
+      "image/png",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
     if (file.size > MAX_SIZE) {
@@ -274,18 +273,18 @@ const WeddingForm = () => {
 
     const fileUrl = URL.createObjectURL(file);
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       documents: {
         ...prev.documents,
-        [name]: file
+        [name]: file,
       },
       previews: {
         ...prev.previews,
-        [name]: file.type.startsWith('image/')
-          ? fileUrl  // Use object URL for images
-          : fileUrl  // Also use object URL for PDFs (works better in iframes)
-      }
+        [name]: file.type.startsWith("image/")
+          ? fileUrl // Use object URL for images
+          : fileUrl, // Also use object URL for PDFs (works better in iframes)
+      },
     }));
   };
 
@@ -313,12 +312,21 @@ const WeddingForm = () => {
       [addressType]: {
         ...prev[addressType],
         city: selectedCity,
+        customCity: selectedCity === "Others" ? "" : undefined, // Clear if not "Others"
       },
     }));
+  };
 
-    if (selectedCity === "Others") {
-      setCustomCity("");
-    }
+  const handleCustomCityChange = (e, addressType) => {
+    const value = e.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      [addressType]: {
+        ...prev[addressType],
+        customCity: value,
+      },
+    }));
   };
 
   const handleBarangayChange = (e, addressType) => {
@@ -337,74 +345,90 @@ const WeddingForm = () => {
     }
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setIsSubmitting(true);
+
     if (isMarried) {
       toast.error('Sorry, but a "Married" user cannot submit an application.');
+      setIsSubmitting(false);
       return;
     }
-    // Required documents list
+
+    // Match backend required documents exactly
     const REQUIRED_DOCUMENTS = [
-      'GroomNewBaptismalCertificate',
-      'GroomNewConfirmationCertificate',
-      'GroomMarriageLicense',
-      'GroomMarriageBans',
-      'GroomOrigCeNoMar',
-      'GroomOrigPSA',
-      'GroomPermitFromtheParishOftheBride',
-      'BrideNewBaptismalCertificate',
-      'BrideNewConfirmationCertificate',
-      'BrideMarriageLicense',
-      'BrideMarriageBans',
-      'BrideOrigCeNoMar',
-      'BrideOrigPSA',
-      'BridePermitFromtheParishOftheBride'
+      "GroomNewBaptismalCertificate",
+      "GroomNewConfirmationCertificate",
+      "GroomMarriageLicense",
+      "GroomMarriageBans",
+      "GroomOrigCeNoMar",
+      "GroomOrigPSA",
+      "GroomPermitFromtheParishOftheBride",
+      "GroomChildBirthCertificate",
+      "GroomOneByOne",
+      "BrideNewBaptismalCertificate",
+      "BrideNewConfirmationCertificate",
+      "BrideMarriageLicense",
+      "BrideMarriageBans",
+      "BrideOrigCeNoMar",
+      "BrideOrigPSA",
+      "BridePermitFromtheParishOftheBride",
+      "BrideChildBirthCertificate",
+      "BrideOneByOne",
     ];
 
-    // Check for missing documents
     const missingDocuments = REQUIRED_DOCUMENTS.filter(
-      field => !formData.documents[field]
+      (field) => !formData.documents[field]
     );
 
     if (missingDocuments.length > 0) {
-      toast.error(`Missing required documents: ${missingDocuments.join(', ')}`);
+      toast.error(`Missing required documents: ${missingDocuments.join(", ")}`);
+      setIsSubmitting(false);
       return;
     }
-    const formDataObj = new FormData();
-    Object.entries(formData.documents).forEach(([fieldName, file]) => {
-      if (file) {
-        formDataObj.append(fieldName, file);
-      }
-    });
-
-    const { documents, previews, ...otherData } = formData;
-    Object.entries(otherData).forEach(([key, value]) => {
-      if (typeof value === 'object' && value !== null) {
-        formDataObj.append(key, JSON.stringify(value));
-      } else {
-        formDataObj.append(key, value);
-      }
-    });
 
     try {
+      const formDataObj = new FormData();
+
+      // Append documents
+      Object.entries(formData.documents).forEach(([fieldName, file]) => {
+        if (file) {
+          formDataObj.append(fieldName, file);
+        }
+      });
+
+      // Append other fields
+      const { documents, previews, ...otherData } = formData;
+      Object.entries(otherData).forEach(([key, value]) => {
+        if (typeof value === "object" && value !== null) {
+          formDataObj.append(key, JSON.stringify(value));
+        } else {
+          formDataObj.append(key, value);
+        }
+      });
+
+      // Submit the form
       const response = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/submitWeddingForm`,
         formDataObj,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
           withCredentials: true,
         }
       );
 
       toast.success("Wedding form submitted successfully!");
-
+      setIsSubmitting(false);
+      // Optionally reset form state here
     } catch (error) {
-
+      console.error("Form submission error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong during submission."
+      );
+      setIsSubmitting(false);
     }
   };
 
@@ -422,7 +446,6 @@ const WeddingForm = () => {
             width: "calc(100% - 270px)",
           }}
         >
-
           {/* Married User Dialog */}
           <BsModal
             show={showMarriedDialog}
@@ -434,13 +457,23 @@ const WeddingForm = () => {
               <BsModal.Title>Notice</BsModal.Title>
             </BsModal.Header>
             <BsModal.Body>
-              <div style={{ color: "red", fontWeight: "bold", textAlign: "center" }}>
+              <div
+                style={{
+                  color: "red",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
                 Sorry, but a "Married" user cannot submit an application. <br />
-                Paumanhin, ang "kasal" ay hindi maaring mag-sagot ng applikasyon.
+                Paumanhin, ang "kasal" ay hindi maaring mag-sagot ng
+                applikasyon.
               </div>
             </BsModal.Body>
             <BsModal.Footer style={{ justifyContent: "center" }}>
-              <Button variant="secondary" onClick={() => setShowMarriedDialog(false)}>
+              <Button
+                variant="secondary"
+                onClick={() => setShowMarriedDialog(false)}
+              >
                 Close
               </Button>
             </BsModal.Footer>
@@ -452,11 +485,25 @@ const WeddingForm = () => {
             encType="multipart/form-data"
             style={{ paddingLeft: "30px" }}
           >
-            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", maxWidth: "300px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: 20,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  maxWidth: "300px",
+                }}
+              >
                 <div>
-                  <h2 style={{ fontSize: "1.2rem", margin: 0 }}>Click here to see Available Dates</h2>
+                  <h2 style={{ fontSize: "1.2rem", margin: 0 }}>
+                    Click here to see Available Dates
+                  </h2>
                 </div>
                 <Button
                   variant="outline-secondary"
@@ -468,16 +515,18 @@ const WeddingForm = () => {
                     borderRadius: 6,
                     padding: "4px 14px",
                     fontSize: "0.95rem",
-                    boxShadow: "none"
+                    boxShadow: "none",
                   }}
                   onClick={() => setShowOverlay(true)}
                 >
                   View Calendar
                 </Button>
               </div>
-              <ConfirmedWeddingModal show={showOverlay} onClose={() => setShowOverlay(false)} />
+              <ConfirmedWeddingModal
+                show={showOverlay}
+                onClose={() => setShowOverlay(false)}
+              />
             </div>
-
 
             <h2>Wedding Form</h2>
             {/* Wedding Date & Time */}
@@ -492,7 +541,9 @@ const WeddingForm = () => {
               />
             </Form.Group>
             <Form.Group>
-              <Form.Label>Wedding Date (Monday Schedules are NOT Available)</Form.Label>
+              <Form.Label>
+                Wedding Date (Monday Schedules are NOT Available)
+              </Form.Label>
               <Form.Control
                 type="date"
                 name="weddingDate"
@@ -523,7 +574,6 @@ const WeddingForm = () => {
               />
             </Form.Group>
 
-
             {/* Groom's Information */}
             <fieldset className="form-group">
               <legend>Groom's Info</legend>
@@ -549,7 +599,12 @@ const WeddingForm = () => {
                       type="text"
                       value={formData.groomAddress.BldgNameTower}
                       onChange={(e) =>
-                        handleNestedChange(e, "groomAddress", null, "BldgNameTower")
+                        handleNestedChange(
+                          e,
+                          "groomAddress",
+                          null,
+                          "BldgNameTower"
+                        )
                       }
                     />
                   </Col>
@@ -559,7 +614,12 @@ const WeddingForm = () => {
                       type="text"
                       value={formData.groomAddress.LotBlockPhaseHouseNo}
                       onChange={(e) =>
-                        handleNestedChange(e, "groomAddress", null, "LotBlockPhaseHouseNo")
+                        handleNestedChange(
+                          e,
+                          "groomAddress",
+                          null,
+                          "LotBlockPhaseHouseNo"
+                        )
                       }
                     />
                   </Col>
@@ -572,7 +632,12 @@ const WeddingForm = () => {
                       type="text"
                       value={formData.groomAddress.SubdivisionVillageZone}
                       onChange={(e) =>
-                        handleNestedChange(e, "groomAddress", null, "SubdivisionVillageZone")
+                        handleNestedChange(
+                          e,
+                          "groomAddress",
+                          null,
+                          "SubdivisionVillageZone"
+                        )
                       }
                     />
                   </Col>
@@ -635,8 +700,10 @@ const WeddingForm = () => {
                         <Form.Control
                           type="text"
                           placeholder="Enter your city"
-                          value={customCity}
-                          onChange={(e) => setCustomCity(e.target.value)}
+                          value={formData.groomAddress.customCity || ""}
+                          onChange={(e) =>
+                            handleCustomCityChange(e, "groomAddress")
+                          }
                         />
                       </>
                     )}
@@ -760,7 +827,12 @@ const WeddingForm = () => {
                       type="text"
                       value={formData.brideAddress.BldgNameTower}
                       onChange={(e) =>
-                        handleNestedChange(e, "brideAddress", null, "BldgNameTower")
+                        handleNestedChange(
+                          e,
+                          "brideAddress",
+                          null,
+                          "BldgNameTower"
+                        )
                       }
                     />
                   </Col>
@@ -770,7 +842,12 @@ const WeddingForm = () => {
                       type="text"
                       value={formData.brideAddress.LotBlockPhaseHouseNo}
                       onChange={(e) =>
-                        handleNestedChange(e, "brideAddress", null, "LotBlockPhaseHouseNo")
+                        handleNestedChange(
+                          e,
+                          "brideAddress",
+                          null,
+                          "LotBlockPhaseHouseNo"
+                        )
                       }
                     />
                   </Col>
@@ -783,7 +860,12 @@ const WeddingForm = () => {
                       type="text"
                       value={formData.brideAddress.SubdivisionVillageZone}
                       onChange={(e) =>
-                        handleNestedChange(e, "brideAddress", null, "SubdivisionVillageZone")
+                        handleNestedChange(
+                          e,
+                          "brideAddress",
+                          null,
+                          "SubdivisionVillageZone"
+                        )
                       }
                     />
                   </Col>
@@ -846,8 +928,10 @@ const WeddingForm = () => {
                         <Form.Control
                           type="text"
                           placeholder="Enter your city"
-                          value={customCity}
-                          onChange={(e) => setCustomCity(e.target.value)}
+                          value={formData.brideAddress.customCity || ""}
+                          onChange={(e) =>
+                            handleCustomCityChange(e, "brideAddress")
+                          }
                         />
                       </>
                     )}
@@ -946,7 +1030,6 @@ const WeddingForm = () => {
                 </Col>
               </Row>
             </fieldset>
-
 
             {/* Ninong Section */}
             <fieldset className="form-group">
@@ -1070,7 +1153,6 @@ const WeddingForm = () => {
               </button>
             </fieldset>
 
-
             {/* File Uploads */}
             <fieldset className="form-group">
               <legend>Upload Documents</legend>
@@ -1087,8 +1169,10 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.BrideNewBaptismalCertificate && (
-                      formData.documents?.BrideNewBaptismalCertificate?.type?.startsWith('image/') ? (
+                    {formData.previews?.BrideNewBaptismalCertificate &&
+                      (formData.documents?.BrideNewBaptismalCertificate?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.BrideNewBaptismalCertificate}
                           alt="Preview"
@@ -1096,7 +1180,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.BrideNewBaptismalCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1105,15 +1196,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.BrideNewBaptismalCertificate?.name || 'Document Preview'}
+                            {formData.documents?.BrideNewBaptismalCertificate
+                              ?.name || "Document Preview"}
                           </div>
-                        </div >
-                      )
-                    )}
+                        </div>
+                      ))}
                   </Form.Group>
                 </Col>
 
@@ -1127,16 +1217,27 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.BrideNewConfirmationCertificate && (
-                      formData.documents?.BrideNewConfirmationCertificate?.type?.startsWith('image/') ? (
+                    {formData.previews?.BrideNewConfirmationCertificate &&
+                      (formData.documents?.BrideNewConfirmationCertificate?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
-                          src={formData.previews.BrideNewConfirmationCertificate}
+                          src={
+                            formData.previews.BrideNewConfirmationCertificate
+                          }
                           alt="Preview"
                           className="img-thumbnail mt-2"
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.BrideNewConfirmationCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1145,15 +1246,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.BrideNewConfirmationCertificate?.name || 'PDF Document'}
+                            {formData.documents?.BrideNewConfirmationCertificate
+                              ?.name || "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
               </Row>
@@ -1169,8 +1269,10 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.BrideMarriageLicense && (
-                      formData.documents?.BrideMarriageLicense?.type?.startsWith('image/') ? (
+                    {formData.previews?.BrideMarriageLicense &&
+                      (formData.documents?.BrideMarriageLicense?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.BrideMarriageLicense}
                           alt="Preview"
@@ -1178,7 +1280,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.BrideMarriageLicense}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1187,15 +1296,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.BrideMarriageLicense?.name || 'PDF Document'}
+                            {formData.documents?.BrideMarriageLicense?.name ||
+                              "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
 
@@ -1209,8 +1317,10 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.BrideMarriageBans && (
-                      formData.documents?.BrideMarriageBans?.type?.startsWith('image/') ? (
+                    {formData.previews?.BrideMarriageBans &&
+                      (formData.documents?.BrideMarriageBans?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.BrideMarriageBans}
                           alt="Preview"
@@ -1218,7 +1328,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.BrideMarriageBans}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1227,15 +1344,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.BrideMarriageBans?.name || 'PDF Document'}
+                            {formData.documents?.BrideMarriageBans?.name ||
+                              "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
               </Row>
@@ -1251,8 +1367,10 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.BrideOrigCeNoMar && (
-                      formData.documents?.BrideOrigCeNoMar?.type?.startsWith('image/') ? (
+                    {formData.previews?.BrideOrigCeNoMar &&
+                      (formData.documents?.BrideOrigCeNoMar?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.BrideOrigCeNoMar}
                           alt="Preview"
@@ -1260,7 +1378,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.BrideOrigCeNoMar}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1269,15 +1394,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.BrideOrigCeNoMar?.name || 'PDF Document'}
+                            {formData.documents?.BrideOrigCeNoMar?.name ||
+                              "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
 
@@ -1291,8 +1415,10 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.BrideOrigPSA && (
-                      formData.documents?.BrideOrigPSA?.type?.startsWith('image/') ? (
+                    {formData.previews?.BrideOrigPSA &&
+                      (formData.documents?.BrideOrigPSA?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.BrideOrigPSA}
                           alt="Preview"
@@ -1300,7 +1426,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.BrideOrigPSA}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1309,15 +1442,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.BrideOrigPSA?.name || 'PDF Document'}
+                            {formData.documents?.BrideOrigPSA?.name ||
+                              "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
               </Row>
@@ -1325,7 +1457,9 @@ const WeddingForm = () => {
               <Row className="mb-3">
                 <Col md={6}>
                   <Form.Group>
-                    <Form.Label>Bride's Permit From the Parish Of the Bride</Form.Label>
+                    <Form.Label>
+                      Bride's Permit From the Parish Of the Bride
+                    </Form.Label>
                     <Form.Control
                       type="file"
                       name="BridePermitFromtheParishOftheBride"
@@ -1333,16 +1467,27 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.BridePermitFromtheParishOftheBride && (
-                      formData.documents?.BridePermitFromtheParishOftheBride?.type?.startsWith('image/') ? (
+                    {formData.previews?.BridePermitFromtheParishOftheBride &&
+                      (formData.documents?.BridePermitFromtheParishOftheBride?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
-                          src={formData.previews.BridePermitFromtheParishOftheBride}
+                          src={
+                            formData.previews.BridePermitFromtheParishOftheBride
+                          }
                           alt="Preview"
                           className="img-thumbnail mt-2"
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.BridePermitFromtheParishOftheBride}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1351,15 +1496,15 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.BridePermitFromtheParishOftheBride?.name || 'PDF Document'}
+                            {formData.documents
+                              ?.BridePermitFromtheParishOftheBride?.name ||
+                              "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
 
@@ -1372,8 +1517,10 @@ const WeddingForm = () => {
                       onChange={handleFileChange}
                       accept="image/*,.pdf"
                     />
-                    {formData.previews?.BrideChildBirthCertificate && (
-                      formData.documents?.BrideChildBirthCertificate?.type?.startsWith('image/') ? (
+                    {formData.previews?.BrideChildBirthCertificate &&
+                      (formData.documents?.BrideChildBirthCertificate?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.BrideChildBirthCertificate}
                           alt="Preview"
@@ -1381,7 +1528,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.BrideChildBirthCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1390,15 +1544,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.BrideChildBirthCertificate?.name || 'PDF Document'}
+                            {formData.documents?.BrideChildBirthCertificate
+                              ?.name || "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
               </Row>
@@ -1427,8 +1580,6 @@ const WeddingForm = () => {
             </fieldset>
 
             <fieldset className="form-group">
-
-
               {/* Bride's Documents Section */}
               <Row className="mb-3">
                 <Col md={6} sx={{ marginBottom: "20px" }}>
@@ -1441,8 +1592,10 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.GroomNewBaptismalCertificate && (
-                      formData.documents?.GroomNewBaptismalCertificate?.type?.startsWith('image/') ? (
+                    {formData.previews?.GroomNewBaptismalCertificate &&
+                      (formData.documents?.GroomNewBaptismalCertificate?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.GroomNewBaptismalCertificate}
                           alt="Preview"
@@ -1450,7 +1603,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.GroomNewBaptismalCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1459,15 +1619,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.GroomNewBaptismalCertificate?.name || 'Document Preview'}
+                            {formData.documents?.GroomNewBaptismalCertificate
+                              ?.name || "Document Preview"}
                           </div>
-                        </div >
-                      )
-                    )}
+                        </div>
+                      ))}
                   </Form.Group>
                 </Col>
 
@@ -1481,16 +1640,27 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.GroomNewConfirmationCertificate && (
-                      formData.documents?.GroomNewConfirmationCertificate?.type?.startsWith('image/') ? (
+                    {formData.previews?.GroomNewConfirmationCertificate &&
+                      (formData.documents?.GroomNewConfirmationCertificate?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
-                          src={formData.previews.GroomNewConfirmationCertificate}
+                          src={
+                            formData.previews.GroomNewConfirmationCertificate
+                          }
                           alt="Preview"
                           className="img-thumbnail mt-2"
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.GroomNewConfirmationCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1499,15 +1669,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.GroomNewConfirmationCertificate?.name || 'PDF Document'}
+                            {formData.documents?.GroomNewConfirmationCertificate
+                              ?.name || "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
               </Row>
@@ -1523,8 +1692,10 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.GroomMarriageLicense && (
-                      formData.documents?.GroomMarriageLicense?.type?.startsWith('image/') ? (
+                    {formData.previews?.GroomMarriageLicense &&
+                      (formData.documents?.GroomMarriageLicense?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.GroomMarriageLicense}
                           alt="Preview"
@@ -1532,7 +1703,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.GroomMarriageLicense}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1541,15 +1719,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.GroomMarriageLicense?.name || 'PDF Document'}
+                            {formData.documents?.GroomMarriageLicense?.name ||
+                              "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
 
@@ -1563,8 +1740,10 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.GroomMarriageBans && (
-                      formData.documents?.GroomMarriageBans?.type?.startsWith('image/') ? (
+                    {formData.previews?.GroomMarriageBans &&
+                      (formData.documents?.GroomMarriageBans?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.GroomMarriageBans}
                           alt="Preview"
@@ -1572,7 +1751,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.GroomMarriageBans}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1581,15 +1767,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.GroomMarriageBans?.name || 'PDF Document'}
+                            {formData.documents?.GroomMarriageBans?.name ||
+                              "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
               </Row>
@@ -1605,8 +1790,10 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.GroomOrigCeNoMar && (
-                      formData.documents?.GroomOrigCeNoMar?.type?.startsWith('image/') ? (
+                    {formData.previews?.GroomOrigCeNoMar &&
+                      (formData.documents?.GroomOrigCeNoMar?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.GroomOrigCeNoMar}
                           alt="Preview"
@@ -1614,7 +1801,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.GroomOrigCeNoMar}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1623,15 +1817,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.GroomOrigCeNoMar?.name || 'PDF Document'}
+                            {formData.documents?.GroomOrigCeNoMar?.name ||
+                              "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
 
@@ -1645,8 +1838,10 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.GroomOrigPSA && (
-                      formData.documents?.GroomOrigPSA?.type?.startsWith('image/') ? (
+                    {formData.previews?.GroomOrigPSA &&
+                      (formData.documents?.GroomOrigPSA?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.GroomOrigPSA}
                           alt="Preview"
@@ -1654,7 +1849,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.GroomOrigPSA}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1663,15 +1865,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.GroomOrigPSA?.name || 'PDF Document'}
+                            {formData.documents?.GroomOrigPSA?.name ||
+                              "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
               </Row>
@@ -1679,7 +1880,9 @@ const WeddingForm = () => {
               <Row className="mb-3">
                 <Col md={6}>
                   <Form.Group>
-                    <Form.Label>Grooms's Permit From the Parish Of the Bride</Form.Label>
+                    <Form.Label>
+                      Grooms's Permit From the Parish Of the Bride
+                    </Form.Label>
                     <Form.Control
                       type="file"
                       name="GroomPermitFromtheParishOftheBride"
@@ -1687,16 +1890,27 @@ const WeddingForm = () => {
                       accept="image/*,.pdf"
                       required
                     />
-                    {formData.previews?.GroomPermitFromtheParishOftheBride && (
-                      formData.documents?.GroomPermitFromtheParishOftheBride?.type?.startsWith('image/') ? (
+                    {formData.previews?.GroomPermitFromtheParishOftheBride &&
+                      (formData.documents?.GroomPermitFromtheParishOftheBride?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
-                          src={formData.previews.GroomPermitFromtheParishOftheBride}
+                          src={
+                            formData.previews.GroomPermitFromtheParishOftheBride
+                          }
                           alt="Preview"
                           className="img-thumbnail mt-2"
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.GroomPermitFromtheParishOftheBride}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1705,15 +1919,15 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.GroomPermitFromtheParishOftheBride?.name || 'PDF Document'}
+                            {formData.documents
+                              ?.GroomPermitFromtheParishOftheBride?.name ||
+                              "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
 
@@ -1726,8 +1940,10 @@ const WeddingForm = () => {
                       onChange={handleFileChange}
                       accept="image/*,.pdf"
                     />
-                    {formData.previews?.GroomChildBirthCertificate && (
-                      formData.documents?.GroomChildBirthCertificate?.type?.startsWith('image/') ? (
+                    {formData.previews?.GroomChildBirthCertificate &&
+                      (formData.documents?.GroomChildBirthCertificate?.type?.startsWith(
+                        "image/"
+                      ) ? (
                         <img
                           src={formData.previews.GroomChildBirthCertificate}
                           alt="Preview"
@@ -1735,7 +1951,14 @@ const WeddingForm = () => {
                           style={{ maxHeight: "150px" }}
                         />
                       ) : (
-                        <div className="mt-2" style={{ width: "100%", height: "300px", marginBottom: "30px", }}>
+                        <div
+                          className="mt-2"
+                          style={{
+                            width: "100%",
+                            height: "300px",
+                            marginBottom: "30px",
+                          }}
+                        >
                           <iframe
                             src={`${formData.previews.GroomChildBirthCertificate}#toolbar=0&navpanes=0&scrollbar=0`}
                             title="Document Preview"
@@ -1744,15 +1967,14 @@ const WeddingForm = () => {
                               height: "100%",
                               border: "1px solid #ddd",
                               borderRadius: "4px",
-
                             }}
                           />
                           <div className="mt-2 text-muted small">
-                            {formData.documents?.GroomChildBirthCertificate?.name || 'PDF Document'}
+                            {formData.documents?.GroomChildBirthCertificate
+                              ?.name || "PDF Document"}
                           </div>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Form.Group>
                 </Col>
               </Row>
@@ -1781,7 +2003,7 @@ const WeddingForm = () => {
             </fieldset>
 
             <button type="submit" disabled={isSubmitting || isMarried}>
-              {isSubmitting ? 'Submitting...' : 'Submit'}
+              {isSubmitting ? "Submitting..." : "Submit"}
             </button>
             <button type="button" onClick={handleClearFields}>
               Clear All Fields

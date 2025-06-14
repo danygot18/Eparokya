@@ -182,7 +182,7 @@ const MassBaptismForm = () => {
       }
 
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/api/v1/massBaptismCreate`,
+        `${process.env.REACT_APP_API}/api/v1/massBaptism/massBaptismCreate`,
         formDataObj,
         { withCredentials: true }
       );

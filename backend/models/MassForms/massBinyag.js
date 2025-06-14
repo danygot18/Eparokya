@@ -155,7 +155,8 @@ const massBaptismSchema = new mongoose.Schema({
 
   checklistId: { type: mongoose.Schema.Types.ObjectId, ref: 'BaptismChecklist' },
   termsAndConditionsId: { type: mongoose.Schema.Types.ObjectId, ref: 'TermsAndConditions' }
-
+},{
+ timestamps: true
 });
 
 module.exports = mongoose.model('massBaptism', massBaptismSchema);

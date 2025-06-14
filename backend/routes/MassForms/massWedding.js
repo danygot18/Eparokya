@@ -52,13 +52,13 @@ router.post('/:massWeddingId/commentMassWedding',  MassWeddingFormController.add
 router.post('/updateAdditionalMassReq/:massWeddingId',  MassWeddingFormController.updateAdditionalReq);
 
 router.get('/getAllUserSubmittedWedding', isAuthenticatedUser, MassWeddingFormController.getMySubmittedForms);
-// router.get('/getWeddingForm/:formId', isAuthenticatedUser, MassWeddingFormController.getWeddingFormById);
+router.get('/getUserMassWeddingForm/:massWeddingId', isAuthenticatedUser, MassWeddingFormController.getMassWeddingFormById);
 
 // router.post('/admin/available-dates', isAuthenticatedUser, isAuthorized, MassWeddingFormController.addAvailableDate);
 router.get('/getmassWeddingById/:massWeddingId',  MassWeddingFormController.getWeddingById);
 
-router.post('/:massWeddingId/confirmMassWedding',  MassWeddingFormController.confirmWedding);
-router.post('/declineMassWedding/:massWeddingId', isAuthenticatedUser, MassWeddingFormController.declineWedding);
+router.post('/:massWeddingId/confirmMassWedding', isAuthenticatedUser, isAuthorized("admin"),  MassWeddingFormController.confirmWedding);
+router.post('/declineMassWedding/:massWeddingId', isAuthenticatedUser, isAuthorized("admin"), MassWeddingFormController.declineWedding);
 
 //wedding dates
 // router.get('/weddingdates', MassWeddingFormController.getWeddingSummary)

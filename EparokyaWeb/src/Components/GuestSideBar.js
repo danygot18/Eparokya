@@ -244,7 +244,7 @@ const GuestSideBar = () => {
               ...(location.pathname === "/user/NavigationForms" ? styles.activeLink : {}),
             }}
           >
-            <FaWpforms style={styles.icon} />Request Form
+            <FaWpforms style={styles.icon} />Request
           </Link>
         </li>
 
@@ -257,7 +257,7 @@ const GuestSideBar = () => {
               ...(location.pathname === "/user/FormGuides" ? styles.activeLink : {}),
             }}
           >
-            <FaRegFileAlt style={styles.icon} /> Form Guide
+            <FaRegFileAlt style={styles.icon} />  Guide
           </Link>
         </li>
 
@@ -347,20 +347,31 @@ const GuestSideBar = () => {
 const styles = {
   sidebarContainer: {
     backgroundColor: '#d6e7c6',
-    width: '220px',
-    height: '100vh', 
-    position: 'sticky', 
+    width: '240px',
+    minWidth: '200px',
+    maxWidth: '280px',
+    height: '100vh',
+    position: 'sticky',
     top: '0',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    padding: '20px',
+    padding: '24px 18px',
     boxSizing: 'border-box',
     overflowY: 'auto',
-    srollbarWidth: 'none',
-    scrollBarOpacity: '0',
-    scrollbarWidth: 'none',        
+    scrollbarWidth: 'thin',
+    scrollbarColor: '#b6d7a8 #d6e7c6',
     msOverflowStyle: 'none',
+  },
+  '@global': {
+    '::-webkit-scrollbar': {
+      width: '6px',
+      background: '#d6e7c6',
+    },
+    '::-webkit-scrollbar-thumb': {
+      background: '#b6d7a8',
+      borderRadius: '8px',
+    },
   },
   modal: {
     position: 'absolute',
@@ -370,62 +381,72 @@ const styles = {
     width: 400,
     height: 350,
     bgcolor: 'background.paper',
-    border: '2px solid #000',
+    border: '2px solid #93c47d',
     boxShadow: 24,
     p: 4,
+    borderRadius: 3,
   },
   modalText: {
-    marginBottom: '10px',
-
+    marginBottom: '12px',
+    color: '#26562e',
+    fontSize: '15px',
   },
-
-
   profileContainer: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    marginBottom: '20px',
+    marginBottom: '24px',
+    gap: '8px',
   },
   profilePicture: {
-    width: '80px',
-    height: '80px',
+    width: '90px',
+    height: '90px',
     borderRadius: '50%',
     objectFit: 'cover',
     marginBottom: '10px',
-    border: '2px solid #FFFFFF',
+    border: '3px solid #93c47d',
+    boxShadow: '0 2px 8px rgba(38,86,46,0.08)',
+    background: '#fff',
   },
   welcomeText: {
     color: '#26562e',
-    fontSize: '16px',
+    fontSize: '18px',
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: '20px',
+    marginBottom: '18px',
+    letterSpacing: '0.5px',
   },
   menuList: {
     listStyleType: 'none',
     padding: 0,
+    margin: 0,
   },
   menuItem: {
-    marginBottom: '10px',
+    marginBottom: '12px',
   },
   link: {
     display: 'flex',
     alignItems: 'center',
-    padding: '10px 15px',
+    padding: '12px 18px',
     color: '#26562e',
     textDecoration: 'none',
-    fontSize: '16px',
-    borderRadius: '5px',
-    transition: 'background-color 0.3s',
+    fontSize: '17px',
+    borderRadius: '7px',
+    transition: 'background-color 0.2s, color 0.2s',
+    fontWeight: 500,
+    gap: '10px',
+    cursor: 'pointer',
   },
   activeLink: {
     backgroundColor: '#93c47d',
-    color: '#26562e',
+    color: '#154314',
     fontWeight: 'bold',
+    boxShadow: '0 2px 8px rgba(38,86,46,0.08)',
   },
   icon: {
-    marginRight: '10px',
-    fontSize: '18px',
+    marginRight: '12px',
+    fontSize: '20px',
+    color: '#154314',
   },
   settingsList: {
     listStyleType: 'none',

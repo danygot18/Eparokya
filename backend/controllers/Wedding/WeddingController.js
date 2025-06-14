@@ -512,22 +512,6 @@ exports.getMySubmittedForms = async (req, res) => {
 };
 
 exports.getWeddingFormById = async (req, res) => {
-  // try {
-  //   const { weddingId } = req.params;
-
-  //   const weddingForm = await Wedding.findById( weddingId )
-  //     .populate('userId', 'name email')
-  //     .lean();
-
-  //   if (!weddingForm) {
-  //     return res.status(404).json({ message: "Wedding form not found." });
-  //   }
-
-  //   res.status(200).json(weddingForm);
-  // } catch (error) {
-  //   console.error("Error fetching wedding form by ID:", error);
-  //   res.status(500).json({ message: "Server error", error: error.message });
-  // }
   try {
     const { weddingId } = req.params;
 

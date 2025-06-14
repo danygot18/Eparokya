@@ -361,7 +361,7 @@ const MassWeddingForm = () => {
     
           // Submit the form
           const response = await axios.post(
-            `${process.env.REACT_APP_API}/api/v1/submitMassWeddingForm`,
+            `${process.env.REACT_APP_API}/api/v1/massWedding/submitMassWeddingForm`,
             formDataObj,
             { withCredentials: true }
           );
