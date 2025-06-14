@@ -15,6 +15,8 @@ import { useRoute } from "@react-navigation/native";
 import baseURL from "../../../assets/common/baseUrl";
 import UserWeddingChecklist from "./UserWeddingChecklist";
 import { Linking } from "react-native";
+import { Button } from "native-base";
+import { Box, VStack, HStack } from "native-base";
 
 const imageFields = [
   { label: "Groom Baptismal Certificate", key: "GroomNewBaptismalCertificate" },
@@ -99,6 +101,7 @@ const SubmittedWeddingDetails = () => {
     try {
       const res = await axios.get(`${baseURL}/getWeddingForm/${weddingId}`);
       setWedding(res.data);
+      console.log(res.data)
     } catch (err) {
       setWedding(null);
     }
@@ -139,6 +142,7 @@ const SubmittedWeddingDetails = () => {
     );
   }
 
+
   return (
     <View style={{ flex: 1, backgroundColor: "#f4f4f4" }}>
       {/* Tabs */}
@@ -165,6 +169,9 @@ const SubmittedWeddingDetails = () => {
       {activeTab === 0 && (
         <ScrollView style={{ flex: 1, padding: 16 }}>
           {/* Wedding Info */}
+          <View style={styles.cardStatus}>
+            <Text style={styles.cardTitle}>Status: {wedding.weddingStatus}  </Text>
+          </View>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Wedding Info</Text>
             <Text>
@@ -376,31 +383,94 @@ const SubmittedWeddingDetails = () => {
       {activeTab === 2 && (
         <ScrollView style={{ flex: 1, padding: 16 }}>
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Admin Comments</Text>
-            {wedding.comments?.length ? (
+            <Text style={styles.cardTitle}>Admin Notes</Text>
+            {wedding.comments && wedding.comments.length > 0 ? (
               wedding.comments.map((c, idx) => (
                 <View key={idx} style={{ marginBottom: 8 }}>
-                  <Text>Comment: {c.selectedComment}</Text>
-                  <Text>Additional: {c.additionalComment}</Text>
+                  <Text>Comment: {c.selectedComment || "N/A"}</Text>
+                  <Text>Additional: {c.additionalComment || "N/A"}</Text>
                   <Text style={{ color: "#888", fontSize: 12 }}>
-                    {formatDate(c.createdAt)}
+                    {c.createdAt ? formatDate(c.createdAt) : "N/A"}
                   </Text>
                 </View>
               ))
             ) : (
-              <Text style={{ color: "#888" }}>No comments yet.</Text>
+              <Text style={{ color: "#888" }}>N/A</Text>
             )}
           </View>
-          {wedding.weddingStatus !== "Cancelled" && (
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setCancelDialogOpen(true)}
-            >
-              <Text style={{ color: "#fff", textAlign: "center" }}>
-                Cancel Wedding
+
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Rescheduling Information</Text>
+            {wedding.adminRescheduled ? (
+              <View style={{ marginBottom: 8 }}>
+                <Text>
+                  Date: {wedding.adminRescheduled.date ? formatDate(wedding.adminRescheduled.date) : "N/A"}
+                </Text>
+                <Text>Reason: {wedding.adminRescheduled.reason || "N/A"}</Text>
+              </View>
+            ) : (
+              <Text style={{ color: "#888" }}>N/A</Text>
+            )}
+          </View>
+
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Additional Requirements</Text>
+            {wedding.additionalReq ? (
+              <>
+                <View style={{ marginBottom: 8 }}>
+                  <Text style={{ fontWeight: 'bold' }}>Canonical Interview</Text>
+                  <Text>Date: {wedding.additionalReq.CanonicalInterview?.date ? formatDate(wedding.additionalReq.CanonicalInterview.date) : "N/A"}</Text>
+                  <Text>Time: {wedding.additionalReq.CanonicalInterview?.time || "N/A"}</Text>
+                </View>
+
+                <View style={{ marginBottom: 8 }}>
+                  <Text style={{ fontWeight: 'bold' }}>Confession</Text>
+                  <Text>Date: {wedding.additionalReq.Confession?.date ? formatDate(wedding.additionalReq.Confession.date) : "N/A"}</Text>
+                  <Text>Time: {wedding.additionalReq.Confession?.time || "N/A"}</Text>
+                </View>
+
+                <View style={{ marginBottom: 8 }}>
+                  <Text style={{ fontWeight: 'bold' }}>Pre-Marriage Seminar</Text>
+                  <Text>Date: {wedding.additionalReq.PreMarriageSeminar?.date ? formatDate(wedding.additionalReq.PreMarriageSeminar.date) : "N/A"}</Text>
+                  <Text>Time: {wedding.additionalReq.PreMarriageSeminar?.time || "N/A"}</Text>
+                </View>
+              </>
+            ) : (
+              <Text style={{ color: "#888" }}>N/A</Text>
+            )}
+          </View>
+
+
+          <Button
+            style={[
+              styles.cancelButton,
+              (wedding.weddingStatus === "Confirmed" || wedding.weddingStatus === "Cancelled") && styles.cancelButtonDisabled
+            ]}
+            onPress={() => setCancelDialogOpen(true)}
+
+            disabled={wedding.weddingStatus === "Confirmed" || wedding.weddingStatus === "Cancelled"}
+          >
+            <Text style={{ color: "#fff", textAlign: "center" }}>
+              Cancel Wedding
+            </Text>
+          </Button>
+
+
+          {wedding.weddingStatus === "Cancelled" && (
+            <Box p={4} borderWidth={1} borderRadius={8} mt={4} mb={10}>
+              <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+                Wedding has been cancelled.
               </Text>
-            </TouchableOpacity>
+              <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+                Reason: {wedding?.cancellingReason?.reason || "N/A"}
+              </Text>
+              <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+                From: {wedding?.cancellingReason?.user || "N/A"}
+              </Text>
+            </Box>
           )}
+
+
           {/* Cancel Dialog */}
           <Modal
             visible={cancelDialogOpen}
@@ -501,16 +571,25 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     elevation: 2,
   },
+  cardStatus: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 10,
+    marginBottom: 16,
+    
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 12,
   },
   cancelButton: {
-    backgroundColor: "#d32f2f",
-    borderRadius: 8,
-    padding: 14,
-    marginTop: 12,
+    backgroundColor: "#e53935", // red
+    padding: 10,
+    borderRadius: 6,
+  },
+  cancelButtonDisabled: {
+    backgroundColor: "#ccc", // light gray when disabled
   },
   modalOverlay: {
     flex: 1,

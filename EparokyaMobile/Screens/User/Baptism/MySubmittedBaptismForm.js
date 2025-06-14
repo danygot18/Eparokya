@@ -8,9 +8,11 @@ import {
   TouchableOpacity,
   Modal,
   Linking,
+  TextInput,
+  Button
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { Button, VStack, Heading, Spinner, Box } from "native-base";
+import {  VStack, Heading, Spinner, Box, HStack } from "native-base";
 import axios from "axios";
 import baseURL from "../../../assets/common/baseUrl";
 import UserBaptismChecklist from "./BaptismChecklist";
@@ -63,6 +65,10 @@ const MySubmittedBaptismForm = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [showModal, setShowModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
+
   // Tab state
   const [activeTab, setActiveTab] = useState(0);
 
@@ -71,31 +77,46 @@ const MySubmittedBaptismForm = () => {
   const [modalImageUrl, setModalImageUrl] = useState(null);
 
   useEffect(() => {
-    const fetchBaptismDetails = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/getBaptismForm/${formId}`);
-        setBaptismDetails(response.data);
-        console.log("Baptism Details:", response.data);
-      } catch (err) {
-        setError("Failed to fetch baptism details.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchBaptismDetails();
-  }, [formId]);
+  }, []);
+
+  const fetchBaptismDetails = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/getBaptismForm/${formId}`);
+      setBaptismDetails(response.data);
+      
+    } catch (err) {
+      setError("Failed to fetch baptism details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
 
   const handleCancel = async () => {
+    setShowModal(true);
+  };
+
+  const submitCancel = async () => {
+    if (!cancelReason.trim()) {
+      Alert.alert("Error", "Please provide a reason for cancellation.");
+      return;
+    }
     try {
-      await axios.put(`${baseURL}/declineBaptism/${formId}`);
-      Alert.alert("Success", "Baptism request cancelled.", [
-        {
-          text: "OK",
-          onPress: () => navigation.navigate("Dashboard"),
-        },
-      ]);
+      await axios.post(
+        `${baseURL}/declineBaptism/${formId}`,
+        { reason: cancelReason },
+        { withCredentials: true }
+      );
+      setShowModal(false);
+      setCancelReason("");
+      Alert.alert("Success", "Baptism cancelled successfully!");
+      fetchBaptismDetails();
     } catch (error) {
-      Alert.alert("Error", "Failed to cancel the baptism request.");
+      Alert.alert("Error", "Failed to cancel the Baptism.");
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -143,10 +164,13 @@ const MySubmittedBaptismForm = () => {
         ))}
       </View>
 
-      {/* Tab Content */}
+      {/* Tab Content    */}
       {activeTab === 0 && (
         <ScrollView style={{ flex: 1, padding: 16 }}>
           <VStack space={4}>
+            <Box p={4} borderWidth={1} borderRadius={8} backgroundColor="#fff">
+              <Text>Status: {baptismDetails?.binyagStatus}</Text>
+            </Box>
             <Box p={4} borderWidth={1} borderRadius={8} backgroundColor="#fff">
               <Heading size="md">User Information</Heading>
               <Text>
@@ -228,7 +252,7 @@ const MySubmittedBaptismForm = () => {
                 </>
               )}
             </Box>
-            <Box p={4} borderWidth={1} borderRadius={8} backgroundColor="#fff">
+            <Box p={4} borderWidth={1} borderRadius={8} backgroundColor="#fff" mb={6}>
               <Heading size="md">Ninang</Heading>
               {Array.isArray(baptismDetails?.ninang) ? (
                 baptismDetails.ninang.map((ninang, idx) => (
@@ -258,10 +282,8 @@ const MySubmittedBaptismForm = () => {
               )}
             </Box>
 
-            <Button colorScheme="danger" onPress={handleCancel}>
-              Cancel Baptism Request
-            </Button>
           </VStack>
+
         </ScrollView>
       )}
       {activeTab === 1 && (
@@ -451,6 +473,95 @@ const MySubmittedBaptismForm = () => {
               )}
             </Box>
           </View>
+          <Button
+            title="Cancel Baptism"
+            color="red"
+            onPress={handleCancel}
+            disabled={
+              baptismDetails?.binyagStatus === "Cancelled" ||
+              baptismDetails?.binyagStatus === "Confirmed"
+            }
+          />
+          <Modal
+            visible={showModal}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowModal(false)}
+          >
+            <View style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              justifyContent: "center",
+              alignItems: "center"
+            }}>
+              <View style={{
+                backgroundColor: "#fff",
+                padding: 24,
+                borderRadius: 12,
+                width: "85%"
+              }}>
+                <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 12 }}>
+                  Reason for Cancellation
+                </Text>
+                <TextInput
+                  placeholder="Enter reason"
+                  value={cancelReason}
+                  onChangeText={setCancelReason}
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 8,
+                    padding: 10,
+                    minHeight: 60,
+                    marginBottom: 16
+                  }}
+                  multiline
+                />
+                <HStack justifyContent="flex-end" space={2}>
+                  <TouchableOpacity
+                    onPress={() => setShowModal(false)}
+                    style={{
+                      paddingVertical: 8,
+                      paddingHorizontal: 16,
+                      backgroundColor: "#eee",
+                      borderRadius: 8,
+                      marginRight: 8
+                    }}
+                    disabled={cancelLoading}
+                  >
+                    <Text>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={submitCancel}
+                    style={{
+                      paddingVertical: 8,
+                      paddingHorizontal: 16,
+                      backgroundColor: "#d32f2f",
+                      borderRadius: 8
+                    }}
+                    disabled={cancelLoading}
+                  >
+                    <Text style={{ color: "#fff" }}>
+                      {cancelLoading ? "Cancelling..." : "Submit"}
+                    </Text>
+                  </TouchableOpacity>
+                </HStack>
+              </View>
+            </View>
+          </Modal>
+          {baptismDetails?.binyagStatus === "Cancelled" && (
+            <Box p={4} borderWidth={1} borderRadius={8} mt={4} mb={10}>
+              <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+                Counseling has been cancelled.
+              </Text>
+              <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+                Reason: {baptismDetails?.cancellingReason?.reason || "N/A"}
+              </Text>
+              <Text style={{ color: "red", textAlign: "center", marginTop: 10 }}>
+                From: {baptismDetails?.cancellingReason?.user || "N/A"}
+              </Text>
+            </Box>
+          )}
         </ScrollView>
       )}
       {activeTab === 3 && (

@@ -235,16 +235,42 @@ exports.confirmBaptism = async (req, res) => {
 };
 
 exports.declineBaptism = async (req, res) => {
+
   try {
+    const { reason } = req.body;
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    console.log(user)
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Set cancellingUser to "Admin" if admin, otherwise use user's full name or fallback to email
+    let cancellingUser;
+
+    if (user?.isAdmin == true) {
+      cancellingUser = "Admin";
+    } else {
+      cancellingUser = user.name;
+    }
+
     const baptism = await Baptism.findByIdAndUpdate(
       req.params.baptismId,
-      { binyagStatus: 'Cancelled' },
+      {
+        binyagStatus: "Cancelled",
+        cancellingReason: { user: cancellingUser, reason },
+      },
       { new: true }
     );
-    if (!baptism) return res.status(404).send('Baptism not found.');
-    res.send(baptism);
+    if (!baptism) {
+      return res.status(404).json({ message: "Baptism not found." });
+    }
+
+    res.json({ message: "Baptism cancelled successfully", baptism });
   } catch (err) {
-    res.status(500).send('Server error.');
+    console.error("Error cancelling Baptism:", err);
+    res.status(500).json({ message: "Server error." });
   }
 };
 

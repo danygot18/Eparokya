@@ -51,6 +51,7 @@ const MySubmittedCounselingForms = () => {
           { withCredentials: true }
         );
         setCounselingDetails(response.data);
+        console.log(response.data)
         setComments(response.data.comments || []);
       } catch (err) {
         setError("Failed to fetch counseling details.");

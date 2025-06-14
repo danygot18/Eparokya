@@ -85,6 +85,7 @@ const CounselingForm = () => {
   ]);
   const [customCity, setCustomCity] = useState("");
   const [customBarangay, setCustomBarangay] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
   const config = {
     withCredentials: true,
@@ -168,13 +169,13 @@ const CounselingForm = () => {
 
   // modified address
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!isAgreed) {
-      setIsModalOpen(true);
-      return;
-    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitting(true)
+        if (!isAgreed) {
+            setIsModalOpen(true);
+            return;
+        }
 
     const { fullName, dateOfBirth } = formData.person;
     const { purpose, contactNumber, address } = formData;
@@ -220,13 +221,15 @@ const CounselingForm = () => {
         config
       );
 
-      toast.success("Counseling form submitted successfully!");
-      handleClear();
-    } catch (error) {
-      console.error("Error submitting counseling form:", error);
-      toast.error("Failed to submit the form. Please try again.");
-    }
-  };
+            toast.success('Counseling form submitted successfully!');
+            handleClear();
+        } catch (error) {
+            console.error('Error submitting counseling form:', error);
+            toast.error('Failed to submit the form. Please try again.');
+        } finally {
+            setSubmitting(false); // Optional: reset to allow resubmission
+        }
+    };
 
   const handleCityChange = (e) => {
     const selectedCity = e.target.value;

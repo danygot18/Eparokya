@@ -36,7 +36,7 @@ router.get('/getAllUserSubmittedBaptism', isAuthenticatedUser, BaptismController
 router.get('/getBaptismForm/:baptismId', isAuthenticatedUser, BaptismController.getBaptismFormById);
 
 
-router.put('/declineBaptism/:baptismId/', isAuthenticatedUser, BaptismController.declineBaptism);
+router.post('/declineBaptism/:baptismId', isAuthenticatedUser, BaptismController.declineBaptism);
 router.post('/:baptismId/admin/addComment', BaptismController.addBaptismComment);
 router.put('/:baptismId/updateBaptismDate', BaptismController.updateBaptismDate);
 

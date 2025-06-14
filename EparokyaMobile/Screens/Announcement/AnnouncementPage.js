@@ -9,6 +9,8 @@ import {
   TextInput,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -19,6 +21,83 @@ import { useSelector } from "react-redux";
 
 const { width } = Dimensions.get("window");
 
+// --- ImageSlider component ---
+const ImageSlider = ({ images }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef();
+
+  const onScroll = (event) => {
+    const slide = Math.round(
+      event.nativeEvent.contentOffset.x / width
+    );
+    setActiveIndex(slide);
+  };
+
+  return (
+    <View style={styles.sliderContainer}>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        ref={scrollRef}
+        style={styles.slider}
+      >
+        {images.map((img, idx) => (
+          <Image
+            key={idx}
+            source={{ uri: img.url }}
+            style={styles.sliderImage}
+          />
+        ))}
+      </ScrollView>
+      <View style={styles.sliderDots}>
+        {images.map((_, idx) => (
+          <View
+            key={idx}
+            style={[
+              styles.sliderDot,
+              idx === activeIndex && styles.sliderDotActive,
+            ]}
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
+
+// --- LikedCount component ---
+const LikedCount = ({ handleLike, item, user }) => {
+  const [likeCount, setLikeCount] = useState(item.likedBy?.length || 0);
+  const [isLiked, setIsLiked] = useState(item.likedBy?.includes(user?._id));
+
+  const toggleLike = async () => {
+    await handleLike(item._id);
+    setIsLiked(!isLiked);
+    setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+  };
+
+  useEffect(() => {
+    setLikeCount(item.likedBy?.length || 0);
+    setIsLiked(item.likedBy?.includes(user?._id));
+  }, [item.likedBy, user?._id]);
+
+  return (
+    <>
+      <TouchableOpacity onPress={toggleLike}>
+        <MaterialIcons
+          name="thumb-up"
+          size={22}
+          color={isLiked ? "#1976d2" : "#bbb"}
+        />
+      </TouchableOpacity>
+      <Text style={styles.countText}>{likeCount}</Text>
+    </>
+  );
+};
+
+// --- AnnouncementPage component ---
 const AnnouncementPage = ({ navigation }) => {
   const [announcements, setAnnouncements] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -27,36 +106,47 @@ const AnnouncementPage = ({ navigation }) => {
   const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { user, token } = useSelector((state) => state.auth);
 
   const POSTS_PER_PAGE = 5;
 
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${baseURL}/getAllAnnouncements`);
+      const sortedAnnouncements = response.data.announcements
+        .sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated))
+        .reverse();
+      setAnnouncements(sortedAnnouncements);
+      setFilteredAnnouncements(sortedAnnouncements);
+      setTotalPages(Math.ceil(sortedAnnouncements.length / POSTS_PER_PAGE));
+    } catch (err) {
+      console.error("Failed to fetch announcements:", err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/getAllannouncementCategory`);
+      setCategories(response.data.categories);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchAnnouncements();
+    fetchCategories();
+  };
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/getAllannouncementCategory`);
-        setCategories(response.data.categories);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    };
-
-    const fetchAnnouncements = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/getAllAnnouncements`);
-        // FILO: sort by dateCreated ASC (oldest first), then reverse for newest first
-        const sortedAnnouncements = response.data.announcements
-          .sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated))
-          .reverse();
-        setAnnouncements(sortedAnnouncements);
-        setFilteredAnnouncements(sortedAnnouncements);
-        setTotalPages(Math.ceil(sortedAnnouncements.length / POSTS_PER_PAGE));
-      } catch (err) {
-        console.error("Failed to fetch announcements:", err);
-      }
-    };
-
     fetchCategories();
     fetchAnnouncements();
   }, []);
@@ -101,9 +191,11 @@ const AnnouncementPage = ({ navigation }) => {
       });
       return;
     }
+    console.log(user)
+    const config = { withCredentials: true };
 
     try {
-      const config = { headers: { Authorization: `Bearer ${token}` } };
+      
       const response = await axios.put(
         `${baseURL}/likeAnnouncement/${announcementId}`,
         {},
@@ -270,6 +362,15 @@ const AnnouncementPage = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f8f8f8" }}>
+        <ActivityIndicator size="large" color="#388e3c" />
+        <Text style={{ marginTop: 10, color: "#388e3c" }}>Loading announcements...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -280,84 +381,18 @@ const AnnouncementPage = ({ navigation }) => {
         ListFooterComponent={renderFooter}
         contentContainerStyle={styles.flatListContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#388e3c"]}
+            tintColor="#388e3c"
+            progressBackgroundColor="#ffffff"
+          />
+        }
       />
       <Toast />
     </View>
-  );
-};
-
-// Image slider for multiple images
-const ImageSlider = ({ images }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const scrollRef = useRef();
-
-  const onScroll = (event) => {
-    const slide = Math.round(
-      event.nativeEvent.contentOffset.x / width
-    );
-    setActiveIndex(slide);
-  };
-
-  return (
-    <View style={styles.sliderContainer}>
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        ref={scrollRef}
-        style={styles.slider}
-      >
-        {images.map((img, idx) => (
-          <Image
-            key={idx}
-            source={{ uri: img.url }}
-            style={styles.sliderImage}
-          />
-        ))}
-      </ScrollView>
-      <View style={styles.sliderDots}>
-        {images.map((_, idx) => (
-          <View
-            key={idx}
-            style={[
-              styles.sliderDot,
-              idx === activeIndex && styles.sliderDotActive,
-            ]}
-          />
-        ))}
-      </View>
-    </View>
-  );
-};
-
-const LikedCount = ({ handleLike, item, user }) => {
-  const [likeCount, setLikeCount] = useState(item.likedBy?.length || 0);
-  const [isLiked, setIsLiked] = useState(item.likedBy?.includes(user?._id));
-
-  const toggleLike = async () => {
-    await handleLike(item._id);
-    setIsLiked(!isLiked);
-    setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
-  };
-
-  useEffect(() => {
-    setLikeCount(item.likedBy?.length || 0);
-    setIsLiked(item.likedBy?.includes(user?._id));
-  }, [item.likedBy, user?._id]);
-
-  return (
-    <>
-      <TouchableOpacity onPress={toggleLike}>
-        <MaterialIcons
-          name="thumb-up"
-          size={22}
-          color={isLiked ? "#1976d2" : "#bbb"}
-        />
-      </TouchableOpacity>
-      <Text style={styles.countText}>{likeCount}</Text>
-    </>
   );
 };
 

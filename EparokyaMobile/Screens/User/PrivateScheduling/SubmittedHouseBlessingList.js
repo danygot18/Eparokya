@@ -30,13 +30,17 @@ const SubmittedHouseBlessingList = () => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `${baseURL}/getAllUserSubmittedHouseBlessing`,
+                `${baseURL}/houseBlessing/getAllUserSubmittedHouseBlessing`,
                 { withCredentials: true }
             );
 
             if (response.data && Array.isArray(response.data.forms)) {
-                setHouseBlessingForms(response.data.forms);
-                setFilteredForms(response.data.forms);
+                const sortedForms = response.data.forms.sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                );
+                setHouseBlessingForms(sortedForms);
+                setFilteredForms(sortedForms);
+                console.log(sortedForms);
             } else {
                 setHouseBlessingForms([]);
                 setFilteredForms([]);
@@ -48,6 +52,7 @@ const SubmittedHouseBlessingList = () => {
             setLoading(false);
         }
     };
+
 
     useEffect(() => {
         let filtered = houseBlessingForms;
@@ -70,8 +75,10 @@ const SubmittedHouseBlessingList = () => {
     }, [activeFilter, searchTerm, houseBlessingForms]);
 
     const handleCardPress = (formId) => {
+        console.log(formId)
         navigation.navigate("SubmittedHouseBlessingForm", { formId });
     };
+    if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
     return (
         <View style={styles.container}>
             <Text style={styles.title}>My Submitted House Blessing Forms</Text>

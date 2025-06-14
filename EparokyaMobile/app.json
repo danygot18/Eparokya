@@ -32,10 +32,10 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/EPAROKYA-SYST.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.danrussell.frontend"
+      "package": "com.danrussell.EparokyaMobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -14,12 +14,10 @@ import { format } from "date-fns";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import Swiper from "react-native-swiper";
 import { Button, Box, VStack, HStack, Avatar, Spinner } from "native-base";
-import Toast from "react-native-toast-message";
 import baseURL from "../../assets/common/baseUrl";
 import { useSelector } from "react-redux";
 
 const AnnouncementDetails = () => {
-  const navigation = useNavigation();
   const route = useRoute();
   const { announcementId } = route.params;
   const [announcement, setAnnouncement] = useState(null);
@@ -30,22 +28,41 @@ const AnnouncementDetails = () => {
   const [replyTexts, setReplyTexts] = useState({});
   const [loading, setLoading] = useState(true);
   const [expandedReplies, setExpandedReplies] = useState({});
-
   const { user, token } = useSelector((state) => state.auth);
+
+  const config = { withCredentials: true };
 
   useEffect(() => {
     if (announcementId) {
       fetchAnnouncement();
       fetchComments();
+
     }
+    // eslint-disable-next-line
   }, [announcementId]);
 
   const fetchAnnouncement = async () => {
     try {
       const res = await axios.get(`${baseURL}/getAnnouncement/${announcementId}`);
-      setAnnouncement(res.data.announcement);
-      setLikeCount(res.data.announcement.likedBy.length);
-      setLiked(res.data.announcement.likedBy.includes(user._id));
+      const announcement = res.data.announcement;
+      setAnnouncement(announcement);
+
+      setLikeCount(announcement.likedBy.length);
+
+      const userLiked = announcement.likedBy.some(
+        (liker) => liker._id === user._id
+      );
+
+      setLiked(userLiked);
+
+      // 🔍 Debug log
+      if (userLiked) {
+        console.log(`✅ User ${user._id} liked this announcement.`);
+      } else {
+        console.log(`❌ User ${user._id} has not liked this announcement.`);
+      }
+
+      console.log("🧾 List of users who liked it:", announcement.likedBy);
     } catch (error) {
       console.error("Error fetching announcement:", error);
     } finally {
@@ -53,10 +70,13 @@ const AnnouncementDetails = () => {
     }
   };
 
+
+
   const fetchComments = async () => {
     try {
       const res = await axios.get(`${baseURL}/comments/${announcementId}`);
       setComments(res.data.data);
+      console.log("commentLike", res.data.data)
     } catch (error) {
       console.error("Error fetching comments:", error);
     }
@@ -64,19 +84,33 @@ const AnnouncementDetails = () => {
 
   const toggleLike = async () => {
     try {
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-
       await axios.put(
         `${baseURL}/likeAnnouncement/${announcementId}`,
         {},
         config
       );
-      setLiked(!liked);
-      setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+
+      // Invert the current liked value
+      const newLiked = !liked;
+
+      // Update state based on new liked value
+      setLiked(newLiked);
+      setLikeCount((prev) => (newLiked ? prev + 1 : prev - 1));
+      setAnnouncement((prev) => {
+        if (!prev) return prev;
+        let newLikedBy;
+        if (newLiked) {
+          newLikedBy = [...prev.likedBy, user._id];
+        } else {
+          newLikedBy = prev.likedBy.filter((id) => id !== user._id);
+        }
+        return { ...prev, likedBy: newLikedBy };
+      });
     } catch (error) {
       console.error("Error toggling like:", error);
     }
   };
+
 
   const addComment = async () => {
     if (!commentText.trim()) return;
@@ -99,25 +133,33 @@ const AnnouncementDetails = () => {
 
   const toggleLikeComment = async (commentId) => {
     try {
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-
-      const res = await axios.put(
-        `${baseURL}/anouncementCommentLike/${commentId}`,
-        {},
-        config
-      );
+      await axios.put(`${baseURL}/announcementCommentLike/${commentId}`, config);
 
       setComments((prevComments) =>
-        prevComments.map((comment) =>
-          comment._id === commentId
-            ? { ...comment, likedBy: res.data.data.likedBy }
-            : comment
-        )
+        prevComments.map((comment) => {
+          if (comment._id !== commentId) return comment;
+
+          const alreadyLiked = comment.likedBy.some(
+            (liker) => liker._id === user._id
+          );
+
+          let updatedLikedBy;
+          if (alreadyLiked) {
+            updatedLikedBy = comment.likedBy.filter(
+              (liker) => liker._id !== user._id
+            );
+          } else {
+            updatedLikedBy = [...comment.likedBy, { _id: user._id }];
+          }
+
+          return { ...comment, likedBy: updatedLikedBy };
+        })
       );
     } catch (error) {
       console.error("Error toggling like on comment:", error);
     }
   };
+
 
   const toggleReplies = (commentId) => {
     setExpandedReplies((prev) => ({ ...prev, [commentId]: !prev[commentId] }));
@@ -151,7 +193,7 @@ const AnnouncementDetails = () => {
       return (
         <Avatar
           size="sm"
-          source={require("../../assets/profile.png")} // Add a default avatar image
+          source={require("../../assets/profile.png")}
         />
       );
     }
@@ -267,17 +309,27 @@ const AnnouncementDetails = () => {
                   </VStack>
                 </HStack>
 
-                <HStack space={2} alignItems="center" mt={2}>
+                <HStack space={3} alignItems="center" mt={2}>
                   <TouchableOpacity onPress={() => toggleLikeComment(comment._id)}>
-                    <FontAwesome5 name="thumbs-up" size={16} />
+                    <FontAwesome5
+                      name="thumbs-up"
+                      size={20}
+                      color={
+                        comment.likedBy.some((liker) => liker._id === user._id)
+                          ? "#1976d2" // blue when liked
+                          : "#bbb"     // gray when not liked
+                      }
+                    />
                   </TouchableOpacity>
                   <Text>{comment.likedBy.length} Likes</Text>
 
                   <TouchableOpacity onPress={() => toggleReplies(comment._id)}>
-                    <FontAwesome5 name="reply" size={16} />
+                    <FontAwesome5 name="reply" size={18} color="#555" />
                   </TouchableOpacity>
                   <Text>{comment.replies.length} Replies</Text>
                 </HStack>
+
+
 
                 {expandedReplies[comment._id] && (
                   <VStack space={2} mt={2}>

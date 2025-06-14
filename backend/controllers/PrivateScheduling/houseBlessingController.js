@@ -300,8 +300,8 @@ exports.getHouseBlessingFormById = async (req, res) => {
 
         const houseBlessingForm = await HouseBlessing.findById(formId)
             .populate('userId', 'name email')
-            .populate('priest', 'fullName')
-            .lean();
+            .populate('priest', 'title fullName');
+            // .lean();
 
         if (!houseBlessingForm) {
             return res.status(404).json({ message: "House Blessing form not found." });
@@ -326,7 +326,7 @@ exports.getHouseBlessingById = async (req, res) => {
 
         const houseBlessing = await HouseBlessing.findById(blessingId)
             .populate('userId', 'name email')
-            .populate('priest', 'fullName'); // ✅ Add this line
+            .populate('priest', 'title fullName'); // ✅ Add this line
 
         if (!houseBlessing) {
             return res.status(404).json({ message: "House Blessing not found." });
