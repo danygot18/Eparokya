@@ -9,13 +9,13 @@ const { Server } = require("socket.io");
 
 const allowedOrigins = [
   // "*",
-  "https://eparokya.vercel.app",
+  // "https://eparokya.vercel.app",
   // "http://localhost:3000",
 ];
 
 // Middleware
 app.use(cors({
-  origin: allowedOrigins,
+  origin: "https://eparokya.vercel.app",
   credentials: true,
   // methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   // allowedHeaders: ["Content-Type", "Authorization"],
