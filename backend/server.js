@@ -59,10 +59,10 @@
 
 // io.on('connection', socket);
 
-const { server, io } = require('./app');
-const connectDatabase = require('./config/database');
-const cloudinary = require('cloudinary');
 const dotenv = require('dotenv');
+const cloudinary = require('cloudinary');
+const connectDatabase = require('./config/database');
+const { app, server, io } = require('./app'); // Import from your app.js
 const socketHandler = require('./socket');
 
 // Load environment variables
@@ -70,10 +70,10 @@ dotenv.config({ path: './config/config.env' });
 console.log("✅ DB_URI:", process.env.DB_URI || "NOT FOUND");
 console.log("🔐 Hugging Face API Key:", process.env.HUGGING_FACE_API_KEY || "NOT FOUND");
 
-// Connect DB
+// Connect to the database
 connectDatabase();
 
-// Cloudinary config
+// Configure Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -87,9 +87,6 @@ server.listen(port, '0.0.0.0', () => {
 });
 
 // Attach socket handler
-// io.on('connection', socketHandler);
-
-
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
     socketHandler(socket);
@@ -99,9 +96,8 @@ io.on('connection', (socket) => {
     });
 });
 
-// Load sentiment analysis model
+// Optionally: Load sentiment analysis model here (if global)
 let sentimentAnalyzer;
-
 (async () => {
     try {
         const { pipeline } = await import('@xenova/transformers');
