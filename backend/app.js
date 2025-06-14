@@ -8,9 +8,9 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const allowedOrigins = [
-  "*",
-  // "https://eparokya.vercel.app",
-  "http://localhost:3000",
+  // "*",
+  "https://eparokya.vercel.app",
+  // "http://localhost:3000",
 ];
 
 // Middleware
@@ -25,21 +25,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("tiny"));
 app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
-app.use("/api/v1", require("./routes/user"));
+// app.use("/api/v1", require("./routes/user"));
 app.use(errorHandler);
 
 // Create HTTP server and export
-const server = http.createServer(app);
-
-// Create Socket.IO server
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST",],
-    credentials: true,
-  }
-});
-
 
 
 app.use("/api/v1", require("./routes/user"));
@@ -128,6 +117,20 @@ app.use("/api/v1", require("./routes/liveVideo"))
 // app.use("/api/v1/resource", require("./routes/Resources/resource"));
 
 // Chat Feature
+
+const server = http.createServer(app);
+
+// Create Socket.IO server
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST",],
+    credentials: true,
+  },
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  transports: ['websocket', 'polling']
+});
 
 
 module.exports = { app, server, io };

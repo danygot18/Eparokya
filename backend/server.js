@@ -59,10 +59,10 @@
 
 // io.on('connection', socket);
 
-const dotenv = require('dotenv');
-const cloudinary = require('cloudinary');
-const connectDatabase = require('./config/database');
 const { server, io } = require('./app');
+const connectDatabase = require('./config/database');
+const cloudinary = require('cloudinary');
+const dotenv = require('dotenv');
 const socketHandler = require('./socket');
 
 // Load environment variables
@@ -88,6 +88,8 @@ server.listen(port, '0.0.0.0', () => {
 
 // Attach socket handler
 // io.on('connection', socketHandler);
+
+
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
     socketHandler(socket);
