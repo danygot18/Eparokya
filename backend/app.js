@@ -14,14 +14,12 @@ const allowedOrigins = [
 ];
 
 // Middleware
-app.use(
-  cors({
-    origin: ["https://eparokya.vercel.app", "http://localhost:3000"], // Allowed domains
-    credentials: true, // Allow sending cookies
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 app.use(express.json());
 app.use(cookieParser());
