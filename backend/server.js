@@ -60,6 +60,7 @@
 // io.on('connection', socket);
 
 const dotenv = require('dotenv');
+const { Server } = require('socket.io');
 const cloudinary = require('cloudinary');
 const connectDatabase = require('./config/database');
 const { app, server, io } = require('./app'); // Import from your app.js
@@ -67,8 +68,8 @@ const socketHandler = require('./socket');
 
 // Load environment variables
 dotenv.config({ path: './config/config.env' });
-console.log("✅ DB_URI:", process.env.DB_URI || "NOT FOUND");
-console.log("🔐 Hugging Face API Key:", process.env.HUGGING_FACE_API_KEY || "NOT FOUND");
+// console.log("✅ DB_URI:", process.env.DB_URI || "NOT FOUND");
+// console.log("🔐 Hugging Face API Key:", process.env.HUGGING_FACE_API_KEY || "NOT FOUND");
 
 // Connect to the database
 connectDatabase();
@@ -83,7 +84,7 @@ cloudinary.config({
 // Start server
 const port = process.env.PORT || 8080;
 server.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 Server running on port ${port} in ${process.env.NODE_ENV} mode`);
+    // console.log(`🚀 Server running on port ${port} in ${process.env.NODE_ENV} mode`);
 });
 
 // Attach socket handler

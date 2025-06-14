@@ -17,7 +17,7 @@ const Profile = () => {
   const { user: reduxUser, loading } = useSelector((state) => state.auth);
   const [user, setUser] = useState(reduxUser);
 
-  console.log('user', reduxUser);
+  // console.log('user', reduxUser);
 
   const fetchUserProfile = async () => {
     try {
@@ -37,7 +37,7 @@ const Profile = () => {
     const getUserProfile = async () => {
       const profileData = await fetchUserProfile();
       if (profileData) {
-        console.log('Fetched User Profile:', profileData);
+        // console.log('Fetched User Profile:', profileData);
         setUser(profileData.user);
       }
     };
