@@ -29,6 +29,19 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 app.use(errorHandler);
 
 // Create HTTP server and export
+const server = http.createServer(app);
+
+// Create Socket.IO server
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST",],
+    credentials: true,
+  },
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  transports: ['websocket', 'polling']
+});
 
 
 app.use("/api/v1", require("./routes/user"));
@@ -118,19 +131,7 @@ app.use("/api/v1", require("./routes/liveVideo"))
 
 // Chat Feature
 
-const server = http.createServer(app);
 
-// Create Socket.IO server
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST",],
-    credentials: true,
-  },
-  pingTimeout: 60000,
-  pingInterval: 25000,
-  transports: ['websocket', 'polling']
-});
 
 
 module.exports = { app, server, io };
