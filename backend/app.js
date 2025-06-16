@@ -43,6 +43,12 @@ const io = new Server(server, {
   // transports: ['websocket', 'polling']
 });
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
+
+
 
 app.use("/api/v1", require("./routes/user"));
 app.use("/api/v1/chat", require("./routes/chat"));
