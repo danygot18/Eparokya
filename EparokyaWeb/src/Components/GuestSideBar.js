@@ -18,7 +18,7 @@ import RateReviewIcon from '@mui/icons-material/RateReview';
 import { ModalTitle } from 'react-bootstrap';
 
 const GuestSideBar = () => {
-  // const [users, setUser] = useState({
+  // const [users, setUser] = useState({R
   //   name: 'Guest',
   //   avatar: 'default-profile-icon.png',
   // });

@@ -23,7 +23,7 @@ const UserLive = () => {
     try {
       const response = await axios.get(`${baseURL}/live`);
       setLiveData(response.data);
-      console.log(response.data);
+      // console.log(response.data);
     } catch (error) {
       console.error("Error fetching live video", error);
     } finally {

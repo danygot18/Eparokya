@@ -40,6 +40,7 @@ import { ChevronDownIcon, ChevronUpIcon } from "native-base";
 import MemberDirectory from "../Screens/MemberDirectory";
 import ParishPriests from "../Screens/ParishPriests";
 import SentimentReports from "../Screens/SentimentReports";
+import WeddingWall from "../Screens/WeddingWall"
 import EventSentiment from "../Screens/../Screens/User/FeedbackForm.js/EventSentiment";
 import ActivitySentiment from "../Screens/../Screens/User/FeedbackForm.js/ActivitySentiment";
 import PriestSentiment from "../Screens/../Screens/User/FeedbackForm.js/PriestSentiment";
@@ -68,6 +69,8 @@ const getIcon = (screenName) => {
       return "form-select";
     case "Prayer Wall":
       return "hands-pray";
+      case "Wedding Wall":
+      return "cards-heart";
     case "Send Prayer":
       return "hand-heart";
     case "Feedback Reports":
@@ -101,7 +104,7 @@ const CustomDrawerContent = (props) => {
   const sections = {
     "Community": ["Home", "Member Directory", "Parish Priests"],
     "Events": ["Calendar", "Ministry Calendar", "Ministry Announcement"],
-    "Prayers": ["Prayer Wall", "Send Prayer"],
+    "Prayers": ["Prayer Wall", "Wedding Wall", "Send Prayer"],
     "Resources": ["Resource Page", "Forms"],
     "Account": ["Profile"]
   };
@@ -391,7 +394,8 @@ const DrawerNavigator = () => {
         <Drawer.Screen name="Ministry Calendar" component={MinistryCalendar} />
         <Drawer.Screen name="Forms" component={Forms} />
         <Drawer.Screen name="Prayer Wall" component={PrayerWall} />
-        <Drawer.Screen name="SendPrayer" component={SendPrayer} />
+         <Drawer.Screen name="Wedding Wall" component={WeddingWall} />
+        <Drawer.Screen name="Send Prayer" component={SendPrayer} />
         <Drawer.Screen name="Live" component={UserLive} />
         <Drawer.Screen name="Profile" component={Profile} />
         <Drawer.Screen name="PriestSentiment" component={PriestSentiment} />

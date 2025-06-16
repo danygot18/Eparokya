@@ -26,9 +26,7 @@ const ImageSlider = ({ images }) => {
   const scrollRef = useRef();
 
   const onScroll = (event) => {
-    const slide = Math.round(
-      event.nativeEvent.contentOffset.x / width
-    );
+    const slide = Math.round(event.nativeEvent.contentOffset.x / width);
     setActiveIndex(slide);
   };
 
@@ -129,8 +127,8 @@ const AnnouncementPage = ({ navigation }) => {
       const all = response.data.announcements
         .sort((a, b) => new Date(a.dateCreated) - new Date(b.dateCreated))
         .reverse();
-      const featured = all.filter(a => a.isFeatured === true);
-      const unfeatured = all.filter(a => !a.isFeatured);
+      const featured = all.filter((a) => a.isFeatured === true);
+      const unfeatured = all.filter((a) => !a.isFeatured);
       setPinnedAnnouncement(featured);
       setAnnouncements(unfeatured);
       setFilteredAnnouncements(unfeatured);
@@ -159,41 +157,41 @@ const AnnouncementPage = ({ navigation }) => {
     return (
       <View style={styles.pinnedContainer}>
         <Text style={styles.pinnedLabel}>Featured Announcements</Text>
-        {pinnedAnnouncement.map(item => renderItem({ item }))}
+        {pinnedAnnouncement.map((item) => renderItem({ item }))}
       </View>
     );
   };
 
   useEffect(() => {
-    const filtered = announcements.filter((announcement) => {
-      const matchesCategory = selectedCategory
-        ? announcement.category?._id === selectedCategory
-        : true;
+    let filtered = announcements;
 
-      const matchesSearch = searchTerm
-        ? (announcement.name &&
-          announcement.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (announcement.tags &&
-          announcement.tags.some((tag) =>
-            tag.toLowerCase().includes(searchTerm.toLowerCase())
-          ))
-        : true;
+    if (selectedCategory !== null) {
+      filtered = filtered.filter(
+        (announcement) =>
+          announcement.category &&
+          announcement.category._id === selectedCategory
+      );
+    }
 
-      return matchesCategory && matchesSearch;
-    });
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (announcement) =>
+          (announcement.name &&
+            announcement.name.toLowerCase().includes(lowerSearch)) ||
+          (announcement.description &&
+            announcement.description.toLowerCase().includes(lowerSearch)) ||
+          (announcement.tags &&
+            announcement.tags.some((tag) =>
+              tag.toLowerCase().includes(lowerSearch)
+            ))
+      );
+    }
 
     setFilteredAnnouncements(filtered);
     setTotalPages(Math.ceil(filtered.length / POSTS_PER_PAGE));
     setCurrentPage(1);
   }, [searchTerm, selectedCategory, announcements]);
-
-  const handleSearch = (term) => {
-    setSearchTerm(term);
-  };
-
-  const handleCategoryPress = (categoryId) => {
-    setSelectedCategory(categoryId);
-  };
 
   const handleLike = async (announcementId) => {
     if (!user || !token) {
@@ -204,29 +202,63 @@ const AnnouncementPage = ({ navigation }) => {
       });
       return;
     }
-    console.log(user)
+
     const config = { withCredentials: true };
 
     try {
-
       const response = await axios.put(
         `${baseURL}/likeAnnouncement/${announcementId}`,
         {},
         config
       );
 
-      const isLikedNow = response.data.liked;
-      setAnnouncements((prevAnnouncements) =>
-        prevAnnouncements.map((announcement) =>
+      const updatedLikedBy = response.data.likedBy;
+
+      setAnnouncements((prev) =>
+        prev.map((announcement) =>
           announcement._id === announcementId
             ? {
-              ...announcement,
-              likedBy: isLikedNow
-                ? [...announcement.likedBy, user._id]
-                : announcement.likedBy.filter((uid) => uid !== user._id),
-            }
+                ...announcement,
+                likedBy: updatedLikedBy
+                  ? updatedLikedBy
+                  : announcement.likedBy.includes(user._id)
+                  ? announcement.likedBy.filter((uid) => uid !== user._id)
+                  : [...announcement.likedBy, user._id],
+              }
             : announcement
         )
+      );
+
+      setFilteredAnnouncements((prev) =>
+        prev.map((announcement) =>
+          announcement._id === announcementId
+            ? {
+                ...announcement,
+                likedBy: updatedLikedBy
+                  ? updatedLikedBy
+                  : announcement.likedBy.includes(user._id)
+                  ? announcement.likedBy.filter((uid) => uid !== user._id)
+                  : [...announcement.likedBy, user._id],
+              }
+            : announcement
+        )
+      );
+
+      setPinnedAnnouncement((prev) =>
+        prev
+          ? prev.map((announcement) =>
+              announcement._id === announcementId
+                ? {
+                    ...announcement,
+                    likedBy: updatedLikedBy
+                      ? updatedLikedBy
+                      : announcement.likedBy.includes(user._id)
+                      ? announcement.likedBy.filter((uid) => uid !== user._id)
+                      : [...announcement.likedBy, user._id],
+                  }
+                : announcement
+            )
+          : prev
       );
     } catch (error) {
       console.error("Error toggling like:", error);
@@ -260,6 +292,14 @@ const AnnouncementPage = ({ navigation }) => {
     return filteredAnnouncements.slice(startIndex, endIndex);
   };
 
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+  };
+
+  const handleCategoryPress = (categoryId) => {
+    setSelectedCategory(categoryId);
+  };
+
   const renderHeader = () => (
     <View>
       <View style={styles.header}>
@@ -282,6 +322,7 @@ const AnnouncementPage = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
+      {/* Place your category ScrollView here */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -312,7 +353,6 @@ const AnnouncementPage = ({ navigation }) => {
       </ScrollView>
     </View>
   );
-
   const renderFooter = () => (
     <View style={styles.paginationContainer}>
       <TouchableOpacity
@@ -348,7 +388,9 @@ const AnnouncementPage = ({ navigation }) => {
       activeOpacity={0.9}
     >
       <Text style={styles.title}>{item.name || "No Title Available"}</Text>
-      <Text style={styles.desc}>{item.description || "No Description Available"}</Text>
+      <Text style={styles.desc}>
+        {item.description || "No Description Available"}
+      </Text>
       {/* Image Slider */}
       {item.images && item.images.length > 0 ? (
         <ImageSlider images={item.images} />
@@ -368,18 +410,25 @@ const AnnouncementPage = ({ navigation }) => {
         <Text style={styles.countText}>{item.comments?.length || 0}</Text>
       </View>
       <Text style={styles.dateText}>
-        {item.dateCreated
-          ? new Date(item.dateCreated).toLocaleString()
-          : ""}
+        {item.dateCreated ? new Date(item.dateCreated).toLocaleString() : ""}
       </Text>
     </TouchableOpacity>
   );
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f8f8f8" }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#f8f8f8",
+        }}
+      >
         <ActivityIndicator size="large" color="#388e3c" />
-        <Text style={{ marginTop: 10, color: "#388e3c" }}>Loading announcements...</Text>
+        <Text style={{ marginTop: 10, color: "#388e3c" }}>
+          Loading announcements...
+        </Text>
       </View>
     );
   }

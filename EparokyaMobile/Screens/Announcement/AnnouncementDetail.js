@@ -70,8 +70,6 @@ const AnnouncementDetails = () => {
     }
   };
 
-
-
   const fetchComments = async () => {
     try {
       const res = await axios.get(`${baseURL}/comments/${announcementId}`);
@@ -110,7 +108,6 @@ const AnnouncementDetails = () => {
       console.error("Error toggling like:", error);
     }
   };
-
 
   const addComment = async () => {
     if (!commentText.trim()) return;
@@ -159,7 +156,6 @@ const AnnouncementDetails = () => {
       console.error("Error toggling like on comment:", error);
     }
   };
-
 
   const toggleReplies = (commentId) => {
     setExpandedReplies((prev) => ({ ...prev, [commentId]: !prev[commentId] }));

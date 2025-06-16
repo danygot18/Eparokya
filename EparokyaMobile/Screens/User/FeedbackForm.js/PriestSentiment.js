@@ -76,7 +76,7 @@ const PriestSentiment = ({ navigation }) => {
     };
     try {
       await axios.post(
-        `${process.env.EXPO_PUBLIC_API}/api/v1/analyzePriestSentiment`,
+        `${baseURL}/analyzePriestSentiment`,
         requestData,
         config
       );

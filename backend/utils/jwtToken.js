@@ -1,7 +1,7 @@
 
 // For Production
 // const sendToken = (user, statusCode, res) => {
-    
+
 //     // Create Jwt token
 //     const token = user.getJwtToken();
 //     // user.token = token;
@@ -16,7 +16,7 @@
 //     //         Date.now() + process.env.COOKIE_EXPIRES_TIME * 24 * 60 * 60 * 1000
 //     //     ),
 //     //     httpOnly: false,
-        
+
 //     // }
 //     console.log(user)
 //     const options = {
@@ -47,12 +47,17 @@ const sendToken = (user, statusCode, res) => {
         httpOnly: true,  // Secure against XSS
         secure: process.env.NODE_ENV === "production", // Use HTTPS only in production
         sameSite: "None", // Required for cross-origin cookies
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 5 minutes
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     };
+
+    // Debug logs
+    console.log("Generated Token:", token);
+    console.log("Cookie Options:", options);
+    console.log("User being sent:", user);
 
     res
         .status(statusCode)
-        .cookie("token", token, options) // Attach JWT token to HTTP-only cookie
+        .cookie("token", token, options)
         .json({
             success: true,
             token,

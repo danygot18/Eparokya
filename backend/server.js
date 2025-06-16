@@ -98,16 +98,16 @@ io.on('connection', (socket) => {
 });
 
 // Optionally: Load sentiment analysis model here (if global)
-let sentimentAnalyzer;
-(async () => {
-    try {
-        const { pipeline } = await import('@xenova/transformers');
-        sentimentAnalyzer = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
-        console.log('🧠 Sentiment model loaded successfully!');
-    } catch (error) {
-        console.error("❌ Error loading sentiment model:", error);
-    }
-})();
+// let sentimentAnalyzer;
+// (async () => {
+//     try {
+//         const { pipeline } = await import('@xenova/transformers');
+//         sentimentAnalyzer = await pipeline('sentiment-analysis', 'Xenova/bert-base-multilingual-uncased-sentiment');
+//         console.log('🧠 Sentiment model loaded successfully!');
+//     } catch (error) {
+//         console.error("❌ Error loading sentiment model:", error);
+//     }
+// })();
 
 
 
