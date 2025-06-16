@@ -34,9 +34,9 @@ const server = http.createServer(app);
 // Create Socket.IO server
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    // methods: ["GET", "POST",],
-    // credentials: true,
+    origin: allowedOrigins,
+    methods: ["GET", "POST",],
+    credentials: true,
   },
   // pingTimeout: 60000,
   // pingInterval: 25000,
