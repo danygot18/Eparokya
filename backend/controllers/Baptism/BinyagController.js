@@ -287,6 +287,7 @@ exports.updateBaptismDate = async (req, res) => {
 
     baptism.baptismDate = newDate;
     baptism.adminRescheduled = { date: newDate, reason: reason };
+    baptism.baptismStatus = "Rescheduled";
 
     await baptism.save();
 

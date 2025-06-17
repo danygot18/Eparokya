@@ -246,6 +246,30 @@ exports.declineCounseling = async (req, res) => {
   }
 };
 
+// exports.updateCounselingDate = async (req, res) => {
+//   try {
+//     const { counselingId } = req.params;
+//     const { newDate, reason } = req.body;
+
+//     const counseling = await Counseling.findById(counselingId);
+//     if (!counseling) {
+//       return res.status(404).json({ message: "Counseling not found" });
+//     }
+
+//     counseling.counselingDate = newDate;
+//     counseling.adminRescheduled = { date: newDate, reason: reason };
+
+//     await counseling.save();
+
+//     return res
+//       .status(200)
+//       .json({ message: "Counseling date updated successfully", counseling });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
 exports.updateCounselingDate = async (req, res) => {
   try {
     const { counselingId } = req.params;
@@ -259,16 +283,20 @@ exports.updateCounselingDate = async (req, res) => {
     counseling.counselingDate = newDate;
     counseling.adminRescheduled = { date: newDate, reason: reason };
 
+    counseling.counselingStatus = "Rescheduled";
+
     await counseling.save();
 
-    return res
-      .status(200)
-      .json({ message: "Counseling date updated successfully", counseling });
+    return res.status(200).json({
+      message: "Counseling date updated successfully",
+      counseling,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // Comments for the admin
 exports.addComment = async (req, res) => {

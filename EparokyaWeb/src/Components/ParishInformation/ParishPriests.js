@@ -28,8 +28,8 @@ const StatusChip = ({ label, value }) => (
   <Chip
     sx={{ m: 0.5 }}
     label={`${label}: ${value}`}
-    color={value === 'Active' || value === 'Available' || value === 'Not Retired' ? 'success' : 'default'}
-    icon={value === 'Active' || value === 'Available' || value === 'Not Retired' ? <CheckCircleIcon /> : <CancelIcon />}
+    color={value === 'Active' || value === 'Available' || value === 'Not Retired' || value === 'In Parish' ?  'success' : 'default'}
+    icon={value === 'Active' || value === 'Available' || value === 'Not Retired' || value === 'In Parish' ?  <CheckCircleIcon /> : <CancelIcon />}
     variant="outlined"
   />
 );
@@ -87,7 +87,7 @@ const ParishPriest = () => {
     const fetchPriests = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllPriest`);
-        setPriests(response.data); 
+        setPriests(response.data);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching priests:', error);
@@ -110,7 +110,7 @@ const ParishPriest = () => {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <GuestSideBar />
       <Container maxWidth="lg" sx={{ py: 4, ml: { xs: 0, md: '240px' } }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ 
+        <Typography variant="h4" component="h1" gutterBottom sx={{
           fontWeight: 'bold',
           mb: 4,
           color: 'primary.main',
@@ -120,7 +120,7 @@ const ParishPriest = () => {
         }}>
           <PersonIcon fontSize="large" /> Parish Priests
         </Typography>
-        
+
         {priests.length === 0 && (
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="h6">No priests found</Typography>
@@ -184,6 +184,7 @@ const ParishPriest = () => {
                   <StatusChip label="Active" value={priest.isActive ? 'Active' : 'Inactive'} />
                   <StatusChip label="Available" value={priest.isAvailable ? 'Available' : 'Not Available'} />
                   <StatusChip label="Retired" value={priest.isRetired ? 'Retired' : 'Not Retired'} />
+                  <StatusChip label="Transfered" value={priest.isTransfered ? 'Transfered' : 'In Parish'} />
                 </Box>
               </CardContent>
             </PriestCard>

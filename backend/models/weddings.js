@@ -310,7 +310,7 @@ const weddingSchema = mongoose.Schema({
   weddingStatus: {
     type: String,
     default: 'Pending',
-    enum: ['Pending', 'Confirmed', 'Cancelled'],
+    enum: ['Pending', 'Confirmed', 'Cancelled', 'Rescheduled'],
   },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   confirmedAt: {

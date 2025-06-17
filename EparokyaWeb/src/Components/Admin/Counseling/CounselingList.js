@@ -22,32 +22,35 @@ import {
 } from "@mui/icons-material";
 import Loader from "../../Layout/Loader";
 
-const StatusChip = styled(Chip)(({ theme, status }) => ({
-  fontWeight: "bold",
-  backgroundColor:
-    status === "Confirmed"
-      ? theme.palette.success.light
-      : status === "Cancelled"
-      ? theme.palette.error.light
-      : theme.palette.warning.light,
-  color: theme.palette.getContrastText(
-    status === "Confirmed"
-      ? theme.palette.success.light
-      : status === "Cancelled"
-      ? theme.palette.error.light
-      : theme.palette.warning.light
-  ),
-}));
+const StatusChip = styled(Chip)(({ theme, status }) => {
+  let bgColor;
+
+  if (status === "Confirmed") {
+    bgColor = theme.palette.success.light;
+  } else if (status === "Cancelled") {
+    bgColor = theme.palette.error.light;
+  } else if (status === "Rescheduled") {
+    bgColor = theme.palette.info.light; 
+  } else {
+    bgColor = theme.palette.warning.light;
+  }
+
+  return {
+    fontWeight: "bold",
+    backgroundColor: bgColor,
+    color: theme.palette.getContrastText(bgColor),
+  };
+});
+
 
 const StyledCard = styled(Paper)(({ theme, status }) => ({
   position: "relative",
-  borderLeft: `6px solid ${
-    status === "Confirmed"
+  borderLeft: `6px solid ${status === "Confirmed"
       ? theme.palette.success.main
       : status === "Cancelled"
-      ? theme.palette.error.main
-      : theme.palette.warning.main
-  }`,
+        ? theme.palette.error.main
+        : theme.palette.warning.main
+    }`,
   padding: theme.spacing(2),
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {
@@ -168,7 +171,7 @@ const CounselingList = () => {
             spacing={2}
             sx={{ mb: 2, justifyContent: "center" }}
           >
-            {["All", "Confirmed", "Pending", "Cancelled"].map((status) => (
+            {["All", "Confirmed", "Pending", "Cancelled", "Rescheduled"].map((status) => (
               <Button
                 key={status}
                 variant={filteredStatus === status ? "contained" : "outlined"}
@@ -176,10 +179,12 @@ const CounselingList = () => {
                   status === "Confirmed"
                     ? "success"
                     : status === "Cancelled"
-                    ? "error"
-                    : status === "Pending"
-                    ? "warning"
-                    : "primary"
+                      ? "error"
+                      : status === "Pending"
+                        ? "warning"
+                        : status === "Rescheduled"
+                          ? "info"
+                          : "primary"
                 }
                 onClick={() => setFilteredStatus(status)}
               >
@@ -275,9 +280,9 @@ const CounselingList = () => {
                             <strong>Counseling Date:</strong>{" "}
                             {item.counselingDate
                               ? format(
-                                  new Date(item.counselingDate),
-                                  "MMMM dd, yyyy"
-                                )
+                                new Date(item.counselingDate),
+                                "MMMM dd, yyyy"
+                              )
                               : "N/A"}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">

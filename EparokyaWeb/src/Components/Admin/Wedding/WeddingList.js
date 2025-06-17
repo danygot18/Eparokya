@@ -160,7 +160,7 @@ const WeddingList = () => {
             Wedding Records
           </Typography>
           <Stack direction="row" spacing={2} sx={{ mb: 2, justifyContent: "center" }}>
-            {["All", "Confirmed", "Pending", "Cancelled"].map((status) => (
+            {["All", "Confirmed", "Pending", "Cancelled", "Rescheduled"].map((status) => (
               <Button
                 key={status}
                 variant={filteredStatus === status ? "contained" : "outlined"}
@@ -171,7 +171,9 @@ const WeddingList = () => {
                       ? "error"
                       : status === "Pending"
                         ? "warning"
-                        : "primary"
+                        : status === "Rescheduled"
+                          ? "info"
+                          : "primary"
                 }
                 onClick={() => setFilteredStatus(status)}
               >

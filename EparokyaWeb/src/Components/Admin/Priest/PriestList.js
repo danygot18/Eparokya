@@ -176,6 +176,19 @@ const PriestCard = ({ priest, onEdit, onDelete, onToggleStatus }) => {
           labelPlacement="start"
           sx={{ m: 0 }}
         />
+         <FormControlLabel
+          control={
+            <Switch
+              checked={priest.isTransfered}
+              onChange={() => onToggleStatus(priest._id, "isTransfered")}
+              color="success"
+              size="small"
+            />
+          }
+          label="Transfered"
+          labelPlacement="start"
+          sx={{ m: 0 }}
+        />
       </Box>
     </Paper>
   );

@@ -268,7 +268,7 @@ const BaptismDetails = () => {
         }
         try {
             const response = await axios.put(
-                `${process.env.REACT_APP_API}/api/v1/declineBaptism/${baptismId}`,
+                `${process.env.REACT_APP_API}/api/v1/Binyag/declineBaptism/${baptismId}`,
                 { reason: cancelReason },
                 { withCredentials: true }
             );
@@ -293,10 +293,24 @@ const BaptismDetails = () => {
             setLoading(true);
             const response = await axios.put(
                 `${process.env.REACT_APP_API}/api/v1/${baptismDetails._id}/updateBaptismDate`,
-                { newDate, reason }
+                {
+                    newDate,
+                    reason,
+                    baptismStatus: "Rescheduled"
+                }
             );
 
             setUpdatedBaptismDate(response.data.baptism.baptismDate);
+            setBaptismDetails(prev => ({
+                ...prev,
+                baptismDate: response.data.baptism.baptismDate,
+                baptismStatus: "Rescheduled",
+                adminRescheduled: {
+                    date: newDate,
+                    reason: reason
+                }
+            }));
+
             toast.success("Baptism date updated successfully!");
         } catch (error) {
             console.error("Error updating baptism date:", error);
@@ -305,6 +319,7 @@ const BaptismDetails = () => {
             setLoading(false);
         }
     };
+
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="error">{error}</div>;
@@ -723,8 +738,6 @@ const BaptismDetails = () => {
 
                 {/* Cancelling Reason Section */}
 
-
-
             </div>
             <div className="wedding-checklist-container">
                 <BaptismChecklist baptismId={baptismId} />
@@ -746,7 +759,7 @@ const BaptismDetails = () => {
                         fontSize: "16px",
                         marginTop: "10px"
                     }}
-                    
+
                 >
                     {baptismDetails?.binyagStatus === "Confirmed" ? "Confirmed Baptism" : "Confirm Baptism"}
                 </button>

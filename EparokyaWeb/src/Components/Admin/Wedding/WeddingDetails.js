@@ -297,29 +297,43 @@ const WeddingDetails = () => {
       setIsCancelling(false);
     }
   };
+const handleUpdate = async () => {
+  if (!newDate || !reason) {
+    toast.error("Please select a date and provide a reason.");
+    return;
+  }
 
-  const handleUpdate = async () => {
-    if (!newDate || !reason) {
-      toast.error("Please select a date and provide a reason.");
-      return;
-    }
+  try {
+    setLoading(true);
+    const response = await axios.put(
+      `${process.env.REACT_APP_API}/api/v1/updateWeddingDate/${weddingDetails._id}`,
+      {
+        newDate,
+        reason,
+        weddingStatus: "Rescheduled"
+      }
+    );
 
-    try {
-      setLoading(true);
-      const response = await axios.put(
-        `${process.env.REACT_APP_API}/api/v1/updateWeddingDate/${weddingDetails._id}`,
-        { newDate, reason }
-      );
+    setUpdatedWeddingDate(response.data.wedding.weddingDate);
+    setWeddingDetails(prev => ({
+      ...prev,
+      weddingDate: response.data.wedding.weddingDate,
+      weddingStatus: "Rescheduled",
+      adminRescheduled: {
+        date: newDate,
+        reason: reason
+      }
+    }));
 
-      setUpdatedWeddingDate(response.data.wedding.weddingDate);
-      toast.success("Wedding date updated successfully!");
-    } catch (error) {
-      console.error("Error updating wedding date:", error);
-      toast.error("Failed to update wedding date.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    toast.success("Wedding date updated successfully!");
+  } catch (error) {
+    console.error("Error updating wedding date:", error);
+    toast.error("Failed to update wedding date.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   if (loading) return <Loader />;
 

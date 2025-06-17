@@ -81,12 +81,11 @@ const HouseBlessingList = () => {
             setLoading(true);
             const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/houseBlessing/getAllhouseBlessing`);
             const forms = response.data.houseBlessingRequests || [];
-            
-            // Sort from latest to oldest by createdAt
+
             const sortedForms = forms.sort(
                 (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
             );
-            
+
             setHouseBlessingForms(sortedForms);
         } catch (err) {
             console.error("Error fetching house blessing forms:", err);
@@ -151,10 +150,10 @@ const HouseBlessingList = () => {
                     }}
                 >
                     <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", textAlign: "center" }}>
-                        House Blessing Records
+                        Blessing Records
                     </Typography>
                     <Stack direction="row" spacing={2} sx={{ mb: 2, justifyContent: "center" }}>
-                        {["All", "Confirmed", "Pending", "Cancelled"].map((status) => (
+                        {["All", "Confirmed", "Pending", "Cancelled", "Rescheduled"].map((status) => (
                             <Button
                                 key={status}
                                 variant={filteredStatus === status ? "contained" : "outlined"}
@@ -165,8 +164,11 @@ const HouseBlessingList = () => {
                                             ? "error"
                                             : status === "Pending"
                                                 ? "warning"
-                                                : "primary"
+                                                : status === "Rescheduled"
+                                                    ? "info"
+                                                    : "primary"
                                 }
+
                                 onClick={() => setFilteredStatus(status)}
                             >
                                 {status}
@@ -240,8 +242,14 @@ const HouseBlessingList = () => {
                                                         />
                                                     </Box>
                                                     <Typography variant="h6" component="h2" gutterBottom>
-                                                        Record #{index + 1 + (currentPage - 1) * cardsPerPage}
+                                                        Blessing -{" "}
+                                                        {item.propertyType === "Others"
+                                                            ? item.customPropertyType || "Others"
+                                                            : item.propertyType || "House"}{" "}
+                                                        (Record #{index + 1 + (currentPage - 1) * cardsPerPage})
                                                     </Typography>
+
+
                                                     <Divider sx={{ my: 1 }} />
                                                     <Typography variant="body2" color="textSecondary">
                                                         <strong>Full Name:</strong> {item.fullName || "N/A"}

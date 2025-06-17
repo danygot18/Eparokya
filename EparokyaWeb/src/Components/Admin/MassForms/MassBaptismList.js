@@ -27,26 +27,25 @@ const StatusChip = styled(Chip)(({ theme, status }) => ({
     status === "Confirmed"
       ? theme.palette.success.light
       : status === "Cancelled"
-      ? theme.palette.error.light
-      : theme.palette.warning.light,
+        ? theme.palette.error.light
+        : theme.palette.warning.light,
   color: theme.palette.getContrastText(
     status === "Confirmed"
       ? theme.palette.success.light
       : status === "Cancelled"
-      ? theme.palette.error.light
-      : theme.palette.warning.light
+        ? theme.palette.error.light
+        : theme.palette.warning.light
   ),
 }));
 
 const StyledCard = styled(Paper)(({ theme, status }) => ({
   position: "relative",
-  borderLeft: `6px solid ${
-    status === "Confirmed"
+  borderLeft: `6px solid ${status === "Confirmed"
       ? theme.palette.success.main
       : status === "Cancelled"
-      ? theme.palette.error.main
-      : theme.palette.warning.main
-  }`,
+        ? theme.palette.error.main
+        : theme.palette.warning.main
+    }`,
   padding: theme.spacing(2),
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {
@@ -173,10 +172,10 @@ const MassBaptismList = () => {
                   status === "Confirmed"
                     ? "success"
                     : status === "Cancelled"
-                    ? "error"
-                    : status === "Pending"
-                    ? "warning"
-                    : "primary"
+                      ? "error"
+                      : status === "Pending"
+                        ? "warning"
+                        : "primary"
                 }
                 onClick={() => setFilteredStatus(status)}
               >
@@ -237,6 +236,7 @@ const MassBaptismList = () => {
                           boxSizing: "border-box",
                         }}
                       >
+
                         <StyledCard
                           elevation={3}
                           status={item.binyagStatus}
@@ -245,6 +245,10 @@ const MassBaptismList = () => {
                           }
                           sx={{ cursor: "pointer", height: "100%" }}
                         >
+                          <Typography variant="h6" component="h2" gutterBottom>
+                            Mass Baptism #{index + 1 + (currentPage - 1) * cardsPerPage}:{" "}
+                            {item.child?.fullName ?? "Unknown Child"}
+                          </Typography>
                           <Box
                             sx={{ position: "absolute", right: 16, top: 16 }}
                           >
@@ -257,18 +261,18 @@ const MassBaptismList = () => {
                           <Typography variant="body2" color="textSecondary">
                             <strong>Baptism Date and Time:</strong>{" "}
                             {item.baptismDateTime?.date &&
-                            item.baptismDateTime?.time
+                              item.baptismDateTime?.time
                               ? `${format(
-                                  new Date(item.baptismDateTime.date),
-                                  "MMMM dd, yyyy"
-                                )} at ${format(
-                                  parse(
-                                    item.baptismDateTime.time,
-                                    "HH:mm", 
-                                    new Date()
-                                  ),
-                                  "h:mm a"
-                                )}`
+                                new Date(item.baptismDateTime.date),
+                                "MMMM dd, yyyy"
+                              )} at ${format(
+                                parse(
+                                  item.baptismDateTime.time,
+                                  "HH:mm",
+                                  new Date()
+                                ),
+                                "h:mm a"
+                              )}`
                               : "N/A"}
                           </Typography>
 
@@ -291,11 +295,10 @@ const MassBaptismList = () => {
                             <strong>Baptism Date and Time:</strong>{" "}
                             {item.baptismDateTime?.date
                               ? `${format(
-                                  new Date(item.baptismDateTime.date),
-                                  "MMMM dd, yyyy"
-                                )} at ${
-                                  item.baptismDateTime?.time || "Unknown"
-                                }`
+                                new Date(item.baptismDateTime.date),
+                                "MMMM dd, yyyy"
+                              )} at ${item.baptismDateTime?.time || "Unknown"
+                              }`
                               : "N/A"}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">

@@ -193,42 +193,44 @@ const CounselingDetails = () => {
     }
   };
 
-  const handleUpdate = async () => {
-    if (!newDate || !reason) {
-      toast.error("Please select a date and provide a reason.", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
-      return;
-    }
+ const handleUpdate = async () => {
+  if (!newDate || !reason) {
+    toast.error("Please select a date and provide a reason.", {
+      position: toast.POSITION.TOP_RIGHT,
+    });
+    return;
+  }
 
-    try {
-      setLoading(true);
-      const response = await axios.put(
-        `${process.env.REACT_APP_API}/api/v1/updateCounselingDate/${counselingId}`,
-        { newDate, reason },
-        { withCredentials: true }
-      );
+  try {
+    setLoading(true);
+    const response = await axios.put(
+      `${process.env.REACT_APP_API}/api/v1/updateCounselingDate/${counselingId}`,
+      { newDate, reason },
+      { withCredentials: true }
+    );
 
-      setCounselingDetails(prev => ({
-        ...prev,
-        counselingDate: newDate,
-        adminRescheduled: {
-          date: newDate,
-          reason: reason
-        }
-      }));
-      toast.success("Counseling date updated successfully!", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
-    } catch (error) {
-      console.error("Error updating counseling date:", error);
-      toast.error("Failed to update counseling date.", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    setCounselingDetails(prev => ({
+      ...prev,
+      counselingDate: newDate,
+      counselingStatus: 'Rescheduled',
+      adminRescheduled: {
+        date: newDate,
+        reason: reason
+      }
+    }));
+
+    toast.success("Counseling date updated successfully!", {
+      position: toast.POSITION.TOP_RIGHT,
+    });
+  } catch (error) {
+    console.error("Error updating counseling date:", error);
+    toast.error("Failed to update counseling date.", {
+      position: toast.POSITION.TOP_RIGHT,
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSubmitComment = async () => {
     if (!selectedComment && !additionalComment) {

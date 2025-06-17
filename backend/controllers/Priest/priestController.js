@@ -37,7 +37,7 @@ exports.createPriest = async (req, res) => {
             crop: 'scale',
         });
 
-        const { title, position, fullName, nickName, birthDate, Seminary, ordinationDate, parishDurationYear, isActive, isAvailable, isRetired } = req.body;
+        const { title, position, fullName, nickName, birthDate, Seminary, ordinationDate, parishDurationYear, isActive, isAvailable, isRetired, isTransfered } = req.body;
         if (!title || !position || !fullName || !birthDate || !Seminary || !ordinationDate || !parishDurationYear) {
             return res.status(400).json({ success: false, message: 'All required fields must be filled.' });
         }
@@ -54,6 +54,7 @@ exports.createPriest = async (req, res) => {
             isActive,
             isAvailable,
             isRetired,
+            isTransfered,
             image: {
                 public_id: result.public_id,
                 url: result.secure_url,
@@ -71,7 +72,7 @@ exports.createPriest = async (req, res) => {
 exports.updatePriestStatus = async (req, res) => {
 try {
     const { field, value } = req.body;
-    const validFields = ['isActive', 'isAvailable', 'isRetired'];
+    const validFields = ['isActive', 'isAvailable', 'isRetired', 'isTransfered'];
     
     if (!validFields.includes(field)) {
         return res.status(400).json({ message: 'Invalid field update' });

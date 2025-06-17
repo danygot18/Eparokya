@@ -12,6 +12,8 @@ import {
   FormControl,
   InputLabel,
   Box,
+  Modal,
+  Button,
   Chip,
   CircularProgress,
   Alert,
@@ -36,12 +38,13 @@ import {
   Today as TodayIcon,
   CalendarMonth as CalendarIcon,
   People as CounselingIcon,
-  
+
 } from "@mui/icons-material";
 import HouseIcon from '@mui/icons-material/House';
 import { History as HistoryIcon } from "@mui/icons-material";
 import SideBar from "../SideBar";
 import MetaData from "../../Layout/MetaData";
+import PriestCalendar from './PriestCalendar';
 
 const PriestNavigation = () => {
   const [data, setData] = useState([]);
@@ -50,6 +53,9 @@ const PriestNavigation = () => {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [dateFilter, setDateFilter] = useState("all");
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
   const navigate = useNavigate();
 
   const config = {
@@ -67,6 +73,7 @@ const PriestNavigation = () => {
         axios.get(`${process.env.REACT_APP_API}/api/v1/getConfirmedCounseling`),
         axios.get(`${process.env.REACT_APP_API}/api/v1/houseBlessing/getConfirmedHouseBlessing`, config),
         axios.get(`${process.env.REACT_APP_API}/api/v1/getAllPrayerRequestIntention`),
+
       ]);
 
       setData([
@@ -327,7 +334,7 @@ const PriestNavigation = () => {
             </Typography>
           </>
         );
-        case "houseBlessing":
+      case "houseBlessing":
         return (
           <>
             <Typography variant="body2" gutterBottom>
@@ -466,6 +473,45 @@ const PriestNavigation = () => {
                   </FormControl>
                 </Box>
               </Box>
+              <Button
+                variant="text"
+                onClick={handleOpen}
+                sx={{
+                  color: '#5bb450',
+                  backgroundColor: 'transparent',
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  mb: 2,
+                  '&:hover': {
+                    backgroundColor: 'rgba(91, 180, 80, 0.08)',
+                  },
+                }}
+              >
+                View Calendar
+              </Button>
+
+              <Modal open={open} onClose={handleClose}>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    borderRadius: 2,
+                    p: 3,
+                    minWidth: 1500,     
+                    width: '80vw',    
+                    maxWidth: '1200px', 
+                    maxHeight: '90vh',
+                    overflowY: 'auto',
+                    outline: 'none',
+                  }}
+                >
+                  <PriestCalendar />
+                </Box>
+              </Modal>
 
               {lastUpdated && (
                 <Typography variant="caption" color="textSecondary">

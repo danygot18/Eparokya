@@ -20,22 +20,23 @@ import {
   ChevronRight as ChevronRightIcon,
 } from "@mui/icons-material";
 
-const StatusChip = styled(Chip)(({ theme, status }) => ({
-  fontWeight: "bold",
-  backgroundColor:
+const StatusChip = styled(Chip)(({ theme, status }) => {
+  const backgroundColor =
     status === "Confirmed"
       ? theme.palette.success.light
       : status === "Cancelled"
         ? theme.palette.error.light
-        : theme.palette.warning.light,
-  color: theme.palette.getContrastText(
-    status === "Confirmed"
-      ? theme.palette.success.light
-      : status === "Cancelled"
-        ? theme.palette.error.light
-        : theme.palette.warning.light
-  ),
-}));
+        : status === "Rescheduled"
+          ? theme.palette.info.light
+          : theme.palette.warning.light;
+
+  return {
+    fontWeight: "bold",
+    backgroundColor,
+    color: theme.palette.getContrastText(backgroundColor),
+  };
+});
+
 
 const StyledCard = styled(Paper)(({ theme, status }) => ({
   position: "relative",
@@ -159,7 +160,7 @@ const BaptismList = () => {
             Baptism Records
           </Typography>
           <Stack direction="row" spacing={2} sx={{ mb: 2, justifyContent: "center" }}>
-            {["All", "Confirmed", "Pending", "Cancelled"].map((status) => (
+            {["All", "Confirmed", "Pending", "Cancelled", "Rescheduled"].map((status) => (
               <Button
                 key={status}
                 variant={filteredStatus === status ? "contained" : "outlined"}
@@ -168,9 +169,11 @@ const BaptismList = () => {
                     ? "success"
                     : status === "Cancelled"
                       ? "error"
-                      : status === "Pending"
-                        ? "warning"
-                        : "primary"
+                      : status === "Rescheduled"
+                        ? "info"
+                        : status === "Pending"
+                          ? "warning"
+                          : "primary"
                 }
                 onClick={() => setFilteredStatus(status)}
               >

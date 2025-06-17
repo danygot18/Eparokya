@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const priestSchema = new mongoose.Schema({
-    title : { type: String, 
+    title: {
+        type: String,
         enum: [
             'Reverend Father',
             'Father',
@@ -19,11 +20,12 @@ const priestSchema = new mongoose.Schema({
             'Monsignor',
             'Patriarch',
             'Pastor',
-            'Pope',      
-            'Primate',          
-         ], 
-        required: true },
-    position : { type: String, required: true },
+            'Pope',
+            'Primate',
+        ],
+        required: true
+    },
+    position: { type: String, required: true },
     fullName: { type: String, required: true },
     nickName: { type: String, required: false },
     birthDate: { type: Date, required: true },
@@ -33,6 +35,8 @@ const priestSchema = new mongoose.Schema({
     isActive: { type: Boolean, required: true, default: false },
     isAvailable: { type: Boolean, required: true, default: false },
     isRetired: { type: Boolean, required: true, default: false },
+    isTransfered: { type: Boolean, required: true, default: false },
+
     image: {
         public_id: {
             type: String,

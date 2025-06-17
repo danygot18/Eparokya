@@ -59,9 +59,9 @@ const HouseBlessingsDetails = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
-    const [updatedHouseBlessingDate, setUpdatedHouseBlessingDate] = useState(
-      blessingDetails?.blessingDate || ""
-    );
+  const [updatedHouseBlessingDate, setUpdatedHouseBlessingDate] = useState(
+    blessingDetails?.blessingDate || ""
+  );
 
   const predefinedComments = [
     "Confirmed",
@@ -103,7 +103,7 @@ const HouseBlessingsDetails = () => {
           ? fetchedPriests
           : [fetchedPriests];
         setPriestsList(formattedPriests);
-        
+
       } catch (err) {
         console.error("Failed to fetch priests:", err);
         setPriestsList([]);
@@ -216,6 +216,7 @@ const HouseBlessingsDetails = () => {
       setBlessingDetails(prev => ({
         ...prev,
         blessingDate: newDate,
+        blessingStatus: 'Rescheduled',
         adminRescheduled: {
           date: newDate,
           reason: reason
@@ -317,7 +318,7 @@ const HouseBlessingsDetails = () => {
           {/* Header with status */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h4" component="h1">
-              House Blessing Details
+               Blessing Details
             </Typography>
             <Chip
               label={blessingDetails?.blessingStatus || "N/A"}
@@ -635,7 +636,6 @@ const HouseBlessingsDetails = () => {
                 />
                 <CardContent>
                   <Stack spacing={2}>
-                    {/* Replace DatePicker with native input */}
                     <TextField
                       label="New Blessing Date"
                       type="date"
@@ -665,7 +665,6 @@ const HouseBlessingsDetails = () => {
                 </CardContent>
               </Card>
 
-              {/* Action Buttons */}
               <Stack spacing={2}>
                 <Button
                   variant="contained"
@@ -673,7 +672,10 @@ const HouseBlessingsDetails = () => {
                   startIcon={<CheckIcon />}
                   onClick={handleConfirm}
                   fullWidth
-                  disabled={blessingDetails?.blessingStatus === "Confirmed"}
+                  disabled={
+                    blessingDetails?.blessingStatus === "Confirmed" ||
+                    blessingDetails?.blessingStatus === "Cancelled"
+                  }
                 >
                   Confirm Blessing
                 </Button>
@@ -688,6 +690,7 @@ const HouseBlessingsDetails = () => {
                   Cancel Blessing
                 </Button>
               </Stack>
+
             </Stack>
           </Stack>
         </Stack>

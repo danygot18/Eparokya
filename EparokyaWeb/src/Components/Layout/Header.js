@@ -54,18 +54,17 @@ const Header = () => {
   };
 
   const navButtonStyle = (route) => ({
-    color: currentPath === route ? "green" : "white",
+    color: currentPath === route ? "#97cf8a" : "white",
     fontWeight: currentPath === route ? "bold" : "normal",
     borderBottom: currentPath === route ? "2px solid green" : "none",
     borderRadius: 3,
     textTransform: "none",
     "&:hover": {
-      color: "green",
+      color: "#97cf8a",
       backgroundColor: "rgba(0, 128, 0, 0.1)",
     },
   });
 
-  // Show loader during initial load or during logout process
   if (loading || isLoggingOut) return <Loader />;
 
   return (
@@ -111,10 +110,18 @@ const Header = () => {
 
           <Button
             component={Link}
-            to="/user/"
-            sx={navButtonStyle("/user/")}
+            to="/GuidesPage"
+            sx={navButtonStyle("/GuidesPage")}
           >
             Guides
+          </Button>
+
+          <Button
+            component={Link}
+            to="/FAQsPage"
+            sx={navButtonStyle("/FAQsPage")}
+          >
+            FAQs
           </Button>
 
           {/* Parish Dropdown */}
@@ -138,7 +145,7 @@ const Header = () => {
             <MenuItem component={Link} to="/memberHistory" onClick={handleParishMenuClose}>
               Members
             </MenuItem>
-            <MenuItem component={Link} to="/parishPriests" onClick={handleParishMenuClose}>
+            <MenuItem component={Link} to="/parishHistory" onClick={handleParishMenuClose}>
               Parish History
             </MenuItem>
             <MenuItem component={Link} to="/parishPriests" onClick={handleParishMenuClose}>

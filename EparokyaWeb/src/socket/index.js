@@ -4,7 +4,7 @@ const config = {
     autoConnect: false,
 };
 
-export const socket = io(`https://eparokya.onrender.com`, {
+export const socket = io(`${process.env.REACT_APP_API}`, {
     autoConnect: false,
     reconnection: true, // enables auto reconnection
     reconnectionAttempts: 10, // maximum attempts

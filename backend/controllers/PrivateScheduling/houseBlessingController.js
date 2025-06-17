@@ -212,6 +212,34 @@ exports.declineBlessing = async (req, res) => {
 };
 
 // Update Blessing Date
+// exports.updateBlessingDate = async (req, res) => {
+//   try {
+//     const { blessingId } = req.params;
+//     const { newDate, reason } = req.body;
+
+//     const houseBlessing = await HouseBlessing.findById(blessingId);
+//     if (!houseBlessing) {
+//       return res.status(404).json({ message: "Blessing not found" });
+//     }
+
+//     // Just update the adminRescheduled field, not the original blessingDate
+//     houseBlessing.adminRescheduled = {
+//       date: newDate,
+//       reason: reason,
+//     };
+
+//     await houseBlessing.save();
+
+//     return res.status(200).json({
+//       message: "Blessing reschedule recorded successfully",
+//       houseBlessing,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
 exports.updateBlessingDate = async (req, res) => {
   try {
     const { blessingId } = req.params;
@@ -222,11 +250,14 @@ exports.updateBlessingDate = async (req, res) => {
       return res.status(404).json({ message: "Blessing not found" });
     }
 
-    // Just update the adminRescheduled field, not the original blessingDate
     houseBlessing.adminRescheduled = {
       date: newDate,
       reason: reason,
     };
+
+    houseBlessing.blessingStatus = 'Rescheduled';
+
+    houseBlessing.blessingDate = newDate;
 
     await houseBlessing.save();
 

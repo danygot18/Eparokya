@@ -76,7 +76,7 @@ const counselingSchema = new mongoose.Schema({
         type: String,
         required: false,
         default: 'Pending',
-        enum: ['Pending', 'Confirmed', 'Cancelled'],
+        enum: ['Pending', 'Confirmed', 'Cancelled', 'Rescheduled'],
     },
 
     createdAt: {

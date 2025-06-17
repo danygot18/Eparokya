@@ -336,6 +336,7 @@ exports.updateWeddingDate = async (req, res) => {
 
     wedding.weddingDate = newDate;
     wedding.adminRescheduled = { date: newDate, reason: reason };
+    wedding.weddingStatus = "Rescheduled";
 
     await wedding.save();
 
@@ -345,6 +346,7 @@ exports.updateWeddingDate = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // Comments for the admin
 exports.addComment = async (req, res) => {

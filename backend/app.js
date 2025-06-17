@@ -8,8 +8,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const allowedOrigins = [
-  // "*",
-  "https://eparokya.vercel.app",
+  "*",
+  // "https://eparokya.vercel.app",
   "http://localhost:3000",
 ];
 
@@ -17,8 +17,8 @@ const allowedOrigins = [
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
-  // methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  // allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use(express.json());
@@ -34,7 +34,7 @@ const server = http.createServer(app);
 // Create Socket.IO server
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: allowedOrigins,
     // methods: ["GET", "POST",],
     // credentials: true,
   },
@@ -53,7 +53,7 @@ app.use("/api/v1", require("./routes/Resources/resource"));
 app.use("/api/v1", require("./routes/Notification/notification"));
 
 // Sentiment Analysis
-app.use("/api/v1/", require("./routes/FeedbackForm/sentimentAnalysis"));
+// app.use("/api/v1/", require("./routes/FeedbackForm/sentimentAnalysis"));
 app.use("/api/v1/", require("./routes/FeedbackForm/Types/eventType"));
 app.use("/api/v1/", require("./routes/FeedbackForm/Types/activityType"));
 
