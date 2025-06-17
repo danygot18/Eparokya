@@ -14,8 +14,8 @@ const fs = require("fs");
 
 exports.registerUser = async (req, res, next) => {
   try {
-    console.log("Request Body:", req.body);
-    console.log("Uploaded File:", req.file);
+    // console.log("Request Body:", req.body);
+    // console.log("Uploaded File:", req.file);
 
     let result;
 

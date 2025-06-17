@@ -76,7 +76,7 @@ const ActivitySentiment = () => {
     };
     try {
       await axios.post(
-        `${process.env.EXPO_PUBLIC_API}/api/v1/analyzeActivitySentiment`,
+        `${baseURL}/analyzeActivitySentiment`,
         requestData,
         config
       );

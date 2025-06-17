@@ -35,6 +35,9 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
+    methods: ["GET", "POST",],
+    credentials: true,
+    origin: allowedOrigins,
     // methods: ["GET", "POST",],
     // credentials: true,
   },
@@ -42,6 +45,12 @@ const io = new Server(server, {
   // pingInterval: 25000,
   // transports: ['websocket', 'polling']
 });
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
+
 
 
 app.use("/api/v1", require("./routes/user"));
@@ -53,7 +62,7 @@ app.use("/api/v1", require("./routes/Resources/resource"));
 app.use("/api/v1", require("./routes/Notification/notification"));
 
 // Sentiment Analysis
-// app.use("/api/v1/", require("./routes/FeedbackForm/sentimentAnalysis"));
+// // app.use("/api/v1/", require("./routes/FeedbackForm/sentimentAnalysis"));
 app.use("/api/v1/", require("./routes/FeedbackForm/Types/eventType"));
 app.use("/api/v1/", require("./routes/FeedbackForm/Types/activityType"));
 
