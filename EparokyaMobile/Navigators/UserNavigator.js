@@ -24,6 +24,13 @@ import SubmittedCounselingList from "../Screens/User/Counseling/SubmittedCounsel
 import SubmittedHouseBlessingList from "../Screens/User/PrivateScheduling/SubmittedHouseBlessingList";
 import SubmittedPrayerRequestList from "../Screens/User/Prayers/SubmittedPrayerRequestList";
 
+//mass
+import SubmittedMassWeddingDetails from "../Screens/User/Mass/MassWedding/SubmittedMassWeddingDetails";
+import SubmittedMassWeddingList from "../Screens/User/Mass/MassWedding/SubmittedMassWeddingList";
+
+import MySubmittedMassBaptismForm from "../Screens/User/Mass/MassBaptism/MySubmittedMassBaptismForm";
+import SubmittedMassBaptismList from "../Screens/User/Mass/MassBaptism/SubmittedMassBaptismList";
+
 // import BinyagForm from "../Screens/User/Baptism/BinyagForm";
 
 import SubmittedWeddingForm from "../Screens/User/Wedding/MySubmittedWeddingForm";
@@ -41,6 +48,8 @@ import Calendar from "../Screens/Calendar/Calendar";
 // import AnnouncementDetail from "../Screens/User/Announcement/AnnouncementDetail";
 
 import UserChat from "../Screens/User/UserChats/UserChat";
+
+import InventoryForm from "../Screens/User/InventoryForm";
 
 const Stack = createStackNavigator();
 
@@ -103,7 +112,7 @@ const UserNavigator = (props) => {
         }}
       />
 
-       <Stack.Screen
+      <Stack.Screen
         name="SubmittedWeddingDetails"
         component={SubmittedWeddingDetails}
         options={{
@@ -190,6 +199,40 @@ const UserNavigator = (props) => {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="SubmittedMassWeddingList"
+        component={SubmittedMassWeddingList}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedMassWeddingDetails"
+        component={SubmittedMassWeddingDetails}
+        options={{
+          headerShown: false,
+        }}
+      />
+      
+      <Stack.Screen
+        name="MySubmittedMassBaptismForm"
+        component={MySubmittedMassBaptismForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedMassBaptismList"
+        component={SubmittedMassBaptismList}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+
 
       {/* <Stack.Screen
         name="WeddingFormContainer"
@@ -296,7 +339,15 @@ const UserNavigator = (props) => {
           headerShown: true,
         }}
       />
-    </Stack.Navigator>
+
+      <Stack.Screen
+        name="InventoryForm"
+        component={InventoryForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack.Navigator> 
   );
 };
 

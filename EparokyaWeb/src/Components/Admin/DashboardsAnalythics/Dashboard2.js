@@ -26,7 +26,7 @@ const Dashboard2 = () => {
         const baptismStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/baptismStatusCount`, config);
         const funeralStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/funeralStatusCount`, config);
         const counselingStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/counselingStatusCount`, config);
-        const houseBlessingStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/stats/blessingStatusCount`, config);
+        const houseBlessingStatusRes = await axios.get(`${process.env.REACT_APP_API}/api/v1/houseBlessing/stats/blessingStatusCount`, config);
 
 
         setWeddingStatus(convertToStatusObject(weddingStatusRes.data));

@@ -151,7 +151,8 @@ exports.getAllBaptisms = async (req, res) => {
   try {
     const baptisms = await MassBaptism.find()
       .populate("userId")
-      .populate("baptismDateTime");
+      .populate("baptismDateTime")
+      .populate('adminNotes.priest');
 
     res.status(200).json({ massBaptismForms: baptisms });
   } catch (error) {
@@ -163,7 +164,8 @@ exports.getBaptismById = async (req, res) => {
   try {
     const baptism = await MassBaptism.findById(req.params.massBaptismId)
       .populate("userId")
-      .populate("baptismDateTime");
+      .populate("baptismDateTime")
+      .populate('adminNotes.priest');
 
     if (!baptism) {
       return res.status(404).json({ message: "Baptism not found" });
@@ -179,9 +181,9 @@ exports.getMySubmittedForms = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const forms = await MassBaptism.find({ userId: userId }).populate(
-      "baptismDateTime"
-    );
+    const forms = await MassBaptism.find({ userId: userId })
+      .populate("baptismDateTime")
+      .populate('adminNotes.priest');
 
     if (!forms.length) {
       return res.status(404).json({ message: "No forms found for this user." });
@@ -202,7 +204,7 @@ exports.getMassBaptismFormById = async (req, res) => {
     console.log("Looking for massBaptismId:", massBaptismId);
 
     const massBaptismForm = await MassBaptism.findById(massBaptismId)
-      .populate({ path: "adminNotes.priest", model: "Priest" })
+      .populate('adminNotes.priest')
       .populate("userId", "name email")
       .populate("baptismDateTime")
       .lean();
@@ -420,24 +422,24 @@ exports.addMassBaptismAdminNotes = async (req, res) => {
     massBaptism.adminNotes.push(newAdminNotes);
     await massBaptism.save();
 
-    let populatedPriest = null;
-    if (priest) {
-      populatedPriest = await Priest.findById(priest).select(
-        "title fullName nickname"
-      );
-    }
+    // let populatedPriest = null;
+    // if (priest) {
+    //   populatedPriest = await Priest.findById(priest).select(
+    //     "title fullName"
+    //   );
+    // }
 
-    const latestNote =
-      massBaptism.adminNotes[massBaptism.adminNotes.length - 1];
+    // const latestNote =
+    //   massBaptism.adminNotes[massBaptism.adminNotes.length - 1];
 
-    const populatedNote = await MassBaptism.populate(latestNote, {
-      path: "priest",
-      select: "title fullName nickName",
-    });
+    // const populatedNote = await MassBaptism.populate(latestNote, {
+    //   path: "priest",
+    //   select: "title fullName nickName",
+    // });
 
     res
       .status(200)
-      .json({ message: "Admin notes added.", adminNotes: populatedNote });
+      .json({ message: "Admin notes added.", adminNotes: newAdminNotes });
   } catch (error) {
     console.error("Error adding admin notes:", error);
     res.status(500).json({ success: false, error: error.message });

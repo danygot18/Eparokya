@@ -131,7 +131,7 @@ const massBaptismSchema = new mongoose.Schema({
 
   adminNotes: [
     {
-      priest: { type: mongoose.Schema.Types.ObjectId, ref: 'priest' },
+      priest: { type: mongoose.Schema.Types.ObjectId, ref: 'Priest' },
       recordedBy: String,
       bookNumber: String,
       pageNumber: String,

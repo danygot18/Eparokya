@@ -47,7 +47,9 @@ const InventoryForm = () => {
     'Other'
   ];
 
-  const units = ['pcs', 'kg', 'g', 'l', 'ml', 'box', 'set'];
+  const units = ['pcs', 
+    // 'kg', 'g', 'l', 'ml', 
+    'box', 'set'];
 
   // Create axios instance with base config
   const api = axios.create({

@@ -2,23 +2,28 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
     Box, Button, Card, CardContent, Container, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, Typography, Chip, Dialog, DialogTitle,
-    DialogContent, DialogActions, TextField, CircularProgress, MenuItem, Stack
+    DialogContent, DialogActions, TextField, CircularProgress, MenuItem, Stack,
+    Tabs, Tab, Paper, Avatar
 } from '@mui/material';
-import { Inventory } from '@mui/icons-material';
+import { Inventory, History, CheckCircle, Pending, Cancel, HourglassTop } from '@mui/icons-material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const InventoryForm = () => {
     const [user, setUser] = useState(null);
-
     const [inventory, setInventory] = useState([]);
     const [loading, setLoading] = useState(false);
     const [openBorrowDialog, setOpenBorrowDialog] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [borrowQuantity, setBorrowQuantity] = useState(1);
+    const [tabValue, setTabValue] = useState(0);
 
-    const [borrowedItems, setBorrowedItems] = useState([]);
-    const [returnedItems, setReturnedItems] = useState([]);
+    const [borrowHistory, setBorrowHistory] = useState({
+        pending: [],
+        borrowed: [],
+        returned: [],
+        rejected: []
+    });
 
     const config = useMemo(() => ({ withCredentials: true }), []);
 
@@ -40,10 +45,6 @@ const InventoryForm = () => {
             ? [user.ministryRoles]
             : [];
 
-    console.log("InventoryForm user:", user);
-    console.log("InventoryForm user.ministryRoles:", user?.ministryRoles);
-
-
     const hasAllowedRole = ministryRoles.some(role =>
         role?.role === 'Coordinator' || role?.role === 'Assistant Coordinator'
     );
@@ -54,25 +55,41 @@ const InventoryForm = () => {
             try {
                 const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/inventory`, config);
                 setInventory(data.inventoryItems);
-
-                // Filter borrow history for current user
-                const borrowed = [];
-                const returned = [];
+                
+                // Organize borrow history by status for the current user
+                const history = {
+                    pending: [],
+                    borrowed: [],
+                    returned: [],
+                    rejected: []
+                };
 
                 data.inventoryItems.forEach(item => {
                     item.borrowHistory.forEach(record => {
-                        if (record.user === user?._id) {
-                            if (record.status === 'borrowed') {
-                                borrowed.push({ ...record, item });
+                        if (record.user._id === user?._id) {
+                            const historyRecord = {
+                                ...record,
+                                itemId: item._id,
+                                itemName: item.name,
+                                itemCategory: item.category,
+                                itemLocation: item.location,
+                                itemUnit: item.unit || 'pcs' // Default unit if not specified
+                            };
+                            
+                            if (record.status === 'pending') {
+                                history.pending.push(historyRecord);
+                            } else if (record.status === 'borrowed') {
+                                history.borrowed.push(historyRecord);
                             } else if (record.status === 'returned') {
-                                returned.push({ ...record, item });
+                                history.returned.push(historyRecord);
+                            } else if (record.status === 'rejected') {
+                                history.rejected.push(historyRecord);
                             }
                         }
                     });
                 });
 
-                setBorrowedItems(borrowed);
-                setReturnedItems(returned);
+                setBorrowHistory(history);
 
             } catch (err) {
                 toast.error('Failed to fetch inventory');
@@ -104,9 +121,37 @@ const InventoryForm = () => {
             );
             toast.success('Borrow request submitted. Waiting for admin approval.');
             handleBorrowClose();
+            // Refresh data after submission
+            const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/inventory`, config);
+            setInventory(data.inventoryItems);
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to request borrow');
         }
+    };
+
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
+    };
+
+    const renderStatusIcon = (status) => {
+        switch (status) {
+            case 'pending':
+                return <HourglassTop color="warning" />;
+            case 'borrowed':
+                return <CheckCircle color="primary" />;
+            case 'returned':
+                return <CheckCircle color="success" />;
+            case 'rejected':
+                return <Cancel color="error" />;
+            default:
+                return null;
+        }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
     };
 
     if (!hasAllowedRole) {
@@ -130,133 +175,183 @@ const InventoryForm = () => {
                     Request to Borrow Inventory
                 </Typography>
 
-                {/* === Currently Borrowed Items === */}
-                {borrowedItems.length > 0 && (
-                    <Box mt={4}>
-                        <Typography variant="h5" gutterBottom>
-                            Currently Borrowed Items
-                        </Typography>
-                        <TableContainer component={Card}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Item</TableCell>
-                                        <TableCell>Quantity</TableCell>
-                                        <TableCell>Borrowed At</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {borrowedItems.map((borrow, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{borrow.item.name}</TableCell>
-                                            <TableCell>
-                                                {borrow.quantity} {borrow.item.unit}
-                                            </TableCell>
-                                            <TableCell>
-                                                {new Date(borrow.borrowedAt).toLocaleDateString()}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Box>
-                )}
+                {/* === Borrow History Section === */}
+                <Box mt={4}>
+                    <Typography variant="h5" gutterBottom>
+                        <History sx={{ verticalAlign: 'middle', mr: 1 }} />
+                        My Borrow History
+                    </Typography>
+                    
+                    <Paper sx={{ mb: 4 }}>
+                        <Tabs
+                            value={tabValue}
+                            onChange={handleTabChange}
+                            variant="scrollable"
+                            scrollButtons="auto"
+                        >
+                            <Tab label={`All (${[...borrowHistory.pending, ...borrowHistory.borrowed, ...borrowHistory.returned, ...borrowHistory.rejected].length})`} />
+                            <Tab label={`Pending (${borrowHistory.pending.length})`} />
+                            <Tab label={`Borrowed (${borrowHistory.borrowed.length})`} />
+                            <Tab label={`Returned (${borrowHistory.returned.length})`} />
+                            <Tab label={`Rejected (${borrowHistory.rejected.length})`} />
+                        </Tabs>
+                    </Paper>
 
-                {/* === Returned Items === */}
-                {returnedItems.length > 0 && (
-                    <Box mt={4}>
-                        <Typography variant="h5" gutterBottom>
-                            Returned Items
-                        </Typography>
-                        <TableContainer component={Card}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Item</TableCell>
-                                        <TableCell>Quantity</TableCell>
-                                        <TableCell>Borrowed At</TableCell>
-                                        <TableCell>Returned At</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {returnedItems.map((borrow, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{borrow.item.name}</TableCell>
-                                            <TableCell>
-                                                {borrow.quantity} {borrow.item.unit}
-                                            </TableCell>
-                                            <TableCell>
-                                                {new Date(borrow.borrowedAt).toLocaleDateString()}
-                                            </TableCell>
-                                            <TableCell>
-                                                {new Date(borrow.returnedAt).toLocaleDateString()}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Box>
-                )}
-
-                {/* === Inventory Borrow Section === */}
-                {loading ? (
-                    <CircularProgress />
-                ) : (
-                    <TableContainer component={Card} sx={{ mt: 4 }}>
+                    <TableContainer component={Card}>
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Name</TableCell>
+                                    <TableCell>Item</TableCell>
                                     <TableCell>Category</TableCell>
-                                    <TableCell align="right">Available</TableCell>
-                                    <TableCell>Location</TableCell>
-                                    <TableCell align="center">Action</TableCell>
+                                    <TableCell>Quantity</TableCell>
+                                    <TableCell>Status</TableCell>
+                                    <TableCell>Borrowed Date</TableCell>
+                                    <TableCell>Returned/Rejected Date</TableCell>
+                                    <TableCell>Notes</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {inventory.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={5} align="center">
-                                            No inventory items found
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    inventory.map(item => (
-                                        <TableRow key={item._id} hover>
-                                            <TableCell>
-                                                <Typography fontWeight="medium">{item.name}</Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    {item.description?.substring(0, 50)}...
-                                                </Typography>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip label={item.category} size="small" />
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                {item.availableQuantity} {item.unit}
-                                            </TableCell>
-                                            <TableCell>{item.location}</TableCell>
-                                            <TableCell align="center">
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    size="small"
-                                                    startIcon={<Inventory />}
-                                                    disabled={item.availableQuantity <= 0}
-                                                    onClick={() => handleBorrowOpen(item)}
-                                                >
-                                                    Request Borrow
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
+                                {(() => {
+                                    let itemsToShow = [];
+                                    switch (tabValue) {
+                                        case 0: itemsToShow = [...borrowHistory.pending, ...borrowHistory.borrowed, ...borrowHistory.returned, ...borrowHistory.rejected]; break;
+                                        case 1: itemsToShow = borrowHistory.pending; break;
+                                        case 2: itemsToShow = borrowHistory.borrowed; break;
+                                        case 3: itemsToShow = borrowHistory.returned; break;
+                                        case 4: itemsToShow = borrowHistory.rejected; break;
+                                        default: itemsToShow = [];
+                                    }
+
+                                    if (itemsToShow.length === 0) {
+                                        return (
+                                            <TableRow>
+                                                <TableCell colSpan={7} align="center">
+                                                    No records found for this status
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    }
+
+                                    return itemsToShow
+                                        .sort((a, b) => new Date(b.borrowedAt || b.requestedAt) - new Date(a.borrowedAt || a.requestedAt))
+                                        .map((record, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>
+                                                    <Stack direction="row" alignItems="center" spacing={1}>
+                                                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                                            {record.itemName.charAt(0)}
+                                                        </Avatar>
+                                                        <Box>
+                                                            <Typography fontWeight="medium">{record.itemName}</Typography>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {record.itemLocation}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Stack>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Chip label={record.itemCategory} size="small" />
+                                                </TableCell>
+                                                <TableCell>
+                                                    {record.quantity} {record.itemUnit}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Stack direction="row" alignItems="center" spacing={1}>
+                                                        {renderStatusIcon(record.status)}
+                                                        <Typography>
+                                                            {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                                                        </Typography>
+                                                        {record.status === 'rejected' && record.rejectionReason && (
+                                                            <Typography variant="caption" color="error">
+                                                                ({record.rejectionReason})
+                                                            </Typography>
+                                                        )}
+                                                    </Stack>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {formatDate(record.borrowedAt)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {record.status === 'returned' && formatDate(record.returnedAt)}
+                                                    {record.status === 'rejected' && formatDate(record.rejectedAt)}
+                                                    {(record.status === 'pending' || record.status === 'borrowed') && '-'}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {record.rejectionReason && record.status === 'rejected' ? (
+                                                        <Typography color="error">{record.rejectionReason}</Typography>
+                                                    ) : record.notes || '-'}
+                                                </TableCell>
+                                            </TableRow>
+                                        ));
+                                })()}
                             </TableBody>
                         </Table>
                     </TableContainer>
-                )}
+                </Box>
+
+                {/* === Inventory Borrow Section === */}
+                <Box mt={4}>
+                    <Typography variant="h5" gutterBottom>
+                        Available Items
+                    </Typography>
+                    
+                    {loading ? (
+                        <CircularProgress />
+                    ) : (
+                        <TableContainer component={Card}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Name</TableCell>
+                                        <TableCell>Category</TableCell>
+                                        <TableCell align="right">Available</TableCell>
+                                        <TableCell>Location</TableCell>
+                                        <TableCell align="center">Action</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {inventory.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} align="center">
+                                                No inventory items found
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        inventory.map(item => (
+                                            <TableRow key={item._id} hover>
+                                                <TableCell>
+                                                    <Typography fontWeight="medium">{item.name}</Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {item.description?.substring(0, 50)}...
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Chip label={item.category} size="small" />
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {item.quantity} {item.unit || 'pcs'}
+                                                </TableCell>
+                                                <TableCell>{item.location}</TableCell>
+                                                <TableCell align="center">
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        size="small"
+                                                        startIcon={<Inventory />}
+                                                        disabled={item.quantity <= 0}
+                                                        onClick={() => handleBorrowOpen(item)}
+                                                    >
+                                                        Request Borrow
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+                </Box>
 
                 {/* === Borrow Dialog === */}
                 <Dialog open={openBorrowDialog} onClose={handleBorrowClose}>
@@ -266,7 +361,7 @@ const InventoryForm = () => {
                             <strong>Item:</strong> {selectedItem?.name}
                         </Typography>
                         <Typography gutterBottom>
-                            <strong>Available:</strong> {selectedItem?.availableQuantity} {selectedItem?.unit}
+                            <strong>Available:</strong> {selectedItem?.quantity} {selectedItem?.unit || 'pcs'}
                         </Typography>
                         <TextField
                             autoFocus
@@ -278,12 +373,12 @@ const InventoryForm = () => {
                             value={borrowQuantity}
                             onChange={(e) =>
                                 setBorrowQuantity(
-                                    Math.max(1, Math.min(selectedItem?.availableQuantity, Number(e.target.value)))
+                                    Math.max(1, Math.min(selectedItem?.quantity, Number(e.target.value)))
                                 )
                             }
                             inputProps={{
                                 min: 1,
-                                max: selectedItem?.availableQuantity
+                                max: selectedItem?.quantity
                             }}
                         />
                         <Typography variant="caption" color="text.secondary">
@@ -300,7 +395,6 @@ const InventoryForm = () => {
             </Container>
         </Box>
     );
-
 };
 
 export default InventoryForm;

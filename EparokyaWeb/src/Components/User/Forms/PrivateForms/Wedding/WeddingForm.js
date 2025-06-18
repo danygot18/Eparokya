@@ -66,6 +66,8 @@ const WeddingForm = () => {
     BridePermitFromtheParishOftheBride: "",
     BrideChildBirthCertificate: "",
     BrideOneByOne: "",
+    priest: "",          // selected from dropdown (ObjectId or "others")
+    customPriest: "",
     documents: {}, // Stores File objects
     previews: {},
   });
@@ -73,6 +75,7 @@ const WeddingForm = () => {
   const [showMarriedDialog, setShowMarriedDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState(null);
+  const [priestList, setPriestList] = useState([]);
   const config = {
     withCredentials: true,
   };
@@ -125,6 +128,21 @@ const WeddingForm = () => {
   const [isAgreed, setIsAgreed] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+
+  useEffect(() => {
+    const fetchPriests = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAvailablePriest`);
+        setPriestList(response.data.priests || []);
+        console.log("Fetched priests:", response.data.priests);
+      } catch (error) {
+        console.error("Failed to fetch priest list", error);
+      }
+    };
+
+    fetchPriests();
+  }, []);
+
 
   const FileUploadField = ({
     name,
@@ -337,6 +355,7 @@ const WeddingForm = () => {
       [addressType]: {
         ...prev[addressType],
         barangay: selectedBarangay,
+
       },
     }));
 
@@ -344,6 +363,24 @@ const WeddingForm = () => {
       setCustomBarangay("");
     }
   };
+
+  const handlePriestChange = (e) => {
+    const value = e.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      priest: value,
+      customPriest: value === "others" ? "" : prev.customPriest,
+    }));
+  };
+
+  const handleCustomPriestChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      customPriest: e.target.value,
+    }));
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -426,7 +463,7 @@ const WeddingForm = () => {
       console.error("Form submission error:", error);
       toast.error(
         error.response?.data?.message ||
-          "Something went wrong during submission."
+        "Something went wrong during submission."
       );
       setIsSubmitting(false);
     }
@@ -1154,6 +1191,29 @@ const WeddingForm = () => {
             </fieldset>
 
             {/* File Uploads */}
+            <fieldset className="form-group">
+              <label>Priest:</label>
+              <select value={formData.priest} onChange={handlePriestChange}>
+                <option value="">-- Select Priest --</option>
+                {priestList.map((p) => (
+                  <option key={p._id} value={p._id}>{p.fullName}</option>
+                ))}
+                <option value="others">Others</option>
+              </select>
+
+              {formData.priest === "others" && (
+                <>
+                  <label>Custom Priest Name:</label>
+                  <input
+                    type="text"
+                    value={formData.customPriest}
+                    onChange={handleCustomPriestChange}
+                    placeholder="Enter custom priest name"
+                  />
+                </>
+              )}
+
+            </fieldset>
             <fieldset className="form-group">
               <legend>Upload Documents</legend>
 

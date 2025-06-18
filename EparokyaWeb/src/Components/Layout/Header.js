@@ -54,14 +54,14 @@ const Header = () => {
   };
 
   const navButtonStyle = (route) => ({
-    color: currentPath === route ? "#97cf8a" : "white",
+    color: currentPath === route ? "#90C67C" : "white",
     fontWeight: currentPath === route ? "bold" : "normal",
-    borderBottom: currentPath === route ? "2px solid green" : "none",
+    borderBottom: currentPath === route ? "2px solid #90C67C" : "none",
     borderRadius: 3,
     textTransform: "none",
     "&:hover": {
-      color: "#97cf8a",
-      backgroundColor: "rgba(0, 128, 0, 0.1)",
+      color: "#90C67C",
+      backgroundColor: "rgba(144, 198, 124, 0.1)",
     },
   });
 

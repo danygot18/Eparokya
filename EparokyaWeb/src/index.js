@@ -1,18 +1,21 @@
-// 
-
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ToastContainer } from 'react-toastify';
+// Don't forget to import the default CSS for react-toastify!
+import 'react-toastify/dist/ReactToastify.css'; // Add this line
+import './index.css'; // Your custom CSS (which should contain .Toastify__toast and .custom-close-button styles)
+
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './store';
 import { socket } from './socket/index';
-import './index.css'
 
+// Define CustomCloseButton directly in this file
+// REMOVE: import CustomCloseButton from './Components/Layout/CustomCloseButton'
 const CustomCloseButton = ({ closeToast }) => (
   <button className="custom-close-button" onClick={closeToast}>
-    Close
+    X {/* Changed 'Close' to 'X' as it's common for close buttons */}
   </button>
 );
 
@@ -41,28 +44,7 @@ const RootComponent = () => {
       }
     };
   }, []);
-  // useEffect(() => {
-  //   // Only connect if not already connected
-  //   if (!socket.connected) {
-  //     socket.connect();
-
-  //     socket.on('connect', () => {
-  //       console.log("Socket connected:", socket.connected);
-  //       console.log("Socket ID:", socket.id);
-  //     });
-
-  //     socket.on('connect_error', (err) => {
-  //       console.log("Connection error:", err);
-  //     });
-  //   }
-
-  //   return () => {
-  //     if (socket.connected) {
-  //       socket.disconnect();
-  //       console.log("Socket disconnected");
-  //     }
-  //   };
-  // }, []);
+  // Removed the duplicate useEffect block - keep only one
 
   return (
     <Provider store={store}>
@@ -74,7 +56,8 @@ const RootComponent = () => {
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}
-        closeOnClick
+        closeOnClick={false} // <--- IMPORTANT: Set closeOnClick to false if you are providing a custom closeButton
+        closeButton={CustomCloseButton} // <--- Pass your custom component here
         pauseOnHover
         draggable
         theme="colored"

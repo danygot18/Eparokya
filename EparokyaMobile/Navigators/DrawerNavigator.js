@@ -9,7 +9,7 @@ import { Modal, View, TouchableOpacity, StyleSheet, Image } from "react-native";
 import axios from "axios";
 import baseURL from "../assets/common/baseUrl";
 
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import {
   NativeBaseProvider,
   Box,
@@ -49,6 +49,8 @@ import NotificationUser from "../service/notificationUser";
 import MinistryCalendar from "../Screens/Calendar/MinistryCalendar";
 import MassReadingsModal from "../service/Readings";
 
+
+
 const Drawer = createDrawerNavigator();
 
 const getIcon = (screenName) => {
@@ -69,7 +71,7 @@ const getIcon = (screenName) => {
       return "form-select";
     case "Prayer Wall":
       return "hands-pray";
-      case "Wedding Wall":
+    case "Wedding Wall":
       return "cards-heart";
     case "Send Prayer":
       return "hand-heart";
@@ -82,9 +84,11 @@ const getIcon = (screenName) => {
     case "Ministry Announcement":
       return "bullhorn";
     default:
-      return help-circle;
+      return help - circle;
   }
 };
+
+
 
 const CustomDrawerContent = (props) => {
   const dispatch = useDispatch();
@@ -93,6 +97,7 @@ const CustomDrawerContent = (props) => {
   const { user } = useSelector((state) => state.auth);
   const [expandedSections, setExpandedSections] = useState({});
   const [availableForms, setAvailableForms] = useState([]);
+
 
   const toggleSection = (section) => {
     setExpandedSections({
@@ -107,6 +112,7 @@ const CustomDrawerContent = (props) => {
     "Prayers": ["Prayer Wall", "Wedding Wall", "Send Prayer"],
     "Resources": ["Resource Page", "Forms"],
     "Account": ["Profile"]
+   
   };
 
   useEffect(() => {
@@ -346,8 +352,8 @@ const DrawerNavigator = () => {
               borderBottomColor="rgba(255,255,255,0.1)"
             >
               {/* Menu Button */}
-              <Pressable 
-                onPress={() => navigation.toggleDrawer()} 
+              <Pressable
+                onPress={() => navigation.toggleDrawer()}
                 p="2"
                 _pressed={{ bg: "rgba(255,255,255,0.1)" }}
               >
@@ -365,7 +371,14 @@ const DrawerNavigator = () => {
 
               <HStack space={4} alignItems="center">
                 <MassReadingsModal />
-                <NotificationUser />
+                <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
+                  <MaterialIcons name="notifications" size={28} color="green" />
+                  {unreadCount > 0 && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>{unreadCount}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
               </HStack>
             </Box>
           ),
@@ -377,9 +390,9 @@ const DrawerNavigator = () => {
           overlayColor: "rgba(0,0,0,0.5)",
         })}
       >
-        <Drawer.Screen 
-          name="Home" 
-          component={Main} 
+        <Drawer.Screen
+          name="Home"
+          component={Main}
           options={{
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="home" color={color} size={size} />
@@ -394,7 +407,7 @@ const DrawerNavigator = () => {
         <Drawer.Screen name="Ministry Calendar" component={MinistryCalendar} />
         <Drawer.Screen name="Forms" component={Forms} />
         <Drawer.Screen name="Prayer Wall" component={PrayerWall} />
-         <Drawer.Screen name="Wedding Wall" component={WeddingWall} />
+        <Drawer.Screen name="Wedding Wall" component={WeddingWall} />
         <Drawer.Screen name="Send Prayer" component={SendPrayer} />
         <Drawer.Screen name="Live" component={UserLive} />
         <Drawer.Screen name="Profile" component={Profile} />
@@ -402,6 +415,7 @@ const DrawerNavigator = () => {
         <Drawer.Screen name="EventSentiment" component={EventSentiment} />
         <Drawer.Screen name="ActivitySentiment" component={ActivitySentiment} />
         <Drawer.Screen name="Feedback Reports" component={SentimentReports} />
+        <Drawer.Screen name="Notifications" component={NotificationUser} />
       </Drawer.Navigator>
     </Box>
   );

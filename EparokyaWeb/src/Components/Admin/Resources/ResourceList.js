@@ -31,6 +31,7 @@ import {
 import SideBar from '../SideBar';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { toast } from 'react-toastify';
 
 const AdminResourceList = () => {
     const [resources, setResources] = useState([]);
@@ -66,7 +67,7 @@ const AdminResourceList = () => {
             const sortedResources = response.data.data.sort(
                 (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
             );
-
+            console.log("Fetched resources:", response.data);
             setResources(sortedResources);
         } catch (error) {
             console.error("Error fetching resources:", error);
@@ -100,14 +101,17 @@ const AdminResourceList = () => {
 
     const handleDelete = async () => {
         if (!resourceToDelete) return;
+        
 
         setDeleteLoading(true);
         try {
             await axios.delete(`${process.env.REACT_APP_API}/api/v1/deleteResource/${resourceToDelete}`);
             setResources(resources.filter((r) => r._id !== resourceToDelete));
             setOpenDeleteDialog(false);
+            toast.success("Success Deleting resource")
         } catch (error) {
             console.error('Error deleting resource:', error);
+            toast.error("Error Deleting resource")
         } finally {
             setDeleteLoading(false);
             setResourceToDelete(null);
@@ -122,8 +126,10 @@ const AdminResourceList = () => {
                     r._id === id ? { ...r, isFeatured: !isFeatured } : r
                 )
             );
+            toast.success("Success updating resource feature status")
         } catch (error) {
             console.error('Error updating resource feature status:', error);
+            toast.error("Error updating resource feature status")
         }
     };
 

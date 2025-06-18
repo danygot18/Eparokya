@@ -207,7 +207,7 @@ const MassBaptismForm = () => {
 
     } catch (error) {
       console.error("Error submitting form:", error.response ? error.response.data : error.message);
-      toast.error("Failed to submit form. Please try again.");
+      toast.error( error.response ? error.response.data : error.message);
     }
   };
 

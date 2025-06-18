@@ -36,6 +36,7 @@ const MassBaptismDetails = () => {
         { withCredentials: true }
       );
       setBaptismDetails(response.data);
+      console.log(response.data)
     } catch (err) {
       setError("Failed to fetch baptism details.");
     } finally {
@@ -64,10 +65,10 @@ const MassBaptismDetails = () => {
   const formatDate = (date) =>
     date
       ? new Date(date).toLocaleString(undefined, {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
       : "N/A";
 
   if (loading) return <Loader />;
@@ -78,7 +79,6 @@ const MassBaptismDetails = () => {
       sx={{
         minHeight: "100vh",
         width: "100%",
-        p: 3,
         backgroundColor: "#f9f9f9",
         display: "flex",
         flexDirection: "row",
@@ -110,11 +110,11 @@ const MassBaptismDetails = () => {
                 <Typography>
                   <strong>Baptism Date and Time:</strong>{" "}
                   {baptismDetails?.baptismDateTime?.date &&
-                  baptismDetails?.baptismDateTime?.time
+                    baptismDetails?.baptismDateTime?.time
                     ? `${format(
-                        new Date(baptismDetails.baptismDateTime.date),
-                        "MMMM dd, yyyy"
-                      )} at ${baptismDetails.baptismDateTime.time}`
+                      new Date(baptismDetails.baptismDateTime.date),
+                      "MMMM dd, yyyy"
+                    )} at ${baptismDetails.baptismDateTime.time}`
                     : "N/A"}
                 </Typography>
 
@@ -308,6 +308,44 @@ const MassBaptismDetails = () => {
                 ) : (
                   <Typography>No admin comments yet.</Typography>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Admin Notes
+                </Typography>
+                {baptismDetails?.adminNotes?.length > 0 ? (
+                  baptismDetails.adminNotes.map((note, index) => {
+                    const priest = note.priest;
+                    const priestName = priest
+                      ? `${priest.title} ${priest.fullName}${priest.nickName ? ` (${priest.nickName})` : ""}`
+                      : "Unknown Priest";
+
+                    return (
+                      <div key={index} className="admin-comment">
+                        <p><strong>Priest:</strong> {priestName}</p>
+                        {note.recordedBy && (
+                          <p><strong>Recorded By:</strong> {note.recordedBy}</p>
+                        )}
+                        {note.bookNumber && (
+                          <p><strong>Book Number:</strong> {note.bookNumber}</p>
+                        )}
+                        {note.pageNumber && (
+                          <p><strong>Page Number:</strong> {note.pageNumber}</p>
+                        )}
+                        {note.lineNumber && (
+                          <p><strong>Line Number:</strong> {note.lineNumber}</p>
+                        )}
+                        <hr />
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p>No additional notes available.</p>
+                )}
+
               </CardContent>
             </Card>
 

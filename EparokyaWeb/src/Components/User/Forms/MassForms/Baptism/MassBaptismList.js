@@ -86,7 +86,7 @@ const SubmittedBaptismList = () => {
       sx={{
         minHeight: "100vh",
         width: "100%",
-        p: 3,
+
         backgroundColor: "#f9f9f9",
         display: "flex",
         flexDirection: "row",
@@ -98,10 +98,10 @@ const SubmittedBaptismList = () => {
           width: "100%",
           maxWidth: 1200,
           mx: "auto",
+          marginTop: 10,
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
+
           flex: 1,
         }}
       >

@@ -93,6 +93,8 @@ const InventoryList = () => {
       });
 
       setInventory(data.inventoryItems);
+      console.log(data.inventoryItems)
+
       setInventoryCount(data.inventoryCount);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch inventory');
@@ -109,6 +111,7 @@ const InventoryList = () => {
         withCredentials: true
       });
       setPendingBorrows(data.pendingBorrows);
+      console.log(data.pendingBorrows)
     } catch (err) {
       toast.error('Failed to fetch pending borrows');
     } finally {
@@ -189,10 +192,11 @@ const InventoryList = () => {
     try {
       await axios.post(
         `${process.env.REACT_APP_API}/api/v1/inventory/${selectedItem._id}/return`,
+
         returnData,
         { withCredentials: true }
       );
-
+      console.log(selectedItem._id)
       toast.success('Item returned successfully');
       fetchInventory();
       handleReturnClose();
@@ -441,6 +445,7 @@ const InventoryList = () => {
                       <TableCell align="right">Available</TableCell>
                       <TableCell>Status</TableCell>
                       <TableCell>Location</TableCell>
+                      <TableCell>Borrowed By</TableCell> {/* NEW COLUMN */}
                       <TableCell align="center">Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -454,6 +459,11 @@ const InventoryList = () => {
                     ) : (
                       inventory.map((item) => {
                         const stockStatus = getStockStatus(item.quantity, item.minStockLevel, item.availableQuantity);
+
+                        const notReturned = (item.borrowHistory || []).filter(
+                          (b) => b.status === "borrowed"
+                        );
+
                         return (
                           <TableRow key={item._id} hover>
                             <TableCell>
@@ -488,6 +498,19 @@ const InventoryList = () => {
                               />
                             </TableCell>
                             <TableCell>{item.location}</TableCell>
+                            <TableCell>
+                              {notReturned.length > 0 ? (
+                                notReturned.map((b, idx) => (
+                                  <Typography key={b._id || idx} variant="body2">
+                                    {b.user?.name || "Unknown"} ({b.quantity})
+                                  </Typography>
+                                ))
+                              ) : (
+                                <Typography variant="body2" color="text.secondary">
+                                  All returned
+                                </Typography>
+                              )}
+                            </TableCell>
                             <TableCell align="center">
                               <Tooltip title="Edit">
                                 <IconButton
@@ -680,51 +703,54 @@ const InventoryList = () => {
 
       {/* Return Dialog */}
       <Dialog open={openReturnDialog} onClose={handleReturnClose}>
-        <DialogTitle>Return Inventory Item</DialogTitle>
-        <DialogContent>
-          <Typography gutterBottom>
-            <strong>Item:</strong> {selectedItem?.name}
-          </Typography>
-          <Typography gutterBottom>
-            <strong>Borrowed:</strong> {selectedItem?.quantity - selectedItem?.availableQuantity} {selectedItem?.unit}
-          </Typography>
-          <TextField
-            select
-            margin="dense"
-            label="Select Borrow Record"
-            fullWidth
-            variant="standard"
-            value={returnData.borrowId}
-            onChange={(e) => setReturnData({ ...returnData, borrowId: e.target.value })}
-          >
-            {selectedItem?.borrowHistory
-              ?.filter(record => record.status === 'borrowed')
-              .map(record => (
-                <MenuItem key={record._id} value={record._id}>
-                  {record.user?.name ? `${record.user.name} - ` : ''}
-                  Borrowed {record.quantity} on {record.borrowedAt ? new Date(record.borrowedAt).toLocaleDateString() : 'N/A'}
-                </MenuItem>
-              ))}
-          </TextField>
-          <TextField
-            margin="dense"
-            label="Quantity to Return"
-            type="number"
-            fullWidth
-            variant="standard"
-            value={returnData.quantity}
-            onChange={(e) => setReturnData({ ...returnData, quantity: e.target.value })}
-            inputProps={{
-              min: 1
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleReturnClose}>Cancel</Button>
-          <Button onClick={handleReturnSubmit} variant="contained" color="primary">
-            Confirm Return
-          </Button>
-        </DialogActions>
+        <Box sx={{ minWidth: 600, maxWidth: 900, height: 500 }}>
+
+          <DialogTitle>Return Inventory Item</DialogTitle>
+          <DialogContent>
+            <Typography gutterBottom>
+              <strong>Item:</strong> {selectedItem?.name}
+            </Typography>
+            <Typography gutterBottom>
+              <strong>Borrowed:</strong> {selectedItem?.quantity - selectedItem?.availableQuantity} {selectedItem?.unit}
+            </Typography>
+            <TextField
+              select
+              margin="dense"
+              label="Select Borrow Record"
+              fullWidth
+              variant="standard"
+              value={returnData.borrowId}
+              onChange={(e) => setReturnData({ ...returnData, borrowId: e.target.value })}
+            >
+              {selectedItem?.borrowHistory
+                ?.filter(record => record.status === 'borrowed')
+                .map(record => (
+                  <MenuItem key={record._id} value={record._id}>
+                    {record.user?.name ? `${record.user.name} - ` : ''}
+                    Borrowed {record.quantity} on {record.borrowedAt ? new Date(record.borrowedAt).toLocaleDateString() : 'N/A'}
+                  </MenuItem>
+                ))}
+            </TextField>
+            <TextField
+              margin="dense"
+              label="Quantity to Return"
+              type="number"
+              fullWidth
+              variant="standard"
+              value={returnData.quantity}
+              onChange={(e) => setReturnData({ ...returnData, quantity: e.target.value })}
+              inputProps={{
+                min: 1
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleReturnClose}>Cancel</Button>
+            <Button onClick={handleReturnSubmit} variant="contained" color="primary">
+              Confirm Return
+            </Button>
+          </DialogActions>
+        </Box>
       </Dialog>
 
       {/* History Dialog */}

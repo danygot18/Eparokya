@@ -357,6 +357,21 @@ const weddingSchema = mongoose.Schema({
     },
   ],
 
+  priest: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Priest',
+    required: function () {
+      return !this.customPriest; // Required if customPriest is not provided
+    },
+  },
+  customPriest: {
+    type: String,
+    required: function () {
+      return !this.priest; // Required if priest is not selected
+    },
+  },
+
+
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   checklistId: {
     type: mongoose.Schema.Types.ObjectId,

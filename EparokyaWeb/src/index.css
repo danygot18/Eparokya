@@ -13,12 +13,19 @@ code {
 }
 
 .Toastify__toast {
-  position: relative; /* enable absolute positioning inside */
+  position: relative;
   font-size: 14px !important;
   font-weight: 500;
   border-radius: 10px !important;
   padding: 12px 16px !important;
+  /* Keep your existing padding */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  /* Make the toast a flex container */
+  align-items: center;
+  /* Vertically center items (text and button) */
+  justify-content: space-between;
+  /* Distribute space between text and button */
 }
 
 /* Success */
@@ -33,9 +40,74 @@ code {
   color: #ffffff !important;
 }
 
-/* Close button positioned top right corner */
+/* --- NEW / MODIFIED SECTION FOR THE CLOSE BUTTON --- */
+
+/* Style the react-toastify's default close button */
+.Toastify__close-button {
+  background: none;
+  /* Remove any default background */
+  border: none;
+  /* Remove any default border */
+  color: #fff;
+  /* Match your desired color */
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  /* Removed absolute positioning here as flexbox will handle it */
+  padding: 0;
+  /* Important: remove default padding that might make it large */
+  margin-left: 10px;
+  /* Add some space between text and button */
+  flex-shrink: 0;
+  /* Prevent the button from shrinking */
+  display: flex;
+  /* Make the button itself a flex container to center its SVG */
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  /* Example: set a fixed small width */
+  height: 20px;
+  /* Example: set a fixed small height */
+  font-size: 11px;
+  /* To affect the 'x' if it's text-based, or just a small overall size */
+  font-weight: bold;
+  /* If you want the 'x' to be bold */
+  border-radius: 5px;
+  /* Add border-radius */
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
+
+/* Target the SVG icon inside the close button */
+.Toastify__close-button svg {
+  width: 14px;
+  /* Adjust SVG size */
+  height: 14px;
+  /* Adjust SVG size */
+  fill: currentColor;
+  /* Ensures SVG takes on the 'color' of its parent */
+}
+
+/* Style for the toast content/body to ensure it takes up space */
+.Toastify__toast-body {
+  flex-grow: 1;
+  /* Allows the content to fill available space */
+  display: flex;
+  /* Make it a flex container */
+  align-items: center;
+  /* Vertically center the text within the body */
+  overflow: hidden;
+  /* Prevent text overflow */
+  margin: 0;
+  /* Remove any default margin that might push things */
+  padding: 0;
+  /* Remove any default padding that might push things */
+}
+
 .custom-close-button {
   position: absolute;
+  /* Or whatever positioning you chose based on your toast's display */
   top: 8px;
   right: 8px;
   background: rgba(255, 255, 255, 0.2);
@@ -48,10 +120,10 @@ code {
   cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s ease;
+  width: 10%;
+  /* Add more styles here to control its size, padding, etc. */
 }
 
 .custom-close-button:hover {
   opacity: 1;
 }
-
-

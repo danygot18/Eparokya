@@ -6,7 +6,7 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import { Box } from "native-base";
+import { Box, Text } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 
 const SubmittedForms = () => {
@@ -22,11 +22,35 @@ const SubmittedForms = () => {
 
   ];
 
+
+  const cards2 = [
+    { route: "SubmittedMassWeddingList", image: require("../../assets/submittedWeddingList.png") },
+
+    { route: "SubmittedMassBaptismList", image: require("../../assets/submittedBaptismalList.png") },
+  ];
+
+
   return (
     <Box style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.row}>
           {cards.map((card, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.card}
+              onPress={() => navigation.navigate(card.route)}
+            >
+              <Image source={card.image} style={styles.image} />
+            </TouchableOpacity>
+          ))}
+
+
+        </View>
+        <Text fontSize={24} fontWeight="bold" textAlign="center" mb="$2">
+          Mass Forms
+        </Text>
+        <View style={styles.row}>
+          {cards2.map((card, index) => (
             <TouchableOpacity
               key={index}
               style={styles.card}

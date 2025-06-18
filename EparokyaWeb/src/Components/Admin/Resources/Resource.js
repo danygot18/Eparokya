@@ -2,7 +2,23 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import SideBar from '../SideBar';
-import { FaTrash } from 'react-icons/fa';
+import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Box,
+  Button,
+  Container,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  Paper,
+  Stack,
+  IconButton,
+  CircularProgress
+} from '@mui/material';
+import { toast } from 'react-toastify';
 
 const Resource = () => {
   const [title, setTitle] = useState('');
@@ -12,15 +28,14 @@ const Resource = () => {
   const [categories, setCategories] = useState([]);
 
   // Media states
-  const [file, setFile] = useState(null); // single file upload (raw file)
-  const [image, setImage] = useState(null); // single image
-  const [images, setImages] = useState([]); // multiple images
-  const [videos, setVideos] = useState([]); // multiple videos
+  const [file, setFile] = useState(null);
+  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
+  const [videos, setVideos] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch resource categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -35,7 +50,6 @@ const Resource = () => {
     fetchCategories();
   }, []);
 
-  // Handlers for file inputs
   const handleFileUpload = (e) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
@@ -99,165 +113,181 @@ const Resource = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
+      toast.success("Success creating resource")
       navigate('/admin/resourceList');
     } catch (error) {
       console.error('Error creating resource:', error);
+       toast.success("Error creating resource")
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ display: "flex" }}>
+    <Box sx={{ display: 'flex' }}>
       <SideBar 
         categories={categories} 
         selectedCategory={resourceCategory} 
         setSelectedCategory={setResourceCategory} 
       />
   
-      <div style={{ flex: 1, padding: "20px" }}>
-        <h2>Create Resource</h2>
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
-          <div className="form-group">
-            <label>Title</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter resource title"
-              required
-            />
-          </div>
-  
-          <div className="form-group">
-            <label>Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter resource description"
-              required
-            />
-          </div>
-  
-          <div className="form-group">
-            <label>Link</label>
-            <input
-              type="text"
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
-              placeholder="Enter resource link (URL)"
-              required
-            />
-          </div>
-  
-          <div className="form-group">
-            <label>Upload File (Optional)</label>
-            <input
-              type="file"
-              onChange={handleFileUpload}
-              accept="*/*"
-            />
-            {file && (
-              <div>
-                <p>File selected: {file.name}</p>
-              </div>
-            )}
-          </div>
-  
-          <div className="form-group">
-            <label>Upload Single Image (Optional)</label>
-            <input
-              type="file"
-              onChange={handleImageUpload}
-              accept="image/*"
-            />
-            {image && (
-              <div className="image-preview">
-                <img src={URL.createObjectURL(image)} alt="Selected" width="150" />
-              </div>
-            )}
-          </div>
-  
-          <div className="form-group">
-            <label>Upload Multiple Images (Optional)</label>
-            <input
-              type="file"
-              multiple
-              onChange={handleMultipleImagesUpload}
-              accept="image/*"
-            />
-            {images.length > 0 && (
-              <div>
-                <h4>Selected Images</h4>
-                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                  {images.map((img, index) => (
-                    <div key={index} className="image-preview" style={{ marginRight: '10px' }}>
-                      <img src={URL.createObjectURL(img)} alt={`Preview ${index + 1}`} width="150" />
-                      <FaTrash 
-                        style={{ cursor: 'pointer', color: 'red' }} 
-                        onClick={() => removeImageFromMultiple(img)}
-                      />
-                    </div>
+      <Container component="main" sx={{ flex: 1, p: 3 }}>
+        <Paper elevation={3} sx={{ p: 3 }}>
+          <Typography variant="h4" component="h2" gutterBottom>
+            Create Resource
+          </Typography>
+          
+          <Box component="form" onSubmit={handleSubmit} encType="multipart/form-data">
+            <Stack spacing={3}>
+              <TextField
+                label="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter resource title"
+                required
+                fullWidth
+              />
+              
+              <TextField
+                label="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter resource description"
+                required
+                multiline
+                rows={4}
+                fullWidth
+              />
+              
+              <TextField
+                label="Link"
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="Enter resource link (URL)"
+                required
+                fullWidth
+              />
+              
+              <Box>
+                <Typography variant="subtitle1" gutterBottom>
+                  Upload File (Optional)
+                </Typography>
+                <Button variant="contained" component="label">
+                  Choose File
+                  <input type="file" hidden onChange={handleFileUpload} accept="*/*" />
+                </Button>
+                {file && (
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    File selected: {file.name}
+                  </Typography>
+                )}
+              </Box>
+              
+              <Box>
+                <Typography variant="subtitle1" gutterBottom>
+                  Upload Single Image (Optional)
+                </Typography>
+                <Button variant="contained" component="label">
+                  Choose Image
+                  <input type="file" hidden onChange={handleImageUpload} accept="image/*" />
+                </Button>
+                {image && (
+                  <Box sx={{ mt: 2 }}>
+                    <img src={URL.createObjectURL(image)} alt="Selected" width="150" />
+                  </Box>
+                )}
+              </Box>
+              
+              <Box>
+                <Typography variant="subtitle1" gutterBottom>
+                  Upload Multiple Images (Optional)
+                </Typography>
+                <Button variant="contained" component="label">
+                  Choose Images
+                  <input type="file" multiple hidden onChange={handleMultipleImagesUpload} accept="image/*" />
+                </Button>
+                {images.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="h6">Selected Images</Typography>
+                    <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', mt: 2 }}>
+                      {images.map((img, index) => (
+                        <Box key={index} sx={{ position: 'relative' }}>
+                          <img src={URL.createObjectURL(img)} alt={`Preview ${index + 1}`} width="150" />
+                          <IconButton 
+                            sx={{ position: 'absolute', top: 0, right: 0, color: 'error.main' }}
+                            onClick={() => removeImageFromMultiple(img)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
+              </Box>
+              
+              <Box>
+                <Typography variant="subtitle1" gutterBottom>
+                  Upload Videos (Optional)
+                </Typography>
+                <Button variant="contained" component="label">
+                  Choose Videos
+                  <input type="file" multiple hidden onChange={handleVideosUpload} accept="video/*" />
+                </Button>
+                {videos.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="h6">Selected Videos</Typography>
+                    <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', mt: 2 }}>
+                      {videos.map((vid, index) => (
+                        <Box key={index} sx={{ position: 'relative' }}>
+                          <video width="200" controls>
+                            <source src={URL.createObjectURL(vid)} type="video/mp4" />
+                          </video>
+                          <IconButton 
+                            sx={{ position: 'absolute', top: 0, right: 0, color: 'error.main' }}
+                            onClick={() => removeVideoFromMultiple(vid)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
+              </Box>
+              
+              <FormControl fullWidth required>
+                <InputLabel>Category</InputLabel>
+                <Select
+                  value={resourceCategory}
+                  onChange={(e) => setResourceCategory(e.target.value)}
+                  label="Category"
+                >
+                  <MenuItem value="">Select Category</MenuItem>
+                  {categories.map((cat) => (
+                    <MenuItem key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </MenuItem>
                   ))}
-                </div>
-              </div>
-            )}
-          </div>
-  
-          <div className="form-group">
-            <label>Upload Videos (Optional)</label>
-            <input
-              type="file"
-              multiple
-              onChange={handleVideosUpload}
-              accept="video/*"
-            />
-            {videos.length > 0 && (
-              <div>
-                <h4>Selected Videos</h4>
-                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                  {videos.map((vid, index) => (
-                    <div key={index} className="video-preview" style={{ marginRight: '10px' }}>
-                      <video width="200" controls>
-                        <source src={URL.createObjectURL(vid)} type="video/mp4" />
-                      </video>
-                      <FaTrash 
-                        style={{ cursor: 'pointer', color: 'red' }} 
-                        onClick={() => removeVideoFromMultiple(vid)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-  
-          <div className="form-group">
-            <label>Category</label>
-            <select
-              value={resourceCategory}
-              onChange={(e) => setResourceCategory(e.target.value)}
-              required
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat._id} value={cat._id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-  
-          <div className="form-actions">
-            <button type="submit" disabled={loading}>
-              {loading ? 'Submitting...' : 'Create Resource'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+                </Select>
+              </FormControl>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button 
+                  type="submit" 
+                  variant="contained" 
+                  disabled={loading}
+                  startIcon={loading ? <CircularProgress size={20} /> : null}
+                >
+                  {loading ? 'Submitting...' : 'Create Resource'}
+                </Button>
+              </Box>
+            </Stack>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
-  
 };
 
 export default Resource;

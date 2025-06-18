@@ -1,62 +1,52 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons"; // For bell icon
-import { useNavigation } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import axios from "axios";
-import { io } from "socket.io-client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-// Initialize Socket
+import { useNavigation } from "@react-navigation/native";
 import { socket } from "../socket";
 import baseURL from "../assets/common/baseUrl";
+import { format } from 'date-fns'; // For date formatting
 
 const NotificationUser = ({ user }) => {
     const [notifications, setNotifications] = useState([]);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [open, setOpen] = useState(false);
     const navigation = useNavigation();
 
-    //  Fetch Notifications from API
+    // Fetch Notifications from API
     const fetchNotifications = useCallback(async () => {
         try {
             const response = await axios.get(`${baseURL}/notifications`, {
                 withCredentials: true,
             });
-            setNotifications(response.data || []);
-            setUnreadCount(response.data.unreadCount || 0);
+            // Sort notifications by date (newest first)
+            const sortedNotifications = (response.data || []).sort((a, b) => 
+                new Date(b.createdAt) - new Date(a.createdAt));
+            setNotifications(sortedNotifications);
         } catch (error) {
             console.error("Error fetching notifications:", error);
         }
     }, []);
 
-    //  Mark Notifications as Read
-    const markAllAsRead = async () => {
-        try {
-            await axios.put(`${baseURL}/notifications/mark-read`, {}, {
-                withCredentials: true,
-            });
-            setUnreadCount(0);
-        } catch (error) {
-            console.error("Error marking notifications as read:", error);
-        }
-    };
-
     // Handle Notification Click
     const handleNotificationClick = (prayerRequestId) => {
         navigation.navigate("PrayerDetails", { id: prayerRequestId });
-        setOpen(false);
     };
 
-    //Listen for Real-time Notifications
+    // Format date to be more readable
+    const formatDate = (dateString) => {
+        try {
+            const date = new Date(dateString);
+            return format(date, 'MMM d, yyyy - h:mm a');
+        } catch (e) {
+            return '';
+        }
+    };
+
+    // Listen for Real-time Notifications
     useEffect(() => {
         socket.connect();
         fetchNotifications();
 
         socket.on("push-notification-user", (data) => {
-            console.log("New Notification:", data.message);
-
-            // Show Expo Push Notification
             Notifications.scheduleNotificationAsync({
                 content: {
                     title: "New Notification",
@@ -66,12 +56,14 @@ const NotificationUser = ({ user }) => {
                 trigger: null,
             });
 
-            setNotifications((prev) => [
-                { N_id: data.N_id, message: data.message },
-                ...prev,
+            // Add new notification to the top of the list
+            setNotifications(prev => [
+                { 
+                    ...data,
+                    createdAt: new Date().toISOString() // Add current timestamp for new notifications
+                },
+                ...prev
             ]);
-
-            setUnreadCount((prev) => prev + 1);
         });
 
         return () => {
@@ -82,44 +74,28 @@ const NotificationUser = ({ user }) => {
 
     return (
         <View style={styles.container}>
-
-            <TouchableOpacity
-                style={styles.bellButton}
-                onPress={() => {
-                    setOpen(!open);
-                    markAllAsRead();
-                }}
-            >
-                <MaterialIcons name="notifications" size={28} color="green" />
-                {unreadCount > 0 && (
-                    <View style={styles.badge}>
-                        <Text style={styles.badgeText}>{unreadCount}</Text>
-                    </View>
-                )}
-            </TouchableOpacity>
-
-
-            {open && (
-                <View style={styles.dropdown}>
-                    <Text style={styles.header}>Notifications</Text>
-                    {notifications.length > 0 ? (
-                        <FlatList
-                            data={notifications}
-                            keyExtractor={(item, index) => (item?.N_id ? item.N_id.toString() : index.toString())}
-
-                            renderItem={({ item }) => (
-                                <TouchableOpacity
-                                    style={styles.notificationItem}
-                                    onPress={() => handleNotificationClick(item.N_id)}
-                                >
-                                    <Text>{item.message}</Text>
-                                </TouchableOpacity>
+            <Text style={styles.header}>Notifications</Text>
+            {notifications.length > 0 ? (
+                <FlatList
+                    data={notifications}
+                    keyExtractor={(item, index) => (item?.N_id ? item.N_id.toString() : index.toString())}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            style={styles.notificationItem}
+                            onPress={() => handleNotificationClick(item.N_id)}
+                        >
+                            <Text style={styles.notificationMessage}>{item.message}</Text>
+                            {item.createdAt && (
+                                <Text style={styles.notificationDate}>
+                                    {formatDate(item.createdAt)}
+                                </Text>
                             )}
-                        />
-                    ) : (
-                        <Text style={styles.noNotifications}>No new notifications</Text>
+                        </TouchableOpacity>
                     )}
-                </View>
+                    style={styles.notificationList}
+                />
+            ) : (
+                <Text style={styles.noNotifications}>No notifications available</Text>
             )}
         </View>
     );
@@ -127,54 +103,51 @@ const NotificationUser = ({ user }) => {
 
 const styles = StyleSheet.create({
     container: {
-        position: "relative",
-    },
-    bellButton: {
-        position: "relative",
-        padding: 10,
-    },
-    badge: {
-        position: "absolute",
-        top: 5,
-        right: 5,
-        backgroundColor: "red",
-        borderRadius: 10,
-        width: 20,
-        height: 20,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    badgeText: {
-        color: "white",
-        fontSize: 12,
-        fontWeight: "bold",
-    },
-    dropdown: {
-        position: "absolute",
-        top: 40,
-        right: 0,
         backgroundColor: "white",
         borderRadius: 8,
         padding: 10,
-        width: 250,
+        width: '90%',
+        maxWidth: 400,
         elevation: 5,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
+        alignSelf: "center",
+        marginTop: 20,
+        maxHeight: '80%',
     },
     header: {
         fontWeight: "bold",
-        marginBottom: 5,
+        marginBottom: 15,
+        fontSize: 18,
+        textAlign: "center",
+        color: '#333',
+    },
+    notificationList: {
+        width: '100%',
     },
     notificationItem: {
-        paddingVertical: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 8,
         borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
+        borderBottomColor: "#eee",
+    },
+    notificationMessage: {
+        fontSize: 15,
+        color: '#333',
+        marginBottom: 4,
+    },
+    notificationDate: {
+        fontSize: 12,
+        color: '#888',
+        fontStyle: 'italic',
     },
     noNotifications: {
         textAlign: "center",
         color: "gray",
+        paddingVertical: 20,
+        fontSize: 16,
     },
 });
 

@@ -51,6 +51,22 @@ exports.submitWeddingForm = async (req, res) => {
       weddingTheme
     } = req.body;
 
+    const { priest, customPriest } = req.body;
+
+    if (!priest && !customPriest) {
+      return res.status(400).json({ message: "Priest is required." });
+    }
+
+    if (priest === "others" && !customPriest) {
+      return res.status(400).json({ message: "Please provide a custom priest name." });
+    }
+
+    // If priest is provided and not "others", check if it's a valid ObjectId
+    if (priest && priest !== "others" && !mongoose.Types.ObjectId.isValid(priest)) {
+      return res.status(400).json({ message: "Invalid priest ID." });
+    }
+
+
     const requiredFields = [
       'dateOfApplication', 'weddingDate', 'weddingTime', 'groomName', 'groomAddress',
       'brideName', 'brideAddress', 'brideReligion', 'brideOccupation', 'brideBirthDate',
@@ -160,6 +176,8 @@ exports.submitWeddingForm = async (req, res) => {
       brideFather,
       brideMother,
       weddingTheme,
+      priest: priest !== "others" ? priest : undefined,
+      customPriest: priest === "others" ? customPriest : undefined,
       ...documents,
       userId: req.user._id,
     });
@@ -233,7 +251,9 @@ exports.getWeddingById = async (req, res) => {
       return res.status(400).json({ message: "Invalid wedding ID format." });
     }
 
-    const wedding = await Wedding.findById(weddingId).populate('userId', 'name email');
+    const wedding = await Wedding.findById(weddingId)
+    .populate('userId', 'name email')
+    .populate('priest', 'fullName title');;
 
     if (!wedding) {
       return res.status(404).json({ message: "Wedding not found." });
@@ -532,7 +552,9 @@ exports.getWeddingFormById = async (req, res) => {
       return res.status(400).json({ message: "Invalid wedding ID format." });
     }
 
-    const wedding = await Wedding.findById(weddingId).populate('userId', 'name email');
+    const wedding = await Wedding.findById(weddingId)
+    .populate('userId', 'name email')
+    .populate('priest', 'fullName title');
 
     if (!wedding) {
       return res.status(404).json({ message: "Wedding not found." });

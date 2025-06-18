@@ -1,12 +1,32 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import GuestSidebar from '../../GuestSideBar';
-import "../../Layout/styles/style.css";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
-import { CircularProgress } from "@mui/material";
-import Loader from "../../Layout/Loader";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+  Avatar,
+  Snackbar,
+  Alert
+} from "@mui/material";
+import { Favorite, FavoriteBorder } from "@mui/icons-material";
+import { styled } from '@mui/material/styles';
+import MetaData from "../../Layout/MetaData";
+import { toast } from "react-toastify";
+
 
 const PrayerWall = () => {
   const [prayers, setPrayers] = useState([]);
@@ -23,9 +43,31 @@ const PrayerWall = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [totalPrayers, setTotalPrayers] = useState(0);
   const [loadingPrayerId, setLoadingPrayerId] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+
+  });
+
   const config = {
     withCredentials: true,
   };
+
+  const PrayerCard = styled(Card)(({ theme }) => ({
+    marginBottom: theme.spacing(3),
+    padding: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: theme.shadows[2],
+  }));
+
+  const PrayerButton = styled(Button)(({ theme }) => ({
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
+  }));
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -49,7 +91,6 @@ const PrayerWall = () => {
         );
 
         const { prayers, total } = response.data;
-        console.log('Fetched prayers:', prayers);
         setPrayers(prayers);
         setTotalPrayers(total);
         setLoading(false);
@@ -65,19 +106,20 @@ const PrayerWall = () => {
   const handleNewPrayerSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
-      toast.error("You must be logged in to post a prayer.");
+      toast.warn("You must be logged in to post a prayer.")
       return;
     }
 
     try {
       const prayerData = { ...newPrayer, userId: user._id };
       await axios.post(`${process.env.REACT_APP_API}/api/v1/submitPrayer`, prayerData, config);
+      toast.success("Successful! Please wait for the admin confirmation for your prayer to be posted")
       setNewPrayer({ title: "", prayerRequest: "", prayerWallSharing: "anonymous", contact: "" });
-      toast.success("Successful! Please wait for the admin confirmation for your prayer to be posted");
+
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error posting prayer:", error);
-      toast.error("Failed to post prayer. Please try again.");
+      toast.error("Failed to post prayer. Please try again.")
     }
   };
 
@@ -105,29 +147,32 @@ const PrayerWall = () => {
     }
   };
 
-
   const handleInclude = async (prayerId) => {
     if (!user) {
-      alert("You must be logged in to include a prayer.");
+      setSnackbar({
+        open: true,
+        message: "You must be logged in to include a prayer.",
+        severity: 'error'
+      });
       return;
     }
 
     try {
       setLoadingPrayerId(prayerId);
-
       const response = await axios.put(
         `${process.env.REACT_APP_API}/api/v1/toggleInclude/${prayerId}`,
         {},
         { withCredentials: true }
-      );
 
+      );
+      toast.success("Successful! Please wait for the admin confirmation for your prayer to be posted")
       setPrayers((prevPrayers) =>
         prevPrayers.map((prayer) =>
           prayer._id === prayerId
             ? {
               ...prayer,
               includeCount: response.data.includeCount,
-              includedByUser: response.data.includedByUser, // Ensure we get this from backend
+              includedByUser: response.data.includedByUser,
             }
             : prayer
         )
@@ -139,204 +184,273 @@ const PrayerWall = () => {
     }
   };
 
-  if (loading) {
-    return <Loader />;
-  }
-
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   return (
-    <div className="prayer-wall-container">
-      <ToastContainer />
-      <div >
-        <GuestSidebar />
-      </div>
+    <Box sx={{
+      display: "flex",
+      minHeight: "100vh",
 
-      <div className="prayer-wall">
-        <div className="prayer-share" style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
-          <button
+    }}>
+      <GuestSidebar />
+
+      <MetaData title="Prayer Wall" />
+
+      <Box sx={{
+        flexGrow: 1,
+
+        flexDirection: 'column',
+        alignItems: 'center', // This centers children horizontally
+        p: 3,
+        width: '100%',
+        maxWidth: '900px', // Adjust as needed
+        margin: '0 auto' // Centers the container
+      }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <PrayerButton
+            variant="contained"
             onClick={() => setIsModalOpen(true)}
-            className="share-button"
-            style={{
-              backgroundColor: "#154314",
-              color: "white",
-              padding: "10px 20px",
-              fontSize: "1.1rem",
-              fontWeight: "bold",
-              border: "none",
-              borderRadius: "5px",
-              width: "60%",
-              maxWidth: "300px",
-              cursor: "pointer",
-              transition: "background-color 0.2s",
-            }}
+            sx={{ width: '60%', maxWidth: 300 }}
           >
             Click here to Share a Prayer
-          </button>
-        </div>
+          </PrayerButton>
+        </Box>
 
+        <Dialog
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          fullWidth
+          maxWidth="md"
+        >
+          <DialogTitle variant="h4" sx={{ fontSize: '1.8rem', padding: 3 }}>Share a Prayer</DialogTitle>
+          <DialogContent sx={{ padding: 3 }}>
+            <Box
+              component="form"
+              onSubmit={handleNewPrayerSubmit}
+              sx={{
+                mt: 1,
+                '& .MuiTextField-root': {
+                  marginBottom: 3
+                }
+              }}
+            >
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Title"
+                placeholder="Title"
+                value={newPrayer.title}
+                onChange={(e) => setNewPrayer({ ...newPrayer, title: e.target.value })}
+                InputProps={{
+                  style: { fontSize: '1.1rem' }
+                }}
+                InputLabelProps={{
+                  style: { fontSize: '1.1rem' }
+                }}
+                size="medium"
+              />
 
-        {isModalOpen && (
-          <>
-            <div
-              className="prayerModal-overlay"
-              onClick={() => setIsModalOpen(false)}
-            ></div>
+              <TextField
+                margin="normal"
+                fullWidth
+                multiline
+                rows={6}
+                label="Your prayer request"
+                placeholder="Your prayer request"
+                value={newPrayer.prayerRequest}
+                onChange={(e) => setNewPrayer({ ...newPrayer, prayerRequest: e.target.value })}
+                required
+                InputProps={{
+                  style: { fontSize: '1.1rem' }
+                }}
+                InputLabelProps={{
+                  style: { fontSize: '1.1rem' }
+                }}
+              />
 
-            <div className="prayerModal">
-              <h3>Share a Prayer</h3>
-              <form onSubmit={handleNewPrayerSubmit}>
-                <input
-                  type="text"
-                  placeholder="Title"
-                  value={newPrayer.title}
-                  onChange={(e) => setNewPrayer({ ...newPrayer, title: e.target.value })}
-                />
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Contact"
+                placeholder="Contact"
+                value={newPrayer.contact}
+                onChange={(e) => setNewPrayer({ ...newPrayer, contact: e.target.value })}
+                InputProps={{
+                  style: { fontSize: '1.1rem' }
+                }}
+                InputLabelProps={{
+                  style: { fontSize: '1.1rem' }
+                }}
+              />
 
-                <textarea
-                  placeholder="Your prayer request"
-                  value={newPrayer.prayerRequest}
-                  onChange={(e) => setNewPrayer({ ...newPrayer, prayerRequest: e.target.value })}
-                  required
-                />
+              <FormControl
+                component="fieldset"
+                margin="normal"
+                fullWidth
+                sx={{ marginBottom: 3 }}
+              >
+                <FormLabel
+                  component="legend"
+                  sx={{ fontSize: '1.1rem', marginBottom: 2 }}
+                >
+                  Sharing Preference
+                </FormLabel>
+                <RadioGroup
+                  value={newPrayer.prayerWallSharing}
+                  onChange={(e) => setNewPrayer({ ...newPrayer, prayerWallSharing: e.target.value })}
+                >
+                  <FormControlLabel
+                    value="anonymous"
+                    control={<Radio size="medium" />}
+                    label={<Typography fontSize="1.1rem">Share anonymously</Typography>}
+                    sx={{ marginBottom: 1 }}
+                  />
+                  <FormControlLabel
+                    value="myName"
+                    control={<Radio size="medium" />}
+                    label={<Typography fontSize="1.1rem">Share with my name</Typography>}
+                  />
+                </RadioGroup>
+              </FormControl>
 
-                <input
-                  type="text"
-                  placeholder="Contact"
-                  value={newPrayer.contact}
-                  onChange={(e) => setNewPrayer({ ...newPrayer, contact: e.target.value })}
-                />
-
-                <div>
-                  <label>
-                    <input
-                      type="radio"
-                      name="prayerWallSharing"
-                      value="anonymous"
-                      checked={newPrayer.prayerWallSharing === 'anonymous'}
-                      onChange={(e) => setNewPrayer({ ...newPrayer, prayerWallSharing: e.target.value })}
-                      required
-                    />
-                    Share anonymously
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="prayerWallSharing"
-                      value="myName"
-                      checked={newPrayer.prayerWallSharing === 'myName'}
-                      onChange={(e) => setNewPrayer({ ...newPrayer, prayerWallSharing: e.target.value })}
-                      required
-                    />
-                    Share with my name
-                  </label>
-                </div>
-
-                <button type="submit">Post Prayer</button>
-              </form>
-
-              <button onClick={() => setIsModalOpen(false)}>Close</button>
-            </div>
-          </>
-        )}
+              <DialogActions sx={{ padding: 0, marginTop: 3 }}>
+                <Button
+                  onClick={() => setIsModalOpen(false)}
+                  sx={{
+                    fontSize: '1.1rem',
+                    padding: '8px 20px'
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  sx={{
+                    fontSize: '1.1rem',
+                    padding: '8px 20px'
+                  }}
+                >
+                  Post Prayer
+                </Button>
+              </DialogActions>
+            </Box>
+          </DialogContent>
+        </Dialog>
 
         {loading ? (
-          <p>Loading prayers...</p>
+          <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+            <CircularProgress />
+          </Box>
         ) : (
           prayers.map((prayer) => (
-            <div className="prayer-box" key={prayer._id}>
-              <div className="prayer-header" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <img
-                  src={
-                    prayer.prayerWallSharing === "anonymous"
-                      ? "/public/../../../../EPAROKYA-SYST.png"
-                      : prayer.user?.avatar?.url || "/path/to/default-avatar.png"
-                  }
-                  alt="Profile"
-                  className="avatar"
-                  style={{ width: "40px", height: "40px", borderRadius: "50%" }}
-                />
-                <span style={{ fontSize: "1.1rem", fontWeight: "bold" }}>
-                  {prayer.prayerWallSharing === "anonymous" ? "Anonymous" : prayer.user?.name || "Unknown User"}
-                </span>
-              </div>
+            <PrayerCard key={prayer._id}>
+              <CardContent>
+                <Box display="flex" alignItems="center" gap={2} mb={2}>
+                  <Avatar
+                    src={
+                      prayer.prayerWallSharing === "anonymous"
+                        ? "/public/../../../../EPAROKYA-SYST.png"
+                        : prayer.user?.avatar?.url
+                    }
+                    sx={{ width: 40, height: 40 }}
+                  />
+                  <Typography variant="h6" fontWeight="bold">
+                    {prayer.prayerWallSharing === "anonymous" ? "Anonymous" : prayer.user?.name || "Unknown User"}
+                  </Typography>
+                </Box>
 
+                <Typography variant="h5" gutterBottom>
+                  {prayer.title}
+                </Typography>
 
+                <Typography variant="body1" paragraph>
+                  {prayer.prayerRequest}
+                </Typography>
 
-              <h4 className="prayer-title">{prayer.title}</h4>
-              <p className="prayer-description">{prayer.prayerRequest}</p>
-              <div className="prayer-actions">
-
-                {/* Like Button */}
-                <div
-                  onClick={() => handleLike(prayer._id)}
-                  style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}
-                >
-                  {prayer.likedByUser ? (
-                    <FaHeart style={{ fontSize: "1.5rem", transition: "transform 0.2s" }} />
-                  ) : (
-                    <FaRegHeart style={{ fontSize: "1.5rem", transition: "transform 0.2s" }} />
-                  )}
-                  <span style={{ fontSize: "1.2rem" }}>{prayer.likes || 0}</span>
-                </div>
-
-
-                <div>
-                  <button
-                    onClick={() => handleInclude(prayer._id)}
-                    disabled={prayer.includedByUser || loadingPrayerId === prayer._id}
-                    style={{
-                      backgroundColor: "#6c757d",
-                      color: "white",
-                      padding: "10px 20px",
-                      fontSize: "1rem",
-                      fontWeight: "bold",
-                      border: "none",
-                      borderRadius: "5px",
-                      width: "60%",
-                      maxWidth: "300px",
-                      cursor: prayer.includedByUser ? "not-allowed" : "pointer",
-                      textAlign: "center",
-                      transition: "background-color 0.2s",
-                    }}
+                <Box display="flex" alignItems="center" gap={2} mb={2}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    gap={1}
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => handleLike(prayer._id)}
                   >
-                    {prayer.includedByUser
-                      ? "You have included this in your prayer"
-                      : loadingPrayerId === prayer._id
-                        ? "Processing..."
-                        : `Include (${prayer.includeCount || 0})`}
-                  </button>
+                    {prayer.likedByUser ? (
+                      <Favorite color="error" fontSize="medium" />
+                    ) : (
+                      <FavoriteBorder fontSize="medium" />
+                    )}
+                    <Typography variant="body1">
+                      {prayer.likes || 0}
+                    </Typography>
+                  </Box>
 
-                  {/* Indicator box */}
-                  {prayer.includedByUser && (
-                    <div style={{
-                      marginTop: "10px",
-                      padding: "8px",
-                      backgroundColor: "#d4edda",
-                      borderRadius: "5px",
-                      color: "#155724",
-                      textAlign: "center",
-                      fontWeight: "bold"
-                    }}>
-                      You have already included this in your prayer.
-                    </div>
+                  <Box>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => handleInclude(prayer._id)}
+                      disabled={prayer.includedByUser || loadingPrayerId === prayer._id}
+                      sx={{ minWidth: 200 }}
+                    >
+                      {prayer.includedByUser
+                        ? "Included in prayer"
+                        : loadingPrayerId === prayer._id
+                          ? <CircularProgress size={24} color="inherit" />
+                          : `Include (${prayer.includeCount || 0})`}
+                    </Button>
+
+                    {prayer.includedByUser && (
+                      <Box
+                        mt={1}
+                        p={1}
+                        bgcolor="success.light"
+                        borderRadius={1}
+                        color="success.dark"
+                        textAlign="center"
+                      >
+                        <Typography variant="body2" fontWeight="bold">
+                          You have already included this in your prayer.
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+
+                <Box display="flex" flexDirection="column" gap={1}>
+                  <Typography variant="caption">
+                    Created: {new Date(prayer.createdAt).toLocaleDateString()}
+                  </Typography>
+                  {prayer.confirmedAt && (
+                    <Typography variant="caption">
+                      Confirmed: {new Date(prayer.confirmedAt).toLocaleDateString()}
+                    </Typography>
                   )}
-                </div>
-
-
-
-              </div>
-              <div className="prayer-meta" style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                <span>Created: {new Date(prayer.createdAt).toLocaleDateString()}</span>
-                {prayer.confirmedAt && (
-                  <span>Confirmed: {new Date(prayer.confirmedAt).toLocaleDateString()}</span>
-                )}
-              </div>
-
-            </div>
+                </Box>
+              </CardContent>
+            </PrayerCard>
           ))
         )}
-      </div>
-    </div>
+      </Box>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: '100%', }}
+
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 

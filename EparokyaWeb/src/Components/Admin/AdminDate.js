@@ -160,7 +160,7 @@ const AdminDates = () => {
   const handleEditDate = async (id, newMaxParticipants) => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API}/api/v1/editDate/${id}`,
+        `${process.env.REACT_APP_API}/api/v1/${id}/editMax`,
         { maxParticipants: newMaxParticipants },
         config
       );

@@ -156,7 +156,7 @@ const MyWeddingSubmittedForm = () => {
         <Paper elevation={3} sx={{
           padding: 3,
           width: "100%",
-          maxWidth: "1200px",
+          maxWidth: "1250px",
           minHeight: "800px",
         }}>
           <Typography variant="h4" gutterBottom sx={{ textAlign: "center" }}>
@@ -175,8 +175,8 @@ const MyWeddingSubmittedForm = () => {
           </Tabs>
 
           <Box sx={{
-            minHeight: "600px",
-            overflow: "auto"
+            minHeight: "900px",
+
           }}>
             {activeTab === 0 && (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -330,7 +330,25 @@ const MyWeddingSubmittedForm = () => {
                       )}
                     </CardContent>
                   </Card>
+
                 </Box>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">Father</Typography>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                      {weddingForms?.customPriest ? (
+                        <Typography sx={{ flex: "1 1 200px" }}>
+                          <strong>Priest:</strong> {weddingForms.customPriest}
+                        </Typography>
+                      ) : (
+                        <Typography sx={{ flex: "1 1 200px" }}>
+                          <strong>Priest:</strong> {weddingForms?.priest?.fullName || "N/A"}
+                        </Typography>
+                      )}
+
+                    </Box>
+                  </CardContent>
+                </Card>
               </Box>
             )}
 
@@ -761,7 +779,7 @@ const MyWeddingSubmittedForm = () => {
             weddingForms?.cancellingReason && (
               <Card sx={{ marginTop: 3 }}>
                 <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
-                  Cancelled: 
+                  Cancelled:
                 </Typography>
                 <Box>
                   <Typography>

@@ -19,10 +19,12 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  CircularProgress
+  CircularProgress,
+  IconButton
 } from "@mui/material";
 import { format } from "date-fns";
 import Loader from "../../Layout/Loader"
+import CloseIcon from "@mui/icons-material/Close";
 
 const WeddingDetails = () => {
   const { weddingId } = useParams();
@@ -66,6 +68,11 @@ const WeddingDetails = () => {
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleOpenModal = () => setModalOpen(true);
+  const handleCloseModal = () => setModalOpen(false);
 
   const formatDate = (date) =>
     date ? new Date(date).toLocaleDateString() : "N/A";
@@ -339,6 +346,84 @@ const handleUpdate = async () => {
 
   if (error) return <div>Error: {error}</div>;
 
+  const renderDocumentCards = (docs, label) => (
+    <>
+      <Typography variant="h5" gutterBottom>
+        {label}
+      </Typography>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+        {docs.map((doc, index) => (
+          <Card key={index} sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
+            <CardContent>
+              <Typography variant="body1" fontWeight="bold">
+                {doc.replace(/([A-Z])/g, " $1").trim()}:
+              </Typography>
+              {weddingDetails?.[doc]?.url ? (
+                /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(weddingDetails[doc].url) ? (
+                  <>
+                    <Box
+                      component="img"
+                      src={weddingDetails[doc].url}
+                      alt={doc}
+                      sx={{
+                        maxWidth: 150,
+                        maxHeight: 150,
+                        width: '100%',
+                        objectFit: "contain",
+                        borderRadius: 1,
+                        mt: 1,
+                      }}
+                      onClick={() => openModal(weddingDetails[doc].url)}
+                    />
+                    <Button
+                      onClick={() => openModal(weddingDetails[doc].url)}
+                      variant="contained"
+                      sx={{ mt: 1, backgroundColor: "#d5edd9", color: "black" }}
+                    >
+                      View Full Image
+                    </Button>
+                  </>
+                ) : (
+                  <Box sx={{
+                    width: '100%',
+                    mt: 1,
+                    mb: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2
+                  }}>
+                    <iframe
+                      src={`${weddingDetails[doc].url}#toolbar=0&navpanes=0&scrollbar=0`}
+                      title={`${doc} Preview`}
+                      style={{
+                        width: '100%',
+                        height: '200px',
+                        border: '1px solid #ddd',
+                        borderRadius: 4,
+                      }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {weddingDetails[doc]?.name || 'Document Preview'}
+                    </Typography>
+                    <Button
+                      onClick={() => window.open(weddingDetails[doc].url, "_blank")}
+                      variant="contained"
+                      sx={{ backgroundColor: "#d5edd9", color: "black" }}
+                    >
+                      View Full File
+                    </Button>
+                  </Box>
+                )
+              ) : (
+                <Typography color="textSecondary">N/A</Typography>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+    </>
+  );
+
   return (
     <div className="wedding-details-page">
       <SideBar />
@@ -504,10 +589,29 @@ const handleUpdate = async () => {
                   </CardContent>
                 </Card>
               ))}
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">Father</Typography>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                    {weddingDetails?.customPriest ? (
+                      <Typography sx={{ flex: "1 1 200px" }}>
+                        <strong>Priest:</strong> {weddingDetails.customPriest}
+                      </Typography>
+                    ) : (
+                      <Typography sx={{ flex: "1 1 200px" }}>
+                        <strong>Priest:</strong> {weddingDetails?.priest?.fullName || "N/A"}
+                      </Typography>
+                    )}
+
+                  </Box>
+                </CardContent>
+              </Card>
+
             </Box>
+
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              {/* Groom Documents */}
-              <Typography variant="h5" gutterBottom>
+
+              {/* <Typography variant="h5" gutterBottom>
                 Groom Documents
               </Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
@@ -583,13 +687,13 @@ const handleUpdate = async () => {
                     </CardContent>
                   </Card>
                 ))}
-              </Box>
+              </Box> */}
 
               {/* Bride Documents */}
               <Typography variant="h5" gutterBottom>
                 Bride Documents
               </Typography>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+              {/* <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
                 {brideDocs.map((doc, index) => (
                   <Card
                     key={index}
@@ -662,8 +766,117 @@ const handleUpdate = async () => {
                     </CardContent>
                   </Card>
                 ))}
-              </Box>
+              </Box> */}
+              <Button
+                variant="contained"
+                sx={{ mb: 2, backgroundColor: "#d5edd9", color: "black" }}
+                onClick={handleOpenModal}
+              >
+                View All Documents
+              </Button>
+
+              {/* <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                {renderDocumentCards(groomDocs, "Groom Documents")}
+                {renderDocumentCards(brideDocs, "Bride Documents")}
+              </Box> */}
+
+              <Dialog open={modalOpen} onClose={handleCloseModal} maxWidth="lg" fullWidth>
+                <DialogContent sx={{ position: "relative", p: 3 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      width: "100%",
+                    }}
+                  >
+                    <Box sx={{ width: "30%" }}>
+                      <Button
+                        aria-label="close"
+                        onClick={handleCloseModal}
+                        sx={{
+                          position: "relative", // Not absolute to stay in flow
+                          top: 0,
+                          right: 0,
+                          color: "red",
+                        }}
+                      >
+                        CLOSE
+                      </Button>
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    {renderDocumentCards(groomDocs, "Groom Documents")}
+                    {renderDocumentCards(brideDocs, "Bride Documents")}
+                  </Box>
+                </DialogContent>
+              </Dialog>
+
             </Box>
+            <div className="wedding-details-box">
+              <h2>Additional Requirements</h2>
+
+              <div className="requirement-section">
+                <h3>Pre Marriage Seminar </h3>
+                <div className="input-row">
+                  <label>Date:</label>
+                  <input
+                    type="date"
+                    value={preMarriageSeminarDate}
+                    onChange={(e) => setPreMarriageSeminarDate(e.target.value)}
+                  />
+                  <label>Time:</label>
+                  <input
+                    type="time"
+                    value={preMarriageSeminarTime}
+                    onChange={(e) => setPreMarriageSeminarTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="requirement-section">
+                <h3>Canonical Interview</h3>
+                <div className="input-row">
+                  <label>Date:</label>
+                  <input
+                    type="date"
+                    value={canonicalInterviewDate}
+                    onChange={(e) => setCanonicalInterviewDate(e.target.value)}
+                  />
+                  <label>Time:</label>
+                  <input
+                    type="time"
+                    value={canonicalInterviewTime}
+                    onChange={(e) => setCanonicalInterviewTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="requirement-section">
+                <h3>Confession</h3>
+                <div className="input-row">
+                  <label>Date:</label>
+                  <input
+                    type="date"
+                    value={confessionDate}
+                    onChange={(e) => setConfessionDate(e.target.value)}
+                  />
+                  <label>Time:</label>
+                  <input
+                    type="time"
+                    value={confessionTime}
+                    onChange={(e) => setConfessionTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <button onClick={updateAdditionalReq}>
+                Submit Additional Requirements
+              </button>
+              <button onClick={handleUpdate} disabled={loading}>
+                {loading ? "Updating..." : "Update Wedding Date"}
+              </button>
+            </div>
           </div>
           <div className="Wedding-right-container">
             <WeddingChecklist weddingId={weddingId} />
@@ -754,74 +967,6 @@ const handleUpdate = async () => {
         <div className="Wedding-down-container-layout">
           {/* Additional Admin Comment */}
           <div className="Down-left-container">
-            <div className="wedding-details-box">
-              <h2>Additional Requirements</h2>
-
-              <div className="requirement-section">
-                <h3>Pre Marriage Seminar </h3>
-                <div className="input-row">
-                  <label>Date:</label>
-                  <input
-                    type="date"
-                    value={preMarriageSeminarDate}
-                    onChange={(e) => setPreMarriageSeminarDate(e.target.value)}
-                  />
-                  <label>Time:</label>
-                  <input
-                    type="time"
-                    value={preMarriageSeminarTime}
-                    onChange={(e) => setPreMarriageSeminarTime(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="requirement-section">
-                <h3>Canonical Interview</h3>
-                <div className="input-row">
-                  <label>Date:</label>
-                  <input
-                    type="date"
-                    value={canonicalInterviewDate}
-                    onChange={(e) => setCanonicalInterviewDate(e.target.value)}
-                  />
-                  <label>Time:</label>
-                  <input
-                    type="time"
-                    value={canonicalInterviewTime}
-                    onChange={(e) => setCanonicalInterviewTime(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="requirement-section">
-                <h3>Confession</h3>
-                <div className="input-row">
-                  <label>Date:</label>
-                  <input
-                    type="date"
-                    value={confessionDate}
-                    onChange={(e) => setConfessionDate(e.target.value)}
-                  />
-                  <label>Time:</label>
-                  <input
-                    type="time"
-                    value={confessionTime}
-                    onChange={(e) => setConfessionTime(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <button onClick={updateAdditionalReq}>
-                Submit Additional Requirements
-              </button>
-              <button onClick={handleUpdate} disabled={loading}>
-                {loading ? "Updating..." : "Update Wedding Date"}
-              </button>
-            </div>
-          </div>
-
-          <div className="Down-right-container">
-            {/* Comments of the Admin Display */}
             <div className="admin-comments-section">
               <h3>Admin Comments</h3>
               {weddingDetails?.comments?.length > 0 ? (
@@ -862,7 +1007,7 @@ const handleUpdate = async () => {
             </div>
 
             {/* For Additional Requirements */}
-            <div className="additional-req-comments">
+            <div className="wedding-details-box">
               <h3>Additional Requirements</h3>
               {weddingDetails?.additionalReq ? (
                 <div className="req-details">
@@ -920,6 +1065,11 @@ const handleUpdate = async () => {
                 <p>No additional requirements have been set yet.</p>
               )}
             </div>
+          </div>
+
+          <div className="Down-right-container">
+            {/* Comments of the Admin Display */}
+
 
             {/* Creating Admin Comment */}
             <div className="admin-section">
@@ -1116,7 +1266,7 @@ const handleUpdate = async () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

@@ -8,8 +8,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const allowedOrigins = [
-  "*",
-  // "https://eparokya.vercel.app",
+  // "*",
+  "https://eparokya.vercel.app",
   "http://localhost:3000",
 ];
 
@@ -62,7 +62,7 @@ app.use("/api/v1", require("./routes/Resources/resource"));
 app.use("/api/v1", require("./routes/Notification/notification"));
 
 // Sentiment Analysis
-// // app.use("/api/v1/", require("./routes/FeedbackForm/sentimentAnalysis"));
+app.use("/api/v1/", require("./routes/FeedbackForm/sentimentAnalysis"));
 app.use("/api/v1/", require("./routes/FeedbackForm/Types/eventType"));
 app.use("/api/v1/", require("./routes/FeedbackForm/Types/activityType"));
 

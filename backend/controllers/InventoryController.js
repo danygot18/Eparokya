@@ -285,6 +285,7 @@ const borrowInventoryItem = async (req, res, next) => {
 const returnInventoryItem = async (req, res, next) => {
   try {
     const { borrowId, quantity } = req.body;
+    // console.log(borrowId, quantity);
     const userId = req.user._id;
 
     const inventoryItem = await Inventory.findById(req.params.id);
@@ -297,9 +298,9 @@ const returnInventoryItem = async (req, res, next) => {
       return next(new ErrorHandler('Borrow record not found', 404));
     }
 
-    if (borrowRecord.user.toString() !== userId.toString()) {
-      return next(new ErrorHandler('You cannot return this item', 403));
-    }
+    // if (borrowRecord.user.toString() !== userId.toString()) {
+    //   return next(new ErrorHandler('You cannot return this item', 403));
+    // }
 
     if (borrowRecord.status === 'returned') {
       return next(new ErrorHandler('Item already returned', 400));

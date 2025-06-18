@@ -13,7 +13,7 @@ const UserProfile = ({ navigation }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.auth);
+  const { token, user } = useSelector((state) => state.auth);
 
   const defaultImage = "https://rb.gy/hnb4yc";
 
@@ -195,6 +195,21 @@ const UserProfile = ({ navigation }) => {
             icon={<MaterialIcons name="summarize" size={28} color="#fff" />}
             aria-label="My Forms"
           />
+          {user.ministryRoles.some(
+            (role) => role.role === 'Coordinator' || role.role === 'Assistant Coordinator'
+          ) && (
+
+              <Button
+                circular
+                size="$5"
+                backgroundColor="#154314"
+                onPress={() => navigation.navigate("InventoryForm")}
+                icon={<MaterialIcons name="inventory" size={28} color="#fff" />}
+                aria-label="My Forms"
+              />
+
+            )}
+
           <Button
             circular
             size="$5"
@@ -203,6 +218,7 @@ const UserProfile = ({ navigation }) => {
             icon={<MaterialIcons name="logout" size={28} color="#fff" />}
             aria-label="Logout"
           />
+
         </XStack>
       </YStack>
     </ScrollView>
