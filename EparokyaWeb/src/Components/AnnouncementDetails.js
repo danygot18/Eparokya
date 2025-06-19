@@ -369,9 +369,9 @@ const AnnouncementDetails = () => {
                         color={
                           comment.likedBy.some(
                             (likerId) =>
-                              likerId === user._id ||
-                              likerId?._id === user._id ||
-                              likerId?.toString?.() === user._id
+                              likerId === user._id || 
+                              likerId?._id === user._id || 
+                              likerId?.toString?.() === user._id 
                           )
                             ? 'blue'
                             : 'gray'
@@ -411,13 +411,13 @@ const AnnouncementDetails = () => {
                           <input
                             type="text"
                             placeholder="Write a reply..."
-                            value={replyText}
+                            value={currentReply}
                             onChange={(e) => setReplyText(e.target.value)}
                             className="reply-input"
                           />
                           <FaPaperPlane
                             size={18}
-                            onClick={() => addReply(comment._id, replyText)}
+                            onClick={() => addReply(comment._id, currentReply)}
                           />
                         </div>
                       </div>

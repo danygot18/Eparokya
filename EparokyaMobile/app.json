@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "EparokyaMobile",
-    "slug": "EparokyaMobile",
+    "slug": "eparokyamobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -42,7 +42,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "978594fd-9d13-416b-b7dc-01449c529690"
+        "projectId": "1ea8c514-6c1a-4abf-ad58-c4a41b1d3dfb"
       }
     }
   }
