@@ -3,9 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
   FaHeart,
-  FaRegHeart,
   FaThumbsUp,
-  FaRegThumbsUp,
   FaReply,
   FaPaperPlane,
 } from "react-icons/fa";
@@ -14,29 +12,32 @@ import { toast } from "react-toastify";
 import GuestSideBar from "./GuestSideBar";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Avatar,
+  TextField,
+  Button,
+  CircularProgress,
+  Divider,
+  Stack,
+} from "@mui/material";
 import "swiper/css";
 import "swiper/css/navigation";
-import CircularProgress from "@mui/material/CircularProgress";
+import MetaData from "./Layout/MetaData";
 
 const AnnouncementDetails = () => {
   const { id } = useParams();
   const [announcement, setAnnouncement] = useState(null);
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
   const [likedUsers, setLikedUsers] = useState([]);
   const [comments, setComments] = useState([]);
-
-  //create a function of this, wala syang function na ng like
-  const [likeCommentCount, setLikeCommentCount] = useState([]);
   const [commentText, setCommentText] = useState("");
-  const [replyText, setReplyText] = useState("");
+  const [currentReply, setCurrentReply] = useState({});
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedReplies, setExpandedReplies] = useState({});
-  const [currentIndex, setCurrentIndex] = useState(0);
-
   const config = { withCredentials: true };
 
   useEffect(() => {
@@ -51,10 +52,7 @@ const AnnouncementDetails = () => {
           setUserId(response.data.user._id);
         }
       } catch (error) {
-        console.error(
-          "Error fetching user:",
-          error.response ? error.response.data : error.message
-        );
+        console.error("Error fetching user:", error);
       }
     };
     fetchUser();
@@ -65,26 +63,17 @@ const AnnouncementDetails = () => {
       fetchAnnouncement();
       fetchComments();
     }
+    // eslint-disable-next-line
   }, [id, userId]);
-
-  // useEffect(() => {
-  //   if (announcement && userId) {
-  //     const isLikedNow = announcement.likedBy.includes(userId);
-  //     setLiked(isLikedNow);
-  //   }
-  // }, [announcement, userId, id]);
 
   const fetchAnnouncement = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/getAnnouncement/${id}`
       );
-
-      const fetchedAnnouncement = res.data.announcement;
-
-      setAnnouncement(fetchedAnnouncement);
-      setLikeCount(fetchedAnnouncement.likedBy.length);
-      setLikedUsers(fetchedAnnouncement.likedBy);
+      setAnnouncement(res.data.announcement);
+      setLikedUsers(res.data.announcement.likedBy);
     } catch (error) {
       console.error("Error fetching announcement:", error);
     } finally {
@@ -94,11 +83,11 @@ const AnnouncementDetails = () => {
 
   const fetchComments = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/comments/${id}`
       );
       setComments(res.data.data);
-      console.log("Comments:", res.data.data);
     } catch (error) {
       console.error("Error fetching comments:", error);
     } finally {
@@ -110,14 +99,11 @@ const AnnouncementDetails = () => {
     try {
       const res = await axios.put(
         `${process.env.REACT_APP_API}/api/v1/likeAnnouncement/${id}`,
-        {}, 
-        { withCredentials: true }
+        {},
+        config
       );
-
-      const updatedAnnouncement = res.data.data;
-
-      setAnnouncement(updatedAnnouncement); 
-      setLikeCount(updatedAnnouncement.likedBy.length);
+      setAnnouncement(res.data.data);
+      setLikedUsers(res.data.data.likedBy);
     } catch (error) {
       console.error("Error toggling like:", error);
     }
@@ -125,7 +111,6 @@ const AnnouncementDetails = () => {
 
   const addComment = async () => {
     if (!commentText.trim()) return;
-
     try {
       const res = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/${id}/announcementComment`,
@@ -143,7 +128,6 @@ const AnnouncementDetails = () => {
         toast.success("Comment added successfully!");
       }
     } catch (error) {
-      console.error("Error adding comment:", error);
       toast.error("Your comment may contain a profane word, please revise it");
     }
   };
@@ -153,25 +137,21 @@ const AnnouncementDetails = () => {
       const res = await axios.put(
         `${process.env.REACT_APP_API}/api/v1/announcementCommentLike/${commentId}`,
         { userId },
-        { withCredentials: true }
+        config
       );
-
       const updatedComment = res.data.data;
-
-      // Replace only the updated comment in the list
       setComments((prevComments) =>
         prevComments.map((comment) =>
           comment._id === updatedComment._id ? updatedComment : comment
         )
       );
     } catch (error) {
-      console.error('Error toggling like on comment:', error);
+      console.error("Error toggling like on comment:", error);
     }
   };
 
   const addReply = async (commentId, replyText) => {
     if (!replyText.trim()) return;
-
     try {
       const res = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/announcementReply/${commentId}`,
@@ -191,11 +171,10 @@ const AnnouncementDetails = () => {
               : comment
           )
         );
-        setReplyText("");
+        setCurrentReply((prev) => ({ ...prev, [commentId]: "" }));
         toast.success("Reply added successfully!");
       }
     } catch (error) {
-      console.error("Error adding reply:", error);
       toast.error("Your reply may contain a profane word, please revise it.");
     }
   };
@@ -207,89 +186,73 @@ const AnnouncementDetails = () => {
     }));
   };
 
-  const renderUserName = (user) => {
-    if (!user) {
-      return (
-        <p
-          className="comment-user"
-          style={{ fontWeight: "bold", color: "#26572E" }}
-        >
-          Deleted User
-        </p>
-      );
-    }
-    return (
-      <p
-        className="comment-user"
-        style={{ fontWeight: "bold", color: "#26572E" }}
-      >
-        {user.name}
-      </p>
-    );
-  };
+  const renderUserName = (user) => (
+    <Typography fontWeight="bold" color="success.main">
+      {user ? user.name : "Deleted User"}
+    </Typography>
+  );
 
-  //   if (loading) return <p>Loading...</p>;
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
         <CircularProgress />
       </Box>
     );
   }
+
   return (
-    <div className="announcement-details-container">
-      <div className="announcement-center-container">
-        <GuestSideBar />
-        <div className="announcement-container">
+    <Box display="flex" flexDirection="row" bgcolor="#f9f9f9" minHeight="100vh">
+      <MetaData title="Announcement Details" />
+      <GuestSideBar />
+      <Box flex={1} p={3} maxWidth={900} mx="auto">
+        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
           {announcement ? (
             <>
-              <div className="post-header">
-                <img
-                  src="/public/../EPAROKYA-SYST.png"
+              {/* Header */}
+              <Box display="flex" alignItems="center" mb={2}>
+                <Avatar
+                  src="/EPAROKYA-SYST.png"
                   alt="Saint Joseph Parish - Taguig"
-                  className="profile-image-small"
+                  sx={{ width: 56, height: 56, mr: 2 }}
                 />
-                <div className="post-user-info">
-                  <p className="post-user-name">Saint Joseph Parish - Taguig</p>
-                  <p className="post-date">
+                <Box>
+                  <Typography fontWeight="bold" fontSize={18}>
+                    Saint Joseph Parish - Taguig
+                  </Typography>
+                  <Typography color="text.secondary" fontSize={14}>
                     {announcement.dateCreated
                       ? format(parseISO(announcement.dateCreated), "PPP")
                       : "Date not available"}
-                  </p>
-
-                </div>
-              </div>
+                  </Typography>
+                </Box>
+              </Box>
 
               {/* Title & Description */}
-              <h1 className="announcement-title">{announcement.name}</h1>
-              <p className="announcement-description">
-                {announcement.description}
-              </p>
+              <Typography variant="h4" fontWeight="bold" color="success.main" mb={1}>
+                {announcement.name}
+              </Typography>
+              <Typography mb={2}>{announcement.description}</Typography>
+              {announcement.richDescription && (
+                <Typography
+                  mb={2}
+                  dangerouslySetInnerHTML={{ __html: announcement.richDescription }}
+                />
+              )}
 
-              {/* Rich Description */}
-              <p
-                className="announcement-rich-description"
-                dangerouslySetInnerHTML={{
-                  __html: announcement.richDescription,
-                }}
-              ></p>
-
-              {/* Image Slider / Single Image */}
+              {/* Images */}
               {announcement.images.length > 1 ? (
-                <Swiper modules={[Navigation]} navigation>
-                  {announcement.images.map((img, index) => (
+                <Swiper modules={[Navigation]} navigation style={{ marginBottom: 16 }}>
+                  {announcement.images.map((img) => (
                     <SwiperSlide key={img.public_id}>
                       <img
                         src={img.url}
                         alt="Announcement"
-                        className="announcement-image"
+                        style={{
+                          width: "100%",
+                          maxHeight: 350,
+                          objectFit: "cover",
+                          borderRadius: 10,
+                        }}
                       />
                     </SwiperSlide>
                   ))}
@@ -299,25 +262,52 @@ const AnnouncementDetails = () => {
                   <img
                     src={announcement.images[0].url}
                     alt="Announcement"
-                    className="announcement-image"
+                    style={{
+                      width: "100%",
+                      maxHeight: 350,
+                      objectFit: "cover",
+                      borderRadius: 10,
+                      marginBottom: 16,
+                    }}
                   />
                 )
               )}
+
+              {/* Videos */}
               {announcement.videos.length > 0 &&
                 announcement.videos.map((video) => (
-                  <video key={video} controls className="announcement-video">
+                  <video
+                    key={video}
+                    controls
+                    style={{
+                      width: "100%",
+                      maxHeight: 350,
+                      borderRadius: 10,
+                      marginBottom: 16,
+                    }}
+                  >
                     <source src={video} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
                 ))}
 
-              <div className="tags">
+              {/* Tags */}
+              <Box mb={2}>
                 {announcement.tags.map((tag) => (
-                  <span key={tag} className="tag">
+                  <span key={tag} style={{
+                    background: "#e0f2f1",
+                    color: "#388e3c",
+                    borderRadius: 8,
+                    padding: "2px 10px",
+                    marginRight: 6,
+                    fontSize: 13,
+                  }}>
                     #{tag}
                   </span>
                 ))}
-              </div>
+              </Box>
+
+              {/* Like Section */}
               <div className="like-section">
                 <FaHeart
                   color={
@@ -335,6 +325,7 @@ const AnnouncementDetails = () => {
                 <span>{announcement?.likedBy?.length || 0} Likes</span>
               </div>
 
+              <Divider sx={{ my: 2 }} />
 
               {/* Comments Section */}
               <div className="comments-section">
@@ -378,9 +369,9 @@ const AnnouncementDetails = () => {
                         color={
                           comment.likedBy.some(
                             (likerId) =>
-                              likerId === user._id || 
-                              likerId?._id === user._id || 
-                              likerId?.toString?.() === user._id 
+                              likerId === user._id ||
+                              likerId?._id === user._id ||
+                              likerId?.toString?.() === user._id
                           )
                             ? 'blue'
                             : 'gray'
@@ -436,28 +427,30 @@ const AnnouncementDetails = () => {
               </div>
             </>
           ) : (
-            <p>Announcement not found.</p>
+            <Typography>Announcement not found.</Typography>
           )}
-        </div>
+        </Paper>
 
         {/* Liked Users Section */}
-        <div className="liked-users-container">
-          <h3>Liked by</h3>
-          <div className="liked-users-list">
+        <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
+          <Typography variant="subtitle1" fontWeight="bold" mb={1}>
+            Liked by
+          </Typography>
+          <Stack direction="row" spacing={2} flexWrap="wrap">
             {likedUsers.map((user) => (
-              <div key={user._id} className="liked-user">
-                <img
+              <Box key={user._id} display="flex" alignItems="center" mr={2} mb={1}>
+                <Avatar
                   src={user.avatar?.url || "/default-avatar.png"}
                   alt={user.name || "User"}
-                  className="user-avatar"
+                  sx={{ width: 32, height: 32, mr: 1 }}
                 />
-                <span>{user.name || "Anonymous"}</span>
-              </div>
+                <Typography fontSize={14}>{user.name || "Anonymous"}</Typography>
+              </Box>
             ))}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Stack>
+        </Paper>
+      </Box>
+    </Box>
   );
 };
 

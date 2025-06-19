@@ -179,7 +179,7 @@ const MySubmittedBaptismForm = () => {
                   baptismDetails?.userId?.fullName ||
                   "N/A"}
               </Text>
-              <Text>Contact Number: {baptismDetails?.phone || "N/A"}</Text>
+              <Text>Contact Number: {" "} {baptismDetails?.userId?.phone || "N/A"}</Text>
             </Box>
             <Box p={4} borderWidth={1} borderRadius={8} backgroundColor="#fff">
               <Heading size="md">Baptism Information</Heading>

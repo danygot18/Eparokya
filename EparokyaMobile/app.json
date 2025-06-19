@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Eparokya",
-    "slug": "Eparokya",
+    "name": "EparokyaMobile",
+    "slug": "EparokyaMobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

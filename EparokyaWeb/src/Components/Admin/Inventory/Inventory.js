@@ -469,7 +469,7 @@ const InventoryList = () => {
                             <TableCell>
                               <Typography fontWeight="medium">{item.name}</Typography>
                               <Typography variant="body2" color="text.secondary">
-                                {item.description.substring(0, 50)}...
+                                {item.description.substring(0, 10)}...
                               </Typography>
                             </TableCell>
                             <TableCell>
@@ -512,96 +512,54 @@ const InventoryList = () => {
                               )}
                             </TableCell>
                             <TableCell align="center">
-                              <Tooltip title="Edit">
-                                <IconButton
-                                  color="primary"
-                                  onClick={() => navigate(`/admin/inventory/${item._id}`)}
-                                  sx={{
-                                    borderRadius: 1,
-                                    padding: '6px 12px',
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                    },
-                                  }}
-                                >
-                                  <Edit
-                                    sx={{
-                                      '&:hover': {
-                                        color: 'secondary.main',
-                                      },
-                                    }}
-                                  />
-                                </IconButton>
-
-                              </Tooltip>
-                              <Tooltip title="Borrow">
-                                <IconButton
-                                  color="success"
-                                  onClick={() => handleBorrowOpen(item)}
-                                  disabled={item.availableQuantity <= 0}
-                                  sx={{
-                                    borderRadius: 1,
-                                    padding: '6px 12px',
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                    },
-                                  }}
-                                >
-                                  <Inventory
-                                    sx={{
-                                      '&:hover': {
-                                        color: 'secondary.main',
-                                      },
-                                    }} />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Return">
-                                <IconButton
-                                  color="info"
-                                  onClick={() => handleReturnOpen(item)}
-                                  disabled={item.quantity === item.availableQuantity}
-                                  sx={{
-                                    borderRadius: 1,
-                                    padding: '6px 12px',
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                    },
-                                  }}
-                                >
-                                  <Person />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="History">
-                                <IconButton
-                                  color="secondary"
-                                  onClick={() => handleHistoryOpen(item)}
-                                  sx={{
-                                    borderRadius: 1,
-                                    padding: '6px 12px',
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                    },
-                                  }}
-                                >
-                                  <History />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Delete">
-                                <IconButton
-                                  color="error"
-                                  onClick={() => handleDeleteClick(item._id)}
-                                  sx={{
-                                    borderRadius: 1,
-                                    padding: '6px 12px',
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                                    },
-                                  }}
-                                >
-                                  <Delete />
-                                </IconButton>
-                              </Tooltip>
+                              <Box
+                                sx={{
+                                  display: 'grid',
+                                  gridTemplateColumns: 'repeat(3, auto)', // 3 columns
+                                  gap: 1,
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                <Tooltip title="Edit">
+                                  <IconButton color="primary" onClick={() => navigate(`/admin/inventory/${item._id}`)} size="small">
+                                    <Edit />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Borrow">
+                                  <IconButton
+                                    color="success"
+                                    onClick={() => handleBorrowOpen(item)}
+                                    disabled={item.availableQuantity <= 0}
+                                    size="small"
+                                  >
+                                    <Inventory />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Return">
+                                  <IconButton
+                                    color="info"
+                                    onClick={() => handleReturnOpen(item)}
+                                    disabled={item.quantity === item.availableQuantity}
+                                    size="small"
+                                  >
+                                    <Person />
+                                  </IconButton>
+                                </Tooltip>
+                                <Box /> {/* empty box to center the bottom row */}
+                                <Tooltip title="History">
+                                  <IconButton color="secondary" onClick={() => handleHistoryOpen(item)} size="small">
+                                    <History />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Delete">
+                                  <IconButton color="error" onClick={() => handleDeleteClick(item._id)} size="small">
+                                    <Delete />
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
                             </TableCell>
+
                           </TableRow>
                         );
                       })
@@ -817,7 +775,7 @@ const InventoryList = () => {
           <Button onClick={handleHistoryClose}>Close</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </Box >
   );
 };
 

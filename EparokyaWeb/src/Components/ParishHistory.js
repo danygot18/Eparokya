@@ -26,10 +26,20 @@ import {
   Place,
   Group
 } from '@mui/icons-material';
+import today1 from '../assets/images/today1.jpg';
+import y2002 from '../assets/images/2002.jpg'
+import y2000 from '../assets/images/2000.jpg'
+import y1996 from '../assets/images/1996.jpg'
+import y1988 from '../assets/images/1988.jpg'
+import y1984 from '../assets/images/1984.jpg'
+import y1983 from '../assets/images/1983.jpg'
+import y1982 from '../assets/images/1982.jpg'
+import december_1982 from '../assets/images/december_1982.jpg'
+
 
 const historyData = {
   '1982 Nov': {
-    image: '../../assets/1982.png',
+    image: y1982,
     title: 'Foundation of the Parish - November 1982',
     text: 'Nagkaroon ng pagpupulong sa pangunguna ni Kagawad Dionisio Castillo na magkaroon ng Bahay Dalanginan o Kapilya. Sinang-ayunan ng Punong Barangay na magkaroon ng lupa ang kapilya gayundin ng Kura Paroko St. Martin de Porres Parish sa United, Paranaque na nakasakop sa buong barangay. Ang kapilya ay itinayo sa pamamagitan ng Bayanihan ng mga mamamayanan, ng mga madre at kura paroko na si Msgr. Bienvenido Mercado.',
     keyPeople: [
@@ -39,7 +49,7 @@ const historyData = {
     location: 'Original Kapilya Site'
   },
   '1982 Dec': {
-    image: '/assets/december_1982.png',
+    image: december_1982,
     title: 'First Mass - December 1982',
     text: 'Ginanap ang kauna-unahang Misa sa pagunguna ni Monsignor Bienvenido Mercado kura paroko ng St. Martin de Porres, United Hills Parish. Ang sumisigang ito nabuo ang pangarap ng lahat na sa takdang panahon, ito ay ganap na pangarap ng parokya sa tulong ng Panginoon.',
     keyPeople: [
@@ -49,7 +59,7 @@ const historyData = {
     location: 'Kapilya'
   },
   '1983': {
-    image: '/assets/images/1983.png',
+    image: y1983,
     title: 'Coming of Religious Congregations',
     text: 'Ang mga Salesiano ni Don Bosco ang nagmimisa sa Kapilya na ito sa pangunguna ni Fr. Rene Gagayna, Fr. Andy Wong, Fr. Broderick Pahillo (ngayon, Katawan ng Obispo, Arkidiyosesis ng Maynila). Nagsimula nang lumago ang pananampalataya ng unang komunidad sa tulong ng pagdating ng ibat-ibang religious congregations tulad ng mga Jesuits, CI CM, I.C.M. mga Seminarista mula sa San Carlos Seminary, Holy Apostles Senior Seminary at Don Bosco Seminary.',
     keyPeople: [
@@ -57,8 +67,8 @@ const historyData = {
     ],
     location: 'Parish Center'
   },
-  '1984': {
-    image: '/assets/images/1984.png',
+  '1984': { 
+    image: y1984,
     title: 'Built Community',
     text: ' Lumago ang bilang ng partisipasyon at pakikipam ng mga mamamayan. Ito na ang kabuuang ng pananampalataya ng lahat ng kapilya na muling dumalo sa pamahalaan ng simbahan sa pamamagitan ng ang upang nababalitaan ng kapilya.',
     keyPeople: [
@@ -79,7 +89,7 @@ const historyData = {
     location: 'Parish and Surrounding Areas'
   },
   '1988': {
-    image: '/assets/images/1988.png',
+    image: y1988,
     title: 'Strengthening the Parish and Faith',
     text: 'Lalo pang pinag-ibayo ni Fr. Rene Lagaya ang mga pormaayon ng ibat-ibang organisasyon at mamamayan. Sa panahon ding ito dumating ang tulong buhat sa komunidad upang ang isang malakas na bagyo na sumira sa kapilya ngunit naitayong muli at pinagkasunduang gawing mas matatag na istraktura.',
     keyPeople: [
@@ -88,7 +98,7 @@ const historyData = {
     location: 'Saint Joseph Parish'
   },
   '1996': {
-    image: '/assets/images/1996.png',
+    image: y1996,
     title: 'The Convent',
     text: ' Sa panahong ito nabuo ang kumbento at napagkasunduan ng mga mamamayan ng Upper Bicutan na magkaroon ng pagpupulong. Dino napagkasunduan na magkaroon ng sariling patron at kapistahan ang kapilya. Ito ay pinagtibay ng Barangay Council at ng Kura Paroko sa katauhan ni Fr. Dennis Salise. Ang kapilya ay pinangalanang Saint Joseph Chapel.',
     keyPeople: [
@@ -98,7 +108,7 @@ const historyData = {
     location: 'Saint Joseph Chapel'
   },
   '2000s': {
-    image: '/assets/images/2000.png',
+    image: y2000,
     title: 'The Parish in the New Millennium',
     text: 'Sa pamamagitan ni Fr. Rev Evangelista, ipinadala sa ating kapilya si Fr. Ben Claveria, isang Pransiskanong pari upang ihanda ang pamayanan na maging isang ganap na parokya. Pinag-ibayo ni Fr. Ben ang karagdagahan ng pamayanan sa pamamagitan ng paglulunsad ng mga gawain lalo na ang pagpapaganda ng simbahan.',
     keyPeople: [
@@ -107,8 +117,8 @@ const historyData = {
     ],
     location: 'Saint Joseph Parish'
   },
-  '2002 ': {
-    image: '/assets/images/2002.png',
+  '2002': {
+    image: y2002,
     title: 'Holy',
     text: 'Binasbasan ang bagong simbahan sa pamumuno ni Bishop Nestor Carino, Obispo ng Distrito ng Pasig.',
     keyPeople: [
@@ -118,7 +128,7 @@ const historyData = {
     location: 'Saint Joseph Parish'
   },
   'Today': {
-    image: '../assets/images/today1.png',
+    image: today1,
     title: 'Today\'s Parish',
     text: 'Kasalukuyan patuloy ang pagpapatuloy ng sambayanan, gayundin ang pagtupad ng mga leaders upang tumulong sa parokya. Mahirap man at napakatagal na maraming dahlil para na maging Parish Pledgers sa paglalagay ng pagkakaisa ang Dios ay pagtupad ng mariin at magpupala sa lahat ng mga tumupad ng kanilang mga tungkulin at mga pangako.',
     keyPeople: [

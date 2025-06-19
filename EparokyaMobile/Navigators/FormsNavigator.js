@@ -27,6 +27,9 @@ import PrayerRequestForm from "../Screens/Forms/Prayers/PrayerRequestForm";
 
 import UserForms from "../Screens/User/UserForms";
 
+//Mass
+import BaptismMassForm from "../Screens/Forms/Mass/BinyagMassForm";
+
 const Stack = createStackNavigator();
 
 const FormsNavigator = () => {
@@ -57,7 +60,7 @@ const FormsNavigator = () => {
 
       <Stack.Screen
         name="WeddingForm2"
-        component={WeddingForm2}  
+        component={WeddingForm2}
         options={{
           headerShown: false,
         }}
@@ -71,7 +74,7 @@ const FormsNavigator = () => {
         }}
       />
       <Stack.Screen
-        name="WeddingForm4"   
+        name="WeddingForm4"
         component={WeddingForm4}
         options={{
           headerShown: false,
@@ -165,6 +168,15 @@ const FormsNavigator = () => {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="BaptismMassForm"
+        component={BaptismMassForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
     </Stack.Navigator>
   );
 };
