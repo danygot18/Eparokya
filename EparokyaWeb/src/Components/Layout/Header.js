@@ -66,7 +66,7 @@ const Header = () => {
     },
   });
 
-  if (loading || isLoggingOut) return <CircularProgress />;
+  if (loading || isLoggingOut) return <CircularProgress  style={{ color: "#90C67C", alignItems: "center", justifyContent: "center" }} />;
 
   return (
     <AppBar position="static" sx={{ backgroundColor: "#1e3a3a", padding: "3px" }}>
