@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { login, clearErrors } from '../../Redux/actions/userActions';
 import Loader from '../Layout/Loader';
 import Metadata from '../Layout/MetaData';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export const Login = () => {
     const dispatch = useDispatch();
@@ -95,7 +96,7 @@ export const Login = () => {
                         type="submit"
                         disabled={loading}
                     >
-                        {loading ? <Loader /> : 'Login'}
+                        {loading ? <CircularProgress /> : 'Login'}
                     </Button>
 
                     <div style={styles.registerContainer}>

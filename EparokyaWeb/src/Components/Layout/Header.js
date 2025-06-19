@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import NotificationUser from "../Notification/NotificationUser";
 import Loader from "../Layout/Loader";
 
+
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ const Header = () => {
     },
   });
 
-  if (loading || isLoggingOut) return <Loader />;
+  if (loading || isLoggingOut) return <CircularProgress />;
 
   return (
     <AppBar position="static" sx={{ backgroundColor: "#1e3a3a", padding: "3px" }}>
