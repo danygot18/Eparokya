@@ -177,8 +177,8 @@ const SubmittedMassWeddingDetails = () => {
             {/* <Text>
               Date of Application: {formatDate(wedding.dateOfApplication)}
             </Text> */}
-            <Text>Wedding Date: {formatDate(wedding.weddingDateTime.date)}</Text>
-            <Text>Wedding Time: {formatTime(wedding.weddingDateTime.time)}</Text>
+            <Text>Wedding Date: {formatDate(wedding?.weddingDateTime?.date) ?? "N/A"}</Text>
+            <Text>Wedding Time: {formatTime(wedding?.weddingDateTime?.time) ?? "N/A"}</Text>
             {/* <Text>Wedding Theme: {wedding.weddingTheme}</Text> */}
           </View>
           {/* Groom Info */}

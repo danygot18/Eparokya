@@ -177,11 +177,11 @@ const SubmittedMassBaptismList = () => {
                   <VStack mt={2}>
                     <Text>
                       <Text fontWeight="bold">Baptism Date:</Text>{" "}
-                      {formatDate(item.baptismDateTime?.date)}
+                      {formatDate(item?.baptismDateTime?.date) || "N/A"}
                     </Text>
                     <Text>
                       <Text fontWeight="bold">Baptism Time:</Text>{" "}
-                      {formatTime(item.baptismDateTime?.time)}
+                      {formatTime(item?.baptismDateTime?.time) || "N/A"} 
                     </Text>
                     <Text>
                       <Text fontWeight="bold">Parent Contact:</Text>{" "}

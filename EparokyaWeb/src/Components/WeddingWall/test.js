@@ -3,7 +3,9 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
   FaHeart,
+  FaRegHeart,
   FaThumbsUp,
+  FaRegThumbsUp,
   FaReply,
   FaPaperPlane,
 } from "react-icons/fa";
@@ -12,30 +14,29 @@ import { toast } from "react-toastify";
 import GuestSideBar from "./GuestSideBar";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
-import {
-  Box,
-  Typography,
-  Paper,
-  Avatar,
-  CircularProgress,
-  Divider,
-  Stack,
-} from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import "swiper/css";
 import "swiper/css/navigation";
-import MetaData from "./Layout/MetaData";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const AnnouncementDetails = () => {
   const { id } = useParams();
   const [announcement, setAnnouncement] = useState(null);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [likedUsers, setLikedUsers] = useState([]);
   const [comments, setComments] = useState([]);
+
+  //create a function of this, wala syang function na ng like
+  const [likeCommentCount, setLikeCommentCount] = useState([]);
   const [commentText, setCommentText] = useState("");
-  const [currentReply, setCurrentReply] = useState({});
+  const [replyText, setReplyText] = useState("");
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedReplies, setExpandedReplies] = useState({});
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   const config = { withCredentials: true };
 
   useEffect(() => {
@@ -50,7 +51,10 @@ const AnnouncementDetails = () => {
           setUserId(response.data.user._id);
         }
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error(
+          "Error fetching user:",
+          error.response ? error.response.data : error.message
+        );
       }
     };
     fetchUser();
@@ -61,17 +65,26 @@ const AnnouncementDetails = () => {
       fetchAnnouncement();
       fetchComments();
     }
-    // eslint-disable-next-line
   }, [id, userId]);
+
+  // useEffect(() => {
+  //   if (announcement && userId) {
+  //     const isLikedNow = announcement.likedBy.includes(userId);
+  //     setLiked(isLikedNow);
+  //   }
+  // }, [announcement, userId, id]);
 
   const fetchAnnouncement = async () => {
     try {
-      setLoading(true);
       const res = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/getAnnouncement/${id}`
       );
-      setAnnouncement(res.data.announcement);
-      setLikedUsers(res.data.announcement.likedBy);
+
+      const fetchedAnnouncement = res.data.announcement;
+
+      setAnnouncement(fetchedAnnouncement);
+      setLikeCount(fetchedAnnouncement.likedBy.length);
+      setLikedUsers(fetchedAnnouncement.likedBy);
     } catch (error) {
       console.error("Error fetching announcement:", error);
     } finally {
@@ -81,11 +94,11 @@ const AnnouncementDetails = () => {
 
   const fetchComments = async () => {
     try {
-      setLoading(true);
       const res = await axios.get(
         `${process.env.REACT_APP_API}/api/v1/comments/${id}`
       );
       setComments(res.data.data);
+      console.log("Comments:", res.data.data);
     } catch (error) {
       console.error("Error fetching comments:", error);
     } finally {
@@ -95,25 +108,25 @@ const AnnouncementDetails = () => {
 
   const toggleLike = async () => {
     try {
-      setLoading(true);
       const res = await axios.put(
         `${process.env.REACT_APP_API}/api/v1/likeAnnouncement/${id}`,
-        {},
-        config
+        {}, 
+        { withCredentials: true }
       );
-      setAnnouncement(res.data.data);
-      setLikedUsers(res.data.data.likedBy);
+
+      const updatedAnnouncement = res.data.data;
+
+      setAnnouncement(updatedAnnouncement); 
+      setLikeCount(updatedAnnouncement.likedBy.length);
     } catch (error) {
       console.error("Error toggling like:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const addComment = async () => {
     if (!commentText.trim()) return;
+
     try {
-      setLoading(true);
       const res = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/${id}/announcementComment`,
         { text: commentText },
@@ -130,37 +143,36 @@ const AnnouncementDetails = () => {
         toast.success("Comment added successfully!");
       }
     } catch (error) {
+      console.error("Error adding comment:", error);
       toast.error("Your comment may contain a profane word, please revise it");
-    } finally {
-      setLoading(false);
     }
   };
 
   const toggleLikeComment = async (commentId) => {
     try {
-      setLoading(true);
       const res = await axios.put(
         `${process.env.REACT_APP_API}/api/v1/announcementCommentLike/${commentId}`,
         { userId },
-        config
+        { withCredentials: true }
       );
+
       const updatedComment = res.data.data;
+
+      // Replace only the updated comment in the list
       setComments((prevComments) =>
         prevComments.map((comment) =>
           comment._id === updatedComment._id ? updatedComment : comment
         )
       );
     } catch (error) {
-      console.error("Error toggling like on comment:", error);
-    } finally {
-      setLoading(false);
+      console.error('Error toggling like on comment:', error);
     }
   };
 
   const addReply = async (commentId, replyText) => {
     if (!replyText.trim()) return;
+
     try {
-      setLoading(true);
       const res = await axios.post(
         `${process.env.REACT_APP_API}/api/v1/announcementReply/${commentId}`,
         { text: replyText },
@@ -179,13 +191,12 @@ const AnnouncementDetails = () => {
               : comment
           )
         );
-        setCurrentReply((prev) => ({ ...prev, [commentId]: "" }));
+        setReplyText("");
         toast.success("Reply added successfully!");
       }
     } catch (error) {
+      console.error("Error adding reply:", error);
       toast.error("Your reply may contain a profane word, please revise it.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -196,73 +207,89 @@ const AnnouncementDetails = () => {
     }));
   };
 
-  const renderUserName = (user) => (
-    <Typography fontWeight="bold" color="success.main">
-      {user ? user.name : "Deleted User"}
-    </Typography>
-  );
+  const renderUserName = (user) => {
+    if (!user) {
+      return (
+        <p
+          className="comment-user"
+          style={{ fontWeight: "bold", color: "#26572E" }}
+        >
+          Deleted User
+        </p>
+      );
+    }
+    return (
+      <p
+        className="comment-user"
+        style={{ fontWeight: "bold", color: "#26572E" }}
+      >
+        {user.name}
+      </p>
+    );
+  };
 
+  //   if (loading) return <p>Loading...</p>;
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
   }
-
   return (
-    <Box display="flex" flexDirection="row" bgcolor="#f9f9f9" minHeight="100vh">
-      <MetaData title="Announcement Details" />
-      <GuestSideBar />
-      <Box flex={1} p={3} maxWidth={900} mx="auto">
-        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+    <div className="announcement-details-container">
+      <div className="announcement-center-container">
+        <GuestSideBar />
+        <div className="announcement-container">
           {announcement ? (
             <>
-              {/* Header */}
-              <Box display="flex" alignItems="center" mb={2}>
-                <Avatar
-                  src="/EPAROKYA-SYST.png"
+              <div className="post-header">
+                <img
+                  src="/public/../EPAROKYA-SYST.png"
                   alt="Saint Joseph Parish - Taguig"
-                  sx={{ width: 56, height: 56, mr: 2 }}
+                  className="profile-image-small"
                 />
-                <Box>
-                  <Typography fontWeight="bold" fontSize={18}>
-                    Saint Joseph Parish - Taguig
-                  </Typography>
-                  <Typography color="text.secondary" fontSize={14}>
+                <div className="post-user-info">
+                  <p className="post-user-name">Saint Joseph Parish - Taguig</p>
+                  <p className="post-date">
                     {announcement.dateCreated
                       ? format(parseISO(announcement.dateCreated), "PPP")
                       : "Date not available"}
-                  </Typography>
-                </Box>
-              </Box>
+                  </p>
+
+                </div>
+              </div>
 
               {/* Title & Description */}
-              <Typography variant="h4" fontWeight="bold" color="success.main" mb={1}>
-                {announcement.name}
-              </Typography>
-              <Typography mb={2}>{announcement.description}</Typography>
-              {announcement.richDescription && (
-                <Typography
-                  mb={2}
-                  dangerouslySetInnerHTML={{ __html: announcement.richDescription }}
-                />
-              )}
+              <h1 className="announcement-title">{announcement.name}</h1>
+              <p className="announcement-description">
+                {announcement.description}
+              </p>
 
-              {/* Images */}
+              {/* Rich Description */}
+              <p
+                className="announcement-rich-description"
+                dangerouslySetInnerHTML={{
+                  __html: announcement.richDescription,
+                }}
+              ></p>
+
+              {/* Image Slider / Single Image */}
               {announcement.images.length > 1 ? (
-                <Swiper modules={[Navigation]} navigation style={{ marginBottom: 16 }}>
-                  {announcement.images.map((img) => (
+                <Swiper modules={[Navigation]} navigation>
+                  {announcement.images.map((img, index) => (
                     <SwiperSlide key={img.public_id}>
                       <img
                         src={img.url}
                         alt="Announcement"
-                        style={{
-                          width: "100%",
-                          maxHeight: 350,
-                          objectFit: "cover",
-                          borderRadius: 10,
-                        }}
+                        className="announcement-image"
                       />
                     </SwiperSlide>
                   ))}
@@ -272,52 +299,25 @@ const AnnouncementDetails = () => {
                   <img
                     src={announcement.images[0].url}
                     alt="Announcement"
-                    style={{
-                      width: "100%",
-                      maxHeight: 350,
-                      objectFit: "cover",
-                      borderRadius: 10,
-                      marginBottom: 16,
-                    }}
+                    className="announcement-image"
                   />
                 )
               )}
-
-              {/* Videos */}
               {announcement.videos.length > 0 &&
                 announcement.videos.map((video) => (
-                  <video
-                    key={video}
-                    controls
-                    style={{
-                      width: "100%",
-                      maxHeight: 350,
-                      borderRadius: 10,
-                      marginBottom: 16,
-                    }}
-                  >
+                  <video key={video} controls className="announcement-video">
                     <source src={video} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
                 ))}
 
-              {/* Tags */}
-              <Box mb={2}>
+              <div className="tags">
                 {announcement.tags.map((tag) => (
-                  <span key={tag} style={{
-                    background: "#e0f2f1",
-                    color: "#388e3c",
-                    borderRadius: 8,
-                    padding: "2px 10px",
-                    marginRight: 6,
-                    fontSize: 13,
-                  }}>
+                  <span key={tag} className="tag">
                     #{tag}
                   </span>
                 ))}
-              </Box>
-
-              {/* Like Section */}
+              </div>
               <div className="like-section">
                 <FaHeart
                   color={
@@ -335,7 +335,6 @@ const AnnouncementDetails = () => {
                 <span>{announcement?.likedBy?.length || 0} Likes</span>
               </div>
 
-              <Divider sx={{ my: 2 }} />
 
               {/* Comments Section */}
               <div className="comments-section">
@@ -379,9 +378,9 @@ const AnnouncementDetails = () => {
                         color={
                           comment.likedBy.some(
                             (likerId) =>
-                              likerId === userId ||
-                              likerId?._id === userId ||
-                              likerId?.toString?.() === userId
+                              likerId === user._id || 
+                              likerId?._id === user._id || 
+                              likerId?.toString?.() === user._id 
                           )
                             ? 'blue'
                             : 'gray'
@@ -421,20 +420,13 @@ const AnnouncementDetails = () => {
                           <input
                             type="text"
                             placeholder="Write a reply..."
-                            value={currentReply[comment._id] || ""}
-                            onChange={(e) =>
-                              setCurrentReply((prev) => ({
-                                ...prev,
-                                [comment._id]: e.target.value,
-                              }))
-                            }
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
                             className="reply-input"
                           />
                           <FaPaperPlane
                             size={18}
-                            onClick={() =>
-                              addReply(comment._id, currentReply[comment._id] || "")
-                            }
+                            onClick={() => addReply(comment._id, replyText)}
                           />
                         </div>
                       </div>
@@ -444,30 +436,28 @@ const AnnouncementDetails = () => {
               </div>
             </>
           ) : (
-            <Typography>Announcement not found.</Typography>
+            <p>Announcement not found.</p>
           )}
-        </Paper>
+        </div>
 
         {/* Liked Users Section */}
-        <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-          <Typography variant="subtitle1" fontWeight="bold" mb={1}>
-            Liked by
-          </Typography>
-          <Stack direction="row" spacing={2} flexWrap="wrap">
+        <div className="liked-users-container">
+          <h3>Liked by</h3>
+          <div className="liked-users-list">
             {likedUsers.map((user) => (
-              <Box key={user._id} display="flex" alignItems="center" mr={2} mb={1}>
-                <Avatar
+              <div key={user._id} className="liked-user">
+                <img
                   src={user.avatar?.url || "/default-avatar.png"}
                   alt={user.name || "User"}
-                  sx={{ width: 32, height: 32, mr: 1 }}
+                  className="user-avatar"
                 />
-                <Typography fontSize={14}>{user.name || "Anonymous"}</Typography>
-              </Box>
+                <span>{user.name || "Anonymous"}</span>
+              </div>
             ))}
-          </Stack>
-        </Paper>
-      </Box>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

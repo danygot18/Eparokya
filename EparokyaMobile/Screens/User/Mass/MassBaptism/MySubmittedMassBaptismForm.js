@@ -185,7 +185,7 @@ const MySubmittedMassBaptismForm = () => {
             <Box p={4} borderWidth={1} borderRadius={8} backgroundColor="#fff">
               <Heading size="md">Baptism Information</Heading>
               <Text>
-                Baptism Date: {formatDate(baptismDetails?.baptismDate)}
+                Baptism Date: {formatDate(baptismDetails?.baptismDate) || "N/A"}
               </Text>
               <Text>Baptism Time: {baptismDetails?.baptismTime || "N/A"}</Text>
             </Box>

@@ -201,11 +201,11 @@ const SubmittedMassWeddingList = () => {
                 <YStack space="$1" ml="$2">
                   <Text>
                     <Text fontWeight="bold">Wedding Date:</Text>{" "}
-                    {formatDate(item.weddingDateTime.date)}
+                    {formatDate(item?.weddingDateTime?.date) ?? "N/A"}
                   </Text>
                   <Text>
                     <Text fontWeight="bold">Wedding Time:</Text>{" "}
-                    {formatTime(item.weddingDateTime.time)}
+                    {formatTime(item?.weddingDateTime?.time) ?? "N/A"}
                   </Text>
                   <Text>
                     <Text fontWeight="bold">Bride Contact:</Text>{" "}
