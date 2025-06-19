@@ -8,8 +8,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const allowedOrigins = [
-  // "*",
-  "https://eparokya.vercel.app",
+  "*",
+  // "https://eparokya.vercel.app",
   "http://localhost:3000",
 ];
 

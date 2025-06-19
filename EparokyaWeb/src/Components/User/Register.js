@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { register, clearErrors } from "../../Redux/actions/userActions";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import {
   Container,
@@ -18,6 +20,10 @@ import {
   FormControlLabel,
   Avatar,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import Metadata from "../Layout/MetaData";
 
@@ -105,6 +111,13 @@ const Register = () => {
   const [customCity, setCustomCity] = useState("");
   const [customBarangay, setCustomBarangay] = useState("");
 
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [enteredOtp, setEnteredOtp] = useState("");
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [pendingUser, setPendingUser] = useState(null);
+  const [pendingAvatar, setPendingAvatar] = useState(null);
+
   useEffect(() => {
     if (isAuthenticated) navigate("/");
     if (error) {
@@ -128,6 +141,31 @@ const Register = () => {
     fetchMinistryCategories();
   }, [error, isAuthenticated, navigate, dispatch]);
 
+  // const sendOtpHandler = async () => {
+  //   try {
+  //     const res = await axios.post(`${process.env.REACT_APP_API}/api/v1/sendOtp`, { email: user.email });
+  //     if (res.data.success) {
+  //       alert("OTP sent to your email.");
+  //       setOtpDialogOpen(true);
+  //       setOtpSent(true);
+  //     }
+  //   } catch (err) {
+  //     alert("Failed to send OTP.");
+  //   }
+  // };
+
+  // const handleVerifyOtp = async () => {
+  //   try {
+  //     const { data } = await axios.post(`${process.env.REACT_APP_API}/api/v1/verifyOtp`, {
+  //       email: user.email,
+  //       otpCode,
+  //     });
+
+  //     navigate("/");
+  //   } catch (error) {
+  //     alert("OTP verification failed.");
+  //   }
+  // };
   // const handleMinistryChange = (event) => {
   //   const { value, checked } = event.target;
   //   setUser((prev) => {
@@ -148,7 +186,6 @@ const Register = () => {
       let updatedMinistryRoles = [...prev.ministryRoles];
 
       if (checked) {
-        // Prompt for start and end years only when a new ministry is added
         const startYear = prompt("Enter start year:");
         const endYear = prompt("Enter end year (optional):");
 
@@ -161,7 +198,6 @@ const Register = () => {
           });
         }
       } else {
-        // Remove the ministry from the list
         updatedMinistryRoles = prev.ministryRoles.filter(
           (roleObj) => roleObj.ministry !== value
         );
@@ -170,7 +206,6 @@ const Register = () => {
       return { ...prev, ministryRoles: updatedMinistryRoles };
     });
   };
-
 
   const handleStartYearChange = (event, ministryId) => {
     const { value } = event.target;
@@ -191,7 +226,6 @@ const Register = () => {
       ),
     }));
   };
-
 
   const handleRoleChange = (event, ministryId) => {
     const { value } = event.target;
@@ -261,40 +295,67 @@ const Register = () => {
     }
   };
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     if (loading) return;
-  
-    const formData = new FormData();
-  
-    Object.entries(user).forEach(([key, value]) => {
-      if (key === "ministryRoles" || key === "address") {
-        console.log(`Before appending: ${key} =`, value);
-        formData.append(key, JSON.stringify(value));
-      } else if (key === "birthDate") {
-        if (value) {
-          const dateObj = new Date(value);
-          if (!isNaN(dateObj.getTime())) {
-            const formattedDate = dateObj.toISOString().split("T")[0]; 
-            formData.append(key, formattedDate);
-          } else {
-            formData.append(key, ""); 
-          }
-        } else {
-          formData.append(key, "");
-        }
-      } else {
-        formData.append(key, value);
-      }
-    });
-  
-    if (avatar) formData.append("avatar", avatar);
-  
-    console.log("Final formData:", Object.fromEntries(formData));
-    dispatch(register(formData));
-  };
-  
 
+    // Validate email
+    if (!user.email) {
+      toast.error("Email is required");
+      return;
+    }
+    setPendingUser(user);
+    setPendingAvatar(avatar);
+
+    try {
+      const res = await axios.post(`${process.env.REACT_APP_API}/api/v1/sendOtp`, {
+        email: user.email
+      });
+
+      if (res.data.success) {
+        setOtpEmail(user.email);
+        setShowOtpDialog(true);
+        toast.success("OTP sent to your email.");
+      }
+    } catch (err) {
+      toast.error("Failed to send OTP.");
+      console.error(err);
+    }
+  };
+
+  const handleVerifyOtpAndRegister = async () => {
+    try {
+      const userData = {
+        ...pendingUser,
+        address: JSON.stringify(pendingUser.address),
+        ministryRoles: JSON.stringify(pendingUser.ministryRoles),
+      };
+
+      const avatarBase64 = pendingAvatar;
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API}/api/v1/verifyOtp`,
+        {
+          email: otpEmail,
+          otpCode: enteredOtp,
+          userData,
+          avatarBase64,
+        },
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        toast.success("Registration successful!");
+        setShowOtpDialog(false);
+        navigate("/");
+      } else {
+        toast.error("OTP verification or registration failed.");
+      }
+    } catch (error) {
+      console.error("OTP/Register error:", error);
+      toast.error("Something went wrong during OTP verification.");
+    }
+  };
 
   return (
     <Container maxWidth="md">
@@ -636,6 +697,37 @@ const Register = () => {
           </Button>
         </form>
       </Box>
+
+      <Dialog open={showOtpDialog} onClose={() => setShowOtpDialog(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>OTP Verification</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Please enter the 6-digit OTP sent to <strong>{otpEmail}</strong>.
+          </Typography>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="OTP Code"
+            type="text"
+            fullWidth
+            value={enteredOtp}
+            onChange={(e) => setEnteredOtp(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowOtpDialog(false)} color="secondary">Cancel</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleVerifyOtpAndRegister}
+          >
+            Verify
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+
     </Container>
   );
 };

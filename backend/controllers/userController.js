@@ -3,6 +3,7 @@ const sendToken = require("../utils/jwtToken");
 const cloudinary = require("cloudinary");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
+const OTP = require('../models/OTP'); 
 const MinistryCategory = require("../models/ministryCategory");
 const { Wedding } = require("../models/weddings");
 const Binyag = require("../models/Binyag");
@@ -117,6 +118,7 @@ exports.registerUser = async (req, res, next) => {
             : undefined,
       },
       ministryRoles: ministryRolesArray,
+      verified: false,
     });
 
     if (!user) {
@@ -130,6 +132,93 @@ exports.registerUser = async (req, res, next) => {
   } catch (error) {
     console.error("Error registering user:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+exports.sendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required." });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "Email already registered." });
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await OTP.findOneAndDelete({ email });
+    await OTP.create({ email, code: otpCode, createdAt: new Date() });
+
+    await sendEmail({
+  email,
+  subject: "Your Eparokya OTP Code",
+  message: `Your OTP code is ${otpCode}. It will expire in 10 minutes.`,
+});
+    res.status(200).json({ success: true, message: "OTP sent." });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    res.status(500).json({ success: false, message: "Error sending OTP." });
+  }
+};
+
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { email, otpCode, userData, avatarBase64 } = req.body;
+
+    const otpRecord = await OTP.findOne({ email });
+    if (!otpRecord || otpRecord.code !== otpCode || (new Date() - otpRecord.createdAt) > 10 * 60 * 1000) {
+      return res.status(400).json({ success: false, message: "Invalid or expired OTP." });
+    }
+
+    let avatarUpload = {
+      public_id: "default_avatar",
+      secure_url: "/images/default_avatar.jpg"
+    };
+
+    if (avatarBase64) {
+      avatarUpload = await cloudinary.v2.uploader.upload(avatarBase64, {
+        folder: "eparokya/avatar",
+        width: 150,
+        crop: "scale",
+      });
+    }
+
+    const parsedAddress = JSON.parse(userData.address);
+    const parsedMinistryRoles = JSON.parse(userData.ministryRoles);
+
+    const ministryRolesArray = parsedMinistryRoles.map((item) => ({
+      ministry: new mongoose.Types.ObjectId(item.ministry),
+      role: item.role,
+      customRole: item.role === "Others" ? item.customRole || "" : undefined,
+      startYear: item.startYear,
+      endYear: item.endYear,
+    }));
+
+    const newUser = await User.create({
+      ...userData,
+      address: {
+        ...parsedAddress,
+        customBarangay: parsedAddress.barangay === "Others" ? parsedAddress.customBarangay : undefined,
+        customCity: parsedAddress.city === "Others" ? parsedAddress.customCity : undefined,
+      },
+      ministryRoles: ministryRolesArray,
+      birthDate: new Date(userData.birthDate),
+      verified: true,
+      avatar: {
+        public_id: avatarUpload.public_id,
+        url: avatarUpload.secure_url,
+      }
+    });
+
+    await OTP.deleteOne({ email });
+    sendToken(newUser, 200, res);
+  } catch (error) {
+    console.error("Error verifying OTP and registering user:", error);
+    res.status(500).json({ success: false, message: "Registration failed." });
   }
 };
 

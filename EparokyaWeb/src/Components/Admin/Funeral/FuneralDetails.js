@@ -35,6 +35,11 @@ import {
 } from "@mui/icons-material";
 import { format } from "date-fns";
 
+// PDF
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { useRef } from 'react';
+
 const FuneralDetails = () => {
     const { funeralId } = useParams();
     const [funeralDetails, setFuneralDetails] = useState(null);
@@ -72,6 +77,10 @@ const FuneralDetails = () => {
     const [reason, setReason] = useState("");
     const [updatedFuneralDate, setUpdatedFuneralDate] = useState("");
     const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+    // pdf
+    const funeralRef = useRef();
+    const adminRef = useRef();
 
     const predefinedComments = [
         "Confirmed and on schedule",
@@ -245,8 +254,6 @@ const FuneralDetails = () => {
         setOffset({ x: 0, y: 0 });
     };
 
-
-
     const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.2, 3));
     const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.2, 0.5));
 
@@ -272,6 +279,41 @@ const FuneralDetails = () => {
         return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
     };
 
+    const handleDownloadPdf = async () => {
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = doc.internal.pageSize.getHeight();
+
+        const renderFullPage = async (ref) => {
+            if (ref.current) {
+                const canvas = await html2canvas(ref.current, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: "#ffffff",
+                    scrollY: -window.scrollY,
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = doc.getImageProperties(imgData);
+
+                let imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                let position = 0;
+
+                // Split to multiple pages if necessary
+                while (imgHeight > 0) {
+                    doc.addImage(imgData, 'PNG', 0, position, pdfWidth, (imgProps.height * pdfWidth) / imgProps.width);
+                    imgHeight -= pdfHeight;
+                    if (imgHeight > 0) doc.addPage();
+                }
+            }
+        };
+
+        await renderFullPage(funeralRef);
+        await renderFullPage(adminRef);
+
+        doc.save('funeral-details.pdf');
+    };
+
     if (loading) return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <CircularProgress />
@@ -293,7 +335,16 @@ const FuneralDetails = () => {
                 {/* Funeral Details Section */}
                 <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
                     {/* Left Column */}
-                    <Box sx={{ flex: 1 }}>
+                    <Box
+                        ref={funeralRef}
+                        sx={{
+                            flex: 1,
+                            width: '800px',
+                            padding: 2,
+                            backgroundColor: 'white',
+                            mb: 3, // Optional: margin-bottom for spacing
+                        }}
+                    >
                         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
                             <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
                                 Funeral Details
@@ -431,7 +482,15 @@ const FuneralDetails = () => {
                     </Box>
 
                     {/* Right Column */}
-                    <Box sx={{ flex: 1 }}>
+                    <Box
+                        ref={adminRef}
+                        sx={{
+                            flex: 1,
+                            width: '800px',
+                            padding: 2,
+                            backgroundColor: 'white',
+                        }}
+                    >
                         {/* Admin Comments Section */}
                         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
                             <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
@@ -682,6 +741,17 @@ const FuneralDetails = () => {
                             >
                                 Go to Admin Chat
                             </Button>
+
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                fullWidth
+                                sx={{ mt: 2 }}
+                                onClick={handleDownloadPdf}
+                            >
+                                Download PDF
+                            </Button>
+
                         </Paper>
                     </Box>
                 </Box>

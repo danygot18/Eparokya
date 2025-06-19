@@ -127,7 +127,7 @@ const userSchema = new mongoose.Schema({
             }
         }
     ],
-   
+
     email: {
         type: String,
         required: [true, 'Please provide your email address'],
@@ -142,7 +142,7 @@ const userSchema = new mongoose.Schema({
     },
     birthDate: {
         type: Date,
-        required: true, 
+        required: true,
     },
     preference: {
         type: String,
@@ -159,15 +159,15 @@ const userSchema = new mongoose.Schema({
     civilStatus: {
         type: String,
         enum: [
-            'Single', 
-            'Married', 
-            'Divorced', 
-            'Widowed', 
-            'Separated', 
-            'In Civil Partnership', 
-            'Former Civil Partner', 
-            ],
-    required: true
+            'Single',
+            'Married',
+            'Divorced',
+            'Widowed',
+            'Separated',
+            'In Civil Partnership',
+            'Former Civil Partner',
+        ],
+        required: true
 
     },
     address: {
@@ -177,13 +177,13 @@ const userSchema = new mongoose.Schema({
         Street: {
             type: String,
             required: [
-              function () {
-                return this.isNew; 
-              },
-              'Street is required',
+                function () {
+                    return this.isNew;
+                },
+                'Street is required',
             ],
-          },
-          
+        },
+
         District: { type: String, required: true },
         barangay: {
             type: String,
@@ -197,10 +197,10 @@ const userSchema = new mongoose.Schema({
                 'Tanyag', 'Tuktukan', 'Upper Bicutan', 'Ususan', 'Wawa', 'West Rembo', 'Western Bicutan',
                 'Others'
             ],
-            required: [ function () {
-                return this.isNew; 
-              },
-              'Barangay is required',
+            required: [function () {
+                return this.isNew;
+            },
+                'Barangay is required',
             ],
         },
         customBarangay: {
@@ -221,10 +221,15 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    isPriest: { 
-        type: Boolean, 
-        default: false 
+    isPriest: {
+        type: Boolean,
+        default: false
     },
+    verified: {
+        type: Boolean,
+        default: false,
+    },
+
     resetPasswordToken: String,
     resetPasswordExpire: Date,
 }, { timestamps: true })

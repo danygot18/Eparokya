@@ -22,7 +22,9 @@ const {
     getUserFormCounts,
     getMemberStatuses,
     updateMemberDirectoryUser,
-    getMemberDirectoryUser
+    getMemberDirectoryUser,
+    sendOtp,
+    verifyOtp
     
 } = require('../controllers/userController');
 const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
@@ -33,6 +35,9 @@ router.post('/register',
 router.post('/login', LoginUser);
 router.get('/profile', isAuthenticatedUser, Profile);
 router.get('/logout', Logout);
+
+router.post("/sendOtp", sendOtp);
+router.post("/verifyOtp", verifyOtp);
 
 router.get("/stats/registeredUsersCount", getRegisteredUsersCount);
 

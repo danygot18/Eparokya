@@ -29,7 +29,7 @@ import {
 
 const historyData = {
   '1982 Nov': {
-    image: '/assets/church-construction.jpg',
+    image: '../../assets/1982.png',
     title: 'Foundation of the Parish - November 1982',
     text: 'Nagkaroon ng pagpupulong sa pangunguna ni Kagawad Dionisio Castillo na magkaroon ng Bahay Dalanginan o Kapilya. Sinang-ayunan ng Punong Barangay na magkaroon ng lupa ang kapilya gayundin ng Kura Paroko St. Martin de Porres Parish sa United, Paranaque na nakasakop sa buong barangay. Ang kapilya ay itinayo sa pamamagitan ng Bayanihan ng mga mamamayanan, ng mga madre at kura paroko na si Msgr. Bienvenido Mercado.',
     keyPeople: [
@@ -39,9 +39,9 @@ const historyData = {
     location: 'Original Kapilya Site'
   },
   '1982 Dec': {
-    image: '/assets/first-mass.jpg',
+    image: '/assets/december_1982.png',
     title: 'First Mass - December 1982',
-    text: 'The first mass was celebrated in the newly constructed kapilya, marking the beginning of regular worship services in the community. Over 200 parishioners attended this historic event, which was presided by Msgr. Mercado with assistance from local lay ministers.',
+    text: 'Ginanap ang kauna-unahang Misa sa pagunguna ni Monsignor Bienvenido Mercado kura paroko ng St. Martin de Porres, United Hills Parish. Ang sumisigang ito nabuo ang pangarap ng lahat na sa takdang panahon, ito ay ganap na pangarap ng parokya sa tulong ng Panginoon.',
     keyPeople: [
       { name: 'Msgr. Bienvenido Mercado', role: 'Celebrant' },
       { name: 'Lay Ministers Group', role: 'Assistants' }
@@ -49,67 +49,80 @@ const historyData = {
     location: 'Kapilya'
   },
   '1983': {
-    image: '/assets/religious-arrival.jpg',
+    image: '/assets/images/1983.png',
     title: 'Coming of Religious Congregations',
-    text: 'The Sisters of the Holy Family arrived to assist with catechesis and community programs. Their presence strengthened the spiritual formation programs and initiated the parish\'s first organized charity works.',
+    text: 'Ang mga Salesiano ni Don Bosco ang nagmimisa sa Kapilya na ito sa pangunguna ni Fr. Rene Gagayna, Fr. Andy Wong, Fr. Broderick Pahillo (ngayon, Katawan ng Obispo, Arkidiyosesis ng Maynila). Nagsimula nang lumago ang pananampalataya ng unang komunidad sa tulong ng pagdating ng ibat-ibang religious congregations tulad ng mga Jesuits, CI CM, I.C.M. mga Seminarista mula sa San Carlos Seminary, Holy Apostles Senior Seminary at Don Bosco Seminary.',
     keyPeople: [
       { name: 'Sisters of the Holy Family', role: 'Religious Congregation' }
     ],
     location: 'Parish Center'
   },
   '1984': {
-    image: '/assets/community-building.jpg',
+    image: '/assets/images/1984.png',
     title: 'Built Community',
-    text: 'The parish established its first Basic Ecclesial Communities (BECs), organizing the faithful into smaller neighborhood groups for prayer, scripture sharing, and mutual support. This became the foundation for the parish\'s strong community spirit.',
+    text: ' Lumago ang bilang ng partisipasyon at pakikipam ng mga mamamayan. Ito na ang kabuuang ng pananampalataya ng lahat ng kapilya na muling dumalo sa pamahalaan ng simbahan sa pamamagitan ng ang upang nababalitaan ng kapilya.',
     keyPeople: [
-      { name: 'BEC Coordinators', role: 'Community Leaders' }
+      { name: 'Tessie Ilave', role: 'Contributors' },
+      { name: 'Salvador Trinidad', role: 'Contributors' },
+      { name: 'Conchita Gonzales', role: 'Contributors' },
     ],
-    location: 'Various Sitios'
+    location: 'Saint Joseph'
   },
   '1986': {
-    image: '/assets/challenges.jpg',
+    image: '/assets/images/1986.png',
     title: 'Parish Challenge',
-    text: 'The parish faced significant challenges during the EDSA Revolution period, with divided loyalties among parishioners. The clergy worked tirelessly to promote peace and reconciliation within the community.',
+    text: 'Dumating ang malaking pagsubok sa komunidad nang isabatas ang Proc. No. 172 na isinasalin ang lupain ng Upper Bicutan sa pagmamay-ari ng mga naninirahan dito. Nagkaroon ng pagkakahati-hati at pagbabaha-bahagi ang dating isang komunidad. Ang pagsubok na ito ay hindi naging hadlang upang ang lahat ay magpatuloy sa paglilingkod.',
     keyPeople: [
-      { name: 'Parish Pastoral Council', role: 'Leadership' }
+      { name: 'Holy Apostles', role: 'Katekista' },
+      { name: 'San Carlos Seminary', role: 'Katekista' }
     ],
     location: 'Parish and Surrounding Areas'
   },
   '1988': {
-    image: '/assets/strengthening.jpg',
+    image: '/assets/images/1988.png',
     title: 'Strengthening the Parish and Faith',
-    text: 'Major renovations were completed on the church building, and the parish launched its first comprehensive catechetical program for all ages. The parish also began its annual pilgrimage tradition.',
+    text: 'Lalo pang pinag-ibayo ni Fr. Rene Lagaya ang mga pormaayon ng ibat-ibang organisasyon at mamamayan. Sa panahon ding ito dumating ang tulong buhat sa komunidad upang ang isang malakas na bagyo na sumira sa kapilya ngunit naitayong muli at pinagkasunduang gawing mas matatag na istraktura.',
     keyPeople: [
-      { name: 'Renovation Committee', role: 'Project Leaders' }
+      { name: 'Fr. Rene Lagaya', role: 'Parish Priest' }
     ],
-    location: 'Church Building'
+    location: 'Saint Joseph Parish'
   },
   '1996': {
-    image: '/assets/convent.jpg',
+    image: '/assets/images/1996.png',
     title: 'The Convent',
-    text: 'A dedicated convent was built to house the religious sisters serving the parish, allowing for expanded ministries and more consistent presence of religious in the community.',
+    text: ' Sa panahong ito nabuo ang kumbento at napagkasunduan ng mga mamamayan ng Upper Bicutan na magkaroon ng pagpupulong. Dino napagkasunduan na magkaroon ng sariling patron at kapistahan ang kapilya. Ito ay pinagtibay ng Barangay Council at ng Kura Paroko sa katauhan ni Fr. Dennis Salise. Ang kapilya ay pinangalanang Saint Joseph Chapel.',
     keyPeople: [
-      { name: 'Construction Team', role: 'Builders' },
-      { name: 'Donors', role: 'Benefactors' }
+      { name: 'Barangay Council', role: 'Nagpatibay' },
+      { name: 'Fr. Dennis Salise', role: 'Nagpatibay' }
     ],
-    location: 'Church Compound'
+    location: 'Saint Joseph Chapel'
   },
   '2000s': {
-    image: '/assets/millenium.jpg',
+    image: '/assets/images/2000.png',
     title: 'The Parish in the New Millennium',
-    text: 'The parish embraced digital technology for evangelization, launched youth programs, and established partnerships with international Catholic organizations. The parish center was expanded to accommodate growing ministries.',
+    text: 'Sa pamamagitan ni Fr. Rev Evangelista, ipinadala sa ating kapilya si Fr. Ben Claveria, isang Pransiskanong pari upang ihanda ang pamayanan na maging isang ganap na parokya. Pinag-ibayo ni Fr. Ben ang karagdagahan ng pamayanan sa pamamagitan ng paglulunsad ng mga gawain lalo na ang pagpapaganda ng simbahan.',
     keyPeople: [
-      { name: 'Youth Ministry', role: 'Tech Integration' },
-      { name: 'Parish Staff', role: 'Administration' }
+      { name: 'Fr. Rev Evangelista', role: 'Nagtuloy' },
+      { name: 'Fr. Ben Claveria', role: 'Nagtuloy' }
     ],
-    location: 'Expanded Facilities'
+    location: 'Saint Joseph Parish'
+  },
+  '2002 ': {
+    image: '/assets/images/2002.png',
+    title: 'Holy',
+    text: 'Binasbasan ang bagong simbahan sa pamumuno ni Bishop Nestor Carino, Obispo ng Distrito ng Pasig.',
+    keyPeople: [
+      { name: 'Bishop Nestor Carino', role: 'Nagbasbas' },
+
+    ],
+    location: 'Saint Joseph Parish'
   },
   'Today': {
-    image: '/assets/today.jpg',
+    image: '../assets/images/today1.png',
     title: 'Today\'s Parish',
-    text: 'Our parish continues to grow in numbers and faith. With a strong community and modern programs, we remain committed to serving with love and mission. The parish now serves over 5,000 families with diverse ministries and outreach programs.',
+    text: 'Kasalukuyan patuloy ang pagpapatuloy ng sambayanan, gayundin ang pagtupad ng mga leaders upang tumulong sa parokya. Mahirap man at napakatagal na maraming dahlil para na maging Parish Pledgers sa paglalagay ng pagkakaisa ang Dios ay pagtupad ng mariin at magpupala sa lahat ng mga tumupad ng kanilang mga tungkulin at mga pangako.',
     keyPeople: [
-      { name: 'Current Parish Priest', role: 'Spiritual Leader' },
+      { name: 'Fr. Errol Mananquil', role: 'Current Parish Priest' },
       { name: 'Parishioners', role: 'Community' }
     ],
     location: 'Present Church'
@@ -139,7 +152,7 @@ function ParishHistory() {
   const navigateHistory = (direction) => {
     const years = Object.keys(historyData);
     const currentIndex = years.indexOf(selectedTab);
-    
+
     if (direction === 'next' && currentIndex < years.length - 1) {
       setSelectedTab(years[currentIndex + 1]);
     } else if (direction === 'prev' && currentIndex > 0) {
@@ -150,9 +163,9 @@ function ParishHistory() {
   const { image, title, text, keyPeople, location } = historyData[selectedTab] || {};
 
   return (
-    <Box sx={{ 
-      p: isMobile ? 2 : 4, 
-      backgroundColor: '#f5f5f5', 
+    <Box sx={{
+      p: isMobile ? 2 : 4,
+      backgroundColor: '#f5f5f5',
       minHeight: '100vh',
       backgroundImage: 'linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url(/assets/background-pattern.png)',
       backgroundAttachment: 'fixed'
@@ -204,9 +217,9 @@ function ParishHistory() {
             <Tab
               key={year}
               label={
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
                   alignItems: isMobile ? 'center' : 'flex-start',
                   p: 1
                 }}>
@@ -232,49 +245,30 @@ function ParishHistory() {
         </Tabs>
 
         {/* Main Content */}
-        <Box sx={{ 
-          flexGrow: 1, 
+        <Box sx={{
+          flexGrow: 1,
           width: isMobile ? '100%' : '70%',
           position: 'relative'
         }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
-            mb: 2,
-            gap: 2
+            mb: 2
           }}>
-            <IconButton 
-              onClick={() => navigateHistory('prev')}
-              disabled={selectedTab === Object.keys(historyData)[0]}
-              sx={{ 
-                visibility: selectedTab === Object.keys(historyData)[0] ? 'hidden' : 'visible',
-                color: '#97cf8a'
+            <Typography
+              variant="h4"
+              align="center"
+              sx={{
+                fontWeight: 'bold',
+                color: '#2e7d32',
+                mx: 2
               }}
             >
-              <ArrowBack fontSize="large" />
-            </IconButton>
-            
-            <Typography variant="h4" align="center" sx={{ 
-              fontWeight: 'bold',
-              color: '#2e7d32',
-              mx: 2,
-              flexGrow: 1
-            }}>
               {title}
             </Typography>
-            
-            <IconButton 
-              onClick={() => navigateHistory('next')}
-              disabled={selectedTab === Object.keys(historyData)[Object.keys(historyData).length - 1]}
-              sx={{ 
-                visibility: selectedTab === Object.keys(historyData)[Object.keys(historyData).length - 1] ? 'hidden' : 'visible',
-                color: '#97cf8a'
-              }}
-            >
-              <ArrowForward fontSize="large" />
-            </IconButton>
           </Box>
+
 
           <Slide direction="up" in={true} mountOnEnter unmountOnExit>
             <Paper
@@ -289,7 +283,7 @@ function ParishHistory() {
             >
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ 
+                  <Box sx={{
                     position: 'relative',
                     borderRadius: 2,
                     overflow: 'hidden',
@@ -312,28 +306,28 @@ function ParishHistory() {
                     </Fade>
                   </Box>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
                   <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.7 }}>
                     {text}
                   </Typography>
-                  
+
                   <Divider sx={{ my: 2 }} />
-                  
+
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Place sx={{ mr: 1, color: '#97cf8a' }} />
                     <Typography variant="subtitle1">
                       <strong>Location:</strong> {location}
                     </Typography>
                   </Box>
-                  
+
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Group sx={{ mr: 1, color: '#97cf8a' }} />
                     <Typography variant="subtitle1">
                       <strong>Key People:</strong>
                     </Typography>
                   </Box>
-                  
+
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
                     {keyPeople.map((person, index) => (
                       <Chip
@@ -345,10 +339,10 @@ function ParishHistory() {
                       />
                     ))}
                   </Box>
-                  
-                  <Button 
-                    variant="contained" 
-                    sx={{ 
+
+                  {/* <Button
+                    variant="contained"
+                    sx={{
                       mr: 2,
                       backgroundColor: '#97cf8a',
                       '&:hover': {
@@ -358,25 +352,25 @@ function ParishHistory() {
                     onClick={() => window.open(image, '_blank')}
                   >
                     View Full Image
-                  </Button>
+                  </Button> */}
                 </Grid>
               </Grid>
             </Paper>
           </Slide>
-          
+
           {/* Related Events */}
           <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold', color: '#2e7d32' }}>
             Related Historical Events
           </Typography>
-          
+
           <Grid container spacing={3}>
             {Object.entries(historyData)
               .filter(([year]) => year !== selectedTab)
               .slice(0, 3)
               .map(([year, data]) => (
                 <Grid item xs={12} sm={6} md={4} key={year}>
-                  <Card 
-                    sx={{ 
+                  <Card
+                    sx={{
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',

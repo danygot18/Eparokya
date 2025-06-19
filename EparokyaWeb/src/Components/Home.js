@@ -133,7 +133,7 @@ export const Home = () => {
   const navigate = useNavigate();
 
   const bannerImages = [
-    `${process.env.PUBLIC_URL}/EParokya-SampleBanner.png`,
+    `${process.env.PUBLIC_URL}/Eparokya_UpdatedBanner.png`,
     `${process.env.PUBLIC_URL}/EParokya2-SampleBanner.png`,
   ];
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
