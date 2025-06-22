@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import TermsModal from "../../../../TermsModal";
 import termsAndConditionsText from "../../../../TermsAndConditionText";
+import HouseBlessingCalendar from "./houseBlessingCalendar";
 
 const HouseBlessingForm = () => {
   const [formData, setFormData] = useState({
@@ -84,6 +85,7 @@ const HouseBlessingForm = () => {
   ]);
   const [customCity, setCustomCity] = useState("");
   const [customBarangay, setCustomBarangay] = useState("");
+  const [showOverlay, setShowOverlay] = useState(false);
 
   const propertyTypes = [
     "House",
@@ -279,6 +281,74 @@ const HouseBlessingForm = () => {
       <Box display="flex" bgcolor="#f9f9f9" width="100%">
         <GuestSidebar />
         <Box flex={1} p={2}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                maxWidth: 300,
+              }}
+            >
+              <Typography variant="h6" sx={{ fontSize: "1.1rem" }}>
+                Click here to see Available Dates
+              </Typography>
+              <Button
+                variant="outlined"
+                color="secondary"
+                sx={{
+                  fontWeight: "bold",
+                  borderRadius: 1,
+                  px: 2,
+                  fontSize: "0.95rem",
+                }}
+                onClick={() => setShowOverlay(true)}
+              >
+                View Calendar
+              </Button>
+            </Box>
+            {/* Only show calendar when showOverlay is true */}
+            {showOverlay && (
+              <Box
+                sx={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100vw",
+                  height: "100vh",
+                  bgcolor: "rgba(0,0,0,0.5)",
+                  zIndex: 1300,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onClick={() => setShowOverlay(false)}
+              >
+                <Box
+                  sx={{
+                    bgcolor: "#fff",
+                    borderRadius: 2,
+                    boxShadow: 24,
+                    p: 2,
+                    minWidth: { xs: "90vw", sm: 600 },
+                    maxHeight: "90vh",
+                    overflowY: "auto",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    sx={{ mb: 2 }}
+                    onClick={() => setShowOverlay(false)}
+                  >
+                    Close
+                  </Button>
+                  <HouseBlessingCalendar />
+                </Box>
+              </Box>
+            )}
+          </Box>
           <form onSubmit={handleSubmit}>
             <Typography variant="h4" gutterBottom>
               House Blessing Information
