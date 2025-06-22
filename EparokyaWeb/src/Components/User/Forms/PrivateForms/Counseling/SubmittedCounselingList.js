@@ -141,7 +141,7 @@ const SubmittedCounselingList = () => {
                     backgroundColor: theme.palette.grey[50]
                 }}
             >
-                <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>My Submitted Counseling Records</Typography>
+                <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>Submitted Counseling Requests</Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
 
                     <Chip

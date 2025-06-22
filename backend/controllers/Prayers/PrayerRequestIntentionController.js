@@ -289,17 +289,17 @@ exports.markPrayerRequestIntentionAsDone = async (req, res) => {
 
 
 
-exports.deletePrayerRequestIntention = async (req, res) => {
-    try {
-        const deletedPrayerRequest = await PrayerRequestIntention.findByIdAndDelete(req.params.prayerIntentionId);
-        if (!deletedPrayerRequest) {
-            return res.status(404).json({ message: 'Prayer request not found' });
-        }
-        res.status(200).json({ message: 'Prayer request deleted successfully' });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
+// exports.deletePrayerRequestIntention = async (req, res) => {
+//     try {
+//         const deletedPrayerRequest = await PrayerRequestIntention.findByIdAndDelete(req.params.prayerIntentionId);
+//         if (!deletedPrayerRequest) {
+//             return res.status(404).json({ message: 'Prayer request not found' });
+//         }
+//         res.status(200).json({ message: 'Prayer request deleted successfully' });
+//     } catch (err) {
+//         res.status(500).json({ message: err.message });
+//     }
+// };
 
 exports.getUserNotifications = async (req, res) => {
     try {
@@ -324,7 +324,81 @@ exports.getUnreadNotifications = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+// prayer history
+exports.getPrayerRequestHistory = async (req, res) => {
+    try {
+        const { prayerType, page = 1, limit = 10, filter = "done" } = req.query;
+        const skip = (page - 1) * limit;
 
+        const match = { prayerType };
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (filter === "done") {
+            match.prayerRequestDate = { $lt: today };
+        } else if (filter === "upcoming") {
+            match.prayerRequestDate = { $gte: today };
+        } else if (filter === "notDone") {
+            match.isDone = false;
+        }
+
+        const total = await PrayerRequestIntention.countDocuments(match);
+        const data = await PrayerRequestIntention.find(match)
+            .populate("userId", "name email")
+            .sort({ "doneAt": -1 })
+            .skip(skip)
+            .limit(parseInt(limit));
+
+        res.status(200).json({
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(total / limit),
+            totalItems: total,
+            data,
+        });
+    } catch (error) {
+        console.error("Error fetching prayer history:", error);
+        res.status(500).json({ message: "Server error while fetching prayer history." });
+    }
+};
+
+
+exports.archivePrayerRequest = async (req, res) => {
+  try {
+    const { prayerIntentionId } = req.params;
+    const updated = await PrayerRequestIntention.findByIdAndUpdate(prayerIntentionId, { archived: true }, { new: true });
+    if (!updated) return res.status(404).json({ message: "Prayer request not found." });
+    res.status(200).json({ message: "Prayer request archived." });
+  } catch (error) {
+    console.error("Error archiving prayer request:", error);
+    res.status(500).json({ message: "Server error while archiving." });
+  }
+};
+
+exports.deletePrayerRequest = async (req, res) => {
+  try {
+    const { prayerIntentionId } = req.params;
+    const deleted = await PrayerRequestIntention.findByIdAndDelete(prayerIntentionId);
+    if (!deleted) return res.status(404).json({ message: "Prayer request not found." });
+    res.status(200).json({ message: "Prayer request deleted." });
+  } catch (error) {
+    console.error("Error deleting prayer request:", error);
+    res.status(500).json({ message: "Server error while deleting." });
+  }
+};
+
+exports.deleteAllDonePrayerRequests = async (req, res) => {
+  try {
+    const result = await PrayerRequestIntention.deleteMany({ isDone: true });
+
+    res.status(200).json({
+      message: `${result.deletedCount} done prayer request(s) deleted.`,
+    });
+  } catch (error) {
+    console.error("Error deleting done prayer requests:", error);
+    res.status(500).json({ message: "Server error while deleting done prayers." });
+  }
+};
 
 
 

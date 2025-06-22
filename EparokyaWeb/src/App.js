@@ -32,6 +32,7 @@ import ResourcePage from "./Components/ResourcePage";
 import ResourceDetails from "./Components/ResourceDetails";
 import WeddingWall from "./Components/WeddingWall/WeddingWall";
 import ParishPriest from "./Components/ParishInformation/ParishPriests";
+import GuestPriest from "./Components/GuestPriest";
 
 import MemberHistory from "./Components/MemberHistory";
 
@@ -284,12 +285,14 @@ function App() {
         <Route path="/resource/:resourceId" element={<ResourceDetails />} />
         <Route path="/memberHistory" element={<MemberHistory />} exact="true" />
         <Route path="/biblePage" element={<Bible />} exact="true" />
+        <Route path="/guestPriest" element={<GuestPriest />} exact="true" />
+
 
         <Route path="/weddingWall" element={<WeddingWall />} exact="true" />
         <Route path="/parishPriests" element={<ParishPriest />} exact="true" />
         <Route path="/FAQsPage" element={<FAQs />} exact="true" />
         <Route path="/GuidesPage" element={<Guides />} exact="true" />
-        <Route path="/ParishHistory" element={<ParishHistory   />} exact="true" />
+        <Route path="/ParishHistory" element={<ParishHistory />} exact="true" />
 
         <Route
           path="/user/ministryAnnouncement"

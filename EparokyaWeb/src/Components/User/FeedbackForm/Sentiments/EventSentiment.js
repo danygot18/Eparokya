@@ -16,13 +16,10 @@ const emojiOptions = [
   "😡",
   "😠",
   "😞",
-  "😕",
   "😐",
   "😊",
-  "😃",
   "😄",
   "😍",
-  "👍",
 ];
 const questions = [
   "How was the event's organization?",

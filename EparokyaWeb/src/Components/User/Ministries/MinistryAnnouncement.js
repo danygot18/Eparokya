@@ -241,7 +241,7 @@ const MinistryAnnouncement = () => {
                         disabled={isAcknowledged}
                         onClick={() => handleAcknowledgeClick(announcement)}
                       >
-                        {isAcknowledged ? "Already Acknowledged" : "Acknowledge"}
+                        {isAcknowledged ? "Acknowledged" : "Acknowledge"}
                       </Button>
                     </CardContent>
                   </Card>

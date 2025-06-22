@@ -20,7 +20,7 @@ module.exports = (io) => {
     const { isAuthenticatedUser, isAuthorized } = require('../../middleware/auth');
 
     router.use((req, res, next) => {
-        req.app.set("io", io);  
+        req.app.set("io", io);
         next();
     });
 
@@ -28,10 +28,14 @@ module.exports = (io) => {
 
     router.get('/getAllPrayerRequestIntention', prayerRequestIntentionController.getAllPrayerRequestIntention);
     router.get('/getPrayerRequestIntentionById/:prayerIntentionId', prayerRequestIntentionController.getPrayerRequestIntentionById);
+    router.get('/intentionHistory', prayerRequestIntentionController.getPrayerRequestHistory);
+
     router.put('/updatePrayerRequestIntention/:prayerIntentionId', prayerRequestIntentionController.updatePrayerRequestIntention);
     router.post('/markPrayerRequestIntentionAsDone/:prayerIntentionId', prayerRequestIntentionController.markPrayerRequestIntentionAsDone);
-    router.delete('/deletePrayerRequestIntention/:prayerIntentionId', prayerRequestIntentionController.deletePrayerRequestIntention);
 
+    router.post('/archivePrayerRequestIntention/:prayerIntentionId', prayerRequestIntentionController.archivePrayerRequest);
+    router.delete('/deletePrayerRequestIntention/:prayerIntentionId', prayerRequestIntentionController.deletePrayerRequest);
+    router.delete('/prayerRequestIntention/deleteAllDone', prayerRequestIntentionController.deleteAllDonePrayerRequests);
 
 
     return router;

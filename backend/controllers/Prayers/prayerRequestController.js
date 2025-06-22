@@ -7,6 +7,7 @@ exports.createPrayerRequest = async (req, res) => {
             offerrorsName,
             prayerType,
             prayerRequestDate,
+            prayerRequestTime,
             Intentions,
             userId,
         } = req.body;
@@ -15,6 +16,7 @@ exports.createPrayerRequest = async (req, res) => {
             offerrorsName,
             prayerType,
             prayerRequestDate,
+            prayerRequestTime,
             Intentions,
             userId,
         });
@@ -27,6 +29,7 @@ exports.createPrayerRequest = async (req, res) => {
     }
 };
 
+
 // Fetch all prayer requests for a user
 exports.getUserPrayerRequests = async (req, res) => {
     try {
@@ -38,6 +41,7 @@ exports.getUserPrayerRequests = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch prayer requests' });
     }
 };
+
 
 exports.getAllPrayerRequests = async (req, res) => {
     try {
@@ -82,7 +86,9 @@ exports.deleteIntentionFromPrayerRequest = async (req, res) => {
             return res.status(404).json({ error: 'Prayer request not found' });
         }
 
-        prayerRequest.Intentions = prayerRequest.Intentions.filter((intention) => intention._id.toString() !== intentionId);
+        prayerRequest.Intentions = prayerRequest.Intentions.filter(
+            (intention) => intention._id.toString() !== intentionId
+        );
         await prayerRequest.save();
 
         res.status(200).json({ message: 'Intention deleted successfully', prayerRequest });
@@ -91,6 +97,7 @@ exports.deleteIntentionFromPrayerRequest = async (req, res) => {
         res.status(500).json({ error: 'Failed to delete intention' });
     }
 };
+
 
 exports.getMySubmittedForms = async (req, res) => {
     try {
@@ -109,6 +116,152 @@ exports.getMySubmittedForms = async (req, res) => {
         res.status(500).json({ message: "Failed to fetch submitted prayer request forms." });
     }
 };
+
+exports.updatePrayerRequestTime = async (req, res) => {
+    try {
+        const { prayerId } = req.params;
+        const { newTime } = req.body;
+
+        const updatedRequest = await PrayerRequest.findByIdAndUpdate(
+            prayerId,
+            {
+                prayerRequestTime: newTime,
+                UpdateTime: newTime // ✅ Save this for display
+            },
+            { new: true }
+        );
+
+        if (!updatedRequest) {
+            return res.status(404).json({ message: 'Prayer request not found' });
+        }
+
+        res.status(200).json({ message: 'Prayer request time updated', prayerRequest: updatedRequest });
+    } catch (error) {
+        console.error('Error updating prayer request time:', error);
+        res.status(500).json({ error: 'Failed to update prayer request time' });
+    }
+};
+exports.acceptPrayerRequest = async (req, res) => {
+    try {
+        const { prayerId } = req.params;
+        const updated = await PrayerRequest.findByIdAndUpdate(
+            prayerId,
+            { prayerStatus: 'Accepted' },
+            { new: true }
+        );
+        if (!updated) return res.status(404).json({ message: 'Prayer request not found.' });
+        res.status(200).json({ message: 'Prayer request accepted.', prayerRequest: updated });
+    } catch (error) {
+        console.error('Error accepting prayer request:', error);
+        res.status(500).json({ message: 'Failed to accept prayer request.' });
+    }
+};
+
+// calling accepted prayer request
+exports.getMassIntentions = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const nextWeek = new Date();
+    nextWeek.setDate(today.getDate() + 7);
+    nextWeek.setHours(23, 59, 59, 999);
+
+    const intentions = await PrayerRequest.find({
+      prayerStatus: 'Accepted',
+      prayerRequestDate: {
+        $gte: today,
+        $lte: nextWeek,
+      },
+    }).select('offerrorsName prayerType prayerRequestDate prayerRequestTime Intentions');
+
+    res.status(200).json({ intentions });
+  } catch (err) {
+    console.error('Error fetching mass intentions:', err);
+    res.status(500).json({ message: 'Failed to fetch mass intentions.' });
+  }
+};
+
+exports.cancelPrayerRequest = async (req, res) => {
+    try {
+        const { prayerId } = req.params;
+        const updated = await PrayerRequest.findByIdAndUpdate(
+            prayerId,
+            { prayerStatus: 'Cancelled' },
+            { new: true }
+        );
+        if (!updated) return res.status(404).json({ message: 'Prayer request not found.' });
+        res.status(200).json({ message: 'Prayer request cancelled.', prayerRequest: updated });
+    } catch (error) {
+        console.error('Error cancelling prayer request:', error);
+        res.status(500).json({ message: 'Failed to cancel prayer request.' });
+    }
+};
+
+exports.getPrayerRequestHistory = async (req, res) => {
+    try {
+        const { status, page = 1, limit = 10, prayerType } = req.query;
+        const skip = (page - 1) * limit;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let query = {};
+
+        if (prayerType) {
+            query.prayerType = prayerType;
+        }
+
+        if (status === "Accepted") {
+            query.prayerStatus = "Accepted";
+            query.UpdateTime = { $in: [null, "", undefined] };
+        } else if (status === "Cancelled") {
+            query.prayerStatus = "Cancelled";
+        } else if (status === "Rescheduled") {
+            query.UpdateTime = { $ne: null };
+        } else if (status === "Upcoming") {
+            query.prayerRequestDate = { $gt: today };
+        } else if (status === "Done") {
+            query.prayerRequestDate = { $lte: today };
+            query.archived = { $ne: true };
+        }
+
+        const total = await PrayerRequest.countDocuments(query);
+        const requests = await PrayerRequest.find(query)
+            .sort({ prayerRequestDate: status === 'Upcoming' ? 1 : -1 })
+            .skip(skip)
+            .limit(Number(limit));
+
+        res.status(200).json({
+            requests,
+            totalPages: Math.ceil(total / limit),
+        });
+    } catch (error) {
+        console.error("Error fetching history:", error);
+        res.status(500).json({ error: "Failed to fetch history." });
+    }
+};
+
+// archive
+exports.archivePrayerRequest = async (req, res) => {
+  try {
+    const { prayerId } = req.params;
+    await PrayerRequest.findByIdAndUpdate(prayerId, { archived: true });
+    res.status(200).json({ message: "Prayer request archived." });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to archive prayer request." });
+  }
+};
+
+exports.permanentlyDeletePrayerRequest = async (req, res) => {
+  try {
+    const { prayerId } = req.params;
+    await PrayerRequest.findByIdAndDelete(prayerId);
+    res.status(200).json({ message: "Prayer request permanently deleted." });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete prayer request." });
+  }
+};
+
+
 
 // exports.getPrayerRequestStatusCounts = async (req, res) => {
 //     try {

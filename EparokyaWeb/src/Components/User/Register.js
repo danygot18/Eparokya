@@ -404,7 +404,7 @@ const Register = () => {
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
-            value={user.birthDate} // Stays in YYYY-MM-DD format
+            value={user.birthDate} 
             onChange={handleDateChange}
             required
           />
@@ -653,7 +653,7 @@ const Register = () => {
 
                       {/* End Year Input */}
                       <TextField
-                        label="End Year (If on-going please state the on-going year)"
+                        label="End Year (If on-going please leave it blank)"
                         type="number"
                         fullWidth
                         margin="normal"

@@ -31,12 +31,18 @@ const priestSchema = new mongoose.Schema({
     birthDate: { type: Date, required: true },
     Seminary: { type: String, required: true },
     ordinationDate: { type: Date, required: true },
-    parishDurationYear: { type: String, required: true },
+    parishDurationYear: { type: String, required: false },
     isActive: { type: Boolean, required: true, default: false },
     isAvailable: { type: Boolean, required: true, default: false },
     isRetired: { type: Boolean, required: true, default: false },
     isTransfered: { type: Boolean, required: true, default: false },
+    GuestPriest: { type: Boolean, required: true, default: false },
 
+    guestDetails: {
+        attended: { type: String },
+        date: { type: Date },
+        time: { type: String }
+    },
     image: {
         public_id: {
             type: String,
@@ -52,12 +58,6 @@ const priestSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    // contributions: [{
-    //     title: { type: String, required: true },
-    //     decription: { type: String, required: false },
-    //     year: { type: String, required: true },
-    // }],
-
 
 });
 

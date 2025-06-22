@@ -60,12 +60,12 @@ const NavigationForm = () => {
       description: "Forms for individual ceremonies and services",
       icon: <HouseIcon />,
       forms: [
-        { name: "Private Wedding", path: "/user/weddingForm" },
-        { name: "Private Baptism", path: "/user/baptismForm" },
+        { name: "Solo Wedding", path: "/user/weddingForm" },
+        { name: "Solo Baptism", path: "/user/baptismForm" },
         { name: "Private Funeral", path: "/user/funeralForm" },
         { name: "Mass Intentions", path: "/user/prayerRequest" },
         { name: "Counseling", path: "/user/counselingForm" },
-        { name: "House Blessing", path: "/user/houseBlessingForm" },
+        { name: "Property Blessing", path: "/user/houseBlessingForm" },
       ],
     },
     {

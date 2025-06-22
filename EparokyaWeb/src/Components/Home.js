@@ -8,6 +8,7 @@ import { CircularProgress } from "@mui/material";
 import { useMemo } from "react";
 import Loader from "./Layout/Loader";
 import MassReadingsCard from "./MassReadingsCard";
+import MassIntentionCard from "./MassIntentionCard";
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -81,43 +82,6 @@ const PinnedAnnouncements = ({
     </div>
   );
 };
-
-// const ParishPriests = ({ priests }) => {
-//   const [currentPriestIndex, setCurrentPriestIndex] = useState(0);
-//   const itemsPerPage = 4;
-
-//   useEffect(() => {
-//     const interval = setInterval(() => {
-//       setCurrentPriestIndex(
-//         (prev) => (prev + 1) % Math.ceil(priests.length / itemsPerPage)
-//       );
-//     }, 4000);
-
-//     return () => clearInterval(interval);
-//   }, [priests]);
-
-//   const startIdx = currentPriestIndex * itemsPerPage;
-//   const endIdx = startIdx + itemsPerPage;
-//   const priestsToDisplay = priests.slice(startIdx, endIdx);
-
-//   return (
-//     <div style={styles.priestsContainer}>
-//       <h2 style={styles.priestsTitle}>Parish Priests</h2>
-//       <div style={styles.priestsGrid}>
-//         {priestsToDisplay.map((priest) => (
-//           <div key={priest._id} style={styles.priestBox}>
-//             <img
-//               src={priest.image?.url || "/placeholder-priest.png"}
-//               alt={priest.nickName || "Priest"}
-//               style={styles.priestImage}
-//             />
-//             <div style={styles.priestName}>{priest.nickName || "Unknown"}</div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
 
 export const Home = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -197,19 +161,6 @@ export const Home = () => {
     }
   };
 
-  // const fetchPriests = async () => {
-  //   try {
-  //     const response = await axios.get(
-  //       `${process.env.REACT_APP_API}/api/v1/getAllPriest`
-  //     );
-  //     // console.log("Priests API Response:", response.data);
-  //     setPriests(response.data.priests || []);
-  //   } catch (err) {
-  //     console.error("Error fetching priests:", err);
-  //     setPriests([]);
-  //   }
-  // };
-
   const goNext = () => {
     const totalPages = Math.ceil(pinnedAnnouncements.length / itemsPerPage);
     setCurrentPinnedPage((prev) => (prev + 1) % totalPages);
@@ -255,168 +206,169 @@ export const Home = () => {
 
       const matchesSearch = searchTerm
         ? announcement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (announcement.tags &&
-            announcement.tags.some((tag) =>
-              tag.toLowerCase().includes(searchTerm.toLowerCase())
-            ))
+        (announcement.tags &&
+          announcement.tags.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase())
+          ))
         : true;
 
       return matchesCategory && matchesSearch;
     }
   );
 
- if (loading) {
-  return <Loader />;
-}
+  if (loading) {
+    return <Loader />;
+  }
 
 
- return (
-  <div style={styles.homeContainer}>
-    <MetaData title="Home" />
-    <div style={styles.contentContainer}>
-      <GuestSideBar />
+  return (
+    <div style={styles.homeContainer}>
+      <MetaData title="Home" />
+      <div style={styles.contentContainer}>
+        <GuestSideBar />
 
-      {/* Main content and right sidebar */}
-      <div style={{ display: "flex", flex: 1 }}>
-        {/* Main Content */}
-        <div style={styles.mainContent}>
-          {/* Banner */}
-          <div style={styles.bannerContainer}>
-            <img
-              src={bannerImages[currentBannerIndex]}
-              alt="Banner"
-              style={styles.bannerImage}
-            />
-          </div>
+        {/* Main content and right sidebar */}
+        <div style={{ display: "flex", flex: 1 }}>
+          {/* Main Content */}
+          <div style={styles.mainContent}>
+            {/* Banner */}
+            <div style={styles.bannerContainer}>
+              <img
+                src={bannerImages[currentBannerIndex]}
+                alt="Banner"
+                style={styles.bannerImage}
+              />
+            </div>
 
-          {/* Search Bar */}
-          <div style={styles.searchBarContainer}>
-            <input
-              type="text"
-              placeholder="Search announcements by name or tags"
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              style={styles.searchInput}
-            />
-          </div>
+            {/* Search Bar */}
+            <div style={styles.searchBarContainer}>
+              <input
+                type="text"
+                placeholder="Search announcements by name or tags"
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                style={styles.searchInput}
+              />
+            </div>
 
-          {/* Pinned Announcements */}
-          {pinnedAnnouncements.length > 0 && (
-            <PinnedAnnouncements
-              pinnedAnnouncements={pinnedAnnouncements}
-              goPrev={goPrev}
-              goNext={goNext}
-              currentPinnedIndex={currentPinnedIndex}
-            />
-          )}
+            {/* Pinned Announcements */}
+            {pinnedAnnouncements.length > 0 && (
+              <PinnedAnnouncements
+                pinnedAnnouncements={pinnedAnnouncements}
+                goPrev={goPrev}
+                goNext={goNext}
+                currentPinnedIndex={currentPinnedIndex}
+              />
+            )}
 
-          {/* Parish Priests */}
-          {/* {priests.length > 0 && <ParishPriests priests={priests} />} */}
+            {/* Parish Priests */}
+            {/* {priests.length > 0 && <ParishPriests priests={priests} />} */}
 
-          {/* Categories */}
-          <div style={styles.categoriesContainer}>
-            <span
-              style={{
-                ...styles.category,
-                backgroundColor:
-                  selectedCategory === null ? "#2c3e50" : "#3a5a40",
-              }}
-              onClick={() => handleCategoryClick(null)}
-            >
-              All
-            </span>
-            {categories.map((category) => (
+            {/* Categories */}
+            <div style={styles.categoriesContainer}>
               <span
-                key={category._id}
                 style={{
                   ...styles.category,
                   backgroundColor:
-                    selectedCategory === category._id ? "#2c3e50" : "#3a5a40",
+                    selectedCategory === null ? "#2c3e50" : "#3a5a40",
                 }}
-                onClick={() => handleCategoryClick(category._id)}
+                onClick={() => handleCategoryClick(null)}
               >
-                {category.name}
+                All
               </span>
-            ))}
-          </div>
-
-          {/* Announcements */}
-          <div style={styles.announcementsContainer}>
-            {displayedAnnouncements.length > 0 ? (
-              displayedAnnouncements.map((announcement) => (
-                <div
-                  key={announcement._id}
+              {categories.map((category) => (
+                <span
+                  key={category._id}
                   style={{
-                    ...styles.announcementCard,
-                    border: announcement.isFeatured ? "3px solid gold" : "none",
+                    ...styles.category,
+                    backgroundColor:
+                      selectedCategory === category._id ? "#2c3e50" : "#3a5a40",
                   }}
-                  onClick={() => handleCardClick(announcement._id)}
+                  onClick={() => handleCategoryClick(category._id)}
                 >
-                  <div style={styles.cardContent}>
-                    <div style={styles.userInfo}>
-                      <img
-                        src="/public/../../../../EPAROKYA-SYST.png"
-                        alt="Saint Joseph Parish"
-                        style={styles.profileImage}
-                      />
-                      <span style={styles.userName}>Saint Joseph Parish</span>
-                    </div>
+                  {category.name}
+                </span>
+              ))}
+            </div>
 
-                    <h2 style={styles.announcementTitle}>
-                      {announcement.name}
-                    </h2>
-                    <p style={styles.announcementDescription}>
-                      {announcement.description}
-                    </p>
-
-                    <div style={styles.imageSliderContainer}>
-                      {announcement.images && announcement.images.length > 0 ? (
-                        <ImageSlider images={announcement.images} />
-                      ) : announcement.image ? (
+            {/* Announcements */}
+            <div style={styles.announcementsContainer}>
+              {displayedAnnouncements.length > 0 ? (
+                displayedAnnouncements.map((announcement) => (
+                  <div
+                    key={announcement._id}
+                    style={{
+                      ...styles.announcementCard,
+                      border: announcement.isFeatured ? "3px solid gold" : "none",
+                    }}
+                    onClick={() => handleCardClick(announcement._id)}
+                  >
+                    <div style={styles.cardContent}>
+                      <div style={styles.userInfo}>
                         <img
-                          src={announcement.image}
-                          alt={announcement.name}
-                          style={styles.announcementImage}
+                          src="/public/../../../../EPAROKYA-SYST.png"
+                          alt="Saint Joseph Parish"
+                          style={styles.profileImage}
                         />
-                      ) : null}
-                    </div>
+                        <span style={styles.userName}>Saint Joseph Parish</span>
+                      </div>
 
-                    <p style={styles.announcementCategory}>
-                      Category:{" "}
-                      {announcement.announcementCategory?.name ||
-                        "Uncategorized"}
-                    </p>
-                    <p style={styles.tags}>
-                      Tags: {announcement.tags.join(", ")}
-                    </p>
+                      <h2 style={styles.announcementTitle}>
+                        {announcement.name}
+                      </h2>
+                      <p style={styles.announcementDescription}>
+                        {announcement.description}
+                      </p>
 
-                    <div style={styles.reactionsContainer}>
-                      <span style={styles.reaction}>
-                        <FaHeart color="red" />{" "}
-                        {announcement.likedBy.length || 0}
-                      </span>
-                      <span style={styles.reaction}>
-                        <FaComment color="blue" />{" "}
-                        {announcement.comments.length || 0}
-                      </span>
+                      <div style={styles.imageSliderContainer}>
+                        {announcement.images && announcement.images.length > 0 ? (
+                          <ImageSlider images={announcement.images} />
+                        ) : announcement.image ? (
+                          <img
+                            src={announcement.image}
+                            alt={announcement.name}
+                            style={styles.announcementImage}
+                          />
+                        ) : null}
+                      </div>
+
+                      <p style={styles.announcementCategory}>
+                        Category:{" "}
+                        {announcement.announcementCategory?.name ||
+                          "Uncategorized"}
+                      </p>
+                      <p style={styles.tags}>
+                        Tags: {announcement.tags.join(", ")}
+                      </p>
+
+                      <div style={styles.reactionsContainer}>
+                        <span style={styles.reaction}>
+                          <FaHeart color="red" />{" "}
+                          {announcement.likedBy.length || 0}
+                        </span>
+                        <span style={styles.reaction}>
+                          <FaComment color="blue" />{" "}
+                          {announcement.comments.length || 0}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <p>No announcements available.</p>
-            )}
+                ))
+              ) : (
+                <p>No announcements available.</p>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Right side: Mass Readings */}
-        <div>
-          <MassReadingsCard />
+          {/* Right side: Mass Readings */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            <MassReadingsCard />
+            <MassIntentionCard />
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 const styles = {
@@ -593,32 +545,6 @@ const styles = {
     justifyContent: "center",
     zIndex: 10,
     margin: "0 15px",
-  },
-  priestsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
-    gap: "20px",
-  },
-
-  priestBox: {
-    textAlign: "center",
-    padding: "10px",
-    borderRadius: "10px",
-    backgroundColor: "#f9f9f9",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  },
-
-  priestImage: {
-    width: "100%",
-    maxWidth: "200px",
-    aspectRatio: "1",
-    objectFit: "cover",
-    borderRadius: "10px",
-  },
-
-  priestName: {
-    marginTop: "10px",
-    fontWeight: "bold",
   },
 };
 

@@ -1,254 +1,281 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../SideBar";
 import {
-    Box,
-    Typography,
-    Chip,
-    Stack,
-    Divider,
-    Paper,
-    Button,
-    useTheme,
-    Select,
-    MenuItem,
-    InputBase,
+  Box,
+  Typography,
+  Chip,
+  Divider,
+  Paper,
+  Button,
+  useTheme,
+  Select,
+  MenuItem,
+  InputBase,
+  Card,
+  CardContent,
+  Pagination,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { format } from "date-fns";
-import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import PrayerRequestIntentionHistory from "./PrayerRequestIntentionHistory";
 
 const StatusChip = styled(Chip)(({ theme, status }) => ({
-    fontWeight: "bold",
-    backgroundColor: status
-        ? theme.palette.success.light
-        : theme.palette.error.light,
-    color: status
-        ? theme.palette.getContrastText(theme.palette.success.light)
-        : theme.palette.getContrastText(theme.palette.error.light),
+  fontWeight: "bold",
+  backgroundColor: status
+    ? theme.palette.success.light
+    : theme.palette.error.light,
+  color: status
+    ? theme.palette.getContrastText(theme.palette.success.light)
+    : theme.palette.getContrastText(theme.palette.error.light),
 }));
-
-const StyledCard = styled(Paper)(({ theme, status }) => ({
-    position: "relative",
-    borderLeft: `6px solid ${status ? theme.palette.success.main : theme.palette.error.main
-        }`,
-    padding: theme.spacing(2),
-    transition: "transform 0.2s, box-shadow 0.2s",
-    "&:hover": {
-        transform: "translateY(-4px)",
-        boxShadow: theme.shadows[6],
-    },
-}));
-
-const groupByMonthYear = (forms) => {
-    const grouped = {};
-    forms.forEach((form) => {
-        const date = new Date(form.createdAt || form.prayerRequestDate || new Date());
-        const monthYear = format(date, "MMMM yyyy");
-        if (!grouped[monthYear]) {
-            grouped[monthYear] = [];
-        }
-        grouped[monthYear].push(form);
-    });
-    return grouped;
-};
 
 const PrayerRequestIntentionList = () => {
-    const [prayerRequests, setPrayerRequests] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filterType, setFilterType] = useState("");
-    const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
-    const theme = useTheme();
+  const [prayerRequests, setPrayerRequests] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [currentPages, setCurrentPages] = useState({});
+  const [tabFilters, setTabFilters] = useState({});
+  const [openHistory, setOpenHistory] = useState(null);
+  const requestsPerPage = 10;
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const cardRefs = useRef({});
 
-    useEffect(() => {
-        fetchPrayerRequests();
-        // eslint-disable-next-line
-    }, []);
+  const config = { withCredentials: true };
 
+  useEffect(() => {
+    fetchPrayerRequests();
+  }, []);
 
+  const fetchPrayerRequests = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/getAllPrayerRequestIntention`,
+        config
+      );
+      setPrayerRequests(response.data || []);
+    } catch (error) {
+      console.error("Error fetching prayer requests:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const config = { withCredentials: true };
-    const fetchPrayerRequests = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(
-                `${process.env.REACT_APP_API}/api/v1/getAllPrayerRequestIntention`,
-                config
-            );
-            setPrayerRequests(response.data || []);
-        } catch (error) {
-            console.error("Error fetching prayer requests:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const filterByTab = (requests, type) => {
+    const now = new Date();
+    const today = new Date(now.setHours(0, 0, 0, 0));
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    const upcoming = new Date();
+    upcoming.setDate(today.getDate() + 2);
 
-    const filteredRequests = prayerRequests.filter((request) => {
-        const matchesSearch = request.prayerType
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase());
-        const matchesFilter = filterType ? request.prayerType === filterType : true;
-        return matchesSearch && matchesFilter;
+    if (type === "Today") {
+      return requests.filter((req) => new Date(req.prayerRequestDate).toDateString() === today.toDateString());
+    } else if (type === "Tomorrow") {
+      return requests.filter((req) => new Date(req.prayerRequestDate).toDateString() === tomorrow.toDateString());
+    } else {
+      return requests.filter((req) => new Date(req.prayerRequestDate) > tomorrow);
+    }
+  };
+
+  const handleDownloadPDF = async (type) => {
+    const input = cardRefs.current[type];
+    if (!input) return;
+    const canvas = await html2canvas(input);
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "px",
+      format: [canvas.width, canvas.height],
     });
-    const sortedRequests = [...filteredRequests].sort((a, b) => {
-        const dateA = new Date(a.createdAt || a.prayerRequestDate || 0);
-        const dateB = new Date(b.createdAt || b.prayerRequestDate || 0);
-        return dateB - dateA; // latest first
-    });
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+    pdf.save(`${type}_prayer_requests.pdf`);
+  };
 
+  const filteredRequests = prayerRequests.filter((request) => {
+    const matchesSearch = request.prayerType
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesFilter = filterType ? request.prayerType === filterType : true;
+    return matchesSearch && matchesFilter;
+  });
 
-    return (
-        <Box sx={{ display: "flex", minHeight: "100vh", width: "100%" }}>
-            <SideBar />
-            <Box
-                component="main"
-                sx={{
-                    flexGrow: 1,
-                    p: 3,
-                    backgroundColor: theme.palette.grey[50],
-                    minHeight: "100vh",
-                    display: "flex",
-                    flexDirection: "column",
-                }}
+  const groupedByPrayerType = filteredRequests.reduce((acc, item) => {
+    if (!acc[item.prayerType]) acc[item.prayerType] = [];
+    acc[item.prayerType].push(item);
+    return acc;
+  }, {});
+
+  const tabOptions = ["Today", "Tomorrow", "Upcoming"];
+
+  return (
+    <Box sx={{ display: "flex", minHeight: "100vh", width: "100%" }}>
+      <SideBar />
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, p: 3, backgroundColor: theme.palette.grey[50] }}
+      >
+        <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto" }}>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
+            Prayer Intention List
+          </Typography>
+
+          <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+            <InputBase
+              placeholder="Search by prayer type"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              sx={{
+                px: 2,
+                py: 1,
+                border: "1px solid #ccc",
+                borderRadius: 1,
+                width: 250,
+                background: "#fff",
+              }}
+            />
+            <Select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              displayEmpty
+              sx={{ minWidth: 180, background: "#fff" }}
+              size="small"
             >
-                <Box
-                    sx={{
-                        width: "100%",
-                        maxWidth: 900,
-                        mx: "auto",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                >
-                    <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", textAlign: "center" }}>
-                        Prayer Intention List
-                    </Typography>
-                    <Stack direction="row" spacing={2} sx={{ mb: 2, width: "100%", justifyContent: "center" }}>
-                        <InputBase
-                            placeholder="Search by prayer type"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            sx={{
-                                px: 2,
-                                py: 1,
-                                border: "1px solid #ccc",
-                                borderRadius: 1,
-                                width: 250,
-                                background: "#fff"
-                            }}
-                        />
-                        <Select
-                            value={filterType}
-                            onChange={(e) => setFilterType(e.target.value)}
-                            displayEmpty
-                            sx={{ minWidth: 180, background: "#fff" }}
-                            size="small"
-                        >
-                            <MenuItem value="">All Prayer Types</MenuItem>
-                            {[...new Set(prayerRequests.map((req) => req.prayerType))].map((type) => (
-                                <MenuItem key={type} value={type}>
-                                    {type}
-                                </MenuItem>
+              <MenuItem value="">All Prayer Types</MenuItem>
+              {[...new Set(prayerRequests.map((req) => req.prayerType))].map(
+                (type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                )
+              )}
+            </Select>
+          </Stack>
+
+          {loading ? (
+            <Typography>Loading prayer intentions...</Typography>
+          ) : Object.keys(groupedByPrayerType).length === 0 ? (
+            <Typography>No intentions found.</Typography>
+          ) : (
+            Object.entries(groupedByPrayerType).map(([type, allRequests]) => {
+              const tab = tabFilters[type] || "Today";
+              const currentPage = currentPages[type] || 1;
+              const requests = filterByTab(allRequests, tab);
+              return (
+                <Card key={type} sx={{ mb: 4, p: 2 }} ref={(el) => (cardRefs.current[type] = el)}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 1 }}>{type}</Typography>
+
+                    <Tabs
+                      value={tab}
+                      onChange={(e, newValue) => setTabFilters({ ...tabFilters, [type]: newValue })}
+                      indicatorColor="primary"
+                      textColor="primary"
+                      sx={{ mb: 2 }}
+                    >
+                      {tabOptions.map((label) => (
+                        <Tab key={label} label={label} value={label} />
+                      ))}
+                    </Tabs>
+
+                    <TableContainer component={Paper}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell><strong>Offeror's Name</strong></TableCell>
+                            <TableCell><strong>Prayer Type</strong></TableCell>
+                            <TableCell><strong>Description</strong></TableCell>
+                            <TableCell><strong>Date</strong></TableCell>
+                            <TableCell><strong>Time</strong></TableCell>
+                            <TableCell><strong>Status</strong></TableCell>
+                            <TableCell><strong>Submitted By</strong></TableCell>
+                            <TableCell><strong>Created At</strong></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {requests
+                            .slice(
+                              (currentPage - 1) * requestsPerPage,
+                              currentPage * requestsPerPage
+                            )
+                            .map((request) => (
+                              <TableRow
+                                key={request._id}
+                                hover
+                                onClick={() =>
+                                  navigate(`/admin/prayerIntention/details/${request._id}`)
+                                }
+                                sx={{ cursor: "pointer" }}
+                              >
+                                <TableCell>{request.offerrorsName}</TableCell>
+                                <TableCell>{request.prayerType === "Others (Iba pa)" ? request.addPrayer : request.prayerType}</TableCell>
+                                <TableCell>{request.prayerDescription || "—"}</TableCell>
+                                <TableCell>{new Date(request.prayerRequestDate).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(`1970-01-01T${request.prayerRequestTime}`).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</TableCell>
+                                <TableCell>
+                                  <span style={{ color: request.isDone ? theme.palette.success.main : theme.palette.error.main }}>
+                                    {request.isDone ? "Done" : "Not Done"}
+                                  </span>
+                                </TableCell>
+                                <TableCell>{request.userId?.name || "N/A"}</TableCell>
+                                <TableCell>{request.createdAt ? new Date(request.createdAt).toLocaleDateString() : "N/A"}</TableCell>
+                              </TableRow>
                             ))}
-                        </Select>
-                    </Stack>
-                    {loading ? (
-                        <Typography variant="body1" sx={{ mt: 4 }}>
-                            Loading prayer intentions...
-                        </Typography>
-                    ) : filteredRequests.length === 0 ? (
-                        <Paper elevation={0} sx={{ p: 3, textAlign: "center" }}>
-                            <Typography variant="body1" color="textSecondary">
-                                No prayer intentions found.
-                            </Typography>
-                        </Paper>
-                    ) : (
-                        <Stack spacing={4} sx={{ width: "100%" }}>
-                            {Object.entries(groupByMonthYear(sortedRequests)).map(
-                                ([monthYear, forms]) => (
-                                    <Box key={monthYear}>
-                                        <Divider sx={{ mb: 2 }}>
-                                            <Chip
-                                                label={monthYear}
-                                                color="primary"
-                                                variant="outlined"
-                                                sx={{ px: 2, fontSize: "0.875rem" }}
-                                            />
-                                        </Divider>
-                                        <Stack spacing={3}>
-                                            {forms.map((request, index) => (
-                                                <StyledCard
-                                                    key={request._id}
-                                                    elevation={3}
-                                                    status={request.isDone}
-                                                    onClick={() => navigate(`/admin/prayerIntention/details/${request._id}`)}
-                                                    sx={{ cursor: "pointer" }}
-                                                >
-                                                    <Box sx={{ position: "absolute", right: 16, top: 16 }}>
-                                                        <StatusChip
-                                                            label={request.isDone ? "Done" : "Not Done"}
-                                                            size="small"
-                                                            status={request.isDone}
-                                                        />
-                                                    </Box>
-                                                    <Typography variant="h6" component="h2" gutterBottom>
-                                                        Prayer Intention #{index + 1}
-                                                    </Typography>
-                                                    <Divider sx={{ my: 1 }} />
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        <strong>Offeror's Name:</strong> {request.offerrorsName}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        <strong>Prayer Type:</strong>{" "}
-                                                        {request.prayerType === "Others (Iba pa)" ? request.addPrayer : request.prayerType}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        <strong>Date:</strong>{" "}
-                                                        {request.prayerRequestDate
-                                                            ? new Date(request.prayerRequestDate).toLocaleDateString()
-                                                            : "N/A"}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        <strong>Time:</strong>{" "}
-                                                        {request.prayerRequestTime
-                                                            ? new Date(`1970-01-01T${request.prayerRequestTime}`).toLocaleTimeString([], {
-                                                                hour: "2-digit",
-                                                                minute: "2-digit",
-                                                                hour12: true,
-                                                            })
-                                                            : "N/A"}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        <strong>Is Done:</strong>{" "}
-                                                        <span style={{ color: request.isDone ? theme.palette.success.main : theme.palette.error.main }}>
-                                                            {request.isDone ? "Yes" : "No"}
-                                                        </span>
-                                                    </Typography>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        <strong>Submitted By:</strong> {request.userId?.name || "N/A"}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        <strong>Created At:</strong>{" "}
-                                                        {request.createdAt
-                                                            ? new Date(request.createdAt).toLocaleDateString()
-                                                            : "N/A"}
-                                                    </Typography>
-                                                </StyledCard>
-                                            ))}
-                                        </Stack>
-                                    </Box>
-                                )
-                            )}
-                        </Stack>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+
+                    {requests.length > requestsPerPage && (
+                      <Box mt={2} display="flex" justifyContent="center">
+                        <Pagination
+                          count={Math.ceil(requests.length / requestsPerPage)}
+                          page={currentPage}
+                          onChange={(e, val) =>
+                            setCurrentPages({ ...currentPages, [type]: val })
+                          }
+                        />
+                      </Box>
                     )}
-                </Box>
-            </Box>
+
+                    <Box mt={2} display="flex" justifyContent="space-between">
+                      <Button variant="outlined" color="primary" onClick={() => handleDownloadPDF(type)}>
+                        Download PDF
+                      </Button>
+                      <Button variant="outlined" color="secondary" onClick={() => setOpenHistory(type)}>
+                        View History
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </Box>
-    );
+      </Box>
+      {openHistory && (
+        <PrayerRequestIntentionHistory
+          open={!!openHistory}
+          onClose={() => setOpenHistory(null)}
+          prayerType={openHistory}
+        />
+      )}
+    </Box>
+  );
 };
 
 export default PrayerRequestIntentionList;

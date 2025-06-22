@@ -123,7 +123,7 @@ const SubmittedFuneralList = () => {
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            My Submitted Funeral Forms
+            Submitted Funeral Requests
           </Typography>
           <Chip
             label={`Sort: ${sortOrder === 'latest' ? 'Latest First' : 'Oldest First'}`}

@@ -5,8 +5,9 @@ const Sentiment = require("sentiment");
 const analyzeSentiment = require("../../../utils/SentimentAnalyzer");
 
 const emojiSentimentMap = {
-  "😡": -2, "😠": -2, "😞": -1, "😕": -1, "😐": 0,
-  "😊": 1, "😃": 2, "😄": 2, "😍": 3, "👍": 2
+  "😡": -3, "😠": -2, "😞": -1, 
+  "😐": 0,
+  "😊": 1, "😄": 2, "😍": 3
 };
 
 const calculateEmojiSentiment = (responses) => {
@@ -90,15 +91,15 @@ exports.analyzeSentiment = async (req, res) => {
     let commentSentiment = comment
       ? await analyzeSentiment(emojiSentiment.score, comment)
       : {
-          basic: { score: 0, comparative: 0, magnitude: 0, words: [], positive: [], negative: [], method: "basic" },
-          advanced: { label: "neutral", score: 0, magnitude: 0, method: "huggingface" },
-        };
+        basic: { score: 0, comparative: 0, magnitude: 0, words: [], positive: [], negative: [], method: "basic" },
+        advanced: { label: "neutral", score: 0, magnitude: 0, method: "huggingface" },
+      };
 
     commentSentiment = {
       basic: {
         score: commentSentiment?.basic?.score || 0,
         comparative: commentSentiment?.basic?.comparative || 0,
-        magnitude: commentSentiment?.basic?.magnitude || 0, 
+        magnitude: commentSentiment?.basic?.magnitude || 0,
         words: commentSentiment?.basic?.words || [],
         positive: commentSentiment?.basic?.positive || [],
         negative: commentSentiment?.basic?.negative || [],
@@ -107,7 +108,7 @@ exports.analyzeSentiment = async (req, res) => {
       advanced: {
         label: commentSentiment?.advanced?.label || "neutral",
         score: commentSentiment?.advanced?.score || 0,
-        magnitude: commentSentiment?.advanced?.magnitude || 0, 
+        magnitude: commentSentiment?.advanced?.magnitude || 0,
         method: commentSentiment?.advanced?.method || "huggingface",
       },
     };

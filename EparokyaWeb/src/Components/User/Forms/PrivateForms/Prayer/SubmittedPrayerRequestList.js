@@ -113,7 +113,7 @@ const SubmittedPrayerRequestList = () => {
             >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-                        My Submitted Prayer Requests
+                        Submitted Prayer Requests
                     </Typography>
                     <Chip
                         label={`Sort: ${sortOrder === 'latest' ? 'Latest First' : 'Oldest First'}`}

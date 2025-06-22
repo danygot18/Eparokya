@@ -110,7 +110,7 @@ const SubmittedBaptismList = () => {
           gutterBottom
           sx={{ fontWeight: "bold", textAlign: "center" }}
         >
-          My Mass Baptism Applications
+          Submitted Mass Baptism Application
         </Typography>
         <Stack
           direction="row"

@@ -3,7 +3,8 @@ const {
     getAllCustomEvents,
     addCustomEvent,
     deleteCustomEvent,
-    getCustomEventById, } = require('../controllers/CustomEvent/customEventController');
+    getCustomEventById,
+ } = require('../controllers/CustomEvent/customEventController');
 const router = express.Router();
 const { isAuthenticatedUser, authorizeAdmin } = require('../middleware/auth');
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import GuestSideBar from "../GuestSideBar";
+import GuestSideBar from "./GuestSideBar";
 import axios from 'axios';
 import {
   Box,
@@ -21,7 +21,8 @@ import {
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   Work as WorkIcon,
-  Star as StarIcon
+  Star as StarIcon,
+  AccessTime as AccessTimeIcon
 } from '@mui/icons-material';
 
 const StatusChip = ({ value }) => {
@@ -36,7 +37,6 @@ const StatusChip = ({ value }) => {
     />
   );
 };
-
 
 const PriestCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -83,7 +83,7 @@ const DetailItem = styled(Box)(({ theme }) => ({
   width: '100%'
 }));
 
-const ParishPriest = () => {
+const GuestPriest = () => {
   const [priests, setPriests] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -91,18 +91,33 @@ const ParishPriest = () => {
     const fetchPriests = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAllPriest`);
-        const filteredPriests = response.data.filter(priest => !priest.GuestPriest);
-        setPriests(filteredPriests);
-
+        const guestPriests = response.data.filter(priest => priest.GuestPriest);
+        setPriests(guestPriests);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching priests:', error);
+        console.error('Error fetching guest priests:', error);
         setLoading(false);
       }
     };
 
     fetchPriests();
   }, []);
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateStr).toLocaleDateString(undefined, options);
+  };
+
+const formatTime = (timeStr) => {
+  if (!timeStr) return '—';
+  const [hour, minute] = timeStr.split(':');
+  const date = new Date();
+  date.setHours(+hour);
+  date.setMinutes(+minute);
+  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+};
+
 
   if (loading) {
     return (
@@ -124,12 +139,12 @@ const ParishPriest = () => {
           alignItems: 'center',
           gap: 1
         }}>
-          Parish Priests
+          Guest Priests
         </Typography>
 
         {priests.length === 0 && (
           <Paper sx={{ p: 3, textAlign: 'center' }}>
-            <Typography variant="h6">No priests found</Typography>
+            <Typography variant="h6">No guest priests found</Typography>
           </Paper>
         )}
 
@@ -139,7 +154,7 @@ const ParishPriest = () => {
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                 <PriestAvatar
                   alt={priest.fullName}
-                  src={priest.image.url}
+                  src={priest.image?.url}
                   variant="rounded"
                 />
               </Box>
@@ -151,22 +166,20 @@ const ParishPriest = () => {
                   <StarIcon color="primary" sx={{ verticalAlign: 'middle', mr: 1 }} />
                   {priest.title} • {priest.position}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontStyle: 'italic' }}>
-                  {priest.parishDurationYear}
-                </Typography>
+
                 <Divider sx={{ my: 2 }} />
 
                 <DetailRow>
                   <DetailItem>
                     <WorkIcon color="action" sx={{ mr: 1 }} />
                     <Typography variant="body1">
-                      <strong>Nickname:</strong> {priest.nickName}
+                      <strong>Nickname:</strong> {priest.nickName || '—'}
                     </Typography>
                   </DetailItem>
                   <DetailItem>
                     <CalendarIcon color="action" sx={{ mr: 1 }} />
                     <Typography variant="body1">
-                      <strong>Birth Date:</strong> {new Date(priest.birthDate).toLocaleDateString()}
+                      <strong>Birth Date:</strong> {formatDate(priest.birthDate)}
                     </Typography>
                   </DetailItem>
                 </DetailRow>
@@ -175,25 +188,48 @@ const ParishPriest = () => {
                   <DetailItem>
                     <SchoolIcon color="action" sx={{ mr: 1 }} />
                     <Typography variant="body1">
-                      <strong>Seminary:</strong> {priest.Seminary}
+                      <strong>Seminary:</strong> {priest.Seminary || '—'}
                     </Typography>
                   </DetailItem>
                   <DetailItem>
                     <CalendarIcon color="action" sx={{ mr: 1 }} />
                     <Typography variant="body1">
-                      <strong>Ordination Date:</strong> {new Date(priest.ordinationDate).toLocaleDateString()}
+                      <strong>Ordination Date:</strong> {formatDate(priest.ordinationDate)}
                     </Typography>
                   </DetailItem>
                 </DetailRow>
 
+                <Divider sx={{ my: 2 }} />
+
+              <DetailRow>
+  <DetailItem>
+    <PersonIcon color="action" sx={{ mr: 1 }} />
+    <Typography variant="body1">
+      <strong>Attended:</strong> {priest.guestDetails?.attended || '—'}
+    </Typography>
+  </DetailItem>
+  <DetailItem>
+    <CalendarIcon color="action" sx={{ mr: 1 }} />
+    <Typography variant="body1">
+      <strong>Date:</strong> {formatDate(priest.guestDetails?.date)}
+    </Typography>
+  </DetailItem>
+</DetailRow>
+
+<DetailRow>
+  <DetailItem>
+    <AccessTimeIcon color="action" sx={{ mr: 1 }} />
+    <Typography variant="body1">
+      <strong>Time:</strong> {formatTime(priest.guestDetails?.time)}
+    </Typography>
+  </DetailItem>
+</DetailRow>
+
+
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
                   <StatusChip value={priest.isActive ? 'Active' : 'Inactive'} />
-                  <StatusChip value={priest.isAvailable ? 'Available' : 'Unavailable'} />
                   <StatusChip value={priest.isRetired ? 'Retired' : 'Serving'} />
-                  <StatusChip value={priest.isTransfered ? 'Transferred' : 'In Parish'} />
                 </Box>
-
-
               </CardContent>
             </PriestCard>
           ))}
@@ -203,4 +239,4 @@ const ParishPriest = () => {
   );
 };
 
-export default ParishPriest;
+export default GuestPriest;

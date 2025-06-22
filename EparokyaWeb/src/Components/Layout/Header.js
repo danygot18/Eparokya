@@ -152,6 +152,9 @@ const Header = () => {
             <MenuItem component={Link} to="/parishPriests" onClick={handleParishMenuClose}>
               Parish Priests
             </MenuItem>
+             <MenuItem component={Link} to="/guestPriest" onClick={handleParishMenuClose}>
+              Guest Priests
+            </MenuItem>
           </Menu>
 
           {/* Authenticated User */}

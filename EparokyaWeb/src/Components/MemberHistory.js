@@ -31,7 +31,7 @@ const MemberHistory = () => {
           const grouped = {};
           memberStatuses.forEach((user) => {
             // console.log("User Data:", user); 
-  
+
             user.ministries.forEach((ministryRole) => {
               const ministryName = ministryRole.ministry || "Unknown Ministry";
               if (!grouped[ministryName]) {
@@ -44,16 +44,16 @@ const MemberHistory = () => {
                 role: ministryRole.role,
                 yearsActive: ministryRole.endYear
                   ? `${ministryRole.startYear} - ${ministryRole.endYear}`
-                  : `${ministryRole.startYear} - Ongoing`,
+                  : `${ministryRole.startYear} - Present`, 
                 isActive: user.isActive,
-                avatar: user.avatar || "", 
-                birthDate: user.birthDate || "N/A", 
+                avatar: user.avatar || "",
+                birthDate: user.birthDate || "N/A",
                 civilStatus: user.civilStatus || "N/A",
                 preference: user.preference || "N/A",
               });
             });
           });
-  
+
           setMinistries(grouped);
         }
       } catch (error) {
@@ -62,7 +62,7 @@ const MemberHistory = () => {
         setLoading(false);
       }
     };
-  
+
     fetchMemberStatuses();
   }, []);
 
@@ -112,12 +112,11 @@ const MemberHistory = () => {
                   <TableRow>
                     <TableCell><strong>Avatar</strong></TableCell>
                     <TableCell><strong>Name</strong></TableCell>
-                    <TableCell><strong>Email</strong></TableCell>
                     <TableCell><strong>Birth Date</strong></TableCell>
                     <TableCell><strong>Civil Status</strong></TableCell>
                     <TableCell><strong>Preference</strong></TableCell>
                     <TableCell><strong>Role</strong></TableCell>
-                    <TableCell><strong>Years Active</strong></TableCell>
+                    <TableCell><strong>Active Since</strong></TableCell>
                     <TableCell><strong>Status</strong></TableCell>
                   </TableRow>
                 </TableHead>
@@ -134,7 +133,6 @@ const MemberHistory = () => {
                       </TableCell>
 
                       <TableCell>{member.name}</TableCell>
-                      <TableCell>{member.email}</TableCell>
                       <TableCell>{formatDate(member.birthDate)}</TableCell>
                       <TableCell>{member.civilStatus || "N/A"}</TableCell>
                       <TableCell>{member.preference || "N/A"}</TableCell>

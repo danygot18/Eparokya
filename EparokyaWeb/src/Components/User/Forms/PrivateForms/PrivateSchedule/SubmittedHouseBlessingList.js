@@ -131,7 +131,7 @@ const SubmittedHouseBlessingList = () => {
                 }}
             >
                 <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    My Submitted House Blessing Records
+                   Submitted Blessing Requests
                 </Typography>
                 <div className="houseBlessing-filters" style={{ marginBottom: 16 }}>
                     {["All", "Pending", "Confirmed", "Cancelled"].map((status) => (
@@ -196,7 +196,7 @@ const SubmittedHouseBlessingList = () => {
                                                             status={status}
                                                         />
                                                         <Typography variant="h6" component="h2" gutterBottom>
-                                                            Record #{index + 1}: {item.fullName || "N/A"}
+                                                            Blessing #{index + 1}: {item.fullName || "N/A"}
                                                         </Typography>
                                                         <Divider sx={{ my: 1 }} />
                                                         <Stack

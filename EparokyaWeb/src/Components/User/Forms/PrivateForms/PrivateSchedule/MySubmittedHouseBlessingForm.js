@@ -150,7 +150,7 @@ const MySubmittedHouseBlessingForm = () => {
             }}
           >
             <Typography variant="h4" component="h1">
-              House Blessing Request
+              Submited Property Blessing Requests
             </Typography>
             <Chip
               label={blessingDetails?.blessingStatus || "N/A"}

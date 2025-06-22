@@ -126,7 +126,7 @@ const SubmittedBaptismList = () => {
             >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-                        My Submitted Baptism Forms
+                        Submitted Baptism Application
                     </Typography>
                     <Chip
                         label={`Sort: ${sortOrder === 'latest' ? 'Latest First' : 'Oldest First'}`}

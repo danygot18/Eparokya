@@ -5,16 +5,13 @@ const Sentiment = require("sentiment");
 const analyzeSentiment = require("../../../utils/SentimentAnalyzer");
 
 const emojiSentimentMap = {
-  "😡": -2,
+  "😡": -3,
   "😠": -2,
   "😞": -1,
-  "😕": -1,
   "😐": 0,
   "😊": 1,
-  "😃": 2,
   "😄": 2,
   "😍": 3,
-  "👍": 2,
 };
 
 const calculateEmojiSentiment = (responses) => {

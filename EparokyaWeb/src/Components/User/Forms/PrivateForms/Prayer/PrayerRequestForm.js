@@ -21,6 +21,7 @@ const PrayerRequestForm = () => {
     offerrorsName: "",
     prayerType: "",
     prayerRequestDate: "",
+     prayerRequestTime: "",
     Intentions: [{ name: "" }],
   });
   const [user, setUser] = useState(null);
@@ -170,6 +171,18 @@ const PrayerRequestForm = () => {
                 />
               </Grid>
             </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                type="time"
+                label="Prayer Request Time"
+                InputLabelProps={{ shrink: true }}
+                value={formData.prayerRequestTime || ""}
+                onChange={(e) => handleChange(e, "prayerRequestTime")}
+              />
+            </Grid>
+
 
             <Typography variant="h5" sx={{ mt: 4 }}>
               Intentions

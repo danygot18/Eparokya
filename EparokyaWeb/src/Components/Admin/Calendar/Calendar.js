@@ -7,8 +7,20 @@ import MetaData from '../../Layout/MetaData';
 import SideBar from '../SideBar';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme, useMediaQuery } from '@mui/material';
-import { Box, Typography, Paper, Button, IconButton, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  IconButton,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+} from '@mui/material';
 import { ChevronLeft, ChevronRight, Today, ViewModule, ViewWeek, ViewDay, ViewAgenda } from '@mui/icons-material';
+import { ArrowBack, ArrowForward } from "@mui/icons-material";
 
 const localizer = momentLocalizer(moment);
 
@@ -139,82 +151,123 @@ const Calendars = () => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  // const [liturgical, setLiturgicalData] = useState({ today: null, tomorrow: null, upcoming: [] });
+  const [liturgical, setLiturgical] = useState([]);
+  const [year, setYear] = useState(new Date().getFullYear());
 
   const config = { withCredentials: true };
 
-  const fetchAllEvents = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [weddingEvents, baptismEvents, funeralEvents, customEvents] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`, config),
-        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`, config),
-        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`, config),
-        axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`, config),
-      ]);
+  useEffect(() => {
+    const fetchAllEvents = async () => {
+      try {
+        setLoading(true);
+        const [weddingEvents, baptismEvents, funeralEvents, customEvents, liturgicalRes] = await Promise.all([
+          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`, config),
+          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`, config),
+          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`, config),
+          axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`, config),
+          axios.get(`${process.env.REACT_APP_API}/api/v1/liturgical/year/${new Date().getFullYear()}`),
+        ]);
 
-      const formattedEvents = [
-        ...weddingEvents.data.map((event) => ({
-          id: `wedding-${event._id}`,
-          title: `${event.bride} & ${event.groom} Wedding`,
-          start: new Date(event.weddingDate),
-          end: new Date(event.weddingDate),
-          type: 'Wedding',
-          bride: event.bride,
-          groom: event.groom,
-          weddingDate: event.weddingDate
-        })),
-        ...baptismEvents.data.map((event) => ({
-          id: `baptism-${event._id}`,
-          title: `Baptism of ${event.child.fullName || "Unknown"}`,
-          start: new Date(event.baptismDate),
-          end: new Date(event.baptismDate),
-          type: 'Baptism',
-          child: event.child,
-          baptismDate: event.baptismDate
-        })),
-        ...funeralEvents.data.map((event) => ({
-          id: `funeral-${event._id}`,
-          title: `Funeral for ${event.name || ""} `,
-          start: new Date(event.funeralDate),
-          end: new Date(event.funeralDate),
-          type: 'Funeral',
-          name: event.name,
-          funeralDate: event.funeralDate
-        })),
-        ...customEvents.data.map((event) => ({
-          id: `custom-${event._id}`,
-          title: event.title,
-          start: new Date(event.customeventDate),
-          end: new Date(event.customeventDate),
-          type: 'Custom',
-          customeventDate: event.customeventDate
-        })),
-      ];
+        const liturgicalEvents = liturgicalRes.data.map(item => ({
+          id: `liturgical-${item.event_key}-${item.date}`,
+          title: item.name,
+          start: new Date(item.date * 1000),
+          end: new Date(item.date * 1000),
+          type: 'Liturgical',
+        }));
 
-      if (location.state && location.state.newEvent) {
-        const newEvent = location.state.newEvent;
-        formattedEvents.push({
-          id: `custom-new-${newEvent.title}`,
-          title: newEvent.title,
-          start: new Date(newEvent.customeventDate),
-          end: new Date(newEvent.customeventDate),
-          type: 'Custom',
-          customeventDate: newEvent.customeventDate
-        });
+        const formattedEvents = [
+          ...weddingEvents.data.map((event) => ({
+            id: `wedding-${event._id}`,
+            title: `${event.bride} & ${event.groom} Wedding`,
+            start: new Date(event.weddingDate),
+            end: new Date(event.weddingDate),
+            type: 'Wedding',
+            brideName: event.bride,
+            groomName: event.groom,
+            weddingDate: event.weddingDate
+          })),
+          ...baptismEvents.data.map((event) => ({
+            id: `baptism-${event._id}`,
+            title: `Baptism of ${event.child.fullName || "Unknown"}`,
+            start: new Date(event.baptismDate),
+            end: new Date(event.baptismDate),
+            type: 'Baptism',
+            child: event.child,
+            baptismDate: event.baptismDate
+          })),
+          ...funeralEvents.data.map((event) => ({
+            id: `funeral-${event._id}`,
+            title: `Funeral for ${event.name?.firstName || ""} ${event.name?.lastName || ""}`,
+            start: new Date(event.funeralDate),
+            end: new Date(event.funeralDate),
+            type: 'Funeral',
+            name: event.name,
+            funeralDate: event.funeralDate
+          })),
+          ...customEvents.data.map((event) => ({
+            id: `custom-${event._id}`,
+            title: event.title,
+            start: new Date(event.customeventDate),
+            end: new Date(event.customeventDate),
+            type: 'Custom',
+            customeventDate: event.customeventDate
+          })),
+          ...liturgicalEvents,
+        ];
+
+        if (location.state?.newEvent) {
+          const newEvent = location.state.newEvent;
+          formattedEvents.push({
+            id: `custom-new-${newEvent.title}`,
+            title: newEvent.title,
+            start: new Date(newEvent.customeventDate),
+            end: new Date(newEvent.customeventDate),
+            type: 'Custom',
+            customeventDate: newEvent.customeventDate
+          });
+        }
+
+        setEvents(formattedEvents);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setErrorMessage('Failed to load events. Please try again.');
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setEvents(formattedEvents);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      setErrorMessage('Failed to load events. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [config, location.state]);
+    fetchAllEvents();
+  }, []);
+
+
 
   useEffect(() => {
-    fetchAllEvents();
-  }, [fetchAllEvents]);
+    const fetchLiturgicalYear = async () => {
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API}/api/v1/liturgical/year/${year}`);
+        setLiturgical(res.data);
+      } catch (err) {
+        console.error("Liturgical fetch error", err);
+      }
+    };
+
+    fetchLiturgicalYear();
+  }, [year]);
+
+
+  useEffect(() => {
+    console.log("Updated liturgical data:", liturgical);
+  }, [liturgical]);
+
+  const groupedByMonth = liturgical.reduce((acc, item) => {
+    const month = new Date(item.date * 1000).toLocaleString('default', { month: 'long' });
+    if (!acc[month]) acc[month] = [];
+    acc[month].push(item);
+    return acc;
+  }, {});
+
 
   const handleEventClick = (event) => {
     setSelectedEvent(event);
@@ -227,7 +280,7 @@ const Calendars = () => {
       Wedding: `getWeddingById/${id}`,
       Baptism: `getBaptism/${id}`,
       Funeral: `getFuneral/${id}`,
-      Custom: `getCustomEventById/${id}`, 
+      Custom: `getCustomEventById/${id}`,
     };
 
     try {
@@ -239,39 +292,42 @@ const Calendars = () => {
     }
   };
 
-  const eventPropGetter = (event) => ({
-    style: {
-      backgroundColor:
-        event.type === 'Wedding' ? '#FFD700' :
-        event.type === 'Baptism' ? '#4CAF50' :
-        event.type === 'Funeral' ? '#F44336' : '#9C27B0',
-      color: 'white',
-      borderRadius: '4px',
-      border: 'none',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-      fontSize: isMobile ? '0.7rem' : '0.8rem',
-      padding: isMobile ? '1px 3px' : '2px 5px'
-    },
-  });
+  const eventPropGetter = (event) => {
+    let backgroundColor = '#3174ad'; // default
+    if (event.type === 'Liturgical') backgroundColor = '#9c27b0'; // purple
+    if (event.type === 'Wedding') backgroundColor = '#4caf50';
+    if (event.type === 'Funeral') backgroundColor = '#f44336';
+    if (event.type === 'Baptism') backgroundColor = '#2196f3';
+    if (event.type === 'Custom') backgroundColor = '#ff9800';
+
+    return {
+      style: {
+        backgroundColor,
+        color: 'white',
+        borderRadius: '4px',
+      },
+    };
+  };
+
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
+    <Box sx={{
+      display: 'flex',
       height: '100vh',
       flexDirection: isMobile ? 'column' : 'row'
     }}>
       <SideBar />
-      
-      <Box sx={{ 
-        fontFamily: 'Helvetica, sans-serif', 
-        flex: 1, 
+
+      <Box sx={{
+        fontFamily: 'Helvetica, sans-serif',
+        flex: 1,
         p: isMobile ? 2 : 3,
         overflow: 'auto'
       }}>
         <MetaData title="Calendar" />
-        <Typography variant="h4" sx={{ 
-          mb: 2, 
-          fontWeight: 'bold', 
+        <Typography variant="h4" sx={{
+          mb: 2,
+          fontWeight: 'bold',
           color: 'success.main',
           fontSize: isMobile ? '1.5rem' : '2rem'
         }}>
@@ -284,10 +340,10 @@ const Calendars = () => {
           </Typography>
         )}
 
-        <Paper elevation={3} sx={{ 
-          height: isMobile ? '500px' : '700px', 
-          p: isMobile ? 1 : 2, 
-          borderRadius: 2 
+        <Paper elevation={3} sx={{
+          height: isMobile ? '500px' : '700px',
+          p: isMobile ? 1 : 2,
+          borderRadius: 2
         }}>
           <Calendar
             localizer={localizer}
@@ -310,14 +366,41 @@ const Calendars = () => {
           />
         </Paper>
 
+        {/* Default Liturgical Calendar  */}
+        <Paper elevation={3} sx={{ p: 2, ml: isMobile ? 0 : 2, mt: isMobile ? 2 : 0, maxHeight: 400, overflowY: 'auto' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <IconButton onClick={() => setYear(prev => prev - 1)}><ArrowBack /></IconButton>
+            <Typography variant="h6">Liturgical Calendar ({year})</Typography>
+            <IconButton onClick={() => setYear(prev => prev + 1)}><ArrowForward /></IconButton>
+          </Box>
+
+          {Object.entries(groupedByMonth).map(([month, items]) => (
+            <Box key={month} sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2 }}>{month}</Typography>
+              <Table size="small">
+                <TableBody>
+                  {items.map((item, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell>{new Date(item.date * 1000).toLocaleDateString()}</TableCell>
+                      <TableCell>{item.day_of_the_week_long}</TableCell>
+                      <TableCell>{item.name}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          ))}
+        </Paper>
+
+
         {selectedEvent && (
-          <Paper elevation={3} sx={{ 
-            mt: 3, 
-            p: isMobile ? 2 : 3, 
-            borderRadius: 2 
+          <Paper elevation={3} sx={{
+            mt: 3,
+            p: isMobile ? 2 : 3,
+            borderRadius: 2
           }}>
-            <Typography variant="h6" sx={{ 
-              mb: 2, 
+            <Typography variant="h6" sx={{
+              mb: 2,
               fontWeight: 'bold',
               fontSize: isMobile ? '1.1rem' : '1.25rem'
             }}>
@@ -330,10 +413,10 @@ const Calendars = () => {
               {selectedEvent.type === 'Wedding' && (
                 <>
                   <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                    <strong>Bride:</strong> {selectedEvent.bride || 'N/A'}
+                    <strong>Bride:</strong> {selectedEvent.brideName || 'N/A'}
                   </Typography>
                   <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                    <strong>Groom:</strong> {selectedEvent.groom || 'N/A'}
+                    <strong>Groom:</strong> {selectedEvent.groomName || 'N/A'}
                   </Typography>
                 </>
               )}
@@ -352,11 +435,19 @@ const Calendars = () => {
                   <strong>Title:</strong> {selectedEvent.title || 'N/A'}
                 </Typography>
               )}
+
+              {selectedEvent.type === 'Liturgical' && (
+                <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  <strong>Liturgical Event:</strong> {selectedEvent.title}
+                </Typography>
+              )}
+
+
               <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
                 <strong>Date:</strong> {moment(
-                  selectedEvent.weddingDate || 
-                  selectedEvent.baptismDate || 
-                  selectedEvent.funeralDate || 
+                  selectedEvent.weddingDate ||
+                  selectedEvent.baptismDate ||
+                  selectedEvent.funeralDate ||
                   selectedEvent.customeventDate
                 ).format('MMMM Do YYYY')}
               </Typography>

@@ -163,7 +163,7 @@ const MassWeddingList = () => {
           gutterBottom
           sx={{ fontWeight: "bold", textAlign: "center" }}
         >
-          My Mass Wedding Applications
+         Submitted Mass Wedding Application
         </Typography>
         <Stack
           direction="row"

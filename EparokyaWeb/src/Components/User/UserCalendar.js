@@ -9,7 +9,7 @@ import { useTheme, useMediaQuery } from '@mui/material';
 import { CircularProgress, Box, Typography, Paper, Button, IconButton } from '@mui/material';
 import { ChevronLeft, ChevronRight, Today, ViewModule, ViewWeek, ViewDay, ViewAgenda } from '@mui/icons-material';
 import Loader from '../Layout/Loader';
-
+import UserLocalCalendarList from '../../Components/UserLocalCalendarList'
 const localizer = momentLocalizer(moment);
 
 const CustomToolbar = ({ label, onNavigate, onView, view }) => {
@@ -140,16 +140,16 @@ const UserCalendar = () => {
 
   const fetchAllEvents = useCallback(async () => {
     try {
-      const [weddingEvents, baptismEvents, funeralEvents, customEvents] =
-        await Promise.all([
-          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`),
-          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`),
-          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`),
-          axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`),
-        ]);
+      const [weddingEvents, baptismEvents, funeralEvents, customEvents, liturgicalEvents] = await Promise.all([
+        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/liturgical/year/2025`) // Optional: Make dynamic
+      ]);
 
       const formattedEvents = [
-        ...weddingEvents.data.map((event) => ({
+        ...weddingEvents.data.map(event => ({
           id: `wedding-${event._id}`,
           title: `${event.brideName} & ${event.groomName} Wedding`,
           start: new Date(event.weddingDate),
@@ -158,7 +158,7 @@ const UserCalendar = () => {
           bride: event.brideName,
           groom: event.groomName,
         })),
-        ...baptismEvents.data.map((event) => ({
+        ...baptismEvents.data.map(event => ({
           id: `baptism-${event._id}`,
           title: `Baptism of ${event.child.fullName || "Unknown"}`,
           start: new Date(event.baptismDate),
@@ -166,7 +166,7 @@ const UserCalendar = () => {
           type: "Baptism",
           child: event.child,
         })),
-        ...funeralEvents.data.map((event) => ({
+        ...funeralEvents.data.map(event => ({
           id: `funeral-${event._id}`,
           title: `Funeral for ${event.name || ""}`,
           start: new Date(event.funeralDate),
@@ -174,13 +174,20 @@ const UserCalendar = () => {
           type: "Funeral",
           name: event.name,
         })),
-        ...customEvents.data.map((event) => ({
+        ...customEvents.data.map(event => ({
           id: `custom-${event._id}`,
           title: event.title,
           start: new Date(event.customeventDate),
           end: new Date(event.customeventDate),
           type: "Custom",
         })),
+        ...liturgicalEvents.data.map((event, idx) => ({
+          id: `liturgical-${idx}`,
+          title: event.name,
+          start: new Date(event.date * 1000),
+          end: new Date(event.date * 1000),
+          type: "Liturgical"
+        }))
       ];
 
       setEvents(formattedEvents);
@@ -191,6 +198,7 @@ const UserCalendar = () => {
       setLoading(false);
     }
   }, []);
+
 
   useEffect(() => {
     fetchAllEvents();
@@ -204,12 +212,12 @@ const UserCalendar = () => {
     style: {
       backgroundColor:
         event.type === 'Wedding' ? '#FFD700' :
-        event.type === 'Baptism' ? '#4CAF50' :
-        event.type === 'Funeral' ? '#F44336' : '#9C27B0',
+          event.type === 'Baptism' ? '#4CAF50' :
+            event.type === 'Funeral' ? '#F44336' :
+              event.type === 'Liturgical' ? '#1976d2' :
+                '#9C27B0',
       color: 'white',
       borderRadius: '4px',
-      border: 'none',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
       fontSize: isMobile ? '0.7rem' : '0.8rem',
       padding: isMobile ? '1px 3px' : '2px 5px'
     },
@@ -220,26 +228,27 @@ const UserCalendar = () => {
   }
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      height: '100vh',
-      flexDirection: isMobile ? 'column' : 'row'
-    }}>
-      {!isMobile && <GuestSideBar style={{ width: '20%', minWidth: '200px' }} />}
-      
-      <Box sx={{ 
-        fontFamily: 'Helvetica, sans-serif', 
-        flex: 1, 
+    <Box
+      sx={{
+        display: 'flex',
+        flex: 1,
+        flexDirection: isMobile ? 'column' : 'row',
         p: isMobile ? 2 : 3,
+        gap: 2,
         overflow: 'auto'
-      }}>
+      }}
+    >
+      <Box sx={{ flex: 2 }}>
         <Metadata title="User Calendar" />
-        <Typography variant="h4" sx={{ 
-          mb: 2, 
-          fontWeight: 'bold', 
-          color: 'success.main',
-          fontSize: isMobile ? '1.5rem' : '2rem'
-        }}>
+        <Typography
+          variant="h4"
+          sx={{
+            mb: 2,
+            fontWeight: 'bold',
+            color: 'success.main',
+            fontSize: isMobile ? '1.5rem' : '2rem'
+          }}
+        >
           Church Events Calendar
         </Typography>
 
@@ -249,11 +258,14 @@ const UserCalendar = () => {
           </Typography>
         )}
 
-        <Paper elevation={3} sx={{ 
-          height: isMobile ? '500px' : '700px', 
-          p: isMobile ? 1 : 2, 
-          borderRadius: 2 
-        }}>
+        <Paper
+          elevation={3}
+          sx={{
+            height: isMobile ? '500px' : '700px',
+            p: isMobile ? 1 : 2,
+            borderRadius: 2
+          }}
+        >
           <Calendar
             localizer={localizer}
             events={events}
@@ -262,11 +274,11 @@ const UserCalendar = () => {
             defaultView={isMobile ? 'agenda' : 'month'}
             view={view}
             onView={setView}
-            views={["month", "week", "day", "agenda"]}
+            views={['month', 'week', 'day', 'agenda']}
             eventPropGetter={eventPropGetter}
             onSelectEvent={handleEventClick}
             components={{
-              toolbar: CustomToolbar,
+              toolbar: CustomToolbar
             }}
             style={{
               height: '100%',
@@ -276,16 +288,22 @@ const UserCalendar = () => {
         </Paper>
 
         {selectedEvent && (
-          <Paper elevation={3} sx={{ 
-            mt: 3, 
-            p: isMobile ? 2 : 3, 
-            borderRadius: 2 
-          }}>
-            <Typography variant="h6" sx={{ 
-              mb: 2, 
-              fontWeight: 'bold',
-              fontSize: isMobile ? '1.1rem' : '1.25rem'
-            }}>
+          <Paper
+            elevation={3}
+            sx={{
+              mt: 3,
+              p: isMobile ? 2 : 3,
+              borderRadius: 2
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                mb: 2,
+                fontWeight: 'bold',
+                fontSize: isMobile ? '1.1rem' : '1.25rem'
+              }}
+            >
               Event Details
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -309,7 +327,10 @@ const UserCalendar = () => {
               )}
               {selectedEvent.type === 'Funeral' && (
                 <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                  <strong>Name:</strong> {selectedEvent.name ? `${selectedEvent.name.firstName || ''} ${selectedEvent.name.lastName || ''}` : 'N/A'}
+                  <strong>Name:</strong>{' '}
+                  {selectedEvent.name
+                    ? `${selectedEvent.name.firstName || ''} ${selectedEvent.name.lastName || ''}`
+                    : 'N/A'}
                 </Typography>
               )}
               {selectedEvent.type === 'Custom' && (
@@ -317,14 +338,28 @@ const UserCalendar = () => {
                   <strong>Title:</strong> {selectedEvent.title || 'N/A'}
                 </Typography>
               )}
+              {selectedEvent.type === 'Liturgical' && (
+                <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  <strong>Liturgical Event:</strong> {selectedEvent.title}
+                </Typography>
+              )}
+
               <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                <strong>Date:</strong> {moment(selectedEvent.start).format('MMMM Do YYYY')}
+                <strong>Date:</strong>{' '}
+                {moment(selectedEvent.start).format('MMMM Do YYYY')}
               </Typography>
             </Box>
           </Paper>
         )}
       </Box>
+
+      {!isMobile && (
+        <Box sx={{ flex: 1, maxWidth: 350 }}>
+          <UserLocalCalendarList />
+        </Box>
+      )}
     </Box>
+
   );
 };
 

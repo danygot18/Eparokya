@@ -15,13 +15,10 @@ const emojiOptions = [
   "😡",
   "😠",
   "😞",
-  "😕",
   "😐",
   "😊",
-  "😃",
   "😄",
   "😍",
-  "👍",
 ];
 const questions = [
   "How approachable was the priest?",
