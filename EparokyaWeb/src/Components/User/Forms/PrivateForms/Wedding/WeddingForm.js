@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
@@ -6,6 +6,17 @@ import GuestSidebar from "../../../../GuestSideBar";
 import MetaData from "../../../../Layout/MetaData";
 import ConfirmedWeddingModal from "./ConfirmedWeddingModal";
 import { Modal as BsModal } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import "./MySubmittedWeddingForm.css";
+import {
+
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+} from "@mui/material";
+
 // import termsAndConditionsText from "../../../../Term";
 
 const WeddingForm = () => {
@@ -66,7 +77,7 @@ const WeddingForm = () => {
     BridePermitFromtheParishOftheBride: "",
     BrideChildBirthCertificate: "",
     BrideOneByOne: "",
-    priest: "",          // selected from dropdown (ObjectId or "others")
+    priest: "", // selected from dropdown (ObjectId or "others")
     customPriest: "",
     documents: {}, // Stores File objects
     previews: {},
@@ -76,6 +87,9 @@ const WeddingForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState(null);
   const [priestList, setPriestList] = useState([]);
+  const [weddings, setWeddings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const config = {
     withCredentials: true,
   };
@@ -128,11 +142,15 @@ const WeddingForm = () => {
   const [isAgreed, setIsAgreed] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
-
+  const [disabledWeddingDates, setDisabledWeddingDates] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   useEffect(() => {
     const fetchPriests = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/api/v1/getAvailablePriest`);
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/api/v1/getAvailablePriest`
+        );
         setPriestList(response.data.priests || []);
         console.log("Fetched priests:", response.data.priests);
       } catch (error) {
@@ -142,7 +160,6 @@ const WeddingForm = () => {
 
     fetchPriests();
   }, []);
-
 
   const FileUploadField = ({
     name,
@@ -355,7 +372,6 @@ const WeddingForm = () => {
       [addressType]: {
         ...prev[addressType],
         barangay: selectedBarangay,
-
       },
     }));
 
@@ -381,10 +397,11 @@ const WeddingForm = () => {
     }));
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    const today = new Date().toISOString().split("T")[0];
 
     if (isMarried) {
       toast.error('Sorry, but a "Married" user cannot submit an application.');
@@ -426,7 +443,6 @@ const WeddingForm = () => {
 
     try {
       const formDataObj = new FormData();
-
       // Append documents
       Object.entries(formData.documents).forEach(([fieldName, file]) => {
         if (file) {
@@ -468,6 +484,50 @@ const WeddingForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  const fetchWeddings = useCallback(async () => {
+    try {
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/confirmedWedding`
+      );
+      const formattedDates = data.map(
+        (event) => new Date(event.weddingDate).toISOString().split("T")[0]
+      );
+      setDisabledWeddingDates(formattedDates);
+
+      // You can still setWeddings for calendar view if needed
+      setWeddings(
+        data.map((event) => ({
+          id: event._id,
+          title: `${event.brideName} & ${event.groomName} Wedding`,
+          start: new Date(event.weddingDate),
+          end: new Date(event.weddingDate),
+        }))
+      );
+    } catch (err) {
+      console.error("Failed to load weddings:", err);
+      setErrorMessage("Failed to load weddings. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const isDateDisabled = (date) => {
+    const day = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const formatted = date.toISOString().split("T")[0];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return (
+      date < today || // Past dates
+      day === 1 || // Mondays
+      disabledWeddingDates.includes(formatted) // Already booked dates
+    );
+  };
+
+  useEffect(() => {
+    fetchWeddings();
+  }, [fetchWeddings]);
 
   return (
     <div style={{ display: "flex" }}>
@@ -572,23 +632,91 @@ const WeddingForm = () => {
               <Form.Control
                 type="date"
                 name="dateOfApplication"
-                value={formData.dateOfApplication}
+                value={new Date().toISOString().split("T")[0]} // Set today's date
+                min={new Date().toISOString().split("T")[0]} // Prevent past dates
                 onChange={handleChange}
-                required
+                disabled // Make it uneditable
               />
             </Form.Group>
+
             <Form.Group>
-              <Form.Label>
+              <Form.Label style={{ marginBottom: '10px'}}>
                 Wedding Date (Monday Schedules are NOT Available)
               </Form.Label>
-              <Form.Control
+
+              {/* <Form.Control
+                type="text"
+                value={formData.weddingDate || ""}
+                placeholder="Select a date from the calendar"
+                className="mb-3"
+                disabled
+              /> */}
+              <TextField
+                label="Wedding Date (Mondays not available)"
                 type="date"
-                name="weddingDate"
-                value={formData.weddingDate}
-                onChange={handleChange}
+                value={formData.weddingDate || ""}
+                onChange={(e) => {
+                  const selectedDate = new Date(e.target.value);
+                  if (isDateDisabled(selectedDate)) {
+                    if (selectedDate.getDay() === 1) {
+                      // Monday check
+                      setModalMessage("Every Monday schedules are not available.");
+                      setModalOpen(true);
+                    } else if (
+                      disabledWeddingDates.includes(selectedDate.toISOString().split("T")[0])
+                    ) {
+                      // Date already booked
+                      setModalMessage("This date is already booked. Please select a different date. See the calendar above to view the available dates ");
+                      setModalOpen(true);
+                    } else {
+                      // Date is in the past or invalid
+                      setModalMessage("Please select a future date.");
+                      setModalOpen(true);
+                    }
+
+                    return;
+                  }
+                  setFormData({ ...formData, weddingDate: e.target.value });
+                }}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
                 required
+                inputProps={{
+                  min: new Date().toISOString().split("T")[0],
+                  style: {
+                    // This will apply to the input element
+                  },
+                }}
+                sx={{
+                  'input[type="date"]::-webkit-calendar-picker-indicator': {
+                    filter:
+                      formData.weddingDate &&
+                        isDateDisabled(new Date(formData.weddingDate))
+                        ? "grayscale(100%) brightness(100%)"
+                        : "none",
+                  },
+                  'input[type="date"]': {
+                    backgroundColor:
+                      formData.weddingDate &&
+                        isDateDisabled(new Date(formData.weddingDate))
+                        ? "#f51616"
+                        : "inherit",
+                  },
+                }}
               />
+              <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
+                <DialogTitle>Date Unavailable</DialogTitle>
+                <DialogContent>
+                  {modalMessage}
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setModalOpen(false)} autoFocus>
+                    OK
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </Form.Group>
+
             <Form.Group>
               <Form.Label>Wedding Time</Form.Label>
               <Form.Control
@@ -1196,7 +1324,9 @@ const WeddingForm = () => {
               <select value={formData.priest} onChange={handlePriestChange}>
                 <option value="">-- Select Priest --</option>
                 {priestList.map((p) => (
-                  <option key={p._id} value={p._id}>{p.fullName}</option>
+                  <option key={p._id} value={p._id}>
+                    {p.fullName}
+                  </option>
                 ))}
                 <option value="others">Others</option>
               </select>
@@ -1212,7 +1342,6 @@ const WeddingForm = () => {
                   />
                 </>
               )}
-
             </fieldset>
             <fieldset className="form-group">
               <legend>Upload Documents</legend>

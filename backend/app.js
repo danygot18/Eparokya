@@ -11,7 +11,7 @@ const allowedOrigins = [
   "*",
   // "https://eparokya.vercel.app",
   "http://localhost:3000",
-];
+];  
 
 // Middleware
 app.use(cors({

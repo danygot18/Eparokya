@@ -12,9 +12,16 @@ import {
   Typography,
   FormControlLabel,
   Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import TermsModal from "../../../../TermsModal";
 import termsAndConditionsText from "../../../../TermsAndConditionText";
+import HouseBlessingCalendar from "./houseBlessingCalendar";
+import { useCallback } from "react";
+import moment from "moment";
 
 const HouseBlessingForm = () => {
   const [formData, setFormData] = useState({
@@ -84,6 +91,12 @@ const HouseBlessingForm = () => {
   ]);
   const [customCity, setCustomCity] = useState("");
   const [customBarangay, setCustomBarangay] = useState("");
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [houseBlessings, setHouseBlessings] = useState([]);
 
   const propertyTypes = [
     "House",
@@ -171,6 +184,68 @@ const HouseBlessingForm = () => {
     });
     setCustomCity("");
     setCustomBarangay("");
+  };
+
+  const fetchHouseBlessings = useCallback(async () => {
+    try {
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/houseBlessing/getConfirmedHouseBlessing`,
+        config
+      );
+      const formatted = data.map((event) => {
+        let start = moment(event.blessingDate).toDate();
+        if (event.blessingTime) {
+          const time = moment(event.blessingTime, ["h:mmA", "h:mm A", "HH:mm"]);
+          if (time.isValid()) {
+            start.setHours(time.hours());
+            start.setMinutes(time.minutes());
+          }
+        }
+        let end = new Date(start);
+        end.setHours(start.getHours() + 1);
+
+        return {
+          id: event._id,
+          title: `${event.fullName || "Unknown"} House Blessing`,
+          start,
+          end,
+          fullName: event.fullName || "N/A",
+          contactNumber: event.contactNumber || "N/A",
+          address: event.address,
+          blessingTime: event.blessingTime || "N/A",
+          blessingStatus: event.blessingStatus || "N/A",
+          comments: event.comments || [],
+          confirmedAt: event.confirmedAt,
+        };
+      });
+      setHouseBlessings(formatted);
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to load house blessings:", err);
+      setErrorMessage("Failed to load house blessings. Please try again.");
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchHouseBlessings();
+  }, [fetchHouseBlessings]);
+
+  const isDateDisabled = (date) => {
+    const day = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const formattedDate = date.toISOString().split("T")[0];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const confirmedDates = houseBlessings.map((b) =>
+      b.start.toISOString().split("T")[0]
+    );
+
+    return (
+      date < today || // Past dates
+      day === 1 || // Mondays
+      confirmedDates.includes(formattedDate) // Already booked dates
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -279,6 +354,77 @@ const HouseBlessingForm = () => {
       <Box display="flex" bgcolor="#f9f9f9" width="100%">
         <GuestSidebar />
         <Box flex={1} p={2}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                maxWidth: 300,
+              }}
+            >
+              <Typography variant="h6" sx={{ fontSize: "1.1rem" }}>
+                Click here to see Available Dates
+              </Typography>
+              <Button
+                variant="outlined"
+                color="secondary"
+                sx={{
+                  fontWeight: "bold",
+                  borderRadius: 1,
+                  px: 2,
+                  fontSize: "0.95rem",
+                }}
+                onClick={() => setShowOverlay(true)}
+              >
+                View Calendar
+              </Button>
+            </Box>
+            {/* Only show calendar when showOverlay is true */}
+            {showOverlay && (
+              <Box
+                sx={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100vw",
+                  height: "100vh",
+                  bgcolor: "rgba(0,0,0,0.5)",
+                  zIndex: 1300,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onClick={() => setShowOverlay(false)}
+              >
+                <Box
+                  sx={{
+                    bgcolor: "#fff",
+                    borderRadius: 2,
+                    boxShadow: 24,
+                    p: 2,
+                    minWidth: { xs: "90vw", sm: 600 },
+                    maxHeight: "90vh",
+                    overflowY: "auto",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      sx={{ mb: 1, width: 30 }}
+                      onClick={() => setShowOverlay(false)}
+                    >
+                      Close
+                    </Button>
+                  </div>
+
+                  <HouseBlessingCalendar />
+                </Box>
+              </Box>
+            )}
+          </Box>
           <form onSubmit={handleSubmit}>
             <Typography variant="h4" gutterBottom>
               House Blessing Information
@@ -393,22 +539,77 @@ const HouseBlessingForm = () => {
             </Typography>
 
             <TextField
-              label="Blessing Date"
+              label="Blessing Date (Mondays not available)"
               type="date"
               value={formData.blessingDate}
-              onChange={(e) => handleChange(e, "blessingDate")}
-              fullWidth
-              margin="normal"
+              onChange={(e) => {
+                const selectedDate = new Date(e.target.value);
+                if (isDateDisabled(selectedDate)) {
+                  if (selectedDate.getDay() === 1) {
+                    // Monday check
+                    setModalMessage("Every Monday schedules are not available.");
+                    setModalOpen(true);
+                  } else if (
+                    houseBlessings.some(
+                      (b) =>
+                        b.start.toISOString().split("T")[0] ===
+                        selectedDate.toISOString().split("T")[0]
+                    )
+                  ) {
+                    // Date already booked
+                    setModalMessage(
+                      "This date is already booked. Please select a different date. See the calendar above to view the available dates."
+                    );
+                    setModalOpen(true);
+                  } else {
+                    // Date is in the past or invalid
+                    setModalMessage("Please select a future date.");
+                    setModalOpen(true);
+                  }
+                  return;
+                }
+                setFormData({ ...formData, blessingDate: e.target.value });
+              }}
               InputLabelProps={{ shrink: true }}
+              fullWidth
               required
+              inputProps={{
+                min: new Date().toISOString().split("T")[0],
+              }}
+              sx={{
+                'input[type="date"]::-webkit-calendar-picker-indicator': {
+                  filter:
+                    formData.blessingDate &&
+                      isDateDisabled(new Date(formData.blessingDate))
+                      ? "grayscale(100%) brightness(100%)"
+                      : "none",
+                },
+                'input[type="date"]': {
+                  backgroundColor:
+                    formData.blessingDate &&
+                      isDateDisabled(new Date(formData.blessingDate))
+                      ? "#f51616"
+                      : "inherit",
+                },
+              }}
             />
-            <TextField
+            {/* <TextField
               label="Blessing Time (Format: 7:00AM)"
               value={formData.blessingTime}
               onChange={(e) => handleChange(e, "blessingTime")}
               fullWidth
               margin="normal"
               required
+            /> */}
+            <TextField
+              label="Blessing Time"
+              type="time"
+              value={formData.blessingTime}
+              onChange={(e) => handleChange(e, "blessingTime")}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+              required
+              sx={{ mt: 2 }}
             />
 
             {/* Address */}
@@ -562,6 +763,16 @@ const HouseBlessingForm = () => {
               </Button>
             </Box>
           </form>
+
+          <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
+            <DialogTitle>Date Not Available</DialogTitle>
+            <DialogContent>
+              <Typography>{modalMessage}</Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setModalOpen(false)}>OK</Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       </Box>
     </Box>

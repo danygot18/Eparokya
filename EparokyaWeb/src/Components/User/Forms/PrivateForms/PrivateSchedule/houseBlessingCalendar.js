@@ -5,9 +5,13 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { useTheme, useMediaQuery } from '@mui/material';
 import { CircularProgress, Box, Typography, Paper, Button, IconButton } from '@mui/material';
-import { ChevronLeft, ChevronRight, Today } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 
 const localizer = momentLocalizer(moment);
+
+const config = {
+  withCredentials: true,
+}
 
 const CustomToolbar = ({ label, onNavigate, onView, view }) => {
   const theme = useTheme();
@@ -126,8 +130,8 @@ const CustomToolbar = ({ label, onNavigate, onView, view }) => {
   );
 };
 
-const BaptismCalendar = () => {
-  const [baptisms, setBaptisms] = useState([]);
+const HouseBlessingCalendar = () => {
+  const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -135,33 +139,47 @@ const BaptismCalendar = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const fetchBaptisms = useCallback(async () => {
+  const fetchHouseBlessings = useCallback(async () => {
     try {
-      const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`);
-      const formatted = data.map(event => ({
-        id: event._id,
-        title: `${event.child?.fullName || "Unknown"} Baptism`,
-        start: new Date(event.baptismDate),
-        end: new Date(event.baptismDate),
-        childName: event.child?.fullName || "N/A",
-        fatherName: event.parents?.fatherFullName || "N/A",
-        motherName: event.parents?.motherFullName || "N/A",
-        type: "Baptism"
-      }));
-      setBaptisms(formatted);
-      console.log('Baptisms loaded:', data);
+      const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/houseBlessing/getConfirmedHouseBlessing`, config);
+      const formatted = data.map(event => {
+        let start = moment(event.blessingDate).toDate();
+        if (event.blessingTime) {
+          const time = moment(event.blessingTime, ["h:mmA", "h:mm A", "HH:mm"]);
+          if (time.isValid()) {
+            start.setHours(time.hours());
+            start.setMinutes(time.minutes());
+          }
+        }
+        let end = new Date(start);
+        end.setHours(start.getHours() + 1);
+
+        return {
+          id: event._id,
+          title: `${event.fullName || "Unknown"} House Blessing`,
+          start,
+          end,
+          fullName: event.fullName || "N/A",
+          contactNumber: event.contactNumber || "N/A",
+          address: event.address,
+          blessingTime: event.blessingTime || "N/A",
+          blessingStatus: event.blessingStatus || "N/A",
+          comments: event.comments || [],
+          confirmedAt: event.confirmedAt,
+        };
+      });
+      setEvents(formatted);
+      setLoading(false);
     } catch (err) {
-      console.error('Failed to load baptisms:', err);
-      setErrorMessage("Failed to load baptisms. Please try again.");
-    } finally {
+      console.error('Failed to load house blessings:', err);
+      setErrorMessage("Failed to load house blessings. Please try again.");
       setLoading(false);
     }
   }, []);
 
-
   useEffect(() => {
-    fetchBaptisms();
-  }, [fetchBaptisms]);
+    fetchHouseBlessings();
+  }, [fetchHouseBlessings]);
 
   const eventPropGetter = () => ({
     style: {
@@ -187,7 +205,7 @@ const BaptismCalendar = () => {
         fontFamily: 'Helvetica, sans-serif',
         flex: 1,
         p: isMobile ? 2 : 3,
-        overflow: 'auto'
+        // overflow: 'auto'
       }}>
 
         <Typography variant="h4" sx={{
@@ -196,10 +214,10 @@ const BaptismCalendar = () => {
           color: 'primary.main',
           fontSize: isMobile ? '1.5rem' : '2rem'
         }}>
-          Baptism Calendar
+          House Blessing Calendar
         </Typography>
         <Typography sx={{ mb: 2 }}>
-          See the available dates for baptisms. If you have any questions, please contact the parish office.
+          See the available dates for house blessings. If you have any questions, please contact the parish office.
           (Mondays not available)
         </Typography>
 
@@ -216,7 +234,7 @@ const BaptismCalendar = () => {
         }}>
           <Calendar
             localizer={localizer}
-            events={baptisms}
+            events={events}
             startAccessor="start"
             endAccessor="end"
             defaultView={isMobile ? 'agenda' : 'month'}
@@ -246,21 +264,37 @@ const BaptismCalendar = () => {
               fontWeight: 'bold',
               fontSize: isMobile ? '1.1rem' : '1.25rem'
             }}>
-              Baptism Details
+              House Blessing Details
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                <strong>Child:</strong> {selectedEvent.childName || 'N/A'}
+                <strong>Name:</strong> {selectedEvent.fullName}
               </Typography>
               <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                <strong>Father:</strong> {selectedEvent.fatherName || 'N/A'}
-              </Typography>
-              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                <strong>Mother:</strong> {selectedEvent.motherName || 'N/A'}
+                <strong>Contact:</strong> {selectedEvent.contactNumber}
               </Typography>
               <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
                 <strong>Date:</strong> {moment(selectedEvent.start).format('MMMM Do YYYY')}
               </Typography>
+              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                <strong>Time:</strong> {selectedEvent.blessingTime}
+              </Typography>
+              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                <strong>Status:</strong> {selectedEvent.blessingStatus}
+              </Typography>
+              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                <strong>Address:</strong> {Object.values(selectedEvent.address || {}).filter(Boolean).join(', ')}
+              </Typography>
+              {selectedEvent.comments && selectedEvent.comments.length > 0 && (
+                <Box sx={{ mt: 1 }}>
+                  <strong>Comments:</strong>
+                  {selectedEvent.comments.map((c, idx) => (
+                    <Typography key={idx} sx={{ fontSize: isMobile ? '0.85rem' : '0.95rem', ml: 1 }}>
+                      - {c.selectedComment} {c.additionalComment ? `(${c.additionalComment})` : ""}
+                    </Typography>
+                  ))}
+                </Box>
+              )}
             </Box>
           </Paper>
         )}
@@ -269,4 +303,4 @@ const BaptismCalendar = () => {
   );
 };
 
-export default BaptismCalendar;
+export default HouseBlessingCalendar;

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Modal, Form, Row, Col } from 'react-bootstrap';
 import GuestSidebar from '../../../../GuestSideBar';
 import TermsModal from "../../../../TermsModal";
 import termsAndConditionsText from "../../../../TermsAndConditionText";
-import { Button, TextField, Typography, Stack, Paper, Box, Container, InputLabel, Select, MenuItem, } from '@mui/material';
+import { Button, TextField, Typography, Stack, Paper, Box, Container, InputLabel, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, } from '@mui/material';
 import MetaData from '../../../../Layout/MetaData';
 import ConfirmationModal from './ConfirmFuneralModal';
 
@@ -18,6 +18,9 @@ const FuneralForm = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAgreed, setIsAgreed] = useState(false);
     const [showOverlay, setShowOverlay] = useState(false);
+    const [funerals, setFunerals] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState('');
 
 
     const [formData, setFormData] = useState({
@@ -92,6 +95,8 @@ const FuneralForm = () => {
     ]);
     const [customCity, setCustomCity] = useState('');
     const [customBarangay, setCustomBarangay] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
 
     // useEffect(() => {
     //     const fetchUser = async () => {
@@ -117,6 +122,27 @@ const FuneralForm = () => {
         withCredentials: true,
     };
 
+    const fetchFunerals = useCallback(async () => {
+        try {
+            const { data } = await axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`);
+            const formatted = data.map(event => ({
+                id: event._id,
+                title: `Funeral of ${event.name}`,
+                start: new Date(event.funeralDate),
+                end: new Date(event.funeralDate),
+                deceased: event.name,
+                location: event.placeOfDeath,
+                type: "Funeral"
+            }));
+            setFunerals(formatted);
+        } catch (err) {
+            console.error('Failed to load funerals:', err);
+            setErrorMessage("Failed to load funerals. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -128,7 +154,23 @@ const FuneralForm = () => {
             }
         };
         fetchUser();
-    }, []);
+        fetchFunerals();
+    }, [fetchFunerals]);
+
+    const isDateDisabled = (date) => {
+        const day = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const formattedDate = date.toISOString().split("T")[0];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const confirmedDates = funerals.map(f => f.start.toISOString().split("T")[0]);
+
+        return (
+            date < today || // Past dates
+            day === 1 || // Mondays
+            confirmedDates.includes(formattedDate) // Already booked dates
+        );
+    };
 
     const handleChange = (e, fieldPath) => {
         const keys = fieldPath.split('.');
@@ -564,15 +606,69 @@ const FuneralForm = () => {
                                             required
                                             fullWidth
                                         />
-                                        <TextField
-                                            label="Araw ng Libing (Monday Schedules are NOT Available)"
-                                            type="date"
-                                            value={formData.funeralDate}
-                                            onChange={(e) => handleChange(e, 'funeralDate')}
-                                            required
-                                            fullWidth
-                                            InputLabelProps={{ shrink: true }}
-                                        />
+                                        <Form.Group>
+                                            <Form.Label style={{ marginBottom: '10px' }}>
+                                                Araw ng Libing (Monday Schedules are NOT Available)
+                                            </Form.Label>
+                                            <TextField
+                                                type="date"
+                                                value={formData.funeralDate || ""}
+                                                onChange={(e) => {
+                                                    const selectedDate = new Date(e.target.value);
+                                                    if (isDateDisabled(selectedDate)) {
+                                                        if (selectedDate.getDay() === 1) {
+                                                            setModalMessage("Every Monday schedules are not available.");
+                                                            setModalOpen(true);
+                                                        } else if (
+                                                            funerals.some(f =>
+                                                                f.start.toISOString().split("T")[0] === selectedDate.toISOString().split("T")[0]
+                                                            )
+                                                        ) {
+                                                            setModalMessage("This date is already booked. Please select a different date. See the calendar above to view the available dates.");
+                                                            setModalOpen(true);
+                                                        } else {
+                                                            setModalMessage("Please select a future date.");
+                                                            setModalOpen(true);
+                                                        }
+                                                        return;
+                                                    }
+                                                    setFormData({ ...formData, funeralDate: e.target.value });
+                                                }}
+                                                InputLabelProps={{ shrink: true }}
+                                                fullWidth
+                                                required
+                                                inputProps={{
+                                                    min: new Date().toISOString().split("T")[0],
+                                                }}
+                                                sx={{
+                                                    'input[type="date"]::-webkit-calendar-picker-indicator': {
+                                                        filter:
+                                                            formData.funeralDate &&
+                                                                isDateDisabled(new Date(formData.funeralDate))
+                                                                ? "grayscale(100%) brightness(100%)"
+                                                                : "none",
+                                                    },
+                                                    'input[type="date"]': {
+                                                        backgroundColor:
+                                                            formData.funeralDate &&
+                                                                isDateDisabled(new Date(formData.funeralDate))
+                                                                ? "#ffebee"
+                                                                : "inherit",
+                                                    },
+                                                }}
+                                            />
+                                            <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
+                                                <DialogTitle>Date Unavailable</DialogTitle>
+                                                <DialogContent>
+                                                    {modalMessage}
+                                                </DialogContent>
+                                                <DialogActions>
+                                                    <Button onClick={() => setModalOpen(false)} autoFocus>
+                                                        OK
+                                                    </Button>
+                                                </DialogActions>
+                                            </Dialog>
+                                        </Form.Group>
                                         <TextField
                                             label="Oras ng Libing"
                                             type="time"
