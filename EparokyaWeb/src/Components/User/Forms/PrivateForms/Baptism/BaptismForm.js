@@ -14,6 +14,11 @@ import {
   InputLabel,
   FormControl,
   Paper,
+  Modal,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import "./BaptismForm.css";
 import GuestSidebar from "../../../../GuestSideBar";
@@ -21,6 +26,8 @@ import MetaData from "../../../../Layout/MetaData";
 import TermsModal from "../../../../TermsModal";
 import termsAndConditionsText from "../../../../TermsAndConditionText";
 import ConfirmedBaptismOverlay from "./ConfirmBaptismModal";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const BaptismForm = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -33,6 +40,8 @@ const BaptismForm = () => {
   const [baptisms, setBaptisms] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   const [formData, setFormData] = useState({
     baptismDate: "",
@@ -286,7 +295,7 @@ const BaptismForm = () => {
       console.error("Error submitting form:", error);
       toast.error(
         error.response?.data?.message ||
-          "Failed to submit form. Please try again."
+        "Failed to submit form. Please try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -424,7 +433,9 @@ const BaptismForm = () => {
                   const selectedDate = new Date(e.target.value);
                   if (isDateDisabled(selectedDate)) {
                     if (selectedDate.getDay() === 1) {
-                      toast.error("Monday schedules are not available");
+                      // Monday check
+                      setModalMessage("Every Monday schedules are not available.");
+                      setModalOpen(true);
                     } else if (
                       baptisms.some(
                         (b) =>
@@ -432,10 +443,15 @@ const BaptismForm = () => {
                           selectedDate.toISOString().split("T")[0]
                       )
                     ) {
-                      toast.error("This date is already booked");
+                      // Date already booked
+                      setModalMessage("This date is already booked. Please select a different date. See the calendar above the view the available dates ");
+                      setModalOpen(true);
                     } else {
-                      toast.error("Please select a future date");
+                      // Date is in the past or invalid
+                      setModalMessage("Please select a future date.");
+                      setModalOpen(true);
                     }
+
                     return;
                   }
                   setFormData({ ...formData, baptismDate: e.target.value });
@@ -453,15 +469,15 @@ const BaptismForm = () => {
                   'input[type="date"]::-webkit-calendar-picker-indicator': {
                     filter:
                       formData.baptismDate &&
-                      isDateDisabled(new Date(formData.baptismDate))
+                        isDateDisabled(new Date(formData.baptismDate))
                         ? "grayscale(100%) brightness(100%)"
                         : "none",
                   },
                   'input[type="date"]': {
                     backgroundColor:
                       formData.baptismDate &&
-                      isDateDisabled(new Date(formData.baptismDate))
-                        ? "#ffebee"
+                        isDateDisabled(new Date(formData.baptismDate))
+                        ? "#f51616"
                         : "inherit",
                   },
                 }}
@@ -476,6 +492,18 @@ const BaptismForm = () => {
                 required
                 sx={{ mt: 2 }}
               />
+              <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
+                <DialogTitle>Date Unavailable</DialogTitle>
+                <DialogContent>
+                  {modalMessage}
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setModalOpen(false)} autoFocus>
+                    OK
+                  </Button>
+                </DialogActions>
+              </Dialog>
+
             </Box>
 
             {/* Child Information */}

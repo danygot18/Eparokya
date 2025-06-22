@@ -200,6 +200,7 @@ const BaptismCalendar = () => {
         </Typography>
         <Typography sx={{ mb: 2 }}>
           See the available dates for baptisms. If you have any questions, please contact the parish office.
+          (Mondays not available)
         </Typography>
 
         {errorMessage && (

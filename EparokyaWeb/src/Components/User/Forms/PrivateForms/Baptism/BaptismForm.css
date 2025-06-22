@@ -21,3 +21,18 @@
     padding: 20px;
     width: calc(100% - 270px);
 }
+
+.react-datepicker__day--highlighted-custom-1 {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.react-datepicker__day--highlighted-custom-2 {
+  background-color: #ffe66d;
+  color: #333;
+}
+
+.react-datepicker__day--disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}

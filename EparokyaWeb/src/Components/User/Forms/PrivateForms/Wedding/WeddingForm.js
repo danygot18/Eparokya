@@ -8,6 +8,14 @@ import ConfirmedWeddingModal from "./ConfirmedWeddingModal";
 import { Modal as BsModal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "./MySubmittedWeddingForm.css";
+import {
+
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+} from "@mui/material";
 
 // import termsAndConditionsText from "../../../../Term";
 
@@ -135,7 +143,8 @@ const WeddingForm = () => {
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const [disabledWeddingDates, setDisabledWeddingDates] = useState([]);
-
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   useEffect(() => {
     const fetchPriests = async () => {
       try {
@@ -470,7 +479,7 @@ const WeddingForm = () => {
       console.error("Form submission error:", error);
       toast.error(
         error.response?.data?.message ||
-          "Something went wrong during submission."
+        "Something went wrong during submission."
       );
       setIsSubmitting(false);
     }
@@ -631,72 +640,81 @@ const WeddingForm = () => {
             </Form.Group>
 
             <Form.Group>
-              <Form.Label>
+              <Form.Label style={{ marginBottom: '10px'}}>
                 Wedding Date (Monday Schedules are NOT Available)
               </Form.Label>
 
-              <Form.Control
+              {/* <Form.Control
                 type="text"
                 value={formData.weddingDate || ""}
                 placeholder="Select a date from the calendar"
                 className="mb-3"
                 disabled
-              />
-              <DatePicker
-                selected={
-                  formData.weddingDate ? new Date(formData.weddingDate) : null
-                }
-                onChange={(date) => {
-                  const formattedDate = date.toISOString().split("T")[0];
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
+              /> */}
+              <TextField
+                label="Wedding Date (Mondays not available)"
+                type="date"
+                value={formData.weddingDate || ""}
+                onChange={(e) => {
+                  const selectedDate = new Date(e.target.value);
+                  if (isDateDisabled(selectedDate)) {
+                    if (selectedDate.getDay() === 1) {
+                      // Monday check
+                      setModalMessage("Every Monday schedules are not available.");
+                      setModalOpen(true);
+                    } else if (
+                      disabledWeddingDates.includes(selectedDate.toISOString().split("T")[0])
+                    ) {
+                      // Date already booked
+                      setModalMessage("This date is already booked. Please select a different date. See the calendar above to view the available dates ");
+                      setModalOpen(true);
+                    } else {
+                      // Date is in the past or invalid
+                      setModalMessage("Please select a future date.");
+                      setModalOpen(true);
+                    }
 
-                  // Validation checks
-                  if (date < today) {
-                    toast.warning("Wedding date cannot be in the past.");
                     return;
                   }
-
-                  if (date.getDay() === 1) {
-                    toast.warning("Monday schedules are not allowed.");
-                    return;
-                  }
-
-                  if (disabledWeddingDates.includes(formattedDate)) {
-                    toast.warning("This date has already been booked.");
-                    return;
-                  }
-
-                  setFormData({
-                    ...formData,
-                    weddingDate: formattedDate,
-                  });
+                  setFormData({ ...formData, weddingDate: e.target.value });
                 }}
-                minDate={new Date()}
-                filterDate={(date) => {
-                  const formattedDate = date.toISOString().split("T")[0];
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-
-                  // Only disable:
-                  // 1. Past dates
-                  // 2. Mondays
-                  // 3. Already booked dates
-                  return !(
-                    date < today ||
-                    date.getDay() === 1 ||
-                    disabledWeddingDates.includes(formattedDate)
-                  );
-                }}
-                dateFormat="yyyy-MM-dd"
-                placeholderText="Select available date"
-                className="form-control"
+                InputLabelProps={{ shrink: true }}
+                fullWidth
                 required
-                highlightDates={disabledWeddingDates.map(
-                  (date) => new Date(date)
-                )}
-                inline
+                inputProps={{
+                  min: new Date().toISOString().split("T")[0],
+                  style: {
+                    // This will apply to the input element
+                  },
+                }}
+                sx={{
+                  'input[type="date"]::-webkit-calendar-picker-indicator': {
+                    filter:
+                      formData.weddingDate &&
+                        isDateDisabled(new Date(formData.weddingDate))
+                        ? "grayscale(100%) brightness(100%)"
+                        : "none",
+                  },
+                  'input[type="date"]': {
+                    backgroundColor:
+                      formData.weddingDate &&
+                        isDateDisabled(new Date(formData.weddingDate))
+                        ? "#f51616"
+                        : "inherit",
+                  },
+                }}
               />
+              <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
+                <DialogTitle>Date Unavailable</DialogTitle>
+                <DialogContent>
+                  {modalMessage}
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setModalOpen(false)} autoFocus>
+                    OK
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </Form.Group>
 
             <Form.Group>
