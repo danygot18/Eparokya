@@ -395,7 +395,7 @@ const PriestNavigation = () => {
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideBar />
-      <MetaData title="Priest Navigation" />
+      <MetaData title="Clergy Calendar" />
       <Box
         sx={{
           flexGrow: 1,

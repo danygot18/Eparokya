@@ -63,7 +63,7 @@ const determineOverallSentiment = (
   advancedLabel,
   emojiScore
 ) => {
-  const weightedAvg = 0.3 * basicScore + 0.5 * advancedScore + 0.7 * emojiScore; // More weight to emoji & AI
+  const weightedAvg = 0.3 * basicScore + 0.5 * advancedScore + 0.7 * emojiScore; 
 
   if (weightedAvg > 1.0) return "Very Positive";
   if (weightedAvg > 0.4) return "Positive";

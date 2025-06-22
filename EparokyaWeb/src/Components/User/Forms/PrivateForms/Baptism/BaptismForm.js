@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Modal, Form, Row, Col } from "react-bootstrap";
 import {
   Box,
-  Grid,
   Typography,
   Button,
   TextField,
@@ -32,6 +30,9 @@ const BaptismForm = () => {
   const [user, setUser] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [baptisms, setBaptisms] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     baptismDate: "",
@@ -65,6 +66,30 @@ const BaptismForm = () => {
     },
   });
 
+  const fetchBaptisms = useCallback(async () => {
+    try {
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_API}/api/v1/confirmedBaptism`
+      );
+      const formatted = data.map((event) => ({
+        id: event._id,
+        title: `${event.child?.fullName || "Unknown"} Baptism`,
+        start: new Date(event.baptismDate),
+        end: new Date(event.baptismDate),
+        childName: event.child?.fullName || "N/A",
+        fatherName: event.parents?.fatherFullName || "N/A",
+        motherName: event.parents?.motherFullName || "N/A",
+        type: "Baptism",
+      }));
+      setBaptisms(formatted);
+    } catch (err) {
+      console.error("Failed to load baptisms:", err);
+      setErrorMessage("Failed to load baptisms. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -78,13 +103,31 @@ const BaptismForm = () => {
       }
     };
     fetchUser();
+    fetchBaptisms();
 
     return () => {
       Object.values(formData.previews).forEach((url) => {
         if (url) URL.revokeObjectURL(url);
       });
     };
-  }, []);
+  }, [fetchBaptisms]);
+
+  const isDateDisabled = (date) => {
+    const day = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const formattedDate = date.toISOString().split("T")[0];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const confirmedDates = baptisms.map(
+      (b) => b.start.toISOString().split("T")[0]
+    );
+
+    return (
+      date < today || // Past dates
+      day === 1 || // Mondays
+      confirmedDates.includes(formattedDate) // Already booked dates
+    );
+  };
 
   const handleChange = (e, path) => {
     const value = e.target.value;
@@ -155,12 +198,9 @@ const BaptismForm = () => {
       setIsSubmitting(false);
       return;
     }
-    console.log("Form Data:", formData);
 
     try {
       const formDataObj = new FormData();
-
-      // Append all form data
       formDataObj.append("baptismDate", formData.baptismDate);
       formDataObj.append("baptismTime", formData.baptismTime);
       formDataObj.append("phone", formData.phone);
@@ -175,7 +215,6 @@ const BaptismForm = () => {
         formData.additionalDocs.baptismPermitFrom
       );
 
-      // Append files if they exist
       if (formData.documents.birthCertificate) {
         formDataObj.append(
           "birthCertificate",
@@ -198,7 +237,7 @@ const BaptismForm = () => {
         );
       }
 
-      const response = await axios.post(
+      await axios.post(
         `${process.env.REACT_APP_API}/api/v1/baptismCreate`,
         formDataObj,
         {
@@ -210,8 +249,6 @@ const BaptismForm = () => {
       );
 
       toast.success("Form submitted successfully!");
-
-      // Reset form
       setFormData({
         baptismDate: "",
         baptismTime: "",
@@ -260,20 +297,18 @@ const BaptismForm = () => {
     if (!file || !previewUrl) return null;
 
     return file.type.startsWith("image/") ? (
-      <div className="mt-2">
+      <Box mt={2}>
         <img
           src={previewUrl}
           alt="Preview"
-          className="img-thumbnail"
-          style={{ maxHeight: "150px" }}
+          style={{ maxHeight: "150px", maxWidth: "100%" }}
         />
-        <div className="text-muted small mt-1">{file.name}</div>
-      </div>
+        <Typography variant="caption" display="block" mt={1}>
+          {file.name}
+        </Typography>
+      </Box>
     ) : (
-      <div
-        className="mt-2"
-        style={{ width: "100%", height: "300px", marginBottom: "30px" }}
-      >
+      <Box mt={2} sx={{ width: "100%", height: "300px", mb: 4 }}>
         <iframe
           src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
           title="Document Preview"
@@ -284,8 +319,10 @@ const BaptismForm = () => {
             borderRadius: "4px",
           }}
         />
-        <div className="text-muted small mt-1">{file.name}</div>
-      </div>
+        <Typography variant="caption" display="block" mt={1}>
+          {file.name}
+        </Typography>
+      </Box>
     );
   };
 
@@ -317,7 +354,16 @@ const BaptismForm = () => {
     }
   };
 
-
+  const styles = {
+    disabledDate: {
+      backgroundColor: "#ffebee", // Light red background
+      color: "#b71c1c", // Dark red text
+      cursor: "not-allowed",
+      "&:hover": {
+        backgroundColor: "#ffcdd2", // Slightly darker red on hover
+      },
+    },
+  };
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f9f9f9" }}>
@@ -331,7 +377,7 @@ const BaptismForm = () => {
         }}
       />
       <GuestSidebar />
-      <Box sx={{ flex: 1, p: { xs: 1, md: 4 } }}>
+      <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
           <Box
             sx={{
@@ -369,322 +415,233 @@ const BaptismForm = () => {
           </Typography>
           <Box component="form" onSubmit={handleSubmit} noValidate>
             {/* Baptism Date and Time */}
-            <Grid container spacing={2} mb={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Araw ng Binyag (Monday Schedules are NOT Available)"
-                  type="date"
-                  value={formData.baptismDate}
-                  onChange={(e) => handleChange(e, "baptismDate")}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Oras ng Binyag"
-                  type="time"
-                  value={formData.baptismTime}
-                  onChange={(e) => handleChange(e, "baptismTime")}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                />
-              </Grid>
-            </Grid>
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                label="Baptism Date (Mondays not available)"
+                type="date"
+                value={formData.baptismDate}
+                onChange={(e) => {
+                  const selectedDate = new Date(e.target.value);
+                  if (isDateDisabled(selectedDate)) {
+                    if (selectedDate.getDay() === 1) {
+                      toast.error("Monday schedules are not available");
+                    } else if (
+                      baptisms.some(
+                        (b) =>
+                          b.start.toISOString().split("T")[0] ===
+                          selectedDate.toISOString().split("T")[0]
+                      )
+                    ) {
+                      toast.error("This date is already booked");
+                    } else {
+                      toast.error("Please select a future date");
+                    }
+                    return;
+                  }
+                  setFormData({ ...formData, baptismDate: e.target.value });
+                }}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+                required
+                inputProps={{
+                  min: new Date().toISOString().split("T")[0],
+                  style: {
+                    // This will apply to the input element
+                  },
+                }}
+                sx={{
+                  'input[type="date"]::-webkit-calendar-picker-indicator': {
+                    filter:
+                      formData.baptismDate &&
+                      isDateDisabled(new Date(formData.baptismDate))
+                        ? "grayscale(100%) brightness(100%)"
+                        : "none",
+                  },
+                  'input[type="date"]': {
+                    backgroundColor:
+                      formData.baptismDate &&
+                      isDateDisabled(new Date(formData.baptismDate))
+                        ? "#ffebee"
+                        : "inherit",
+                  },
+                }}
+              />
+              <TextField
+                label="Baptism Time"
+                type="time"
+                value={formData.baptismTime}
+                onChange={(e) => handleChange(e, "baptismTime")}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+                required
+                sx={{ mt: 2 }}
+              />
+            </Box>
 
             {/* Child Information */}
-            <Typography variant="h6" mt={3}>
+            <Typography variant="h6" mt={3} mb={2}>
               Child Information
             </Typography>
             <TextField
-              label="Buong Pangalan ng Bibinyagan"
+              label="Child's Full Name"
               value={formData.child.fullName}
               onChange={(e) => handleChange(e, "child.fullName")}
               fullWidth
               required
-              sx={{ mb: 2, mt: 1 }}
+              sx={{ mb: 2 }}
             />
-            <Grid container spacing={2} mb={2}>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  label="Araw ng Kapanganakan"
-                  type="date"
-                  value={formData.child.dateOfBirth}
-                  onChange={(e) => handleChange(e, "child.dateOfBirth")}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  label="Lugar ng Kapanganakan"
-                  value={formData.child.placeOfBirth}
-                  onChange={(e) => handleChange(e, "child.placeOfBirth")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <FormControl fullWidth required>
-                  <InputLabel id="child-gender-label">Kasarian</InputLabel>
-                  <Select
-                    labelId="child-gender-label"
-                    label="Kasarian"
-                    value={formData.child.gender}
-                    onChange={(e) => handleChange(e, "child.gender")}
-                  >
-                    <MenuItem value="">
-                      <em>-- Piliin ang Kasarian --</em>
-                    </MenuItem>
-                    <MenuItem value="Male">Lalaki</MenuItem>
-                    <MenuItem value="Female">Babae</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+              <TextField
+                label="Date of Birth"
+                type="date"
+                value={formData.child.dateOfBirth}
+                onChange={(e) => handleChange(e, "child.dateOfBirth")}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Place of Birth"
+                value={formData.child.placeOfBirth}
+                onChange={(e) => handleChange(e, "child.placeOfBirth")}
+                fullWidth
+                required
+              />
+              <FormControl fullWidth required>
+                <InputLabel>Gender</InputLabel>
+                <Select
+                  value={formData.child.gender}
+                  onChange={(e) => handleChange(e, "child.gender")}
+                  label="Gender"
+                >
+                  <MenuItem value="Male">Male</MenuItem>
+                  <MenuItem value="Female">Female</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
 
             {/* Parents Information */}
-            <Typography variant="h6" mt={3}>
-              Magulang ng Bibinyagan
+            <Typography variant="h6" mt={3} mb={2}>
+              Parents Information
             </Typography>
-            <Grid container spacing={2} mb={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Buong Pangalan ng Ama"
-                  value={formData.parents.fatherFullName}
-                  onChange={(e) => handleChange(e, "parents.fatherFullName")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Lugar ng Kapanganakan (Ama)"
-                  value={formData.parents.placeOfFathersBirth}
-                  onChange={(e) =>
-                    handleChange(e, "parents.placeOfFathersBirth")
-                  }
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Buong Pangalan ng Ina"
-                  value={formData.parents.motherFullName}
-                  onChange={(e) => handleChange(e, "parents.motherFullName")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Lugar ng Kapanganakan (Ina)"
-                  value={formData.parents.placeOfMothersBirth}
-                  onChange={(e) =>
-                    handleChange(e, "parents.placeOfMothersBirth")
-                  }
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Tirahan"
-                  value={formData.parents.address}
-                  onChange={(e) => handleChange(e, "parents.address")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <TextField
-                  label="Contact Number"
-                  value={formData.phone}
-                  onChange={(e) => handleChange(e, "phone")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <FormControl fullWidth required>
-                  <InputLabel id="marriage-status-label">Saan Kasal</InputLabel>
-                  <Select
-                    labelId="marriage-status-label"
-                    label="Saan Kasal"
-                    value={formData.parents.marriageStatus}
-                    onChange={(e) => handleChange(e, "parents.marriageStatus")}
-                  >
-                    <MenuItem value="">
-                      <em>-- Saan Kasal --</em>
-                    </MenuItem>
-                    <MenuItem value="Simbahan">Simbahan (Katoliko)</MenuItem>
-                    <MenuItem value="Civil">Civil (Huwes)</MenuItem>
-                    <MenuItem value="Nat">Nat (Hindi Kasal)</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-
-            {/* Ninong */}
-            <Typography variant="h6" mt={3}>
-              Ninong
-            </Typography>
-            <Grid container spacing={2} mb={2}>
-              <Grid item xs={12} md={5}>
-                <TextField
-                  label="Pangalan"
-                  value={formData.ninong.name}
-                  onChange={(e) => handleChange(e, "ninong.name")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={5}>
-                <TextField
-                  label="Tirahan"
-                  value={formData.ninong.address}
-                  onChange={(e) => handleChange(e, "ninong.address")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <TextField
-                  label="Relihiyon"
-                  value={formData.ninong.religion}
-                  onChange={(e) => handleChange(e, "ninong.religion")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-            </Grid>
-
-            {/* Ninang */}
-            <Typography variant="h6" mt={3}>
-              Ninang
-            </Typography>
-            <Grid container spacing={2} mb={2}>
-              <Grid item xs={12} md={5}>
-                <TextField
-                  label="Pangalan"
-                  value={formData.ninang.name}
-                  onChange={(e) => handleChange(e, "ninang.name")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={5}>
-                <TextField
-                  label="Tirahan"
-                  value={formData.ninang.address}
-                  onChange={(e) => handleChange(e, "ninang.address")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <TextField
-                  label="Relihiyon"
-                  value={formData.ninang.religion}
-                  onChange={(e) => handleChange(e, "ninang.religion")}
-                  fullWidth
-                  required
-                />
-              </Grid>
-            </Grid>
-
-            {/* Secondary Ninong */}
-            <Typography variant="h6" mt={3}>
-              Secondary Ninong
-            </Typography>
-            {NinongGodparents.map((godparent, index) => (
-              <Grid container spacing={2} mb={1} key={`ninong-${index}`}>
-                <Grid item xs={10}>
-                  <TextField
-                    label="Pangalan ng Ninong"
-                    value={godparent.name}
-                    onChange={(e) =>
-                      handleGodparentChange("ninong", index, e.target.value)
-                    }
-                    fullWidth
-                  />
-                </Grid>
-                <Grid
-                  item
-                  xs={2}
-                  sx={{ display: "flex", alignItems: "center" }}
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+              <TextField
+                label="Father's Full Name"
+                value={formData.parents.fatherFullName}
+                onChange={(e) => handleChange(e, "parents.fatherFullName")}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Father's Birthplace"
+                value={formData.parents.placeOfFathersBirth}
+                onChange={(e) => handleChange(e, "parents.placeOfFathersBirth")}
+                fullWidth
+                required
+              />
+            </Box>
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+              <TextField
+                label="Mother's Full Name"
+                value={formData.parents.motherFullName}
+                onChange={(e) => handleChange(e, "parents.motherFullName")}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Mother's Birthplace"
+                value={formData.parents.placeOfMothersBirth}
+                onChange={(e) => handleChange(e, "parents.placeOfMothersBirth")}
+                fullWidth
+                required
+              />
+            </Box>
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+              <TextField
+                label="Address"
+                value={formData.parents.address}
+                onChange={(e) => handleChange(e, "parents.address")}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Contact Number"
+                value={formData.phone}
+                onChange={(e) => handleChange(e, "phone")}
+                fullWidth
+                required
+              />
+              <FormControl fullWidth required>
+                <InputLabel>Marriage Status</InputLabel>
+                <Select
+                  value={formData.parents.marriageStatus}
+                  onChange={(e) => handleChange(e, "parents.marriageStatus")}
+                  label="Marriage Status"
                 >
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => handleRemoveGodparent("ninong", index)}
-                    fullWidth
-                  >
-                    Remove
-                  </Button>
-                </Grid>
-              </Grid>
-            ))}
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => handleAddGodparent("ninong")}
-              sx={{ mb: 3 }}
-            >
-              Add Secondary Ninong
-            </Button>
+                  <MenuItem value="Simbahan">Church Wedding</MenuItem>
+                  <MenuItem value="Civil">Civil Wedding</MenuItem>
+                  <MenuItem value="Nat">Not Married</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
 
-            {/* Secondary Ninang */}
-            <Typography variant="h6" mt={3}>
-              Secondary Ninang
+            {/* Godparents */}
+            <Typography variant="h6" mt={3} mb={2}>
+              Godparents
             </Typography>
-            {NinangGodparents.map((godparent, index) => (
-              <Grid container spacing={2} mb={1} key={`ninang-${index}`}>
-                <Grid item xs={10}>
-                  <TextField
-                    label="Pangalan ng Ninang"
-                    value={godparent.name}
-                    onChange={(e) =>
-                      handleGodparentChange("ninang", index, e.target.value)
-                    }
-                    fullWidth
-                  />
-                </Grid>
-                <Grid
-                  item
-                  xs={2}
-                  sx={{ display: "flex", alignItems: "center" }}
-                >
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => handleRemoveGodparent("ninang", index)}
-                    fullWidth
-                  >
-                    Remove
-                  </Button>
-                </Grid>
-              </Grid>
-            ))}
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => handleAddGodparent("ninang")}
-              sx={{ mb: 3 }}
-            >
-              Add Secondary Ninang
-            </Button>
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+              <TextField
+                label="Godfather Name"
+                value={formData.ninong.name}
+                onChange={(e) => handleChange(e, "ninong.name")}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Godfather Address"
+                value={formData.ninong.address}
+                onChange={(e) => handleChange(e, "ninong.address")}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Godfather Religion"
+                value={formData.ninong.religion}
+                onChange={(e) => handleChange(e, "ninong.religion")}
+                fullWidth
+                required
+              />
+            </Box>
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+              <TextField
+                label="Godmother Name"
+                value={formData.ninang.name}
+                onChange={(e) => handleChange(e, "ninang.name")}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Godmother Address"
+                value={formData.ninang.address}
+                onChange={(e) => handleChange(e, "ninang.address")}
+                fullWidth
+                required
+              />
+              <TextField
+                label="Godmother Religion"
+                value={formData.ninang.religion}
+                onChange={(e) => handleChange(e, "ninang.religion")}
+                fullWidth
+                required
+              />
+            </Box>
 
-            {/* Required Documents */}
-            <Typography variant="h6" mt={3}>
+            {/* Documents */}
+            <Typography variant="h6" mt={3} mb={2}>
               Required Documents
             </Typography>
-            <FormGroup sx={{ mb: 3 }}>
-              <InputLabel className="fw-bold text-danger">
+            <Box sx={{ mb: 3 }}>
+              <InputLabel sx={{ fontWeight: "bold", color: "error.main" }}>
                 Birth Certificate *
               </InputLabel>
               <Button variant="contained" component="label" sx={{ mb: 1 }}>
@@ -701,83 +658,7 @@ const BaptismForm = () => {
                 file={formData.documents.birthCertificate}
                 previewUrl={formData.previews.birthCertificate}
               />
-            </FormGroup>
-            <FormGroup sx={{ mb: 3 }}>
-              <InputLabel className="fw-bold text-danger">
-                Marriage Certificate *
-              </InputLabel>
-              <Button variant="contained" component="label" sx={{ mb: 1 }}>
-                Upload Marriage Certificate
-                <input
-                  type="file"
-                  hidden
-                  onChange={(e) => handleFileChange(e, "marriageCertificate")}
-                  accept="image/*,.pdf,.doc,.docx"
-                  required
-                />
-              </Button>
-              <DocumentPreview
-                file={formData.documents.marriageCertificate}
-                previewUrl={formData.previews.marriageCertificate}
-              />
-            </FormGroup>
-
-            {/* Additional Documents */}
-            <Typography variant="h6" mt={3}>
-              Additional Documents
-            </Typography>
-            <TextField
-              label="Baptism Permit From"
-              placeholder="Enter issuing parish"
-              value={formData.additionalDocs.baptismPermitFrom}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  additionalDocs: {
-                    ...prev.additionalDocs,
-                    baptismPermitFrom: e.target.value,
-                  },
-                }))
-              }
-              fullWidth
-              sx={{ mb: 2 }}
-            />
-            <FormGroup sx={{ mb: 3 }}>
-              <InputLabel>Baptism Permit (FOR NON-PARISHIONERS)</InputLabel>
-              <Button variant="contained" component="label" sx={{ mb: 1 }}>
-                Upload Baptism Permit
-                <input
-                  type="file"
-                  hidden
-                  onChange={(e) => handleFileChange(e, "baptismPermit")}
-                  accept="image/*,.pdf,.doc,.docx"
-                />
-              </Button>
-              <DocumentPreview
-                file={formData.documents.baptismPermit}
-                previewUrl={formData.previews.baptismPermit}
-              />
-            </FormGroup>
-            <FormGroup sx={{ mb: 3 }}>
-              <InputLabel>
-                Certificate Of No Record of Baptism (FOR 2 YEARS OLD AND ABOVE)
-              </InputLabel>
-              <Button variant="contained" component="label" sx={{ mb: 1 }}>
-                Upload Certificate
-                <input
-                  type="file"
-                  hidden
-                  onChange={(e) =>
-                    handleFileChange(e, "certificateOfNoRecordBaptism")
-                  }
-                  accept="image/*,.pdf,.doc,.docx"
-                />
-              </Button>
-              <DocumentPreview
-                file={formData.documents.certificateOfNoRecordBaptism}
-                previewUrl={formData.previews.certificateOfNoRecordBaptism}
-              />
-            </FormGroup>
+            </Box>
 
             <Box
               sx={{
@@ -787,45 +668,31 @@ const BaptismForm = () => {
                 mt: 4,
               }}
             >
-    <FormControlLabel
-  control={
-    <Checkbox
-      checked={agreedToTerms}
-      onClick={(e) => {
-        if (!agreedToTerms) {
-          e.preventDefault(); // block direct toggle
-          setShowTermsModal(true); // open modal instead
-        } else {
-          setAgreedToTerms(false); // allow unchecking
-        }
-      }}
-      required
-    />
-  }
-  label="I agree to the terms and conditions"
-/>
-
-
-<Button
-  type="submit"
-  variant="contained"
-  size="large"
-  disabled={isSubmitting || !agreedToTerms} // Disable until agreed
->
-  {isSubmitting ? "Submitting..." : "Submit"}
-</Button>
-
-{/* Terms and Conditions Modal */}
-<TermsModal
-  isOpen={showTermsModal}
-  onClose={() => setShowTermsModal(false)}
-  onAccept={() => {
-    setAgreedToTerms(true);
-    setShowTermsModal(false);
-  }}
-  termsText={termsAndConditionsText}
-/>
-
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={agreedToTerms}
+                    onClick={(e) => {
+                      if (!agreedToTerms) {
+                        e.preventDefault();
+                        setShowTermsModal(true);
+                      } else {
+                        setAgreedToTerms(false);
+                      }
+                    }}
+                    required
+                  />
+                }
+                label="I agree to the terms and conditions"
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={isSubmitting || !agreedToTerms}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </Button>
             </Box>
           </Box>
         </Paper>

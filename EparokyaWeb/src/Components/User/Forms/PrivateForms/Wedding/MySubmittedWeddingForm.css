@@ -104,3 +104,19 @@
 .user-button-container {
     /* Add your styles here */
 }
+
+.custom-datepicker {
+  font-size: 1.2rem; /* Increase font size */
+  width: 100%; /* Full width if needed */
+}
+
+.react-datepicker {
+  font-size: 1.2rem; /* Enlarge calendar text */
+}
+
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker__time-name {
+  width: 3rem;
+  line-height: 3rem;
+}

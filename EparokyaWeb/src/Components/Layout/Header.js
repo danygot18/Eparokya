@@ -8,14 +8,13 @@ import {
   Menu,
   MenuItem,
   Typography,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../Redux/actions/userActions";
 import { toast } from "react-toastify";
 import NotificationUser from "../Notification/NotificationUser";
 import Loader from "../Layout/Loader";
-
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -34,11 +33,11 @@ const Header = () => {
 
   const handleUserMenuOpen = (event) => setUserMenuEl(event.currentTarget);
   const handleUserMenuClose = () => setUserMenuEl(null);
-  
+
   const logoutHandler = async () => {
     setIsLoggingOut(true);
     try {
-       dispatch(logout());
+      dispatch(logout());
       navigate("/");
       toast.success("Log Out Success", {
         position: toast.POSITION.TOP_RIGHT,
@@ -46,9 +45,9 @@ const Header = () => {
 
       document.cookie = [
         'token=""',
-        'expires=Thu, 01 Jan 1970 00:00:00 GMT',
-        'path=/'
-      ].join('; ');
+        "expires=Thu, 01 Jan 1970 00:00:00 GMT",
+        "path=/",
+      ].join("; ");
     } finally {
       setIsLoggingOut(false);
     }
@@ -66,10 +65,22 @@ const Header = () => {
     },
   });
 
-  if (loading || isLoggingOut) return <CircularProgress  style={{ color: "#90C67C", alignItems: "center", justifyContent: "center" }} />;
+  if (loading || isLoggingOut)
+    return (
+      <CircularProgress
+        style={{
+          color: "#90C67C",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      />
+    );
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#1e3a3a", padding: "3px" }}>
+    <AppBar
+      position="static"
+      sx={{ backgroundColor: "#1e3a3a", padding: "3px" }}
+    >
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         {/* Left - Logo */}
         <Typography
@@ -96,7 +107,7 @@ const Header = () => {
           <Button
             component={Link}
             to="/user/prayerRequestIntention"
-            sx={navButtonStyle("/user/prayerRequestIntention") }
+            sx={navButtonStyle("/user/prayerRequestIntention")}
           >
             Prayer
           </Button>
@@ -104,7 +115,7 @@ const Header = () => {
           <Button
             component={Link}
             to="/user/live"
-            sx={navButtonStyle("/user/live")}     
+            sx={navButtonStyle("/user/live")}
           >
             Live
           </Button>
@@ -143,13 +154,32 @@ const Header = () => {
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
-            <MenuItem component={Link} to="/memberHistory" onClick={handleParishMenuClose}>
+            <MenuItem
+              component={Link}
+              to="/memberHistory"
+              onClick={handleParishMenuClose}
+            >
               Members
             </MenuItem>
-            <MenuItem component={Link} to="/parishHistory" onClick={handleParishMenuClose}>
+            <MenuItem
+              component={Link}
+              to="/user/ministryCalendar"
+              onClick={handleUserMenuClose}
+            >
+              Ministry Calendar
+            </MenuItem>
+            <MenuItem
+              component={Link}
+              to="/parishHistory"
+              onClick={handleParishMenuClose}
+            >
               Parish History
             </MenuItem>
-            <MenuItem component={Link} to="/parishPriests" onClick={handleParishMenuClose}>
+            <MenuItem
+              component={Link}
+              to="/parishPriests"
+              onClick={handleParishMenuClose}
+            >
               Parish Priests
             </MenuItem>
           </Menu>
@@ -173,21 +203,34 @@ const Header = () => {
                 open={Boolean(userMenuEl)}
                 onClose={handleUserMenuClose}
               >
-                <MenuItem component={Link} to="/profile" onClick={handleUserMenuClose}>
+                <MenuItem
+                  component={Link}
+                  to="/profile"
+                  onClick={handleUserMenuClose}
+                >
                   Profile
                 </MenuItem>
-                <MenuItem component={Link} to="/user/ministryCalendar" onClick={handleUserMenuClose}>
-                  Ministry Calendar
-                </MenuItem>
-                <MenuItem component={Link} to="/user/ministryAnnouncement" onClick={handleUserMenuClose}>
+                <MenuItem
+                  component={Link}
+                  to="/user/ministryAnnouncement"
+                  onClick={handleUserMenuClose}
+                >
                   Ministry Announcements
                 </MenuItem>
                 {user?.isAdmin && (
-                  <MenuItem component={Link} to="/admin/dashboard" onClick={handleUserMenuClose}>
+                  <MenuItem
+                    component={Link}
+                    to="/admin/dashboard"
+                    onClick={handleUserMenuClose}
+                  >
                     Dashboard
                   </MenuItem>
                 )}
-                <MenuItem component={Link} to="/chatlist" onClick={handleUserMenuClose}>
+                <MenuItem
+                  component={Link}
+                  to="/chatlist"
+                  onClick={handleUserMenuClose}
+                >
                   Chat
                 </MenuItem>
                 <MenuItem onClick={logoutHandler}>
