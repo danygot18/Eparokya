@@ -258,7 +258,7 @@ const Calendars = () => {
 
 
   useEffect(() => {
-    console.log("Updated liturgical data:", liturgical);
+    // console.log("Updated liturgical data:", liturgical);
   }, [liturgical]);
 
   const groupedByMonth = liturgical.reduce((acc, item) => {
@@ -367,7 +367,7 @@ const Calendars = () => {
         </Paper>
 
         {/* Default Liturgical Calendar  */}
-        <Paper elevation={3} sx={{ p: 2, ml: isMobile ? 0 : 2, mt: isMobile ? 2 : 0, maxHeight: 400, overflowY: 'auto' }}>
+        <Paper elevation={3} sx={{ p: 2, ml: isMobile ? 0 : 2, mt: isMobile ? 2 : 0, maxHeight: 400, overflowY: 'auto', mt: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
             <IconButton onClick={() => setYear(prev => prev - 1)}><ArrowBack /></IconButton>
             <Typography variant="h6">Liturgical Calendar ({year})</Typography>
