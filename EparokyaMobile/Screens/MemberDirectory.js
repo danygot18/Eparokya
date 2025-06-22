@@ -115,7 +115,7 @@ const MemberDirectory = () => {
                     <YStack flex={1}>
                       <Text fontWeight="bold">{member.name}</Text>
                       <Text color="#666" fontSize={12}>
-                        {formatDate(member.birthDate)}
+                        Birthday: {formatDate(member.birthDate)}
                       </Text>
                       <Text color="#666" fontSize={12}>
                         Civil Status: {member.civilStatus}
