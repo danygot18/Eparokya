@@ -228,8 +228,9 @@ exports.submitWeddingForm = async (req, res) => {
 
 exports.getAllWeddings = async (req, res) => {
   try {
-    const weddingList = await Wedding.find({}, 'brideName groomName bridePhone groomPhone weddingDate weddingTime weddingStatus userId')
-      .populate('userId', 'name');
+    const weddingList = await Wedding.find({}, 'brideName groomName bridePhone groomPhone weddingDate weddingTime weddingStatus userId priest ')
+      .populate('userId', 'name')
+      .populate('priest', 'fullName title');;
 
 
     if (!weddingList || weddingList.length === 0) {

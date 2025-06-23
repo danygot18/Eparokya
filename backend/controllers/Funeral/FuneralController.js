@@ -201,7 +201,9 @@ exports.createFuneral = async (req, res) => {
 
 exports.getFunerals = async (req, res) => {
     try {
-        const funerals = await Funeral.find().populate('userId', 'name');
+        const funerals = await Funeral.find()
+            .populate('userId', 'name')
+            .populate('Priest', 'fullName')
         res.status(200).json(funerals);
     } catch (err) {
         console.error('Error fetching funeral entries:', err);
