@@ -361,7 +361,7 @@ export const Home = () => {
           </div>
 
           {/* Right side: Mass Readings */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div style={{ display: "flex", flexDirection: "column", width: "450px"}}>
             <MassReadingsCard />
             <MassIntentionCard />
           </div>

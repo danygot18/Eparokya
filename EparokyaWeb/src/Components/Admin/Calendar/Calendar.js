@@ -258,7 +258,7 @@ const Calendars = () => {
 
 
   useEffect(() => {
-    console.log("Updated liturgical data:", liturgical);
+    // console.log("Updated liturgical data:", liturgical);
   }, [liturgical]);
 
   const groupedByMonth = liturgical.reduce((acc, item) => {

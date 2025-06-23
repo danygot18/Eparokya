@@ -228,17 +228,22 @@ const UserCalendar = () => {
   }
 
   return (
+    
     <Box
       sx={{
         display: 'flex',
         flex: 1,
         flexDirection: isMobile ? 'column' : 'row',
-        p: isMobile ? 2 : 3,
+        // p: isMobile ? 2 : 3,
         gap: 2,
         overflow: 'auto'
       }}
     >
-      <Box sx={{ flex: 2 }}>
+      
+      <div>
+        <GuestSideBar />
+      </div>
+      <Box sx={{ flex: 2, p: isMobile ? 1 : 2, overflowY: 'auto' }}>
         <Metadata title="User Calendar" />
         <Typography
           variant="h4"
@@ -354,7 +359,7 @@ const UserCalendar = () => {
       </Box>
 
       {!isMobile && (
-        <Box sx={{ flex: 1, maxWidth: 350 }}>
+        <Box sx={{ flex: 1, maxWidth: 350, mt: 2, mr: 2 }}>
           <UserLocalCalendarList />
         </Box>
       )}
