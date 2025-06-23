@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../../Layout/styles/style.css";
 import SideBar from "../SideBar";
 import { useNavigate } from "react-router-dom";
-import Loader from "../../Layout/Loader";
 import {
   Box,
   Typography,
@@ -12,6 +10,15 @@ import {
   Divider,
   Paper,
   Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { format } from "date-fns";
@@ -19,6 +26,7 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
 } from "@mui/icons-material";
+import Loader from "../../Layout/Loader";
 
 const StatusChip = styled(Chip)(({ theme, status }) => {
   const backgroundColor =
@@ -36,7 +44,6 @@ const StatusChip = styled(Chip)(({ theme, status }) => {
     color: theme.palette.getContrastText(backgroundColor),
   };
 });
-
 
 const StyledCard = styled(Paper)(({ theme, status }) => ({
   position: "relative",
@@ -67,11 +74,37 @@ const groupByMonthYear = (forms) => {
   return grouped;
 };
 
+const formatBaptismTime = (rawTime) => {
+  if (!rawTime) return "N/A";
+  
+  try {
+    let date;
+    if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
+      const today = new Date();
+      const [hours, minutes] = rawTime.split(':');
+      date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), +hours, +minutes);
+    } else {
+      date = new Date(rawTime);
+    }
+
+    if (isNaN(date.getTime())) {
+      console.warn("Invalid baptismTime:", rawTime);
+      return "N/A";
+    }
+
+    return format(date, 'h:mm a');
+  } catch (e) {
+    console.error("Error parsing baptismTime:", rawTime, e);
+    return "N/A";
+  }
+};
+
 const BaptismList = () => {
   const [baptismForms, setBaptismForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filteredStatus, setFilteredStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState("cards"); // 'cards' or 'table'
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -87,13 +120,11 @@ const BaptismList = () => {
       );
       if (response.data && Array.isArray(response.data.baptismForms)) {
         setBaptismForms(response.data.baptismForms);
-        console.log("Baptism Forms:", response.data.baptismForms);
       } else {
         setBaptismForms([]);
       }
     } catch (error) {
       console.error("Error fetching baptism forms:", error);
-      window.alert("Unable to fetch baptism forms.");
     } finally {
       setLoading(false);
     }
@@ -118,18 +149,141 @@ const BaptismList = () => {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const cardsPerPage = 10;
-  const totalPages = Math.ceil(sortedForms.length / cardsPerPage);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(sortedForms.length / itemsPerPage);
   const paginatedForms = sortedForms.slice(
-    (currentPage - 1) * cardsPerPage,
-    currentPage * cardsPerPage
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   const groupedPaginated = groupByMonthYear(paginatedForms);
 
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
+  const renderCardsView = () => (
+    <Stack spacing={4} sx={{ width: "100%" }}>
+      {Object.entries(groupedPaginated).map(([monthYear, forms]) => (
+        <Box key={monthYear}>
+          <Divider sx={{ mb: 2 }}>
+            <Chip
+              label={monthYear}
+              color="primary"
+              variant="outlined"
+              sx={{ px: 2, fontSize: "0.875rem" }}
+            />
+          </Divider>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              width: "100%",
+            }}
+          >
+            {forms.map((item, index) => (
+              <Box
+                key={item._id}
+                sx={{
+                  flex: "1 1 calc(50% - 16px)",
+                  minWidth: 0,
+                  maxWidth: "calc(50% - 16px)",
+                  boxSizing: "border-box",
+                }}
+              >
+                <StyledCard
+                  elevation={3}
+                  status={item.binyagStatus}
+                  onClick={() => navigate(`/admin/baptismDetails/${item._id}`)}
+                  sx={{ cursor: "pointer", height: "100%" }}
+                >
+                  <Box sx={{ position: "absolute", right: 16, top: 16 }}>
+                    <StatusChip
+                      label={item.binyagStatus ?? "Unknown"}
+                      size="small"
+                      status={item.binyagStatus}
+                    />
+                  </Box>
+                  <Typography variant="h6" component="h2" gutterBottom>
+                    Baptism #{index + 1 + (currentPage - 1) * itemsPerPage}: {item.child?.fullName ?? "Unknown Child"}
+                  </Typography>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Father:</strong> {item.parents?.fatherFullName ?? "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Mother:</strong> {item.parents?.motherFullName ?? "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Baptism Date:</strong>{" "}
+                    {item.baptismDate
+                      ? new Date(item.baptismDate).toLocaleDateString()
+                      : "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Baptism Time:</strong> {formatBaptismTime(item?.baptismTime)}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Contact:</strong> {item.phone ?? "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Submitted By:</strong> {item.userId?.name || "Unknown"}
+                  </Typography>
+                </StyledCard>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      ))}
+    </Stack>
+  );
+
+  const renderTableView = () => (
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>#</strong></TableCell>
+              <TableCell><strong>Child Name</strong></TableCell>
+              <TableCell><strong>Father</strong></TableCell>
+              <TableCell><strong>Mother</strong></TableCell>
+              <TableCell><strong>Baptism Date</strong></TableCell>
+              <TableCell><strong>Baptism Time</strong></TableCell>
+              <TableCell><strong>Contact</strong></TableCell>
+              <TableCell><strong>Submitted By</strong></TableCell>
+              <TableCell><strong>Status</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedForms.map((item, index) => (
+              <TableRow 
+                key={item._id} 
+                hover 
+                sx={{ cursor: "pointer" }}
+                onClick={() => navigate(`/admin/baptismDetails/${item._id}`)}
+              >
+                <TableCell>{index + 1 + (currentPage - 1) * itemsPerPage}</TableCell>
+                <TableCell>{item.child?.fullName ?? "Unknown Child"}</TableCell>
+                <TableCell>{item.parents?.fatherFullName ?? "N/A"}</TableCell>
+                <TableCell>{item.parents?.motherFullName ?? "N/A"}</TableCell>
+                <TableCell>
+                  {item.baptismDate ? new Date(item.baptismDate).toLocaleDateString() : "N/A"}
+                </TableCell>
+                <TableCell>{formatBaptismTime(item?.baptismTime)}</TableCell>
+                <TableCell>{item.phone ?? "N/A"}</TableCell>
+                <TableCell>{item.userId?.name || "Unknown"}</TableCell>
+                <TableCell>
+                  <StatusChip
+                    label={item.binyagStatus ?? "Unknown"}
+                    size="small"
+                    status={item.binyagStatus}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", width: "100%" }}>
@@ -159,43 +313,56 @@ const BaptismList = () => {
           <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", textAlign: "center" }}>
             Baptism Records
           </Typography>
-          <Stack direction="row" spacing={2} sx={{ mb: 2, justifyContent: "center" }}>
-            {["All", "Confirmed", "Pending", "Cancelled", "Rescheduled"].map((status) => (
-              <Button
-                key={status}
-                variant={filteredStatus === status ? "contained" : "outlined"}
-                color={
-                  status === "Confirmed"
-                    ? "success"
-                    : status === "Cancelled"
-                      ? "error"
-                      : status === "Rescheduled"
-                        ? "info"
-                        : status === "Pending"
-                          ? "warning"
-                          : "primary"
-                }
-                onClick={() => setFilteredStatus(status)}
-              >
-                {status}
-              </Button>
-            ))}
-          </Stack>
+          
+          <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mb: 2 }}>
+            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+              {["All", "Confirmed", "Pending", "Cancelled", "Rescheduled"].map((status) => (
+                <Button
+                  key={status}
+                  variant={filteredStatus === status ? "contained" : "outlined"}
+                  color={
+                    status === "Confirmed"
+                      ? "success"
+                      : status === "Cancelled"
+                        ? "error"
+                        : status === "Rescheduled"
+                          ? "info"
+                          : status === "Pending"
+                            ? "warning"
+                            : "primary"
+                  }
+                  onClick={() => setFilteredStatus(status)}
+                >
+                  {status}
+                </Button>
+              ))}
+            </Stack>
+            
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={(e, newMode) => newMode && setViewMode(newMode)}
+              aria-label="view mode"
+            >
+              <ToggleButton value="cards" aria-label="card view">
+                Card View
+              </ToggleButton>
+              <ToggleButton value="table" aria-label="table view">
+                Table View
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          
           <Box sx={{ width: "100%", mb: 2 }}>
-            <input
-              type="text"
-              placeholder="Search by Child or Parent Name"
+            <TextField
+              label="Search by Child or Parent Name"
+              variant="outlined"
+              fullWidth
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                padding: "10px",
-                marginBottom: "20px",
-                width: "100%",
-                borderRadius: 4,
-                border: "1px solid #ccc",
-              }}
             />
           </Box>
+          
           {loading ? (
             <Loader />
           ) : paginatedForms.length === 0 ? (
@@ -205,145 +372,42 @@ const BaptismList = () => {
               </Typography>
             </Paper>
           ) : (
-            <Stack spacing={4} sx={{ width: "100%" }}>
-              {Object.entries(groupedPaginated).map(([monthYear, forms]) => (
-                <Box key={monthYear}>
-                  <Divider sx={{ mb: 2 }}>
-                    <Chip
-                      label={monthYear}
-                      color="primary"
-                      variant="outlined"
-                      sx={{ px: 2, fontSize: "0.875rem" }}
-                    />
-                  </Divider>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 2,
-                      width: "100%",
-                    }}
-                  >
-                    {forms.map((item, index) => (
-                      <Box
-                        key={item._id}
-                        sx={{
-                          flex: "1 1 calc(50% - 16px)",
-                          minWidth: 0,
-                          maxWidth: "calc(50% - 16px)",
-                          boxSizing: "border-box",
-                        }}
-                      >
-                        <StyledCard
-                          elevation={3}
-                          status={item.binyagStatus}
-                          onClick={() => navigate(`/admin/baptismDetails/${item._id}`)}
-                          sx={{ cursor: "pointer", height: "100%" }}
-                        >
-                          <Box sx={{ position: "absolute", right: 16, top: 16 }}>
-                            <StatusChip
-                              label={item.binyagStatus ?? "Unknown"}
-                              size="small"
-                              status={item.binyagStatus}
-                            />
-                          </Box>
-                          <Typography variant="h6" component="h2" gutterBottom>
-                            Baptism #{index + 1 + (currentPage - 1) * cardsPerPage}: {item.child?.fullName ?? "Unknown Child"}
-                          </Typography>
-                          <Divider sx={{ my: 1 }} />
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Father:</strong> {item.parents?.fatherFullName ?? "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Mother:</strong> {item.parents?.motherFullName ?? "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Baptism Date:</strong>{" "}
-                            {item.baptismDate
-                              ? new Date(item.baptismDate).toLocaleDateString()
-                              : "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Baptism Time:</strong>{" "}
-                            {item?.baptismTime ? (() => {
-                              try {
-                                const rawTime = item.baptismTime;
-
-                                // If it's just a time string like "12:41", create a full date with today's date
-                                let date;
-                                if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
-                                  const today = new Date();
-                                  const [hours, minutes] = rawTime.split(':');
-                                  date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), +hours, +minutes);
-                                } else {
-                                  date = new Date(rawTime);
-                                }
-
-                                if (isNaN(date.getTime())) {
-                                  console.warn("Invalid baptismTime:", rawTime);
-                                  return "N/A";
-                                }
-
-                                return format(date, 'h:mm a'); // e.g. "1:08 AM"
-                              } catch (e) {
-                                console.error("Error parsing baptismTime:", item.baptismTime, e);
-                                return "N/A";
-                              }
-                            })() : "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Contact:</strong> {item.phone ?? "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Submitted By:</strong> {item.userId?.name || "Unknown"}
-                          </Typography>
-                        </StyledCard>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              ))}
+            <>
+              {viewMode === "cards" ? renderCardsView() : renderTableView()}
+              
               {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div style={{ position: "relative", width: "50%", height: "100%", alignItems: "center", margin: "auto" }}>
+                <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 3 }}>
                   <Box
                     sx={{
                       display: "flex",
-                      justifyContent: "center",
                       alignItems: "center",
                       gap: 2,
-                      mt: 3,
                     }}
                   >
-                    <div>
-                      <Button
-                        variant="outlined"
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                        startIcon={<ChevronLeftIcon />}
-                      >
-                        Previous
-                      </Button>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                      <Typography variant="body1" color="text.secondary">
-                        Page {currentPage} of {totalPages}
-                      </Typography>
-                    </div>
-                    <div>
-                      <Button
-                        variant="outlined"
-                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        endIcon={<ChevronRightIcon />}
-                      >
-                        Next
-                      </Button>
-                    </div>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      startIcon={<ChevronLeftIcon />}
+                    >
+                      Previous
+                    </Button>
+                    <Typography variant="body1" color="text.secondary">
+                      Page {currentPage} of {totalPages}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      endIcon={<ChevronRightIcon />}
+                    >
+                      Next
+                    </Button>
                   </Box>
-                </div>
+                </Box>
               )}
-            </Stack>
+            </>
           )}
         </Box>
       </Box>
