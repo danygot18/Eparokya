@@ -23,8 +23,7 @@ import {
     Divider
 } from "@mui/material";
 import { format } from "date-fns";
-
-
+import BaptismPDFDownloadForm from "./BaptismPDFDownloadForm";
 
 
 const BaptismDetails = () => {
@@ -793,6 +792,12 @@ const BaptismDetails = () => {
                         Cancel Baptism
                     </button>
                 </div>
+                <BaptismPDFDownloadForm
+                    baptismDetails={baptismDetails}
+                    comments={comments}
+                    adminNotes={baptismDetails?.adminNotes}
+                />
+
                 <Dialog open={showCancelModal} onClose={() => setShowCancelModal(false)} size="md">
                     <DialogTitle>Cancel Baptism</DialogTitle>
                     <DialogContent>

@@ -40,6 +40,7 @@ import {
 import SideBar from "../SideBar";
 import { toast, ToastContainer } from "react-toastify";
 import dayjs from "dayjs";
+import HouseBlessingPDFDownloadForm from "./BlessingPDFDownloadForm";
 
 const HouseBlessingsDetails = () => {
   const { blessingId } = useParams();
@@ -690,6 +691,10 @@ const HouseBlessingsDetails = () => {
                   Cancel Blessing
                 </Button>
               </Stack>
+              <HouseBlessingPDFDownloadForm
+  blessingDetails={blessingDetails}
+  comments={comments}
+/>
 
             </Stack>
           </Stack>

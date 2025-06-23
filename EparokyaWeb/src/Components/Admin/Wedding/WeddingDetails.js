@@ -25,6 +25,8 @@ import {
 import { format } from "date-fns";
 import Loader from "../../Layout/Loader"
 import CloseIcon from "@mui/icons-material/Close";
+import WeddingPDFDownloadForm from "./WeddingPDFDownloadForm";
+
 
 const WeddingDetails = () => {
   const { weddingId } = useParams();
@@ -76,6 +78,7 @@ const WeddingDetails = () => {
 
   const formatDate = (date) =>
     date ? new Date(date).toLocaleDateString() : "N/A";
+
 
   useEffect(() => {
     const fetchWeddingDetails = async () => {
@@ -342,6 +345,7 @@ const handleUpdate = async () => {
 };
 
 
+
   if (loading) return <Loader />;
 
   if (error) return <div>Error: {error}</div>;
@@ -472,7 +476,7 @@ const handleUpdate = async () => {
                           return "N/A";
                         }
 
-                        return format(date, 'h:mm a'); // e.g. "1:08 AM"
+                        return format(date, 'h:mm a'); 
                       } catch (e) {
                         console.error("Error parsing weddingTime:", weddingDetails.weddingTime, e);
                         return "N/A";
@@ -514,6 +518,14 @@ const handleUpdate = async () => {
                       <strong>Phone:</strong>{" "}
                       {weddingDetails?.bridePhone || "N/A"}
                     </Typography>
+                     <Typography sx={{ flex: "1 1 200px" }}>
+                      <strong>Bride Mother:</strong>{" "}
+                      {weddingDetails?.brideMother || "N/A"}
+                    </Typography>
+                     <Typography sx={{ flex: "1 1 200px" }}>
+                      <strong>Bride Father:</strong>{" "}
+                      {weddingDetails?.brideFather || "N/A"}
+                    </Typography>
                   </CardContent>
                 </Card>
 
@@ -541,12 +553,21 @@ const handleUpdate = async () => {
                       <strong>Phone:</strong>{" "}
                       {weddingDetails?.groomPhone || "N/A"}
                     </Typography>
+                     <Typography sx={{ flex: "1 1 200px" }}>
+                      <strong>Groom Mother:</strong>{" "}
+                      {weddingDetails?.groomMother || "N/A"}
+                    </Typography>
+                     <Typography sx={{ flex: "1 1 200px" }}>
+                      <strong>Groom Father:</strong>{" "}
+                      {weddingDetails?.groomFather || "N/A"}
+                    </Typography>
+                   
                   </CardContent>
                 </Card>
               </Box>
 
               {/* Parents Details */}
-              <Card>
+              {/* <Card>
                 <CardContent>
                   <Typography variant="h6">Parents</Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
@@ -568,7 +589,7 @@ const handleUpdate = async () => {
                     </Typography>
                   </Box>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               {/* Ninong & Ninang */}
               {["Ninong", "Ninang"].map((role) => (
@@ -1227,7 +1248,8 @@ const handleUpdate = async () => {
                 Go to Admin Chat
               </button>
             </div>
-            <button
+            {/* confirm */}
+            {/* <button
               disabled={weddingDetails?.weddingStatus === "Confirmed"}
               onClick={() => setShowConfirmDialog(true)}
               style={{
@@ -1243,7 +1265,11 @@ const handleUpdate = async () => {
               }}
             >
               {weddingDetails?.weddingStatus === "Confirmed" ? "Confirmed Wedding" : "Confirm Wedding"}
-            </button>
+            </button> */}
+
+              {/* --- Download PDF Button --- */}
+           <WeddingPDFDownloadForm weddingDetails={weddingDetails} />
+
             <Dialog open={showConfirmDialog} onClose={() => setShowConfirmDialog(false)}>
               <DialogTitle>Confirm Wedding</DialogTitle>
               <DialogContent>

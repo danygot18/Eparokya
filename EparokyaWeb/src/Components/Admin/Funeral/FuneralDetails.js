@@ -34,11 +34,9 @@ import {
     Fullscreen as FullscreenIcon,
 } from "@mui/icons-material";
 import { format } from "date-fns";
-
-// PDF
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { useRef } from 'react';
+import FuneralPDFDownloadForm from "./FuneralPDFDownloadForm";
+
 
 const FuneralDetails = () => {
     const { funeralId } = useParams();
@@ -279,40 +277,6 @@ const FuneralDetails = () => {
         return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
     };
 
-    const handleDownloadPdf = async () => {
-        const doc = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = doc.internal.pageSize.getWidth();
-        const pdfHeight = doc.internal.pageSize.getHeight();
-
-        const renderFullPage = async (ref) => {
-            if (ref.current) {
-                const canvas = await html2canvas(ref.current, {
-                    scale: 2,
-                    useCORS: true,
-                    backgroundColor: "#ffffff",
-                    scrollY: -window.scrollY,
-                });
-
-                const imgData = canvas.toDataURL('image/png');
-                const imgProps = doc.getImageProperties(imgData);
-
-                let imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                let position = 0;
-
-                // Split to multiple pages if necessary
-                while (imgHeight > 0) {
-                    doc.addImage(imgData, 'PNG', 0, position, pdfWidth, (imgProps.height * pdfWidth) / imgProps.width);
-                    imgHeight -= pdfHeight;
-                    if (imgHeight > 0) doc.addPage();
-                }
-            }
-        };
-
-        await renderFullPage(funeralRef);
-        await renderFullPage(adminRef);
-
-        doc.save('funeral-details.pdf');
-    };
 
     if (loading) return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -742,15 +706,10 @@ const FuneralDetails = () => {
                                 Go to Admin Chat
                             </Button>
 
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                fullWidth
-                                sx={{ mt: 2 }}
-                                onClick={handleDownloadPdf}
-                            >
-                                Download PDF
-                            </Button>
+                            <FuneralPDFDownloadForm
+                                funeralDetails={funeralDetails}
+                                comments={comments}
+                            />
 
                         </Paper>
                     </Box>
