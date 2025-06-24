@@ -156,7 +156,7 @@ const MemberDirectory = () => {
                         <TableCell sx={{ width: 100 }}>Barangay</TableCell>
                         <TableCell sx={{ width: 100 }}>City</TableCell>
                         <TableCell sx={{ width: 100 }}>Role</TableCell>
-                        <TableCell sx={{ width: 120 }}>Years Active</TableCell>
+                        <TableCell sx={{ width: 120 }}>Since</TableCell>
                         <TableCell sx={{ width: 80 }}>Status</TableCell>
                       </TableRow>
                     </TableHead>

@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import SideBar from "../SideBar";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 import {
   Box,
@@ -312,6 +312,17 @@ const PrayerRequestList = () => {
                 border: "1px solid #ccc",
               }}
             />
+
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 1 }}
+              onClick={() => navigate("/admin/prayerRequestFullList")}
+              fullWidth
+            >
+              View Full List
+            </Button>
+
           </Box>
           {loading ? (
             <Loader />
@@ -347,8 +358,8 @@ const PrayerRequestList = () => {
                         <TableRow>
                           <TableCell><strong>Prayer Type</strong></TableCell>
                           <TableCell><strong>Offeror's Name</strong></TableCell>
-                          <TableCell><strong>Prayer Request Date</strong></TableCell>
-                          <TableCell><strong>Prayer Time</strong></TableCell>
+                          <TableCell><strong>Date</strong></TableCell>
+                          <TableCell><strong>Time</strong></TableCell>
                           <TableCell><strong>Intentions</strong></TableCell>
                           <TableCell><strong>Submitted By</strong></TableCell>
                           <TableCell><strong>Actions</strong></TableCell>
@@ -493,8 +504,8 @@ const PrayerRequestList = () => {
                         <TableRow>
                           <TableCell><strong>Prayer Type</strong></TableCell>
                           <TableCell><strong>Offeror's Name</strong></TableCell>
-                          <TableCell><strong>Prayer Request Date</strong></TableCell>
-                          <TableCell><strong>Prayer Request Time</strong></TableCell>
+                          <TableCell><strong>Date</strong></TableCell>
+                          <TableCell><strong>Time</strong></TableCell>
                           <TableCell><strong>Intentions</strong></TableCell>
                           <TableCell><strong>Submitted By</strong></TableCell>
                           <TableCell><strong>Actions</strong></TableCell>
@@ -647,11 +658,11 @@ const PrayerRequestList = () => {
                         <TableRow>
                           <TableCell><strong>Prayer Type</strong></TableCell>
                           <TableCell><strong>Offeror's Name</strong></TableCell>
-                          <TableCell><strong>Prayer Request Date</strong></TableCell>
-                          <TableCell><strong>Prayer Request Time</strong></TableCell>
+                          <TableCell><strong>Date</strong></TableCell>
+                          <TableCell><strong>Time</strong></TableCell>
                           <TableCell><strong>Intentions</strong></TableCell>
                           <TableCell><strong>Submitted By</strong></TableCell>
-                           <TableCell><strong>Actions</strong></TableCell>
+                          <TableCell><strong>Actions</strong></TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
