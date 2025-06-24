@@ -12,6 +12,18 @@ import {
   Divider,
   Paper,
   Button,
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  CircularProgress,
+  Avatar,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { format } from "date-fns";
@@ -68,11 +80,38 @@ const groupByMonthYear = (forms) => {
   return grouped;
 };
 
+const formatWeddingTime = (rawTime) => {
+  if (!rawTime) return "N/A";
+
+  try {
+    // If it's just a time string like "12:41", create a full date with today's date
+    let date;
+    if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
+      const today = new Date();
+      const [hours, minutes] = rawTime.split(':');
+      date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), +hours, +minutes);
+    } else {
+      date = new Date(rawTime);
+    }
+
+    if (isNaN(date.getTime())) {
+      console.warn("Invalid weddingTime:", rawTime);
+      return "N/A";
+    }
+
+    return format(date, 'h:mm a'); // e.g. "1:08 AM"
+  } catch (e) {
+    console.error("Error parsing weddingTime:", rawTime, e);
+    return "N/A";
+  }
+};
+
 const WeddingList = () => {
   const [weddingForms, setWeddingForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filteredStatus, setFilteredStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState("cards"); // 'cards' or 'table'
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -131,6 +170,135 @@ const WeddingList = () => {
     setCurrentPage(value);
   };
 
+  const renderCardsView = () => (
+    <Stack spacing={4} sx={{ width: "100%" }}>
+      {Object.entries(groupedPaginated).map(([monthYear, forms]) => (
+        <Box key={monthYear}>
+          <Divider sx={{ mb: 2 }}>
+            <Chip
+              label={monthYear}
+              color="primary"
+              variant="outlined"
+              sx={{ px: 2, fontSize: "0.875rem" }}
+            />
+          </Divider>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              width: "100%",
+            }}
+          >
+            {forms.map((item, index) => (
+              <Box
+                key={item._id}
+                sx={{
+                  flex: "1 1 calc(50% - 16px)",
+                  minWidth: 0,
+                  maxWidth: "calc(50% - 16px)",
+                  boxSizing: "border-box",
+                }}
+              >
+                <StyledCard
+                  elevation={3}
+                  status={item.weddingStatus}
+                  onClick={() => navigate(`/admin/weddingDetails/${item._id}`)}
+                  sx={{ cursor: "pointer", height: "100%" }}
+                >
+                  <Box sx={{ position: "absolute", right: 16, top: 16 }}>
+                    <StatusChip
+                      label={item.weddingStatus ?? "Unknown"}
+                      size="small"
+                      status={item.weddingStatus}
+                    />
+                  </Box>
+                  <Typography variant="h6" component="h2" gutterBottom>
+                    Wedding #{index + 1 + (currentPage - 1) * cardsPerPage}: {item.brideName ?? "Unknown Bride"} & {item.groomName ?? "Unknown Groom"}
+                  </Typography>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Wedding Date:</strong>{" "}
+                    {item.weddingDate
+                      ? new Date(item.weddingDate).toLocaleDateString()
+                      : "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Wedding Time:</strong> {formatWeddingTime(item?.weddingTime)}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Bride Contact:</strong> {item.bridePhone ?? "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Groom Contact:</strong> {item.groomPhone ?? "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Priest:</strong> {item.priest?.fullName || "after confirmation"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Submitted By:</strong> {item.userId?.name || "Unknown"}
+                  </Typography>
+                </StyledCard>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      ))}
+    </Stack>
+  );
+
+  const renderTableView = () => (
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>#</strong></TableCell>
+              <TableCell><strong>Couple</strong></TableCell>
+              <TableCell><strong>Wedding Date</strong></TableCell>
+              <TableCell><strong>Wedding Time</strong></TableCell>
+              <TableCell><strong>Bride Contact</strong></TableCell>
+              <TableCell><strong>Groom Contact</strong></TableCell>
+              <TableCell><strong>Priest</strong></TableCell>
+              <TableCell><strong>Submitted By</strong></TableCell>
+              <TableCell><strong>Status</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedForms.map((item, index) => (
+              <TableRow
+                key={item._id}
+                hover
+                sx={{ cursor: "pointer" }}
+                onClick={() => navigate(`/admin/weddingDetails/${item._id}`)}
+              >
+                <TableCell>{index + 1 + (currentPage - 1) * cardsPerPage}</TableCell>
+                <TableCell>
+                  {item.brideName ?? "Unknown Bride"} & {item.groomName ?? "Unknown Groom"}
+                </TableCell>
+                <TableCell>
+                  {item.weddingDate ? new Date(item.weddingDate).toLocaleDateString() : "N/A"}
+                </TableCell>
+                <TableCell>{formatWeddingTime(item?.weddingTime)}</TableCell>
+                <TableCell>{item.bridePhone ?? "N/A"}</TableCell>
+                <TableCell>{item.groomPhone ?? "N/A"}</TableCell>
+                <TableCell>{item.priest?.fullName ?? "After Confirmation"}</TableCell>
+                <TableCell>{item.userId?.name || "Unknown"}</TableCell>
+                <TableCell>
+                  <StatusChip
+                    label={item.weddingStatus ?? "Unknown"}
+                    size="small"
+                    status={item.weddingStatus}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", width: "100%" }}>
       <SideBar />
@@ -159,43 +327,56 @@ const WeddingList = () => {
           <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", textAlign: "center" }}>
             Wedding Records
           </Typography>
-          <Stack direction="row" spacing={2} sx={{ mb: 2, justifyContent: "center" }}>
-            {["All", "Confirmed", "Pending", "Cancelled", "Rescheduled"].map((status) => (
-              <Button
-                key={status}
-                variant={filteredStatus === status ? "contained" : "outlined"}
-                color={
-                  status === "Confirmed"
-                    ? "success"
-                    : status === "Cancelled"
-                      ? "error"
-                      : status === "Pending"
-                        ? "warning"
-                        : status === "Rescheduled"
-                          ? "info"
-                          : "primary"
-                }
-                onClick={() => setFilteredStatus(status)}
-              >
-                {status}
-              </Button>
-            ))}
-          </Stack>
+
+          <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mb: 2 }}>
+            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+              {["All", "Confirmed", "Pending", "Cancelled", "Rescheduled"].map((status) => (
+                <Button
+                  key={status}
+                  variant={filteredStatus === status ? "contained" : "outlined"}
+                  color={
+                    status === "Confirmed"
+                      ? "success"
+                      : status === "Cancelled"
+                        ? "error"
+                        : status === "Pending"
+                          ? "warning"
+                          : status === "Rescheduled"
+                            ? "info"
+                            : "primary"
+                  }
+                  onClick={() => setFilteredStatus(status)}
+                >
+                  {status}
+                </Button>
+              ))}
+            </Stack>
+
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={(e, newMode) => newMode && setViewMode(newMode)}
+              aria-label="view mode"
+            >
+              <ToggleButton value="cards" aria-label="card view">
+                Card View
+              </ToggleButton>
+              <ToggleButton value="table" aria-label="table view">
+                Table View
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
           <Box sx={{ width: "100%", mb: 2 }}>
-            <input
-              type="text"
-              placeholder="Search by Bride or Groom Name"
+            <TextField
+              label="Search by Bride or Groom Name"
+              variant="outlined"
+              fullWidth
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                padding: "10px",
-                marginBottom: "20px",
-                width: "100%",
-                borderRadius: 4,
-                border: "1px solid #ccc",
-              }}
             />
           </Box>
+
           {loading ? (
             <Loader />
           ) : paginatedForms.length === 0 ? (
@@ -205,102 +386,9 @@ const WeddingList = () => {
               </Typography>
             </Paper>
           ) : (
-            <Stack spacing={4} sx={{ width: "100%" }}>
-              {Object.entries(groupedPaginated).map(([monthYear, forms]) => (
-                <Box key={monthYear}>
-                  <Divider sx={{ mb: 2 }}>
-                    <Chip
-                      label={monthYear}
-                      color="primary"
-                      variant="outlined"
-                      sx={{ px: 2, fontSize: "0.875rem" }}
-                    />
-                  </Divider>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 2,
-                      width: "100%",
-                    }}
-                  >
-                    {forms.map((item, index) => (
-                      <Box
-                        key={item._id}
-                        sx={{
-                          flex: "1 1 calc(50% - 16px)",
-                          minWidth: 0,
-                          maxWidth: "calc(50% - 16px)",
-                          boxSizing: "border-box",
-                        }}
-                      >
-                        <StyledCard
-                          elevation={3}
-                          status={item.weddingStatus}
-                          onClick={() => navigate(`/admin/weddingDetails/${item._id}`)}
-                          sx={{ cursor: "pointer", height: "100%" }}
-                        >
-                          <Box sx={{ position: "absolute", right: 16, top: 16 }}>
-                            <StatusChip
-                              label={item.weddingStatus ?? "Unknown"}
-                              size="small"
-                              status={item.weddingStatus}
-                            />
-                          </Box>
-                          <Typography variant="h6" component="h2" gutterBottom>
-                            Wedding #{index + 1 + (currentPage - 1) * cardsPerPage}: {item.brideName ?? "Unknown Bride"} & {item.groomName ?? "Unknown Groom"}
-                          </Typography>
-                          <Divider sx={{ my: 1 }} />
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Wedding Date:</strong>{" "}
-                            {item.weddingDate
-                              ? new Date(item.weddingDate).toLocaleDateString()
-                              : "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Wedding Time:</strong>{" "}
-                            {item?.weddingTime ? (() => {
-                              try {
-                                const rawTime = item.weddingTime;
+            <>
+              {viewMode === "cards" ? renderCardsView() : renderTableView()}
 
-                                // If it's just a time string like "12:41", create a full date with today's date
-                                let date;
-                                if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
-                                  const today = new Date();
-                                  const [hours, minutes] = rawTime.split(':');
-                                  date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), +hours, +minutes);
-                                } else {
-                                  date = new Date(rawTime);
-                                }
-
-                                if (isNaN(date.getTime())) {
-                                  console.warn("Invalid weddingTime:", rawTime);
-                                  return "N/A";
-                                }
-
-                                return format(date, 'h:mm a'); // e.g. "1:08 AM"
-                              } catch (e) {
-                                console.error("Error parsing weddingTime:", item.weddingTime, e);
-                                return "N/A";
-                              }
-                            })() : "N/A"}
-
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Bride Contact:</strong> {item.bridePhone ?? "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Groom Contact:</strong> {item.groomPhone ?? "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Submitted By:</strong> {item.userId?.name || "Unknown"}
-                          </Typography>
-                        </StyledCard>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              ))}
               {/* Pagination Controls */}
               {totalPages > 1 && (
                 <div style={{ position: "relative", width: "50%", height: "100%", alignItems: "center", margin: "auto" }}>
@@ -341,7 +429,7 @@ const WeddingList = () => {
                   </Box>
                 </div>
               )}
-            </Stack>
+            </>
           )}
         </Box>
       </Box>
