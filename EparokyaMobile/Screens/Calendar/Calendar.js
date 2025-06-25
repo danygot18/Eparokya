@@ -9,21 +9,32 @@ import {
 } from "react-native";
 import * as Calendar from "expo-calendar";
 import { Calendar as RNCalendar } from "react-native-calendars";
-// import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from "axios";
 import SyncStorage from "sync-storage";
 import baseURL from "../../assets/common/baseUrl";
 import { useSelector } from "react-redux";
 
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
 const CalendarComponent = () => {
   const [confirmedWeddings, setConfirmedWeddings] = useState([]);
   const [confirmedFunerals, setConfirmedFunerals] = useState([]);
+  const [confirmedBaptisms, setConfirmedBaptisms] = useState([]); // 1. Add state
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [markedDates, setMarkedDates] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
-  const [filterType, setFilterType] = useState("all"); 
+  const [filterType, setFilterType] = useState("all");
 
-  const { user, token } = useSelector(state => state.auth)
+  const { user, token } = useSelector((state) => state.auth);
+
   useEffect(() => {
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
@@ -31,6 +42,7 @@ const CalendarComponent = () => {
         const calendarId = await createCalendar();
         fetchConfirmedWeddingDates(calendarId);
         fetchConfirmedFuneralDates(calendarId);
+        fetchConfirmedBaptismDates(calendarId); // 3. Call fetch
       } else {
         Alert.alert(
           "Permission Denied",
@@ -63,10 +75,10 @@ const CalendarComponent = () => {
 
   const fetchConfirmedWeddingDates = async (calendarId) => {
     try {
-      
       const response = await axios.get(`${baseURL}/confirmedWedding`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      // console.log("Confirmed Weddings:", response.data);
 
       const weddings = response.data;
       setConfirmedWeddings(weddings);
@@ -92,13 +104,13 @@ const CalendarComponent = () => {
 
   const fetchConfirmedFuneralDates = async (calendarId) => {
     try {
-      
       const response = await axios.get(`${baseURL}/confirmedFuneral`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log("Confirmed Funerals:", response.data);
+
       const funerals = response.data;
-      // console.log("Funerals:", funerals);
       setConfirmedFunerals(funerals);
 
       const dates = { ...markedDates };
@@ -121,6 +133,39 @@ const CalendarComponent = () => {
     }
   };
 
+  // 2. Fetch confirmed baptisms
+  const fetchConfirmedBaptismDates = async (calendarId) => {
+    try {
+      const response = await axios.get(`${baseURL}/confirmedBaptism`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const baptisms = response.data;
+      setConfirmedBaptisms(baptisms);
+
+      const dates = { ...markedDates };
+      for (const baptism of baptisms) {
+        const date = baptism.baptismDate
+          ? new Date(baptism.baptismDate).toISOString().split("T")[0]
+          : null;
+        if (date) {
+          if (!dates[date]) {
+            dates[date] = { dots: [{ color: "green" }] };
+          } else {
+            dates[date].dots = [
+              ...(dates[date].dots || []),
+              { color: "green" },
+            ];
+          }
+        }
+      }
+      setMarkedDates(dates);
+    } catch (error) {
+      console.error("Error fetching confirmed baptisms:", error);
+    }
+  };
+
+  // 4. Update filter to include baptisms
   const handleFilter = (type) => {
     setFilterType(type);
 
@@ -128,11 +173,18 @@ const CalendarComponent = () => {
       setFilteredEvents(confirmedWeddings);
     } else if (type === "funeral") {
       setFilteredEvents(confirmedFunerals);
+    } else if (type === "baptism") {
+      setFilteredEvents(confirmedBaptisms);
     } else {
-      setFilteredEvents([...confirmedWeddings, ...confirmedFunerals]);
+      setFilteredEvents([
+        ...confirmedWeddings,
+        ...confirmedFunerals,
+        ...confirmedBaptisms,
+      ]);
     }
   };
 
+  // 4. Update day press to include baptisms
   const handleDayPress = (day) => {
     const selectedDay = day.dateString;
     setSelectedDate(selectedDay);
@@ -148,10 +200,13 @@ const CalendarComponent = () => {
           new Date(funeral.funeralDate).toISOString().split("T")[0] ===
           selectedDay
       ),
+      ...confirmedBaptisms.filter(
+        (baptism) =>
+          new Date(baptism.baptismDate).toISOString().split("T")[0] ===
+          selectedDay
+      ),
     ];
-    console.log("Events on selected day:", eventsOnDate);
     setFilteredEvents(eventsOnDate);
-    
   };
 
   return (
@@ -190,6 +245,15 @@ const CalendarComponent = () => {
         >
           <Text style={styles.filterText}>Funerals</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === "baptism" && styles.activeFilter,
+          ]}
+          onPress={() => handleFilter("baptism")}
+        >
+          <Text style={styles.filterText}>Baptisms</Text>
+        </TouchableOpacity>
       </View>
       <FlatList
         data={filteredEvents}
@@ -197,22 +261,47 @@ const CalendarComponent = () => {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>
-              {item.brideName ? "Wedding" : "Funeral"}
+              {item.brideName
+                ? "Wedding"
+                : item.baptismDate
+                ? "Baptism"
+                : "Funeral"}
             </Text>
             {item.brideName ? (
               <>
                 <Text>
-                  {item.brideName} & {item.groomName}
+                  Bride & Groom: {item.brideName} & {item.groomName}
                 </Text>
-                <Text>Religion - Groom: {item.groomReligion || "N/A"}</Text>
-                <Text>Religion - Bride: {item.brideReligion || "N/A"}</Text>
+                <Text>Date: {formatDate(item.weddingDate) || "N/a"}</Text>
+                {/* <Text>Religion - Groom: {item.groomReligion || "N/A"}</Text>
+                <Text>Religion - Bride: {item.brideReligion || "N/A"}</Text> */}
                 <Text>Status: {item.weddingStatus || "Pending"}</Text>
+              </>
+            ) : item.baptismDate ? (
+              <>
+                <Text>
+                  Child Name: {item.childName || item.child?.fullName || "N/A"}
+                </Text>
+                <Text>
+                  Father:{" "}
+                  {item.fatherName || item.parents?.fatherFullName || "N/A"}
+                </Text>
+                <Text>
+                  Mother:{" "}
+                  {item.motherName || item.parents?.motherFullName || "N/A"}
+                </Text>
+                <Text>
+                  Funeral Date:{" "}
+                  {item?.funeralDate ? formatDate(item.funeralDate) : "N/A"}
+                </Text>
+
+                <Text>
+                  Status: {item.baptismStatus || item.binyagStatus || "Pending"}
+                </Text>
               </>
             ) : (
               <>
-                <Text>
-                  {item.name} 
-                </Text>
+                <Text>Name: {item.name}</Text>
                 <Text>Age: {item.age || "N/A"}</Text>
                 <Text>Contact Person: {item.contactPerson || "N/A"}</Text>
                 <Text>Status: {item.funeralStatus || "Pending"}</Text>
@@ -224,7 +313,6 @@ const CalendarComponent = () => {
     </View>
   );
 };
-
 
 const calendarTheme = {
   calendarBackground: "#ffffff",
@@ -283,11 +371,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginVertical: 10,
   },
-filterButton: {
+  filterButton: {
     marginHorizontal: 5,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 8, 
+    borderRadius: 8,
     backgroundColor: "#e0e0e0",
   },
   activeFilter: {
