@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { format, parse } from "date-fns";
 import SideBar from "../SideBar";
+import jsPDF from "jspdf";
 
 const PrayerRequestFullList = () => {
     const [prayerRequestForms, setPrayerRequestForms] = useState([]);
@@ -21,7 +22,6 @@ const PrayerRequestFullList = () => {
     const [pagination, setPagination] = useState({});
     const perPage = 15;
 
-    // Fetch all prayer requests
     useEffect(() => {
         const fetchPrayerRequestForms = async () => {
             try {
@@ -47,7 +47,6 @@ const PrayerRequestFullList = () => {
         fetchPrayerRequestForms();
     }, []);
 
-    // Group by prayer type
     const categorized = {};
     prayerRequestForms.forEach((form) => {
         const type = form.prayerType || "Other";
@@ -55,7 +54,6 @@ const PrayerRequestFullList = () => {
         categorized[type].push(form);
     });
 
-    // Pagination helpers
     const getPage = (type) => pagination[type] || 1;
     const setPage = (type, value) =>
         setPagination((prev) => ({ ...prev, [type]: value }));
@@ -70,6 +68,75 @@ const PrayerRequestFullList = () => {
     const sortedEntries = Object.entries(categorized).sort(
         ([a], [b]) => prioritizedOrder.indexOf(a) - prioritizedOrder.indexOf(b)
     );
+
+    const handleDownloadPDF = (type, list) => {
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text(`Prayer Requests - ${type}`, 14, 16);
+
+        let y = 28;
+        doc.setFontSize(11);
+        doc.text("Prayer Type", 14, y);
+        doc.text("Offeror's Name", 44, y);
+        doc.text("Date", 94, y);
+        doc.text("Time", 124, y);
+        doc.text("Intentions", 144, y);
+        
+
+        y += 6;
+        doc.setLineWidth(0.1);
+        doc.line(14, y, 200, y);
+        y += 4;
+
+        list.forEach((item, idx) => {
+            if (y > 270) {
+                doc.addPage();
+                y = 20;
+            }
+
+            const prayerType = doc.splitTextToSize(item.prayerType || "", 28);
+            const offeror = doc.splitTextToSize(item.offerrorsName || "N/A", 44);
+            const date = doc.splitTextToSize(
+                item.prayerRequestDate
+                    ? new Date(item.prayerRequestDate).toLocaleDateString()
+                    : "N/A",
+                28
+            );
+            const time = doc.splitTextToSize(item.prayerRequestTime || "N/A", 18);
+            const intentions = doc.splitTextToSize(
+                Array.isArray(item.Intentions) && item.Intentions.length > 0
+                    ? item.Intentions.map((intention) => intention.name || "Unnamed").join(", ")
+                    : "N/A",
+                50
+            );
+            const submittedBy = doc.splitTextToSize(item.userId?.name || "Unknown", 28);
+
+            const lines = Math.max(
+                prayerType.length,
+                offeror.length,
+                date.length,
+                time.length,
+                intentions.length,
+               
+            );
+
+            for (let i = 0; i < lines; i++) {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text(prayerType[i] || "", 14, y);
+                doc.text(offeror[i] || "", 44, y);
+                doc.text(date[i] || "", 94, y);
+                doc.text(time[i] || "", 124, y);
+                doc.text(intentions[i] || "", 144, y);
+               
+                y += 8;
+            }
+        });
+
+        doc.save(`prayer_requests_${type.replace(/\s+/g, "_")}.pdf`);
+    };
 
     return (
         <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto", py: 4 }}>
@@ -103,9 +170,19 @@ const PrayerRequestFullList = () => {
                                 position: "relative",
                             }}
                         >
-                            <Typography variant="h5" sx={{ mt: 2, mb: 1 }}>
-                                {type}
-                            </Typography>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Typography variant="h5" sx={{ mt: 2, mb: 1 }}>
+                                    {type}
+                                </Typography>
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    onClick={() => handleDownloadPDF(type, list)}
+                                    sx={{ mt: 2, mb: 1 }}
+                                >
+                                    Download PDF
+                                </Button>
+                            </Box>
                             <TableContainer component={Paper} sx={{ mb: 2 }}>
                                 <Table>
                                     <TableHead>

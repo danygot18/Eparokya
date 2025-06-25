@@ -294,11 +294,11 @@ const Calendars = () => {
 
   const eventPropGetter = (event) => {
     let backgroundColor = '#3174ad';
-    if (event.type === 'Liturgical') backgroundColor = '#9c27b0';
-    if (event.type === 'Wedding') backgroundColor = '#4caf50';
-    if (event.type === 'Funeral') backgroundColor = '#f44336';
-    if (event.type === 'Baptism') backgroundColor = '#2196f3';
-    if (event.type === 'Custom') backgroundColor = '#ff9800';
+    if (event.type === 'Liturgical') backgroundColor = '#2e7d32'; 
+    else if (event.type === 'Custom') backgroundColor = '#9c27b0';
+    else if (event.type === 'Wedding') backgroundColor = '#4caf50';
+    else if (event.type === 'Funeral') backgroundColor = '#f44336';
+    else if (event.type === 'Baptism') backgroundColor = '#2196f3';
 
     return {
       style: {
@@ -441,15 +441,15 @@ const Calendars = () => {
                 </Table>
               </Box>
             ))}
-             <Box sx={{ mt: 1 }}>
-    <Typography variant="caption">
-      <span style={{ color: '#1976d2', fontWeight: 'bold' }}>● Sunday</span> &nbsp;
-      <span style={{ color: '#9c27b0', fontWeight: 'bold' }}>● Solemnity</span> &nbsp;
-      <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>● Memorial</span> &nbsp;
-      <span style={{ color: '#ed6c02', fontWeight: 'bold' }}>● Feast</span> &nbsp;
-      <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>● Lent/Advent</span>
-    </Typography>
-  </Box>
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="caption">
+                <span style={{ color: '#1976d2', fontWeight: 'bold' }}>● Sunday</span> &nbsp;
+                <span style={{ color: '#9c27b0', fontWeight: 'bold' }}>● Solemnity</span> &nbsp;
+                <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>● Memorial</span> &nbsp;
+                <span style={{ color: '#ed6c02', fontWeight: 'bold' }}>● Feast</span> &nbsp;
+                <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>● Lent/Advent</span>
+              </Typography>
+            </Box>
           </Paper>
 
           {/* Local Calendar List */}

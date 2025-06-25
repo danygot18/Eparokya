@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import SideBar from "../SideBar";
 import { useNavigate } from "react-router-dom";
+import jsPDF from "jspdf";
 
 const PrayerRequestIntentionFullList = () => {
   const [prayerRequests, setPrayerRequests] = useState([]);
@@ -39,7 +40,7 @@ const PrayerRequestIntentionFullList = () => {
         `${process.env.REACT_APP_API}/api/v1/getAllPrayerRequestIntention`,
         { withCredentials: true }
       );
-      setPrayerRequests(response.data?.reverse() || []); 
+      setPrayerRequests(response.data?.reverse() || []);
     } catch (error) {
       setPrayerRequests([]);
     } finally {
@@ -64,6 +65,86 @@ const PrayerRequestIntentionFullList = () => {
     ? prayerRequests.find((req) => req.prayerType === filterType)?.prayerType
     : "";
 
+const handleDownloadPDF = (type, list) => {
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text(`Prayer Requests - ${type}`, 14, 16);
+
+  let y = 28;
+  doc.setFontSize(11);
+  doc.text("Prayer Type", 14, y);
+  doc.text("Offeror's Name", 64, y);
+  doc.text("Date", 100, y);
+  doc.text("Time", 134, y);
+  doc.text("Intentions", 164, y);
+
+  y += 6;
+  doc.setLineWidth(0.1);
+  doc.line(14, y, 200, y);
+  y += 4;
+
+  list.forEach((item, idx) => {
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+
+    const prayerType = doc.splitTextToSize(item.prayerType || "", 45);
+    const offeror = doc.splitTextToSize(item.offerrorsName || "N/A", 45);
+
+    const formattedDate = item.prayerRequestDate
+      ? new Date(item.prayerRequestDate).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : "N/A";
+    const date = doc.splitTextToSize(formattedDate, 28);
+
+    let formattedTime = "N/A";
+    if (item.prayerRequestTime) {
+      const [hour, minute] = item.prayerRequestTime.split(":");
+      const dateObj = new Date();
+      dateObj.setHours(Number(hour), Number(minute));
+      formattedTime = dateObj.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+    }
+    const time = doc.splitTextToSize(formattedTime, 18);
+
+    const intentions = doc.splitTextToSize(
+      Array.isArray(item.Intentions) && item.Intentions.length > 0
+        ? item.Intentions.map((intention) => intention.name || "Unnamed").join(", ")
+        : "N/A",
+      40
+    );
+
+    const lines = Math.max(
+      prayerType.length,
+      offeror.length,
+      date.length,
+      time.length,
+      intentions.length
+    );
+
+    for (let i = 0; i < lines; i++) {
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(prayerType[i] || "", 14, y);
+      doc.text(offeror[i] || "", 64, y);
+      doc.text(date[i] || "", 100, y);
+      doc.text(time[i] || "", 134, y);
+      doc.text(intentions[i] || "", 164, y);
+      y += 8;
+    }
+  });
+
+  doc.save(`prayer_requests_${type.replace(/\s+/g, "_")}.pdf`);
+};
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", width: "100%" }}>
@@ -99,7 +180,7 @@ const PrayerRequestIntentionFullList = () => {
               value={filterType}
               onChange={(e) => {
                 setFilterType(e.target.value);
-                setPage(1); // Reset to first page on filter change
+                setPage(1);
               }}
               displayEmpty
               sx={{ minWidth: 180, background: "#fff" }}
@@ -114,6 +195,13 @@ const PrayerRequestIntentionFullList = () => {
                 )
               )}
             </Select>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => handleDownloadPDF(selectedTypeLabel || "All", filteredRequests)}
+            >
+              Download PDF
+            </Button>
           </Box>
           {/* Category Title */}
           {filterType && (
@@ -159,11 +247,11 @@ const PrayerRequestIntentionFullList = () => {
                         <TableCell>
                           {request.prayerRequestTime
                             ? new Date(
-                                `1970-01-01T${request.prayerRequestTime}`
-                              ).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })
+                              `1970-01-01T${request.prayerRequestTime}`
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
                             : "N/A"}
                         </TableCell>
                         <TableCell>
