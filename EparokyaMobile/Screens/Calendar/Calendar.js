@@ -10,14 +10,13 @@ import {
 import * as Calendar from "expo-calendar";
 import { Calendar as RNCalendar } from "react-native-calendars";
 import axios from "axios";
-import SyncStorage from "sync-storage";
-import baseURL from "../../assets/common/baseUrl";
 import { useSelector } from "react-redux";
+import baseURL from "../../assets/common/baseUrl";
 
 const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
+  if (!dateString) return null;
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString("tl-PH", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -27,22 +26,20 @@ const formatDate = (dateString) => {
 const CalendarComponent = () => {
   const [confirmedWeddings, setConfirmedWeddings] = useState([]);
   const [confirmedFunerals, setConfirmedFunerals] = useState([]);
-  const [confirmedBaptisms, setConfirmedBaptisms] = useState([]); // 1. Add state
+  const [confirmedBaptisms, setConfirmedBaptisms] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [markedDates, setMarkedDates] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [filterType, setFilterType] = useState("all");
 
-  const { user, token } = useSelector((state) => state.auth);
+  const { token } = useSelector((state) => state.auth);
 
   useEffect(() => {
     (async () => {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       if (status === "granted") {
-        const calendarId = await createCalendar();
-        fetchConfirmedWeddingDates(calendarId);
-        fetchConfirmedFuneralDates(calendarId);
-        fetchConfirmedBaptismDates(calendarId); // 3. Call fetch
+        await createCalendar();
+        await fetchAllEventsAndMarkDates();
       } else {
         Alert.alert(
           "Permission Denied",
@@ -73,99 +70,60 @@ const CalendarComponent = () => {
     return newCalendarId;
   };
 
-  const fetchConfirmedWeddingDates = async (calendarId) => {
+  const fetchAllEventsAndMarkDates = async () => {
     try {
-      const response = await axios.get(`${baseURL}/confirmedWedding`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      // console.log("Confirmed Weddings:", response.data);
+      const [weddingsRes, funeralsRes, baptismsRes] = await Promise.all([
+        axios.get(`${baseURL}/confirmedWedding`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${baseURL}/confirmedFuneral`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${baseURL}/confirmedBaptism`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
 
-      const weddings = response.data;
+      const weddings = weddingsRes.data;
+      const funerals = funeralsRes.data;
+      const baptisms = baptismsRes.data;
+
       setConfirmedWeddings(weddings);
-
-      const dates = { ...markedDates };
-      for (const wedding of weddings) {
-        const date = wedding.weddingDate
-          ? new Date(wedding.weddingDate).toISOString().split("T")[0]
-          : null;
-        if (date) {
-          if (!dates[date]) {
-            dates[date] = { dots: [{ color: "red" }] };
-          } else {
-            dates[date].dots = [...(dates[date].dots || []), { color: "red" }];
-          }
-        }
-      }
-      setMarkedDates(dates);
-    } catch (error) {
-      console.error("Error fetching confirmed weddings:", error);
-    }
-  };
-
-  const fetchConfirmedFuneralDates = async (calendarId) => {
-    try {
-      const response = await axios.get(`${baseURL}/confirmedFuneral`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      console.log("Confirmed Funerals:", response.data);
-
-      const funerals = response.data;
       setConfirmedFunerals(funerals);
-
-      const dates = { ...markedDates };
-      for (const funeral of funerals) {
-        const date = funeral.funeralDate
-          ? new Date(funeral.funeralDate).toISOString().split("T")[0]
-          : null;
-
-        if (date) {
-          if (!dates[date]) {
-            dates[date] = { dots: [{ color: "blue" }] };
-          } else {
-            dates[date].dots = [...(dates[date].dots || []), { color: "blue" }];
-          }
-        }
-      }
-      setMarkedDates(dates);
-    } catch (error) {
-      console.error("Error fetching confirmed funerals:", error);
-    }
-  };
-
-  // 2. Fetch confirmed baptisms
-  const fetchConfirmedBaptismDates = async (calendarId) => {
-    try {
-      const response = await axios.get(`${baseURL}/confirmedBaptism`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const baptisms = response.data;
       setConfirmedBaptisms(baptisms);
 
-      const dates = { ...markedDates };
-      for (const baptism of baptisms) {
-        const date = baptism.baptismDate
-          ? new Date(baptism.baptismDate).toISOString().split("T")[0]
-          : null;
+      const newMarkedDates = {};
+
+      for (const wedding of weddings) {
+        const date = wedding.weddingDate?.split("T")[0];
         if (date) {
-          if (!dates[date]) {
-            dates[date] = { dots: [{ color: "green" }] };
-          } else {
-            dates[date].dots = [
-              ...(dates[date].dots || []),
-              { color: "green" },
-            ];
-          }
+          if (!newMarkedDates[date]) newMarkedDates[date] = { dots: [] };
+          newMarkedDates[date].dots.push({ color: "red" });
         }
       }
-      setMarkedDates(dates);
-    } catch (error) {
-      console.error("Error fetching confirmed baptisms:", error);
+
+      for (const funeral of funerals) {
+        const date = funeral.funeralDate?.split("T")[0];
+        if (date) {
+          if (!newMarkedDates[date]) newMarkedDates[date] = { dots: [] };
+          newMarkedDates[date].dots.push({ color: "blue" });
+        }
+      }
+
+      for (const baptism of baptisms) {
+        const date = baptism.baptismDate?.split("T")[0];
+        if (date) {
+          if (!newMarkedDates[date]) newMarkedDates[date] = { dots: [] };
+          newMarkedDates[date].dots.push({ color: "green" });
+        }
+      }
+
+      setMarkedDates(newMarkedDates);
+    } catch (err) {
+      console.error("Error fetching calendar events:", err);
     }
   };
 
-  // 4. Update filter to include baptisms
   const handleFilter = (type) => {
     setFilterType(type);
 
@@ -184,7 +142,6 @@ const CalendarComponent = () => {
     }
   };
 
-  // 4. Update day press to include baptisms
   const handleDayPress = (day) => {
     const selectedDay = day.dateString;
     setSelectedDate(selectedDay);
@@ -218,42 +175,20 @@ const CalendarComponent = () => {
         onDayPress={handleDayPress}
       />
       <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filterType === "all" && styles.activeFilter,
-          ]}
-          onPress={() => handleFilter("all")}
-        >
-          <Text style={styles.filterText}>All</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filterType === "wedding" && styles.activeFilter,
-          ]}
-          onPress={() => handleFilter("wedding")}
-        >
-          <Text style={styles.filterText}>Weddings</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filterType === "funeral" && styles.activeFilter,
-          ]}
-          onPress={() => handleFilter("funeral")}
-        >
-          <Text style={styles.filterText}>Funerals</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filterType === "baptism" && styles.activeFilter,
-          ]}
-          onPress={() => handleFilter("baptism")}
-        >
-          <Text style={styles.filterText}>Baptisms</Text>
-        </TouchableOpacity>
+        {["all", "wedding", "funeral", "baptism"].map((type) => (
+          <TouchableOpacity
+            key={type}
+            style={[
+              styles.filterButton,
+              filterType === type && styles.activeFilter,
+            ]}
+            onPress={() => handleFilter(type)}
+          >
+            <Text style={styles.filterText}>
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
       <FlatList
         data={filteredEvents}
@@ -272,9 +207,7 @@ const CalendarComponent = () => {
                 <Text>
                   Bride & Groom: {item.brideName} & {item.groomName}
                 </Text>
-                <Text>Date: {formatDate(item.weddingDate) || "N/a"}</Text>
-                {/* <Text>Religion - Groom: {item.groomReligion || "N/A"}</Text>
-                <Text>Religion - Bride: {item.brideReligion || "N/A"}</Text> */}
+                <Text>Date: {formatDate(item.weddingDate)}</Text>
                 <Text>Status: {item.weddingStatus || "Pending"}</Text>
               </>
             ) : item.baptismDate ? (
@@ -291,12 +224,11 @@ const CalendarComponent = () => {
                   {item.motherName || item.parents?.motherFullName || "N/A"}
                 </Text>
                 <Text>
-                  Funeral Date:{" "}
-                  {item?.funeralDate ? formatDate(item.funeralDate) : "N/A"}
+                  Baptism Date: {formatDate(item.baptismDate) || "N/A"}
                 </Text>
-
                 <Text>
-                  Status: {item.baptismStatus || item.binyagStatus || "Pending"}
+                  Status:{" "}
+                  {item.baptismStatus || item.binyagStatus || "Pending"}
                 </Text>
               </>
             ) : (
@@ -305,6 +237,9 @@ const CalendarComponent = () => {
                 <Text>Age: {item.age || "N/A"}</Text>
                 <Text>Contact Person: {item.contactPerson || "N/A"}</Text>
                 <Text>Status: {item.funeralStatus || "Pending"}</Text>
+                <Text>
+                  Funeral Date: {formatDate(item.funeralDate) || "N/A"}
+                </Text>
               </>
             )}
           </View>
@@ -312,25 +247,6 @@ const CalendarComponent = () => {
       />
     </View>
   );
-};
-
-const calendarTheme = {
-  calendarBackground: "#ffffff",
-  textSectionTitleColor: "#b6c1cd",
-  selectedDayBackgroundColor: "#ff6347",
-  todayTextColor: "#ff6347",
-  dayTextColor: "#2d4150",
-  dotColor: "#ff6347",
-  selectedDotColor: "#ffffff",
-  arrowColor: "orange",
-  monthTextColor: "black",
-  indicatorColor: "blue",
-  textDayFontWeight: "300",
-  textMonthFontWeight: "bold",
-  textDayHeaderFontWeight: "500",
-  textDayFontSize: 16,
-  textMonthFontSize: 18,
-  textDayHeaderFontSize: 14,
 };
 
 const styles = StyleSheet.create({
@@ -343,12 +259,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 24,
     marginBottom: 10,
-    textAlign: "center",
-  },
-  dateText: {
-    fontWeight: "bold",
-    fontSize: 18,
-    marginTop: 15,
     textAlign: "center",
   },
   card: {
@@ -370,9 +280,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginVertical: 10,
+    flexWrap: "wrap",
   },
   filterButton: {
-    marginHorizontal: 5,
+    margin: 5,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -380,10 +291,6 @@ const styles = StyleSheet.create({
   },
   activeFilter: {
     backgroundColor: "#bdbdbd",
-  },
-  filterText: {
-    color: "black",
-    fontWeight: "bold",
   },
   filterText: {
     color: "black",
