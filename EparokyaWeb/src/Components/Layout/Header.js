@@ -182,7 +182,7 @@ const Header = () => {
             >
               Parish Priests
             </MenuItem>
-             <MenuItem component={Link} to="/guestPriest" onClick={handleParishMenuClose}>
+            <MenuItem component={Link} to="/guestPriest" onClick={handleParishMenuClose}>
               Guest Priests
             </MenuItem>
           </Menu>
@@ -220,7 +220,7 @@ const Header = () => {
                 >
                   Ministry Announcements
                 </MenuItem>
-                {user?.isAdmin && (
+                {user?.isAdmin && !user?.isPriest && (
                   <MenuItem
                     component={Link}
                     to="/admin/dashboard"
@@ -229,6 +229,19 @@ const Header = () => {
                     Dashboard
                   </MenuItem>
                 )}
+
+                {/* Admin and also a priest */}
+                {user?.isAdmin && user?.isPriest && (
+                  <MenuItem
+                    component={Link}
+                    to="/admin/dashboard"
+                    onClick={handleUserMenuClose}
+                  >
+                    PriestNavigation
+                  </MenuItem>
+                )}
+
+
                 <MenuItem
                   component={Link}
                   to="/chatlist"

@@ -29,6 +29,7 @@ const UsersList = () => {
         config
       );
       setAllUsers(data.users || []);
+      console.log(data.users)
       setLoading(false);
     } catch (error) {
       errMsg(error.response?.data.message || 'Failed to load users');
@@ -140,6 +141,7 @@ const UsersList = () => {
                   <th>User Name</th>
                   <th>Email</th>
                   <th>Role</th>
+                  <th>Priest</th>
                   <th>Ministry Categories</th>
                   <th>Joined</th>
                   <th>Actions</th>
@@ -152,6 +154,7 @@ const UsersList = () => {
                       <td>{user.name}</td>
                       <td>{user.email}</td>
                       <td>{user.isAdmin ? 'Admin' : 'User'}</td>
+                      <td>{user.isPriest ? 'Father' : 'No'}</td>
                       <td>
                         {user.ministryRoles?.map((role) => role.ministry?.name || "Unknown").join(', ') || "No Ministry"}
                       </td>

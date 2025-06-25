@@ -641,6 +641,7 @@ exports.updateUser = async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
     isAdmin: req.body.isAdmin,
+    isPriest: req.body.isPriest,
   };
 
   try {

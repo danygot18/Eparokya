@@ -1,7 +1,5 @@
-//New SideBar Code
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import { Link, useLocation } from "react-router-dom";
 import {
   Drawer,
   List,
@@ -19,6 +17,10 @@ import {
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
+  CalendarToday as CalendarTodayIcon,
+  ChevronRight,
+  ExpandMore,
+  ChevronLeft,
   People as PeopleIcon,
   LiveTv as LiveTvIcon,
   Person as PersonIcon,
@@ -28,7 +30,6 @@ import {
   Feedback as FeedbackIcon,
   Forum as ForumIcon,
   Assignment as AssignmentIcon,
-  CalendarToday as CalendarTodayIcon,
   ListAlt as ListAltIcon,
   Event as EventIcon,
   Inventory as InventoryIcon,
@@ -37,11 +38,8 @@ import {
   LibraryBooks as LibraryBooksIcon,
   Lock as LockIcon,
   Celebration as CelebrationIcon,
-  ChevronRight,
-  ExpandMore,
-  ChevronLeft,
 } from "@mui/icons-material";
-import { useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const drawerWidth = 240;
 const collapsedWidth = 56;
@@ -75,9 +73,7 @@ const SideBar = () => {
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const location = useLocation();
 
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
+  const toggleDrawer = () => setDrawerOpen(!drawerOpen);
 
   const handleDropdownToggle = (key) => {
     setOpenDropdowns((prev) => ({
@@ -86,239 +82,113 @@ const SideBar = () => {
     }));
   };
 
-  const menuItems = [
-    {
-      text: "Dashboard",
-      icon: <DashboardIcon />,
-      path: "/admin/dashboard",
-    },
-    {
-      text: "Priest Navigation ",
-      icon: <DashboardIcon />,
-      path: "/admin/priestNavigation",
-    },
-    {
-      text: "Add Sunday Readings ",
-      icon: <DashboardIcon />,
-      path: "/admin/addReadings",
-    },
-    {
-      text: "Users",
-      icon: <PeopleIcon />,
-      path: "/admin/users",
-    },
-    {
-      text: "User Submission",
-      icon: <PeopleIcon />,
-      path: "/admin/formCounts",
-    },
-    {
-      text: "Live",
-      icon: <LiveTvIcon />,
-      path: "/admin/live",
-    },
+  const { user: reduxUser, loading } = useSelector((state) => state.auth);
+  const [user, setUser] = useState(reduxUser);
+
+  const allMenuItems = [
+    { text: "Dashboard", icon: <DashboardIcon />, path: "/admin/dashboard" },
+    { text: "Priest Navigation", icon: <DashboardIcon />, path: "/admin/priestNavigation" },
+    { text: "Add Sunday Readings", icon: <DashboardIcon />, path: "/admin/addReadings" },
+    { text: "Users", icon: <PeopleIcon />, path: "/admin/users" },
+    { text: "User Submission", icon: <PeopleIcon />, path: "/admin/formCounts" },
+    { text: "Live", icon: <LiveTvIcon />, path: "/admin/live" },
     {
       text: "Parish Priest",
       icon: <PersonIcon />,
       subItems: [
-        {
-          text: "Add Parish Priests",
-          path: "/admin/create/priest",
-        },
-        {
-          text: "Parish Priests List",
-          path: "/admin/priestList",
-        },
+        { text: "Add Parish Priests", path: "/admin/create/priest" },
+        { text: "Parish Priests List", path: "/admin/priestList" },
       ],
     },
-    {
-      text: "Ministry Categories",
-      icon: <CategoryIcon />,
-      path: "/admin/ministryCategory/create",
-    },
+    { text: "Ministry Categories", icon: <CategoryIcon />, path: "/admin/ministryCategory/create" },
     {
       text: "Member Directory",
       icon: <PermContactCalendarIcon />,
       subItems: [
-        {
-          text: "Add Member Batch Year",
-          path: "/admin/memberBatchYear",
-        },
-        {
-          text: "Member Directory List",
-          path: "/admin/memberDirectory",
-        },
+        { text: "Add Member Batch Year", path: "/admin/memberBatchYear" },
+        { text: "Member Directory List", path: "/admin/memberDirectory" },
       ],
     },
-    {
-      text: "Member History",
-      icon: <HistoryIcon />,
-      path: "/admin/calendar",
-    },
+    { text: "Member History", icon: <HistoryIcon />, path: "/admin/calendar" },
     {
       text: "Feedback Form",
       icon: <FeedbackIcon />,
       subItems: [
-        {
-          text: "Add Active Form",
-          path: "/admin/AdminSelection",
-        },
-         {
-          text: "Add Activity Type",
-          path: "/admin/ActivityType",
-        },
-         {
-          text: "Add Event Type",
-          path: "/admin/EventType",
-        },
-        {
-          text: "Sentiment Results",
-          path: "/admin/SentimentResults",
-        },
+        { text: "Add Active Form", path: "/admin/AdminSelection" },
+        { text: "Add Activity Type", path: "/admin/ActivityType" },
+        { text: "Add Event Type", path: "/admin/EventType" },
+        { text: "Sentiment Results", path: "/admin/SentimentResults" },
       ],
     },
     {
       text: "Sentiment Lists",
       icon: <FeedbackIcon />,
       subItems: [
-        {
-          text: "Priest Sentiments",
-          path: "/admin/PriestSentimentList",
-        },
-        {
-          text: "Event Sentiments",
-          path: "/admin/EventSentimentList",
-        },
-        {
-          text: "Activity Sentiments",
-          path: "/admin/ActivitytSentimentList",
-        },
+        { text: "Priest Sentiments", path: "/admin/PriestSentimentList" },
+        { text: "Event Sentiments", path: "/admin/EventSentimentList" },
+        { text: "Activity Sentiments", path: "/admin/ActivitytSentimentList" },
       ],
     },
-    {
-      text: "Prayer Wall Requests",
-      icon: <ForumIcon />,
-      path: "/admin/prayerReview",
-    },
-    {
-      text: "Prayer Requests",
-      icon: <AssignmentIcon />,
-      path: "/admin/prayerIntentionList",
-    },
-    {
-      text: "Calendar",
-      icon: <CalendarTodayIcon />,
-      path: "/admin/calendar",
-    },
-    // {
-    //   text: "Ministry Inventory",
-    //   icon: <InventoryIcon />,
-    //   path: "/admin/adminDate",
-    // },
-    {
-      text: "Set Available Date",
-      icon: <DateRangeIcon />,
-      path: "/admin/adminDate",
-    },
+    { text: "Prayer Wall Requests", icon: <ForumIcon />, path: "/admin/prayerReview" },
+    { text: "Prayer Requests", icon: <AssignmentIcon />, path: "/admin/prayerIntentionList" },
+    { text: "Calendar", icon: <CalendarTodayIcon />, path: "/admin/calendar" },
+    { text: "Set Available Date", icon: <DateRangeIcon />, path: "/admin/adminDate" },
     {
       text: "Announcements",
       icon: <AnnouncementIcon />,
       subItems: [
-        {
-          text: "Create Announcement",
-          path: "/admin/create/announcement",
-        },
-        {
-          text: "Announcement List",
-          path: "/admin/announcementList",
-        },
-        {
-          text: "Announcement Category",
-          path: "/admin/announcementCategory/create",
-        },
+        { text: "Create Announcement", path: "/admin/create/announcement" },
+        { text: "Announcement List", path: "/admin/announcementList" },
+        { text: "Announcement Category", path: "/admin/announcementCategory/create" },
       ],
     },
     {
       text: "Resource Page",
       icon: <LibraryBooksIcon />,
       subItems: [
-        {
-          text: "Create Resource Category",
-          path: "/admin/resourceCategory/create",
-        },
-        {
-          text: "Create Resource",
-          path: "/admin/resource/create",
-        },
-        {
-          text: "Resources List",
-          path: "/admin/resourceList",
-        },
-        {
-          text: "Live",
-          path: "/admin/live",
-        },
+        { text: "Create Resource Category", path: "/admin/resourceCategory/create" },
+        { text: "Create Resource", path: "/admin/resource/create" },
+        { text: "Resources List", path: "/admin/resourceList" },
+        { text: "Live", path: "/admin/live" },
       ],
     },
     {
       text: "Private Forms List",
       icon: <LockIcon />,
       subItems: [
-        {
-          text: "Wedding List",
-          path: "/admin/weddingList",
-        },
-        {
-          text: "Baptism List",
-          path: "/admin/baptismList",
-        },
-        {
-          text: "Funeral List",
-          path: "/admin/funeralList",
-        },
-        {
-          text: "Mass Intentions",
-          path: "/admin/prayerRequestList",
-        },
-        {
-          text: "Counseling",
-          path: "/admin/counselingList",
-        },
-        {
-          text: "House Blessings",
-          path: "/admin/houseBlessingList",
-        },
+        { text: "Wedding List", path: "/admin/weddingList" },
+        { text: "Baptism List", path: "/admin/baptismList" },
+        { text: "Funeral List", path: "/admin/funeralList" },
+        { text: "Mass Intentions", path: "/admin/prayerRequestList" },
+        { text: "Counseling", path: "/admin/counselingList" },
+        { text: "House Blessings", path: "/admin/houseBlessingList" },
       ],
     },
     {
       text: "Mass Forms List",
       icon: <CelebrationIcon />,
       subItems: [
-        {
-          text: "Mass Wedding List",
-          path: "/admin/mass/weddingList",
-        },
-        {
-          text: "Mass Baptism List",
-          path: "/admin/mass/baptismList",
-        },
+        { text: "Mass Wedding List", path: "/admin/mass/weddingList" },
+        { text: "Mass Baptism List", path: "/admin/mass/baptismList" },
       ],
     },
     {
       text: "Inventory",
       icon: <InventoryIcon />,
       subItems: [
-        {
-          text: "Inventory List",
-          path: "/admin/InventoryList",
-        },
-        {
-          text: "Inventory Form",
-          path: "/admin/InventoryForm",
-        },
+        { text: "Inventory List", path: "/admin/InventoryList" },
+        { text: "Inventory Form", path: "/admin/InventoryForm" },
       ],
     },
   ];
+
+  // ✅ Filter if user is both isAdmin and isPriest — show only 2 items
+  let menuItems = allMenuItems;
+  if (user?.isAdmin && user?.isPriest) {
+    menuItems = allMenuItems.filter(
+      (item) => item.text === "Priest Navigation" || item.text === "Calendar"
+    );
+  }
 
   return (
     <StyledDrawer variant="permanent" open={drawerOpen}>
@@ -335,49 +205,23 @@ const SideBar = () => {
           borderColor: "divider",
         }}
       >
-        <IconButton
-          onClick={toggleDrawer}
-          size="small"
-          sx={{
-            borderRadius: 0,
-            px: 1.5,
-            py: 0.5,
-            "&:hover": {
-              backgroundColor: "transparent",
-            },
-          }}
-        >
+        <IconButton onClick={toggleDrawer}>
           {drawerOpen ? <ChevronLeft /> : <ChevronRight />}
         </IconButton>
       </Box>
 
-      {drawerOpen && (
+      {drawerOpen && user?.isAdmin && (
         <Box sx={{ p: 2, textAlign: "center" }}>
           <Typography variant="h6" noWrap>
-            Admin Panel
+            {user.isPriest ? "Priest Panel" : "Admin Panel"}
           </Typography>
         </Box>
       )}
 
+
       <Divider />
 
-      <List
-        sx={{
-          overflowY: "auto",
-          overflowX: "hidden",
-          "&::-webkit-scrollbar": {
-            width: "0.4em",
-          },
-          "&::-webkit-scrollbar-track": {
-            boxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
-            webkitBoxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "rgba(0,0,0,.1)",
-            borderRadius: "4px",
-          },
-        }}
-      >
+      <List>
         {menuItems.map((item, index) => {
           const isParentActive = item.subItems?.some(
             (sub) => location.pathname === sub.path
@@ -395,9 +239,7 @@ const SideBar = () => {
                       backgroundColor: isParentActive
                         ? "action.selected"
                         : "transparent",
-                      "&:hover": {
-                        backgroundColor: "action.hover",
-                      },
+                      "&:hover": { backgroundColor: "action.hover" },
                       px: 2,
                       py: 1,
                     }}
@@ -407,56 +249,31 @@ const SideBar = () => {
                     </ListItemIcon>
                     {drawerOpen && (
                       <>
-                        <ListItemText
-                          primary={item.text}
-                          sx={{
-                            color: "black",
-                            fontWeight: isParentActive ? "bold" : "normal",
-                          }}
-                        />
-                        {openDropdowns[index] ? (
-                          <ExpandMore fontSize="small" />
-                        ) : (
-                          <ChevronRight fontSize="small" />
-                        )}
+                        <ListItemText primary={item.text} />
+                        {openDropdowns[index] ? <ExpandMore /> : <ChevronRight />}
                       </>
                     )}
                   </ListItem>
-                  <Collapse
-                    in={openDropdowns[index] && drawerOpen}
-                    timeout="auto"
-                    unmountOnExit
-                  >
+                  <Collapse in={openDropdowns[index] && drawerOpen}>
                     <List component="div" disablePadding>
-                      {item.subItems.map((subItem, subIndex) => {
-                        const isSubActive = location.pathname === subItem.path;
-                        return (
-                          <ListItem
-                            button
-                            key={subIndex}
-                            component={Link}
-                            to={subItem.path}
-                            sx={{
-                              pl: 4,
-                              py: 1,
-                              backgroundColor: isSubActive
+                      {item.subItems.map((subItem, subIndex) => (
+                        <ListItem
+                          key={subIndex}
+                          button
+                          component={Link}
+                          to={subItem.path}
+                          sx={{
+                            pl: 4,
+                            py: 1,
+                            backgroundColor:
+                              location.pathname === subItem.path
                                 ? "action.selected"
                                 : "transparent",
-                              "&:hover": {
-                                backgroundColor: "action.hover",
-                              },
-                            }}
-                          >
-                            <ListItemText
-                              primary={subItem.text}
-                              sx={{
-                                color: "black",
-                                fontWeight: isSubActive ? "bold" : "normal",
-                              }}
-                            />
-                          </ListItem>
-                        );
-                      })}
+                          }}
+                        >
+                          <ListItemText primary={subItem.text} />
+                        </ListItem>
+                      ))}
                     </List>
                   </Collapse>
                 </>
@@ -469,9 +286,7 @@ const SideBar = () => {
                     backgroundColor: isActive
                       ? "action.selected"
                       : "transparent",
-                    "&:hover": {
-                      backgroundColor: "action.hover",
-                    },
+                    "&:hover": { backgroundColor: "action.hover" },
                     px: 2,
                     py: 1,
                   }}

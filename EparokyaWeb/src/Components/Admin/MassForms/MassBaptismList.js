@@ -10,11 +10,19 @@ import {
   Divider,
   Paper,
   Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   useTheme,
 } from "@mui/material";
 import { format, parse } from "date-fns";
 import { styled } from "@mui/material/styles";
-
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
@@ -40,12 +48,13 @@ const StatusChip = styled(Chip)(({ theme, status }) => ({
 
 const StyledCard = styled(Paper)(({ theme, status }) => ({
   position: "relative",
-  borderLeft: `6px solid ${status === "Confirmed"
+  borderLeft: `6px solid ${
+    status === "Confirmed"
       ? theme.palette.success.main
       : status === "Cancelled"
         ? theme.palette.error.main
         : theme.palette.warning.main
-    }`,
+  }`,
   padding: theme.spacing(2),
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {
@@ -74,6 +83,7 @@ const MassBaptismList = () => {
   const [loading, setLoading] = useState(true);
   const [filteredStatus, setFilteredStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState("cards"); // 'cards' or 'table'
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
   const theme = useTheme();
@@ -117,15 +127,166 @@ const MassBaptismList = () => {
     const dateB = new Date(b.createdAt || b.baptismDateTime?.date || 0);
     return dateB - dateA;
   });
+ 
 
-  const cardsPerPage = 10;
-  const totalPages = Math.ceil(sortedForms.length / cardsPerPage);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(sortedForms.length / itemsPerPage);
   const paginatedForms = sortedForms.slice(
-    (currentPage - 1) * cardsPerPage,
-    currentPage * cardsPerPage
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   const groupedPaginated = groupByMonthYear(paginatedForms);
+
+  const formatBaptismTime = (rawTime) => {
+    if (!rawTime) return "N/A";
+    
+    try {
+      const time = parse(rawTime, "HH:mm", new Date());
+      return format(time, "h:mm a");
+    } catch (e) {
+      console.error("Error parsing baptism time:", rawTime, e);
+      return "N/A";
+    }
+  };
+
+  const renderCardsView = () => (
+    <Stack spacing={4} sx={{ width: "100%" }}>
+      {Object.entries(groupedPaginated).map(([monthYear, forms]) => (
+        <Box key={monthYear}>
+          <Divider sx={{ mb: 2 }}>
+            <Chip
+              label={monthYear}
+              color="primary"
+              variant="outlined"
+              sx={{ px: 2, fontSize: "0.875rem" }}
+            />
+          </Divider>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              width: "100%",
+            }}
+          >
+            {forms.map((item, index) => (
+              <Box
+                key={item._id}
+                sx={{
+                  flex: "1 1 calc(50% - 16px)",
+                  minWidth: 0,
+                  maxWidth: "calc(50% - 16px)",
+                  boxSizing: "border-box",
+                }}
+              >
+                <StyledCard
+                  elevation={3}
+                  status={item.binyagStatus}
+                  onClick={() =>
+                    navigate(`/admin/massBaptismDetails/${item._id}`)
+                  }
+                  sx={{ cursor: "pointer", height: "100%" }}
+                >
+                  <Typography variant="h6" component="h2" gutterBottom>
+                    Mass Baptism #{index + 1 + (currentPage - 1) * itemsPerPage}:{" "}
+                    {item.child?.fullName ?? "Unknown Child"}
+                  </Typography>
+                  <Box sx={{ position: "absolute", right: 16, top: 16 }}>
+                    <StatusChip
+                      label={item.binyagStatus ?? "Unknown"}
+                      size="small"
+                      status={item.binyagStatus}
+                    />
+                  </Box>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Baptism Date and Time:</strong>{" "}
+                    {item.baptismDateTime?.date
+                      ? `${format(
+                          new Date(item.baptismDateTime.date),
+                          "MMMM dd, yyyy"
+                        )} at ${formatBaptismTime(item.baptismDateTime?.time)}`
+                      : "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Name of the Child:</strong>{" "}
+                    {item.child?.fullName || "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Father:</strong>{" "}
+                    {item.parents?.fatherFullName || "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Mother:</strong>{" "}
+                    {item.parents?.motherFullName || "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Contact Info:</strong> {item.userId?.phone || "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Submitted By:</strong>{" "}
+                    {item.userId?.name || "Unknown"}
+                  </Typography>
+                </StyledCard>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      ))}
+    </Stack>
+  );
+
+  const renderTableView = () => (
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>#</strong></TableCell>
+              <TableCell><strong>Child Name</strong></TableCell>
+              <TableCell><strong>Baptism Date</strong></TableCell>
+              <TableCell><strong>Baptism Time</strong></TableCell>
+              <TableCell><strong>Father</strong></TableCell>
+              <TableCell><strong>Mother</strong></TableCell>
+              <TableCell><strong>Contact Info</strong></TableCell>
+              <TableCell><strong>Submitted By</strong></TableCell>
+              <TableCell><strong>Status</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedForms.map((item, index) => (
+              <TableRow 
+                key={item._id} 
+                hover 
+                sx={{ cursor: "pointer" }}
+                onClick={() => navigate(`/admin/massBaptismDetails/${item._id}`)}
+              >
+                <TableCell>{index + 1 + (currentPage - 1) * itemsPerPage}</TableCell>
+                <TableCell>{item.child?.fullName ?? "Unknown Child"}</TableCell>
+                <TableCell>
+                  {item.baptismDateTime?.date 
+                    ? format(new Date(item.baptismDateTime.date), 'MMMM dd, yyyy') 
+                    : "N/A"}
+                </TableCell>
+                <TableCell>{formatBaptismTime(item.baptismDateTime?.time)}</TableCell>
+                <TableCell>{item.parents?.fatherFullName || "N/A"}</TableCell>
+                <TableCell>{item.parents?.motherFullName || "N/A"}</TableCell>
+                <TableCell>{item?.userId?.phone || "N/A"}</TableCell>
+                <TableCell>{item.userId?.name || "Unknown"}</TableCell>
+                <TableCell>
+                  <StatusChip
+                    label={item.binyagStatus ?? "Unknown"}
+                    size="small"
+                    status={item.binyagStatus}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", width: "100%" }}>
@@ -159,45 +320,54 @@ const MassBaptismList = () => {
           >
             Mass Baptism Records
           </Typography>
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ mb: 2, justifyContent: "center" }}
-          >
-            {["All", "Confirmed", "Pending", "Cancelled"].map((status) => (
-              <Button
-                key={status}
-                variant={filteredStatus === status ? "contained" : "outlined"}
-                color={
-                  status === "Confirmed"
-                    ? "success"
-                    : status === "Cancelled"
-                      ? "error"
-                      : status === "Pending"
-                        ? "warning"
-                        : "primary"
-                }
-                onClick={() => setFilteredStatus(status)}
-              >
-                {status}
-              </Button>
-            ))}
-          </Stack>
+          
+          <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mb: 2 }}>
+            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+              {["All", "Confirmed", "Pending", "Cancelled"].map((status) => (
+                <Button
+                  key={status}
+                  variant={filteredStatus === status ? "contained" : "outlined"}
+                  color={
+                    status === "Confirmed"
+                      ? "success"
+                      : status === "Cancelled"
+                        ? "error"
+                        : status === "Pending"
+                          ? "warning"
+                          : "primary"
+                  }
+                  onClick={() => setFilteredStatus(status)}
+                >
+                  {status}
+                </Button>
+              ))}
+            </Stack>
+            
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={(e, newMode) => newMode && setViewMode(newMode)}
+              aria-label="view mode"
+            >
+              <ToggleButton value="cards" aria-label="card view">
+                Card View
+              </ToggleButton>
+              <ToggleButton value="table" aria-label="table view">
+                Table View
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          
           <Box sx={{ width: "100%", mb: 2 }}>
-            <input
-              type="text"
-              placeholder="Search by Child Name"
+            <TextField
+              label="Search by Child Name"
+              variant="outlined"
+              fullWidth
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                padding: "10px",
-                marginBottom: "20px",
-                width: "100%",
-                borderRadius: 4,
-                border: "1px solid #ccc",
-              }}
             />
           </Box>
+          
           {loading ? (
             <Loader />
           ) : paginatedForms.length === 0 ? (
@@ -207,170 +377,42 @@ const MassBaptismList = () => {
               </Typography>
             </Paper>
           ) : (
-            <Stack spacing={4} sx={{ width: "100%" }}>
-              {Object.entries(groupedPaginated).map(([monthYear, forms]) => (
-                <Box key={monthYear}>
-                  <Divider sx={{ mb: 2 }}>
-                    <Chip
-                      label={monthYear}
-                      color="primary"
-                      variant="outlined"
-                      sx={{ px: 2, fontSize: "0.875rem" }}
-                    />
-                  </Divider>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 2,
-                      width: "100%",
-                    }}
-                  >
-                    {forms.map((item, index) => (
-                      <Box
-                        key={item._id}
-                        sx={{
-                          flex: "1 1 calc(50% - 16px)",
-                          minWidth: 0,
-                          maxWidth: "calc(50% - 16px)",
-                          boxSizing: "border-box",
-                        }}
-                      >
-
-                        <StyledCard
-                          elevation={3}
-                          status={item.binyagStatus}
-                          onClick={() =>
-                            navigate(`/admin/massBaptismDetails/${item._id}`)
-                          }
-                          sx={{ cursor: "pointer", height: "100%" }}
-                        >
-                          <Typography variant="h6" component="h2" gutterBottom>
-                            Mass Baptism #{index + 1 + (currentPage - 1) * cardsPerPage}:{" "}
-                            {item.child?.fullName ?? "Unknown Child"}
-                          </Typography>
-                          <Box
-                            sx={{ position: "absolute", right: 16, top: 16 }}
-                          >
-                            <StatusChip
-                              label={item.binyagStatus ?? "Unknown"}
-                              size="small"
-                              status={item.binyagStatus}
-                            />
-                          </Box>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Baptism Date and Time:</strong>{" "}
-                            {item.baptismDateTime?.date &&
-                              item.baptismDateTime?.time
-                              ? `${format(
-                                new Date(item.baptismDateTime.date),
-                                "MMMM dd, yyyy"
-                              )} at ${format(
-                                parse(
-                                  item.baptismDateTime.time,
-                                  "HH:mm",
-                                  new Date()
-                                ),
-                                "h:mm a"
-                              )}`
-                              : "N/A"}
-                          </Typography>
-
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Name of the Child:</strong>{" "}
-                            {item.child?.fullName || "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Father:</strong>{" "}
-                            {item.parents?.fatherFullName || "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Mother:</strong>{" "}
-                            {item.parents?.motherFullName || "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Contact Info:</strong> {item.phone || "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Baptism Date and Time:</strong>{" "}
-                            {item.baptismDateTime?.date
-                              ? `${format(
-                                new Date(item.baptismDateTime.date),
-                                "MMMM dd, yyyy"
-                              )} at ${item.baptismDateTime?.time || "Unknown"
-                              }`
-                              : "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Submitted By:</strong>{" "}
-                            {item.userId?.name || "Unknown"}
-                          </Typography>
-                        </StyledCard>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              ))}
+            <>
+              {viewMode === "cards" ? renderCardsView() : renderTableView()}
+              
+              {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div
-                  style={{
-                    position: "relative",
-                    width: "50%",
-                    height: "100%",
-                    alignItems: "center",
-                    margin: "auto",
-                  }}
-                >
+                <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 3 }}>
                   <Box
                     sx={{
                       display: "flex",
-                      justifyContent: "center",
                       alignItems: "center",
                       gap: 2,
-                      mt: 3,
                     }}
                   >
-                    <div>
-                      <Button
-                        variant="outlined"
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(prev - 1, 1))
-                        }
-                        disabled={currentPage === 1}
-                        startIcon={<ChevronLeftIcon />}
-                      >
-                        Previous
-                      </Button>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                      }}
+                    <Button
+                      variant="outlined"
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      startIcon={<ChevronLeftIcon />}
                     >
-                      <Typography variant="body1" color="text.secondary">
-                        Page {currentPage} of {totalPages}
-                      </Typography>
-                    </div>
-                    <div>
-                      <Button
-                        variant="outlined"
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
-                          )
-                        }
-                        disabled={currentPage === totalPages}
-                        endIcon={<ChevronRightIcon />}
-                      >
-                        Next
-                      </Button>
-                    </div>
+                      Previous
+                    </Button>
+                    <Typography variant="body1" color="text.secondary">
+                      Page {currentPage} of {totalPages}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      endIcon={<ChevronRightIcon />}
+                    >
+                      Next
+                    </Button>
                   </Box>
-                </div>
+                </Box>
               )}
-            </Stack>
+            </>
           )}
         </Box>
       </Box>
