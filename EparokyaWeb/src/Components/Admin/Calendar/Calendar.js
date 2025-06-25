@@ -367,138 +367,180 @@ const Calendars = () => {
         </Paper>
 
         {/* Default Liturgical Calendar  */}
-       <Box
-  sx={{
-    display: isMobile ? 'block' : 'flex',
-    gap: 2,
-    mt: 2,
-    width: '100%',
-  }}
->
-  {/* Liturgical Calendar */}
-  <Paper
-    elevation={3}
-    sx={{
-      p: 2,
-      maxHeight: 400,
-      overflowY: 'auto',
-      width: isMobile ? '100%' : '50%',
-      maxWidth: '100%',
-      flex: 1,
-    }}
-  >
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-      <IconButton onClick={() => setYear(prev => prev - 1)}><ArrowBack /></IconButton>
-      <Typography variant="h6">Liturgical Calendar ({year})</Typography>
-      <IconButton onClick={() => setYear(prev => prev + 1)}><ArrowForward /></IconButton>
-    </Box>
-    {Object.entries(groupedByMonth).map(([month, items]) => (
-      <Box key={month} sx={{ mb: 2 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2 }}>{month}</Typography>
-        <Table size="small">
-          <TableBody>
-            {items.map((item, idx) => (
-              <TableRow key={idx}>
-                <TableCell>{new Date(item.date * 1000).toLocaleDateString()}</TableCell>
-                <TableCell>{item.day_of_the_week_long}</TableCell>
-                <TableCell>{item.name}</TableCell>
-              </TableRow>
+        <Box
+          sx={{
+            display: isMobile ? 'block' : 'flex',
+            gap: 2,
+            mt: 2,
+            width: '100%',
+          }}
+        >
+          {/* Liturgical Calendar */}
+          <Paper
+            elevation={3}
+            sx={{
+              p: 2,
+              maxHeight: 400,
+              overflowY: 'auto',
+              width: isMobile ? '100%' : '50%',
+              maxWidth: '100%',
+              flex: 1,
+              position: 'relative',
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <IconButton onClick={() => setYear(prev => prev - 1)}><ArrowBack /></IconButton>
+              <Typography variant="h6">Liturgical Calendar ({year})</Typography>
+              <IconButton onClick={() => setYear(prev => prev + 1)}><ArrowForward /></IconButton>
+            </Box>
+
+            {Object.entries(groupedByMonth).map(([month, items]) => (
+              <Box key={month} sx={{ mb: 3 }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 'bold',
+                    backgroundColor: '#f0f0f0',
+                    p: 1,
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
+                    borderBottom: '1px solid #ddd',
+                  }}
+                >
+                  {month}
+                </Typography>
+                <Table size="small">
+                  <TableBody>
+                    {items.map((item, idx) => {
+                      const isToday = new Date().toDateString() === new Date(item.date * 1000).toDateString();
+
+                      let bgColor = idx % 2 === 0 ? '#fafafa' : 'white'; // alternate row
+                      if (isToday) bgColor = '#fffae6'; // highlight today
+
+                      // Optional: color-code based on name keywords
+                      let nameColor = 'default';
+                      const nameLower = item.name.toLowerCase();
+                      if (nameLower.includes('sunday')) nameColor = 'primary.main';
+                      else if (nameLower.includes('solemnity')) nameColor = 'secondary.main';
+                      else if (nameLower.includes('memorial')) nameColor = 'success.main';
+                      else if (nameLower.includes('feast')) nameColor = 'warning.main';
+                      else if (nameLower.includes('lent') || nameLower.includes('advent')) nameColor = 'error.main';
+
+                      return (
+                        <TableRow key={idx} sx={{ backgroundColor: bgColor }}>
+                          <TableCell>{new Date(item.date * 1000).toLocaleDateString()}</TableCell>
+                          <TableCell>{item.day_of_the_week_long}</TableCell>
+                          <TableCell sx={{ color: nameColor, fontWeight: '500' }}>
+                            {item.name}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </Box>
             ))}
-          </TableBody>
-        </Table>
-      </Box>
-    ))}
-  </Paper>
+             <Box sx={{ mt: 1 }}>
+    <Typography variant="caption">
+      <span style={{ color: '#1976d2', fontWeight: 'bold' }}>● Sunday</span> &nbsp;
+      <span style={{ color: '#9c27b0', fontWeight: 'bold' }}>● Solemnity</span> &nbsp;
+      <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>● Memorial</span> &nbsp;
+      <span style={{ color: '#ed6c02', fontWeight: 'bold' }}>● Feast</span> &nbsp;
+      <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>● Lent/Advent</span>
+    </Typography>
+  </Box>
+          </Paper>
 
-  {/* Local Calendar List */}
-  <Paper
-    elevation={3}
-    sx={{
-      p: 2,
-      maxHeight: 400,
-      overflowY: 'auto',
-      width: isMobile ? '100%' : '50%',
-      maxWidth: '100%',
-      flex: 1,
-      ml: isMobile ? 0 : 2,
-      mt: isMobile ? 2 : 0,
-    }}
-  >
-    <LocalCalendarList />
-  </Paper>
-</Box>
+          {/* Local Calendar List */}
+          <Paper
+            elevation={3}
+            sx={{
+              p: 2,
+              maxHeight: 400,
+              overflowY: 'auto',
+              width: isMobile ? '100%' : '50%',
+              maxWidth: '100%',
+              flex: 1,
+              ml: isMobile ? 0 : 2,
+              mt: isMobile ? 2 : 0,
+            }}
+          >
+            <LocalCalendarList />
+          </Paper>
+        </Box>
 
-      {selectedEvent && (
-        <Paper elevation={3} sx={{
-          mt: 3,
-          p: isMobile ? 2 : 3,
-          borderRadius: 2
-        }}>
-          <Typography variant="h6" sx={{
-            mb: 2,
-            fontWeight: 'bold',
-            fontSize: isMobile ? '1.1rem' : '1.25rem'
+        {selectedEvent && (
+          <Paper elevation={3} sx={{
+            mt: 3,
+            p: isMobile ? 2 : 3,
+            borderRadius: 2
           }}>
-            Event Details
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-              <strong>Type:</strong> {selectedEvent.type}
+            <Typography variant="h6" sx={{
+              mb: 2,
+              fontWeight: 'bold',
+              fontSize: isMobile ? '1.1rem' : '1.25rem'
+            }}>
+              Event Details
             </Typography>
-            {selectedEvent.type === 'Wedding' && (
-              <>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                <strong>Type:</strong> {selectedEvent.type}
+              </Typography>
+              {selectedEvent.type === 'Wedding' && (
+                <>
+                  <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                    <strong>Bride:</strong> {selectedEvent.brideName || 'N/A'}
+                  </Typography>
+                  <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                    <strong>Groom:</strong> {selectedEvent.groomName || 'N/A'}
+                  </Typography>
+                </>
+              )}
+              {selectedEvent.type === 'Baptism' && (
                 <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                  <strong>Bride:</strong> {selectedEvent.brideName || 'N/A'}
+                  <strong>Child:</strong> {selectedEvent.child?.fullName || 'N/A'}
                 </Typography>
+              )}
+              {selectedEvent.type === 'Funeral' && (
                 <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                  <strong>Groom:</strong> {selectedEvent.groomName || 'N/A'}
+                  <strong>Name:</strong> {selectedEvent.name ? `${selectedEvent.name.firstName || ''} ${selectedEvent.name.lastName || ''}` : 'N/A'}
                 </Typography>
-              </>
-            )}
-            {selectedEvent.type === 'Baptism' && (
-              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                <strong>Child:</strong> {selectedEvent.child?.fullName || 'N/A'}
-              </Typography>
-            )}
-            {selectedEvent.type === 'Funeral' && (
-              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                <strong>Name:</strong> {selectedEvent.name ? `${selectedEvent.name.firstName || ''} ${selectedEvent.name.lastName || ''}` : 'N/A'}
-              </Typography>
-            )}
-            {selectedEvent.type === 'Custom' && (
-              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                <strong>Title:</strong> {selectedEvent.title || 'N/A'}
-              </Typography>
-            )}
+              )}
+              {selectedEvent.type === 'Custom' && (
+                <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  <strong>Title:</strong> {selectedEvent.title || 'N/A'}
+                </Typography>
+              )}
 
-            {selectedEvent.type === 'Liturgical' && (
-              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                <strong>Liturgical Event:</strong> {selectedEvent.title}
-              </Typography>
-            )}
+              {selectedEvent.type === 'Liturgical' && (
+                <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  <strong>Liturgical Event:</strong> {selectedEvent.title}
+                </Typography>
+              )}
 
 
-            <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
-              <strong>Date:</strong> {moment(
-                selectedEvent.weddingDate ||
-                selectedEvent.baptismDate ||
-                selectedEvent.funeralDate ||
-                selectedEvent.customeventDate
-              ).format('MMMM Do YYYY')}
-            </Typography>
-          </Box>
-        </Paper>
-      )}
+              <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                <strong>Date:</strong> {moment(
+                  selectedEvent.weddingDate ||
+                  selectedEvent.baptismDate ||
+                  selectedEvent.funeralDate ||
+                  selectedEvent.customeventDate
+                ).format('MMMM Do YYYY')}
+              </Typography>
+            </Box>
+          </Paper>
+        )}
 
-      <Button
-        variant='contained'
-        color='success'
-        sx={{ mt: 3 }}
-        onClick={() => navigate('/admin/addEvent')}
-      >
-        Add Event
-      </Button>
-    </Box>
+        <Button
+          variant='contained'
+          color='success'
+          sx={{ mt: 3 }}
+          onClick={() => navigate('/admin/addEvent')}
+        >
+          Add Event
+        </Button>
+      </Box>
     </Box >
   );
 };

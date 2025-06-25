@@ -149,6 +149,7 @@ const PrayerRequestIntentionList = () => {
                 background: "#fff",
               }}
             />
+
             <Select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
@@ -166,6 +167,15 @@ const PrayerRequestIntentionList = () => {
               )}
             </Select>
           </Stack>
+
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mb: 2 }}
+            onClick={() => navigate("/admin/prayerRequestIntentionFullList")}
+          >
+            View Full List
+          </Button>
 
           {loading ? (
             <Typography>Loading prayer intentions...</Typography>

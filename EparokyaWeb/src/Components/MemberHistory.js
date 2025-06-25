@@ -116,7 +116,7 @@ const MemberHistory = () => {
                     <TableCell><strong>Civil Status</strong></TableCell>
                     <TableCell><strong>Preference</strong></TableCell>
                     <TableCell><strong>Role</strong></TableCell>
-                    <TableCell><strong>Active Since</strong></TableCell>
+                    <TableCell><strong>Since</strong></TableCell>
                     <TableCell><strong>Status</strong></TableCell>
                   </TableRow>
                 </TableHead>

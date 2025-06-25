@@ -167,6 +167,10 @@ import AdminPrayerReview from "./Components/Admin/Prayers/AdminPrayerReview";
 import PrayerIntentionsList from "./Components/Admin/Prayers/prayerRequestIntentionList";
 import PrayerIntentionDetails from "./Components/Admin/Prayers/prayerRequestIntentionDetails";
 
+import PrayerRequestFullList from "./Components/Admin/Prayers/prayerRequestFullList";
+
+import PrayerRequestIntentionFullList from "./Components/Admin/Prayers/prayerRequestIntentionFullList";
+
 // Private Forms
 import WeddingList from "./Components/Admin/Wedding/WeddingList";
 import WeddingDetails from "./Components/Admin/Wedding/WeddingDetails";
@@ -811,6 +815,25 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/admin/prayerRequestFullList"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <PrayerRequestFullList />
+            </ProtectedRoute>
+          }
+        />
+
+          <Route
+          path="/admin/prayerRequestIntentionFullList"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <PrayerRequestIntentionFullList />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/admin/prayerIntentionList"
           element={
