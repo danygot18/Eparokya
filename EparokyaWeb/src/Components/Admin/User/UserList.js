@@ -92,7 +92,9 @@ const UsersList = () => {
       <div className="d-flex">
 
         {/* Sidebar: Fixed width, full height */}
-        <div className="bg-light" style={{ width: '250px' }}>
+        <div className="bg-light" 
+        style={{ width: '250px' }}
+        >
           <SideBar />
         </div>
 

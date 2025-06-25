@@ -10,6 +10,15 @@ import {
   Divider,
   Paper,
   Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   useTheme,
 } from "@mui/material";
 import { format } from "date-fns";
@@ -74,6 +83,7 @@ const MassWeddingList = () => {
   const [loading, setLoading] = useState(true);
   const [filteredStatus, setFilteredStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState("cards"); // 'cards' or 'table'
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
   const theme = useTheme();
@@ -122,14 +132,148 @@ const MassWeddingList = () => {
     return dateB - dateA;
   });
 
-  const cardsPerPage = 10;
-  const totalPages = Math.ceil(sortedForms.length / cardsPerPage);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(sortedForms.length / itemsPerPage);
   const paginatedForms = sortedForms.slice(
-    (currentPage - 1) * cardsPerPage,
-    currentPage * cardsPerPage
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   const groupedPaginated = groupByMonthYear(paginatedForms);
+
+  // --- Card View ---
+  const renderCardsView = () => (
+    <Stack spacing={4} sx={{ width: "100%" }}>
+      {Object.entries(groupedPaginated).map(([monthYear, forms]) => (
+        <Box key={monthYear}>
+          <Divider sx={{ mb: 2 }}>
+            <Chip
+              label={monthYear}
+              color="primary"
+              variant="outlined"
+              sx={{ px: 2, fontSize: "0.875rem" }}
+            />
+          </Divider>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              width: "100%",
+            }}
+          >
+            {forms.map((item, index) => (
+              <Box
+                key={item._id}
+                sx={{
+                  flex: "1 1 calc(50% - 16px)",
+                  minWidth: 0,
+                  maxWidth: "calc(50% - 16px)",
+                  boxSizing: "border-box",
+                }}
+              >
+                <StyledCard
+                  elevation={3}
+                  status={item.weddingStatus}
+                  onClick={() =>
+                    navigate(`/admin/massWeddingDetails/${item._id}`)
+                  }
+                  sx={{ cursor: "pointer", height: "100%" }}
+                >
+                  <Box sx={{ position: "absolute", right: 16, top: 16 }}>
+                    <StatusChip
+                      label={item.weddingStatus ?? "Unknown"}
+                      size="small"
+                      status={item.weddingStatus}
+                    />
+                  </Box>
+                  <Typography variant="h6" component="h2" gutterBottom>
+                    Mass Wedding #
+                    {index + 1 + (currentPage - 1) * itemsPerPage}:{" "}
+                    {item.brideName ?? "Unknown Bride"} &{" "}
+                    {item.groomName ?? "Unknown Groom"}
+                  </Typography>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Wedding Date and Time:</strong>{" "}
+                    {item.weddingDateTime?.date
+                      ? `${format(
+                          new Date(item.weddingDateTime.date),
+                          "MMMM dd, yyyy"
+                        )} at ${item.weddingDateTime?.time || "N/A"}`
+                      : "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Bride Contact:</strong> {item.bridePhone || "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Groom Contact:</strong> {item.groomPhone || "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Submitted By:</strong>{" "}
+                    {item.userId?.name || "Unknown"}
+                  </Typography>
+                </StyledCard>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      ))}
+    </Stack>
+  );
+
+  // --- Table View ---
+  const renderTableView = () => (
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>#</strong></TableCell>
+              <TableCell><strong>Bride Name</strong></TableCell>
+              <TableCell><strong>Groom Name</strong></TableCell>
+              <TableCell><strong>Wedding Date</strong></TableCell>
+              <TableCell><strong>Wedding Time</strong></TableCell>
+              <TableCell><strong>Bride Contact</strong></TableCell>
+              <TableCell><strong>Groom Contact</strong></TableCell>
+              <TableCell><strong>Submitted By</strong></TableCell>
+              <TableCell><strong>Status</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedForms.map((item, index) => (
+              <TableRow
+                key={item._id}
+                hover
+                sx={{ cursor: "pointer" }}
+                onClick={() => navigate(`/admin/massWeddingDetails/${item._id}`)}
+              >
+                <TableCell>{index + 1 + (currentPage - 1) * itemsPerPage}</TableCell>
+                <TableCell>{item.brideName ?? "Unknown Bride"}</TableCell>
+                <TableCell>{item.groomName ?? "Unknown Groom"}</TableCell>
+                <TableCell>
+                  {item.weddingDateTime?.date
+                    ? format(new Date(item.weddingDateTime.date), "MMMM dd, yyyy")
+                    : "N/A"}
+                </TableCell>
+                <TableCell>{item.weddingDateTime?.time || "N/A"}</TableCell>
+                <TableCell>{item.bridePhone || "N/A"}</TableCell>
+                <TableCell>{item.groomPhone || "N/A"}</TableCell>
+                <TableCell>{item.userId?.name || "Unknown"}</TableCell>
+                <TableCell>
+                  <StatusChip
+                    label={item.weddingStatus ?? "Unknown"}
+                    size="small"
+                    status={item.weddingStatus}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", width: "100%" }}>
@@ -163,43 +307,48 @@ const MassWeddingList = () => {
           >
             Mass Wedding Records
           </Typography>
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ mb: 2, justifyContent: "center" }}
-          >
-            {["All", "Confirmed", "Pending", "Cancelled"].map((status) => (
-              <Button
-                key={status}
-                variant={filteredStatus === status ? "contained" : "outlined"}
-                color={
-                  status === "Confirmed"
-                    ? "success"
-                    : status === "Cancelled"
-                    ? "error"
-                    : status === "Pending"
-                    ? "warning"
-                    : "primary"
-                }
-                onClick={() => setFilteredStatus(status)}
-              >
-                {status}
-              </Button>
-            ))}
-          </Stack>
+          <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mb: 2 }}>
+            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+              {["All", "Confirmed", "Pending", "Cancelled"].map((status) => (
+                <Button
+                  key={status}
+                  variant={filteredStatus === status ? "contained" : "outlined"}
+                  color={
+                    status === "Confirmed"
+                      ? "success"
+                      : status === "Cancelled"
+                      ? "error"
+                      : status === "Pending"
+                      ? "warning"
+                      : "primary"
+                  }
+                  onClick={() => setFilteredStatus(status)}
+                >
+                  {status}
+                </Button>
+              ))}
+            </Stack>
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={(e, newMode) => newMode && setViewMode(newMode)}
+              aria-label="view mode"
+            >
+              <ToggleButton value="cards" aria-label="card view">
+                Card View
+              </ToggleButton>
+              <ToggleButton value="table" aria-label="table view">
+                Table View
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
           <Box sx={{ width: "100%", mb: 2 }}>
-            <input
-              type="text"
-              placeholder="Search by Bride or Groom Name"
+            <TextField
+              label="Search by Bride or Groom Name"
+              variant="outlined"
+              fullWidth
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                padding: "10px",
-                marginBottom: "20px",
-                width: "100%",
-                borderRadius: 4,
-                border: "1px solid #ccc",
-              }}
             />
           </Box>
           {loading ? (
@@ -211,147 +360,42 @@ const MassWeddingList = () => {
               </Typography>
             </Paper>
           ) : (
-            <Stack spacing={4} sx={{ width: "100%" }}>
-              {Object.entries(groupedPaginated).map(([monthYear, forms]) => (
-                <Box key={monthYear}>
-                  <Divider sx={{ mb: 2 }}>
-                    <Chip
-                      label={monthYear}
-                      color="primary"
-                      variant="outlined"
-                      sx={{ px: 2, fontSize: "0.875rem" }}
-                    />
-                  </Divider>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 2,
-                      width: "100%",
-                    }}
-                  >
-                    {forms.map((item, index) => (
-                      <Box
-                        key={item._id}
-                        sx={{
-                          flex: "1 1 calc(50% - 16px)",
-                          minWidth: 0,
-                          maxWidth: "calc(50% - 16px)",
-                          boxSizing: "border-box",
-                        }}
-                      >
-                        <StyledCard
-                          elevation={3}
-                          status={item.weddingStatus}
-                          onClick={() =>
-                            navigate(`/admin/massWeddingDetails/${item._id}`)
-                          }
-                          sx={{ cursor: "pointer", height: "100%" }}
-                        >
-                          <Box
-                            sx={{ position: "absolute", right: 16, top: 16 }}
-                          >
-                            <StatusChip
-                              label={item.weddingStatus ?? "Unknown"}
-                              size="small"
-                              status={item.weddingStatus}
-                            />
-                          </Box>
-                          <Typography variant="h6" component="h2" gutterBottom>
-                            Mass Wedding #
-                            {index + 1 + (currentPage - 1) * cardsPerPage}:{" "}
-                            {item.brideName ?? "Unknown Bride"} &{" "}
-                            {item.groomName ?? "Unknown Groom"}
-                          </Typography>
-                          <Divider sx={{ my: 1 }} />
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Wedding Date and Time:</strong>{" "}
-                            {item.weddingDateTime?.date
-                              ? `${format(
-                                  new Date(item.weddingDateTime.date),
-                                  "MMMM dd, yyyy"
-                                )} at ${item.weddingDateTime?.time || "N/A"}`
-                              : "N/A"}
-                          </Typography>
+            <>
+              {viewMode === "cards" ? renderCardsView() : renderTableView()}
 
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Bride Contact:</strong>{" "}
-                            {item.bridePhone || "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Groom Contact:</strong>{" "}
-                            {item.groomPhone || "N/A"}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            <strong>Submitted By:</strong>{" "}
-                            {item.userId?.name || "Unknown"}
-                          </Typography>
-                        </StyledCard>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              ))}
+              {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div
-                  style={{
-                    position: "relative",
-                    width: "50%",
-                    height: "100%",
-                    alignItems: "center",
-                    margin: "auto",
-                  }}
-                >
+                <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 3 }}>
                   <Box
                     sx={{
                       display: "flex",
-                      justifyContent: "center",
                       alignItems: "center",
                       gap: 2,
-                      mt: 3,
                     }}
                   >
-                    <div>
-                      <Button
-                        variant="outlined"
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(prev - 1, 1))
-                        }
-                        disabled={currentPage === 1}
-                        startIcon={<ChevronLeftIcon />}
-                      >
-                        Previous
-                      </Button>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                      }}
+                    <Button
+                      variant="outlined"
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      startIcon={<ChevronLeftIcon />}
                     >
-                      <Typography variant="body1" color="text.secondary">
-                        Page {currentPage} of {totalPages}
-                      </Typography>
-                    </div>
-                    <div>
-                      <Button
-                        variant="outlined"
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
-                          )
-                        }
-                        disabled={currentPage === totalPages}
-                        endIcon={<ChevronRightIcon />}
-                      >
-                        Next
-                      </Button>
-                    </div>
+                      Previous
+                    </Button>
+                    <Typography variant="body1" color="text.secondary">
+                      Page {currentPage} of {totalPages}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      endIcon={<ChevronRightIcon />}
+                    >
+                      Next
+                    </Button>
                   </Box>
-                </div>
+                </Box>
               )}
-            </Stack>
+            </>
           )}
         </Box>
       </Box>

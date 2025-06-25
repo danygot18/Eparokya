@@ -313,7 +313,7 @@ const Calendars = () => {
   return (
     <Box sx={{
       display: 'flex',
-      height: '100vh',
+      // height: '100vh',
       flexDirection: isMobile ? 'column' : 'row'
     }}>
       <SideBar />

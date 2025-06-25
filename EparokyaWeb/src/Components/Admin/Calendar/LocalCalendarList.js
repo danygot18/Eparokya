@@ -36,7 +36,7 @@ const LocalCalendarList = () => {
       sx={{
         p: 2,
         maxHeight: "600px",
-        overflowY: "auto",
+        // overflowY: "auto",
         minWidth: "300px",
       }}
     >

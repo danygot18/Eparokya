@@ -9,8 +9,9 @@ import {
   TableRow,
   Paper,
   Typography,
-  Grid,
   TextField,
+  Box,
+  Container,
 } from "@mui/material";
 import SideBar from "../SideBar";
 import Loader from "../../Layout/Loader";
@@ -56,19 +57,18 @@ const UserFormCounts = () => {
   );
 
   return (
-    <Grid container spacing={2}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       {/* Sidebar */}
-      <Grid item xs={12} md={3}>
+      <Box sx={{ width: "250px", flexShrink: 0 }}>
         <SideBar />
-      </Grid>
+      </Box>
 
       {/* Main Content */}
-      <Grid item xs={12} md={9}>
+      <Container sx={{ flexGrow: 1, py: 4 }}>
         <Typography variant="h5" gutterBottom>
           User Form Submissions
         </Typography>
 
-        {/* Search Bar */}
         <TextField
           label="Search by Name"
           variant="outlined"
@@ -78,34 +78,20 @@ const UserFormCounts = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
-        {loading ? ( 
+        {loading ? (
           <Loader />
         ) : (
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>
-                    <b>User</b>
-                  </TableCell>
-                  <TableCell>
-                    <b>Email</b>
-                  </TableCell>
-                  <TableCell>
-                    <b>Wedding</b>
-                  </TableCell>
-                  <TableCell>
-                    <b>Baptism</b>
-                  </TableCell>
-                  <TableCell>
-                    <b>Counseling</b>
-                  </TableCell>
-                  <TableCell>
-                    <b>House Blessing</b>
-                  </TableCell>
-                  <TableCell>
-                    <b>Total Submissions</b>
-                  </TableCell>
+                  <TableCell><b>User</b></TableCell>
+                  <TableCell><b>Email</b></TableCell>
+                  <TableCell><b>Wedding</b></TableCell>
+                  <TableCell><b>Baptism</b></TableCell>
+                  <TableCell><b>Counseling</b></TableCell>
+                  <TableCell><b>House Blessing</b></TableCell>
+                  <TableCell><b>Total Submissions</b></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -124,8 +110,8 @@ const UserFormCounts = () => {
             </Table>
           </TableContainer>
         )}
-      </Grid>
-    </Grid>
+      </Container>
+    </Box>
   );
 };
 

@@ -186,7 +186,7 @@ const SideBar = () => {
   let menuItems = allMenuItems;
   if (user?.isAdmin && user?.isPriest) {
     menuItems = allMenuItems.filter(
-      (item) => item.text === "Priest Navigation" || item.text === "Calendar"
+      (item) => item.text === "Priest Navigation" || item.text === "Calendar" || item.text === "Sentiment Lists"
     );
   }
 
