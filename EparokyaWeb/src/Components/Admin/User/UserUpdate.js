@@ -5,18 +5,19 @@ import SideBar from '../SideBar';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { errMsg, successMsg } from '../../../Utils/helpers';
-import { getToken } from '../../../Utils/helpers';
 import axios from 'axios';
+import { Button } from '@mui/material'
 
 const UpdateUser = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [isAdmin, setIsAdmin] = useState(false); // Boolean state for isAdmin
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isPriest, setIsPriest] = useState(false); // NEW: isPriest state
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [user, setUser] = useState(null);
     const [isUpdated, setIsUpdated] = useState(false);
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     const { id } = useParams();
 
     const config = {
@@ -29,22 +30,14 @@ const UpdateUser = () => {
             setUser(data.user);
             setName(data.user.name);
             setEmail(data.user.email);
-            setIsAdmin(data.user.isAdmin); // Set isAdmin state
+            setIsAdmin(data.user.isAdmin);
+            setIsPriest(data.user.isPriest); // NEW: Set isPriest
             setLoading(false);
         } catch (error) {
-            setError(error.response.data.message);
+            setError(error.response?.data?.message || "Failed to fetch user");
         }
     };
 
-    // const updateUser = async (id, userData) => {
-    //     try {
-    //         const { data } = await axios.put(`${process.env.REACT_APP_API}/api/v1/admin/user/${id}`, userData, config);
-    //         setIsUpdated(data.success);
-    //         setLoading(false);
-    //     } catch (error) {
-    //         setError(error.response.data.message);
-    //     }
-    // };
     const updateUser = async (id, userData) => {
         try {
             const { data } = await axios.put(
@@ -55,10 +48,9 @@ const UpdateUser = () => {
             setIsUpdated(data.success);
             setLoading(false);
         } catch (error) {
-            setError(error.response.data.message);
+            setError(error.response?.data?.message || "Update failed");
         }
     };
-
 
     useEffect(() => {
         if (!user || user._id !== id) {
@@ -74,34 +66,16 @@ const UpdateUser = () => {
         }
     }, [error, isUpdated, id, user]);
 
-    // const submitHandler = (e) => {
-    //     e.preventDefault();
-    //     const formData = new FormData();
-    //     formData.set('name', name);
-    //     formData.set('email', email);
-    //     formData.set('isAdmin', isAdmin); // Set the correct field for isAdmin
-    //     updateUser(user._id, formData);
-    // };
-    // const submitHandler = (e) => {
-    //     e.preventDefault();
-    //     const formData = new FormData();
-    //     formData.set('name', name);
-    //     formData.set('email', email);
-    //     formData.set('isAdmin', isAdmin === true); // Ensure it's a Boolean
-    //     updateUser(user._id, formData);
-    // };
     const submitHandler = (e) => {
         e.preventDefault();
-
         const userData = {
             name,
             email,
-            isAdmin, // This will send the correct boolean value
+            isAdmin,
+            isPriest, // NEW: include isPriest in update
         };
-
         updateUser(user._id, userData);
     };
-
 
     return (
         <div>
@@ -114,7 +88,8 @@ const UpdateUser = () => {
                     <div className="row wrapper">
                         <div className="col-10 col-lg-5">
                             <form className="shadow-lg" onSubmit={submitHandler}>
-                                <h1 className="mt-2 mb-5">Update User</h1>
+                                <h1 className="mt-2 mb-4">Update User</h1>
+
                                 <div className="form-group">
                                     <label htmlFor="name_field">Name</label>
                                     <input
@@ -125,6 +100,7 @@ const UpdateUser = () => {
                                         onChange={(e) => setName(e.target.value)}
                                     />
                                 </div>
+
                                 <div className="form-group">
                                     <label htmlFor="email_field">Email</label>
                                     <input
@@ -135,22 +111,36 @@ const UpdateUser = () => {
                                         onChange={(e) => setEmail(e.target.value)}
                                     />
                                 </div>
+
                                 <div className="form-group">
-                                    <label htmlFor="role_field">Role</label>
+                                    <label htmlFor="role_field">Admin Role</label>
                                     <select
                                         id="role_field"
                                         className="form-control"
                                         value={isAdmin ? 'admin' : 'user'}
-                                        onChange={(e) => setIsAdmin(e.target.value === 'admin')} // Correct logic
+                                        onChange={(e) => setIsAdmin(e.target.value === 'admin')}
                                     >
                                         <option value="user">User</option>
                                         <option value="admin">Admin</option>
                                     </select>
-
                                 </div>
-                                <button type="submit" className="btn update-btn btn-block mt-4 mb-3">
+
+                                <div className="form-group">
+                                    <label htmlFor="priest_field">Priest Status</label>
+                                    <select
+                                        id="priest_field"
+                                        className="form-control"
+                                        value={isPriest ? 'priest' : 'not_priest'}
+                                        onChange={(e) => setIsPriest(e.target.value === 'priest')}
+                                    >
+                                        <option value="not_priest">Not a Priest</option>
+                                        <option value="priest">Priest</option>
+                                    </select>
+                                </div>
+
+                                <Button type="submit" variant='contained'>
                                     Update
-                                </button>
+                                </Button>
                             </form>
                         </div>
                     </div>
