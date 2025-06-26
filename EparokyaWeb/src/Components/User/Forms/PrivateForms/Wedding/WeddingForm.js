@@ -1,21 +1,24 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import {  Form, Row, Col } from "react-bootstrap";
 import GuestSidebar from "../../../../GuestSideBar";
 import MetaData from "../../../../Layout/MetaData";
 import ConfirmedWeddingModal from "./ConfirmedWeddingModal";
-import { Modal as BsModal } from "react-bootstrap";
+// import { Modal as BsModal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "./MySubmittedWeddingForm.css";
 import {
-
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Button,
+  Typography,
+  IconButton,
   TextField,
 } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 
 // import termsAndConditionsText from "../../../../Term";
 
@@ -145,6 +148,53 @@ const WeddingForm = () => {
   const [disabledWeddingDates, setDisabledWeddingDates] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+
+  const MarriedDialog = ({ showMarriedDialog, setShowMarriedDialog }) => {
+    const handleClose = () => {
+      setShowMarriedDialog(false);
+    };
+
+    return (
+      <Dialog
+        open={showMarriedDialog}
+        onClose={handleClose}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          Notice
+          <IconButton edge="end" onClick={handleClose}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent>
+          <Typography
+            variant="body1"
+            align="center"
+            color="error"
+            fontWeight="bold"
+          >
+            Sorry, but a "Married" user cannot submit an application. <br />
+            Paumanhin, ang "kasal" ay hindi maaring mag-sagot ng applikasyon.
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+          <Button variant="outlined" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
   useEffect(() => {
     const fetchPriests = async () => {
       try {
@@ -544,37 +594,10 @@ const WeddingForm = () => {
           }}
         >
           {/* Married User Dialog */}
-          <BsModal
-            show={showMarriedDialog}
-            onHide={() => setShowMarriedDialog(false)}
-            centered
-            backdrop={false} // No gray overlay
-          >
-            <BsModal.Header closeButton>
-              <BsModal.Title>Notice</BsModal.Title>
-            </BsModal.Header>
-            <BsModal.Body>
-              <div
-                style={{
-                  color: "red",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
-              >
-                Sorry, but a "Married" user cannot submit an application. <br />
-                Paumanhin, ang "kasal" ay hindi maaring mag-sagot ng
-                applikasyon.
-              </div>
-            </BsModal.Body>
-            <BsModal.Footer style={{ justifyContent: "center" }}>
-              <Button
-                variant="secondary"
-                onClick={() => setShowMarriedDialog(false)}
-              >
-                Close
-              </Button>
-            </BsModal.Footer>
-          </BsModal>
+          <MarriedDialog
+            showMarriedDialog={showMarriedDialog}
+            setShowMarriedDialog={setShowMarriedDialog}
+          />
 
           {/* wedding calendar */}
           <form
@@ -640,7 +663,7 @@ const WeddingForm = () => {
             </Form.Group>
 
             <Form.Group>
-              <Form.Label style={{ marginBottom: '10px'}}>
+              <Form.Label style={{ marginBottom: '10px' }}>
                 Wedding Date (Monday Schedules are NOT Available)
               </Form.Label>
 
