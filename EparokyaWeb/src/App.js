@@ -34,6 +34,12 @@ import WeddingWall from "./Components/WeddingWall/WeddingWall";
 import ParishPriest from "./Components/ParishInformation/ParishPriests";
 import GuestPriest from "./Components/GuestPriest";
 
+import CreateMissions from "./Components/Admin/Missions";
+import MissionList from "./Components/Admin/MissionLists";
+import MissionsPage from "./Components/MissionsPage";
+
+import MissionsPageDetail from "./Components/MissionsPageDetails";
+
 import MemberHistory from "./Components/MemberHistory";
 
 import SubmittedForms from "./Components/User/Forms/SubmittedFormsNavigation";
@@ -297,6 +303,9 @@ function App() {
         <Route path="/FAQsPage" element={<FAQs />} exact="true" />
         <Route path="/GuidesPage" element={<Guides />} exact="true" />
         <Route path="/ParishHistory" element={<ParishHistory />} exact="true" />
+
+         <Route path="/missionsPage" element={<MissionsPage />} exact="true" />
+         <Route path="/missionsPageDetail/:id" element={<MissionsPage />} exact="true" />
 
         <Route
           path="/user/ministryAnnouncement"
@@ -675,6 +684,25 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/admin/createMission"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <CreateMissions />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/missionList"
+          element={
+            <ProtectedRoute isAdmin={true}>
+              <MissionList />
+            </ProtectedRoute>
+          }
+        />
+
 
         {/* Members */}
         <Route

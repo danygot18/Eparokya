@@ -1,5 +1,5 @@
 
-// // For Production
+// For Production
 // const sendToken = (user, statusCode, res) => {
 
 //     // Create Jwt token
@@ -113,10 +113,9 @@
 // }
 
 // module.exports = sendToken;
+
 // New
-
-
-// For Deployment
+// For Deployment - USING
 const sendToken = (user, statusCode, res) => {
     const token = user.getJwtToken();
 

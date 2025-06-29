@@ -100,6 +100,14 @@ const SideBar = () => {
         { text: "Parish Priests List", path: "/admin/priestList" },
       ],
     },
+     {
+      text: "Missions Page",
+      icon: <PersonIcon />,
+      subItems: [
+        { text: "Add Missions", path: "/admin/createMission" },
+        { text: "Missions List", path: "/admin/missionList" },
+      ],
+    },
     { text: "Ministry Categories", icon: <CategoryIcon />, path: "/admin/ministryCategory/create" },
     {
       text: "Member Directory",

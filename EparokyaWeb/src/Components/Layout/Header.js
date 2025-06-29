@@ -136,6 +136,14 @@ const Header = () => {
             FAQs
           </Button>
 
+          <Button
+            component={Link}
+            to="/missionsPage"
+            sx={navButtonStyle("/missionsPage")}
+          >
+            Missions
+          </Button>
+
           {/* Parish Dropdown */}
           <Button
             onClick={handleParishMenuOpen}

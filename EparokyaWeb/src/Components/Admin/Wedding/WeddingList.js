@@ -84,7 +84,6 @@ const formatWeddingTime = (rawTime) => {
   if (!rawTime) return "N/A";
 
   try {
-    // If it's just a time string like "12:41", create a full date with today's date
     let date;
     if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
       const today = new Date();
@@ -111,12 +110,11 @@ const WeddingList = () => {
   const [loading, setLoading] = useState(true);
   const [filteredStatus, setFilteredStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("cards"); // 'cards' or 'table'
+  const [viewMode, setViewMode] = useState("cards"); 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchWeddingForms();
-    // eslint-disable-next-line
   }, []);
 
   const fetchWeddingForms = async () => {

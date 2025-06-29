@@ -56,6 +56,8 @@ app.use((req, res, next) => {
 app.use("/api/v1", require("./routes/user"));
 app.use("/api/v1/chat", require("./routes/chat"));
 app.use("/api/v1", require("./routes/Resources/resource"));
+app.use("/api/v1", require("./routes/missions"));
+
 // Prayer Wall
 
 
