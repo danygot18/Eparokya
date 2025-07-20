@@ -15,8 +15,37 @@ import {
 } from "@mui/material";
 import GuestSidebar from "./GuestSideBar";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 const CARDS_PER_PAGE = 4;
+
+const formatMissionTime = (rawTime) => {
+    if (!rawTime) return "N/A";
+
+    try {
+        let date;
+        if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
+            const today = new Date();
+            const [hours, minutes] = rawTime.split(':');
+            date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), +hours, +minutes);
+        } else {
+            date = new Date(rawTime);
+        }
+
+        if (isNaN(date.getTime())) {
+            console.warn("Invalid baptismTime:", rawTime);
+            return "N/A";
+        }
+
+        return format(date, 'h:mm a');
+    } catch (e) {
+        console.error("Error parsing baptismTime:", rawTime, e);
+        return "N/A";
+    }
+};
 
 const MissionsPage = () => {
     const [missions, setMissions] = useState([]);
@@ -35,6 +64,7 @@ const MissionsPage = () => {
                         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
                     )
                 );
+                console.log(res.data)
             } catch (err) {
                 setMissions([]);
             }
@@ -107,17 +137,24 @@ const MissionsPage = () => {
                             <Chip
                                 label={mainMission.Date ? new Date(mainMission.Date).toLocaleDateString() : ""}
                                 color="primary"
-                                size="small"
+                                size="small"                           
+                                avatar={< EventAvailableIcon />}
                             />
                             <Chip
-                                label={mainMission.Time}
+                                label={formatMissionTime(mainMission?.Time)}
                                 color="secondary"
                                 size="small"
+                                avatar={<AccessTimeFilledIcon />}
                             />
                             <Chip
                                 label={`By: ${mainMission.Author?.replace(/<i>|<\/i>/g, "")}`}
                                 size="small"
                                 avatar={<Avatar>{mainMission.Author?.replace(/<i>|<\/i>/g, "").charAt(0)}</Avatar>}
+                            />
+                            <Chip
+                                label={`Budget: ${mainMission.Budget?.replace(/<i>|<\/i>/g, "")}`}
+                                size="small"
+                            // avatar={<Avatar>{mainMission.Budget?.replace(/<i>|<\/i>/g, "").charAt(0)}</Avatar>}
                             />
                         </Stack>
                         <Typography variant="body1" gutterBottom>
@@ -209,17 +246,20 @@ const MissionsPage = () => {
                                             label={mission.Date ? new Date(mission.Date).toLocaleDateString() : ""}
                                             color="primary"
                                             size="small"
+                                            avatar={< EventAvailableIcon />}
                                         />
                                         <Chip
-                                            label={mission.Time}
+
+                                            label={formatMissionTime(mission.Time)}
                                             color="secondary"
                                             size="small"
+                                            avatar={< AccessTimeFilledIcon />}
                                         />
                                     </Stack>
                                     <Typography variant="body2" color="text.secondary" gutterBottom>
                                         <b>Facilitators:</b> {mission.Facilitators?.join(", ") || "None"}
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                                    {/* <Typography variant="body2" color="text.secondary" gutterBottom>
                                         <b>Volunteers:</b> {mission.Volunteers?.join(", ") || "None"}
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -229,6 +269,12 @@ const MissionsPage = () => {
                                                 typeof min === "object" && min.name ? min.name : min
                                             ).join(", ")
                                             : "None"}
+                                    </Typography> */}
+                                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                                        <b>Budget:</b>{" "}
+                                        <span style={{ fontStyle: "italic" }}>
+                                            {mission.Budget?.replace(/<i>|<\/i>/g, "")}
+                                        </span>
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" gutterBottom>
                                         <b>By:</b>{" "}

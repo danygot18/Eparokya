@@ -7,7 +7,9 @@ const { isAuthenticatedUser, isAuthorized } = require('../middleware/auth');
 
 router.get('/getAllMissions', missionsController.getAllMissions);
 
-router.get('/getMissionById/:missionsId', isAuthenticatedUser, isAuthorized("admin"), missionsController.getMissionById);
+router.get('/getMissionById/:id', 
+    // isAuthenticatedUser, isAuthorized("admin"),
+     missionsController.getMissionById);
 
 router.post(
     '/createMission',

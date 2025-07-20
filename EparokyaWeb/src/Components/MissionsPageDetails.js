@@ -15,8 +15,37 @@ import {
 } from "@mui/material";
 import GuestSidebar from "./GuestSideBar";
 import { useParams, useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 const MISSIONS_PER_PAGE = 6;
+
+const formatMissionTime = (rawTime) => {
+    if (!rawTime) return "N/A";
+
+    try {
+        let date;
+        if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
+            const today = new Date();
+            const [hours, minutes] = rawTime.split(':');
+            date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), +hours, +minutes);
+        } else {
+            date = new Date(rawTime);
+        }
+
+        if (isNaN(date.getTime())) {
+            console.warn("Invalid baptismTime:", rawTime);
+            return "N/A";
+        }
+
+        return format(date, 'h:mm a');
+    } catch (e) {
+        console.error("Error parsing baptismTime:", rawTime, e);
+        return "N/A";
+    }
+};
 
 const MissionsPageDetails = () => {
     const { id } = useParams();
@@ -25,11 +54,14 @@ const MissionsPageDetails = () => {
     const [page, setPage] = useState(1);
     const navigate = useNavigate();
 
+
+
     useEffect(() => {
         const fetchMission = async () => {
             try {
                 const res = await axios.get(`${process.env.REACT_APP_API}/api/v1/getMissionById/${id}`);
                 setMission(res.data);
+                console.log(res.data)
             } catch (err) {
                 setMission(null);
             }
@@ -101,16 +133,19 @@ const MissionsPageDetails = () => {
                                 label={mission.Date ? new Date(mission.Date).toLocaleDateString() : ""}
                                 color="primary"
                                 size="small"
+                                avatar={<EventAvailableIcon/>}
                             />
                             <Chip
-                                label={mission.Time}
+                                label={formatMissionTime(mission?.Time)}
                                 color="secondary"
                                 size="small"
+                                avatar={<AccessTimeFilledIcon/>}
                             />
                             <Chip
                                 label={mission.Location}
                                 color="default"
                                 size="small"
+                                avatar={<LocationOnIcon/>}
                             />
                             <Chip
                                 label={`By: ${mission.Author?.replace(/<i>|<\/i>/g, "")}`}
@@ -137,7 +172,7 @@ const MissionsPageDetails = () => {
                                 : "None"}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                            <b>Budget:</b> {mission.Budget || "N/A"}
+                            <b>Budget: ₱</b> {mission.Budget || "N/A"}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
                             <b>Budget From:</b> {mission.BudgetFrom || "N/A"}
@@ -188,7 +223,7 @@ const MissionsPageDetails = () => {
                                         transition: "transform 0.2s",
                                         "&:hover": { transform: "scale(1.03)" },
                                     }}
-                                    onClick={() => navigate(`/missions/${m._id}`)}
+                                    onClick={() => navigate(`/missionsPageDetail/${m._id}`)}
                                 >
                                     {m.Image?.single && (
                                         <CardMedia

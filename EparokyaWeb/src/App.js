@@ -305,7 +305,7 @@ function App() {
         <Route path="/ParishHistory" element={<ParishHistory />} exact="true" />
 
          <Route path="/missionsPage" element={<MissionsPage />} exact="true" />
-         <Route path="/missionsPageDetail/:id" element={<MissionsPage />} exact="true" />
+         <Route path="/missionsPageDetail/:id" element={<MissionsPageDetail />} exact="true" />
 
         <Route
           path="/user/ministryAnnouncement"
