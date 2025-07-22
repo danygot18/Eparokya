@@ -700,11 +700,13 @@ const BaptismForm = () => {
                 control={
                   <Checkbox
                     checked={agreedToTerms}
-                    onClick={(e) => {
-                      if (!agreedToTerms) {
-                        e.preventDefault();
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        // Show terms modal when trying to check
                         setShowTermsModal(true);
+                        // Don't update state yet - wait for modal confirmation
                       } else {
+                        // Allow direct unchecking
                         setAgreedToTerms(false);
                       }
                     }}
@@ -722,6 +724,15 @@ const BaptismForm = () => {
                 {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             </Box>
+
+            <TermsModal
+              show={showTermsModal}
+              onHide={() => setShowTermsModal(false)}
+              onAgree={() => {
+                setAgreedToTerms(true);
+                setShowTermsModal(false);
+              }}
+            />
           </Box>
         </Paper>
       </Box>

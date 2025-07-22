@@ -152,122 +152,124 @@ const Calendars = () => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  // const [liturgical, setLiturgicalData] = useState({ today: null, tomorrow: null, upcoming: [] });
   const [liturgical, setLiturgical] = useState([]);
   const [year, setYear] = useState(new Date().getFullYear());
 
   const config = { withCredentials: true };
 
-  useEffect(() => {
-    const fetchAllEvents = async () => {
-      try {
-        setLoading(true);
-        const [weddingEvents, baptismEvents, funeralEvents, customEvents, liturgicalRes] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`, config),
-          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`, config),
-          axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`, config),
-          axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`, config),
-          axios.get(`${process.env.REACT_APP_API}/api/v1/liturgical/year/${new Date().getFullYear()}`),
-        ]);
+  const fetchAllEvents = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [weddingEvents, baptismEvents, funeralEvents, customEvents, liturgicalRes] = await Promise.all([
+        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`, config),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`, config),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedFuneral`, config),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/getAllCustomEvents`, config),
+        axios.get(`${process.env.REACT_APP_API}/api/v1/liturgical/year/${new Date().getFullYear()}`),
+      ]);
 
-        const liturgicalEvents = liturgicalRes.data.map(item => ({
-          id: `liturgical-${item.event_key}-${item.date}`,
-          title: item.name,
-          start: new Date(item.date * 1000),
-          end: new Date(item.date * 1000),
-          type: 'Liturgical',
-        }));
+      // Create Date objects with time component (midnight)
+      const createDateWithTime = (dateString) => {
+        const date = new Date(dateString);
+        date.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
+        return date;
+      };
 
-        const formattedEvents = [
-          ...weddingEvents.data.map((event) => ({
-            id: `wedding-${event._id}`,
-            title: `${event.brideName} & ${event.groomName} Wedding`,
-            start: new Date(event.weddingDate),
-            end: new Date(event.weddingDate),
-            type: 'Wedding',
-            brideName: event.bride,
-            groomName: event.groom,
-            weddingDate: event.weddingDate
-          })),
-          ...baptismEvents.data.map((event) => ({
-            id: `baptism-${event._id}`,
-            title: `Baptism of ${event.child.fullName || "Unknown"}`,
-            start: new Date(event.baptismDate),
-            end: new Date(event.baptismDate),
-            type: 'Baptism',
-            child: event.child,
-            baptismDate: event.baptismDate
-          })),
-          ...funeralEvents.data.map((event) => ({
-            id: `funeral-${event._id}`,
-            title: `Funeral for ${event.name?.firstName || ""} ${event.name?.lastName || ""}`,
-            start: new Date(event.funeralDate),
-            end: new Date(event.funeralDate),
-            type: 'Funeral',
-            name: event.name,
-            funeralDate: event.funeralDate
-          })),
-          ...customEvents.data.map((event) => ({
-            id: `custom-${event._id}`,
-            title: event.title,
-            start: new Date(event.customeventDate),
-            end: new Date(event.customeventDate),
-            type: 'Custom',
-            customeventDate: event.customeventDate
-          })),
-          ...liturgicalEvents,
-        ];
+      // Access the litcal array from the response data
+      const liturgicalEvents = (liturgicalRes.data.litcal || []).map((item, i) => ({
+        id: `liturgical-${item.event_key || i}`,
+        title: item.name,
+        start: new Date(item.date * 1000),
+        end: new Date(item.date * 1000),
+        type: 'Liturgical',
+      }));
 
-        if (location.state?.newEvent) {
-          const newEvent = location.state.newEvent;
-          formattedEvents.push({
-            id: `custom-new-${newEvent.title}`,
-            title: newEvent.title,
-            start: new Date(newEvent.customeventDate),
-            end: new Date(newEvent.customeventDate),
-            type: 'Custom',
-            customeventDate: newEvent.customeventDate
-          });
-        }
+      const formattedEvents = [
+        ...weddingEvents.data.map((event) => ({
+          id: `wedding-${event._id}`,
+          title: `${event.brideName} & ${event.groomName} Wedding`,
+          start: createDateWithTime(event.weddingDate),
+          end: createDateWithTime(event.weddingDate),
+          type: 'Wedding',
+          brideName: event.brideName,
+          groomName: event.groomName,
+          weddingDate: event.weddingDate
+        })),
+        ...baptismEvents.data.map((event) => ({
+          id: `baptism-${event._id}`,
+          title: `Baptism of ${event.child?.fullName || "Unknown"}`,
+          start: createDateWithTime(event.baptismDate),
+          end: createDateWithTime(event.baptismDate),
+          type: 'Baptism',
+          child: event.child,
+          baptismDate: event.baptismDate
+        })),
+        ...funeralEvents.data.map((event) => ({
+          id: `funeral-${event._id}`,
+          title: `Funeral for ${event.name?.firstName || ""} ${event.name?.lastName || ""}`,
+          start: createDateWithTime(event.funeralDate),
+          end: createDateWithTime(event.funeralDate),
+          type: 'Funeral',
+          name: event.name,
+          funeralDate: event.funeralDate
+        })),
+        ...customEvents.data.map((event) => ({
+          id: `custom-${event._id}`,
+          title: event.title,
+          start: createDateWithTime(event.customeventDate),
+          end: createDateWithTime(event.customeventDate),
+          type: 'Custom',
+          customeventDate: event.customeventDate
+        })),
+        ...liturgicalEvents,
+      ];
 
-        setEvents(formattedEvents);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-        setErrorMessage('Failed to load events. Please try again.');
-      } finally {
-        setLoading(false);
+      if (location.state?.newEvent) {
+        const newEvent = location.state.newEvent;
+        formattedEvents.push({
+          id: `custom-new-${newEvent.title}`,
+          title: newEvent.title,
+          start: createDateWithTime(newEvent.customeventDate),
+          end: createDateWithTime(newEvent.customeventDate),
+          type: 'Custom',
+          customeventDate: newEvent.customeventDate
+        });
       }
-    };
 
+      setEvents(formattedEvents);
+      setErrorMessage("");
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      setErrorMessage('Failed to load events. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [location.state, year]);
+
+  useEffect(() => { 
     fetchAllEvents();
-  }, []);
-
+  }, [fetchAllEvents]);
 
   useEffect(() => {
     const fetchLiturgicalYear = async () => {
       try {
         const res = await axios.get(`${process.env.REACT_APP_API}/api/v1/liturgical/year/${year}`);
-        setLiturgical(res.data);
+        setLiturgical(res.data.litcal || []);
       } catch (err) {
         console.error("Liturgical fetch error", err);
+        setLiturgical([]);
       }
     };
 
     fetchLiturgicalYear();
   }, [year]);
 
-
-  useEffect(() => {
-    // console.log("Updated liturgical data:", liturgical);
-  }, [liturgical]);
-
-  const groupedByMonth = liturgical.reduce((acc, item) => {
+  const groupedByMonth = (Array.isArray(liturgical) ? liturgical : []).reduce((acc, item) => {
     const month = new Date(item.date * 1000).toLocaleString('default', { month: 'long' });
     if (!acc[month]) acc[month] = [];
     acc[month].push(item);
     return acc;
   }, {});
-
 
   const handleEventClick = (event) => {
     setSelectedEvent(event);
@@ -305,15 +307,23 @@ const Calendars = () => {
         backgroundColor,
         color: 'white',
         borderRadius: '4px',
+        fontSize: isMobile ? '0.7rem' : '0.8rem',
+        padding: isMobile ? '1px 3px' : '2px 5px'
       },
     };
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress color="success" />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{
       display: 'flex',
-      // height: '100vh',
       flexDirection: isMobile ? 'column' : 'row'
     }}>
       <SideBar />
@@ -415,10 +425,9 @@ const Calendars = () => {
                     {items.map((item, idx) => {
                       const isToday = new Date().toDateString() === new Date(item.date * 1000).toDateString();
 
-                      let bgColor = idx % 2 === 0 ? '#fafafa' : 'white'; // alternate row
-                      if (isToday) bgColor = '#fffae6'; // highlight today
+                      let bgColor = idx % 2 === 0 ? '#fafafa' : 'white';
+                      if (isToday) bgColor = '#fffae6';
 
-                      // Optional: color-code based on name keywords
                       let nameColor = 'default';
                       const nameLower = item.name.toLowerCase();
                       if (nameLower.includes('sunday')) nameColor = 'primary.main';
@@ -512,20 +521,19 @@ const Calendars = () => {
                   <strong>Title:</strong> {selectedEvent.title || 'N/A'}
                 </Typography>
               )}
-
               {selectedEvent.type === 'Liturgical' && (
                 <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
                   <strong>Liturgical Event:</strong> {selectedEvent.title}
                 </Typography>
               )}
 
-
               <Typography sx={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>
                 <strong>Date:</strong> {moment(
                   selectedEvent.weddingDate ||
                   selectedEvent.baptismDate ||
                   selectedEvent.funeralDate ||
-                  selectedEvent.customeventDate
+                  selectedEvent.customeventDate ||
+                  selectedEvent.start
                 ).format('MMMM Do YYYY')}
               </Typography>
             </Box>
@@ -541,7 +549,7 @@ const Calendars = () => {
           Add Event
         </Button>
       </Box>
-    </Box >
+    </Box>
   );
 };
 

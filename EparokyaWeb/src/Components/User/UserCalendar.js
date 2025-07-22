@@ -69,6 +69,7 @@ const UserCalendar = () => {
 
   const fetchAllEvents = useCallback(async () => {
     try {
+      setLoading(true);
       const [wedding, baptism, funeral, custom, liturgicalData] = await Promise.all([
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedWedding`),
         axios.get(`${process.env.REACT_APP_API}/api/v1/confirmedBaptism`),
@@ -77,27 +78,68 @@ const UserCalendar = () => {
         axios.get(`${process.env.REACT_APP_API}/api/v1/liturgical/year/${year}`)
       ]);
 
+      // Create Date objects with time component (midnight)
+      const createDateWithTime = (dateString) => {
+        const date = new Date(dateString);
+        date.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
+        return date;
+      };
+
       const formatted = [
-        ...wedding.data.map(e => ({ id: `wedding-${e._id}`, title: `${e.brideName} & ${e.groomName} Wedding`, start: new Date(e.weddingDate), end: new Date(e.weddingDate), type: 'Wedding' })),
-        ...baptism.data.map(e => ({ id: `baptism-${e._id}`, title: `Baptism of ${e.child.fullName}`, start: new Date(e.baptismDate), end: new Date(e.baptismDate), type: 'Baptism' })),
-        ...funeral.data.map(e => ({ id: `funeral-${e._id}`, title: `Funeral for ${e.name}`, start: new Date(e.funeralDate), end: new Date(e.funeralDate), type: 'Funeral' })),
-        ...custom.data.map(e => ({ id: `custom-${e._id}`, title: e.title, start: new Date(e.customeventDate), end: new Date(e.customeventDate), type: 'Custom' })),
-        ...liturgicalData.data.map((e, i) => ({ id: `liturgical-${i}`, title: e.name, start: new Date(e.date * 1000), end: new Date(e.date * 1000), type: 'Liturgical' }))
+        ...wedding.data.map(e => ({
+          id: `wedding-${e._id}`,
+          title: `${e.brideName} & ${e.groomName} Wedding`,
+          start: createDateWithTime(e.weddingDate),
+          end: createDateWithTime(e.weddingDate),
+          type: 'Wedding'
+        })),
+        ...baptism.data.map(e => ({
+          id: `baptism-${e._id}`,
+          title: `Baptism of ${e.child.fullName}`,
+          start: createDateWithTime(e.baptismDate),
+          end: createDateWithTime(e.baptismDate),
+          type: 'Baptism'
+        })),
+        ...funeral.data.map(e => ({
+          id: `funeral-${e._id}`,
+          title: `Funeral for ${e.name}`,
+          start: createDateWithTime(e.funeralDate),
+          end: createDateWithTime(e.funeralDate),
+          type: 'Funeral'
+        })),
+        ...custom.data.map(e => ({
+          id: `custom-${e._id}`,
+          title: e.title,
+          start: createDateWithTime(e.customeventDate),
+          end: createDateWithTime(e.customeventDate),
+          type: 'Custom'
+        })),
+        ...(liturgicalData.data.litcal || []).map((e, i) => ({
+          id: `liturgical-${i}`,
+          title: e.name,
+          start: new Date(e.date * 1000),
+          end: new Date(e.date * 1000),
+          type: 'Liturgical'
+        }))
       ];
 
       setEvents(formatted);
+      setErrorMessage("");
     } catch (error) {
+      console.error("Error fetching events:", error);
       setErrorMessage("Failed to load events. Please try again.");
     } finally {
       setLoading(false);
     }
   }, [year]);
 
-  useEffect(() => { fetchAllEvents(); }, [fetchAllEvents]);
+  useEffect(() => {
+    fetchAllEvents();
+  }, [fetchAllEvents]);
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API}/api/v1/liturgical/year/${year}`)
-      .then(res => setLiturgical(res.data))
+      .then(res => setLiturgical(res.data.litcal || []))
       .catch(() => setLiturgical([]));
   }, [year]);
 
@@ -111,9 +153,9 @@ const UserCalendar = () => {
     style: {
       backgroundColor:
         event.type === 'Wedding' ? '#FFD700' :
-        event.type === 'Baptism' ? '#4CAF50' :
-        event.type === 'Funeral' ? '#F44336' :
-        event.type === 'Liturgical' ? '#1976d2' : '#9C27B0',
+          event.type === 'Baptism' ? '#4CAF50' :
+            event.type === 'Funeral' ? '#F44336' :
+              event.type === 'Liturgical' ? '#1976d2' : '#9C27B0',
       color: 'white',
       borderRadius: '4px',
       fontSize: isMobile ? '0.7rem' : '0.8rem',
@@ -131,7 +173,11 @@ const UserCalendar = () => {
         <Metadata title="User Calendar" />
         <Typography variant="h4" sx={{ mb: 2, fontWeight: 'bold', color: 'success.main', fontSize: isMobile ? '1.5rem' : '2rem' }}>Church Events Calendar</Typography>
 
-        {errorMessage && <Typography color="error" sx={{ mb: 2 }}>{errorMessage}</Typography>}
+        {errorMessage && (
+          <Typography color="error" sx={{ mb: 2 }}>
+            {errorMessage}
+          </Typography>
+        )}
 
         <Paper elevation={3} sx={{ height: isMobile ? '500px' : '700px', p: isMobile ? 1 : 2, borderRadius: 2 }}>
           <Calendar
@@ -147,6 +193,11 @@ const UserCalendar = () => {
             onSelectEvent={handleEventClick}
             components={{ toolbar: CustomToolbar }}
             style={{ height: '100%', minHeight: isMobile ? '400px' : '600px' }}
+            // Add these props to ensure events are visible
+            timeslots={1}
+            step={60}
+            min={new Date(0, 0, 0, 8, 0, 0)} // 8 AM
+            max={new Date(0, 0, 0, 17, 0, 0)} // 5 PM
           />
         </Paper>
 
