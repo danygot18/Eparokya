@@ -5,44 +5,24 @@ import {
   Box,
   Typography,
   Button,
-  TextField,
-  Select,
-  MenuItem,
   Checkbox,
   FormControlLabel,
-  FormGroup,
-  InputLabel,
-  FormControl,
   Paper,
-  Modal,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  InputLabel
 } from "@mui/material";
-import "./BaptismForm.css";
+import InputField from "../../../../../Utils/InputField";
+import DocumentPreview from "../../../../../Utils/documentPreview";
+import { allFormConfigs, documentsInformation } from "../../FormsConfig/baptismFormConfig";
 import GuestSidebar from "../../../../GuestSideBar";
 import MetaData from "../../../../Layout/MetaData";
 import TermsModal from "../../../../TermsModal";
-import termsAndConditionsText from "../../../../TermsAndConditionText";
 import ConfirmedBaptismOverlay from "./ConfirmBaptismModal";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 
-const BaptismForm = () => {
-  const [showTermsModal, setShowTermsModal] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [NinongGodparents, setNinongGodparents] = useState([]);
-  const [NinangGodparents, setNinangGodparents] = useState([]);
-  const [user, setUser] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showOverlay, setShowOverlay] = useState(false);
-  const [baptisms, setBaptisms] = useState([]);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-
+const useBaptismFormHook = () => {
   const [formData, setFormData] = useState({
     baptismDate: "",
     baptismTime: "",
@@ -74,6 +54,32 @@ const BaptismForm = () => {
       baptismPermitFrom: "",
     },
   });
+  return { formData, setFormData };
+};
+
+
+const BaptismForm = () => {
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [NinongGodparents, setNinongGodparents] = useState([]);
+  const [NinangGodparents, setNinangGodparents] = useState([]);
+  const [user, setUser] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [baptisms, setBaptisms] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const { formData, setFormData } = useBaptismFormHook();
+
+
+  // Helper function to get nested values
+  const getNestedValue = (obj, path) => {
+    return path.split('.').reduce((current, key) => {
+      return current && current[key] !== undefined ? current[key] : '';
+    }, obj);
+  };
 
   const fetchBaptisms = useCallback(async () => {
     try {
@@ -122,7 +128,7 @@ const BaptismForm = () => {
   }, [fetchBaptisms]);
 
   const isDateDisabled = (date) => {
-    const day = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const day = date.getDay();
     const formattedDate = date.toISOString().split("T")[0];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -132,9 +138,9 @@ const BaptismForm = () => {
     );
 
     return (
-      date < today || // Past dates
-      day === 1 || // Mondays
-      confirmedDates.includes(formattedDate) // Already booked dates
+      date < today ||
+      day === 1 ||
+      confirmedDates.includes(formattedDate)
     );
   };
 
@@ -198,6 +204,28 @@ const BaptismForm = () => {
     }));
   };
 
+  const handleBaptismDateChange = (e) => {
+    const selectedDate = new Date(e.target.value);
+    if (isDateDisabled(selectedDate)) {
+      if (selectedDate.getDay() === 1) {
+        setModalMessage("Every Monday schedules are not available.");
+      } else if (
+        baptisms.some(
+          (b) =>
+            b.start.toISOString().split("T")[0] ===
+            selectedDate.toISOString().split("T")[0]
+        )
+      ) {
+        setModalMessage("This date is already booked. Please select a different date. See the calendar above to view available dates.");
+      } else {
+        setModalMessage("Please select a future date.");
+      }
+      setModalOpen(true);
+      return;
+    }
+    setFormData({ ...formData, baptismDate: e.target.value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -224,27 +252,11 @@ const BaptismForm = () => {
         formData.additionalDocs.baptismPermitFrom
       );
 
-      if (formData.documents.birthCertificate) {
-        formDataObj.append(
-          "birthCertificate",
-          formData.documents.birthCertificate
-        );
-      }
-      if (formData.documents.marriageCertificate) {
-        formDataObj.append(
-          "marriageCertificate",
-          formData.documents.marriageCertificate
-        );
-      }
-      if (formData.documents.baptismPermit) {
-        formDataObj.append("baptismPermit", formData.documents.baptismPermit);
-      }
-      if (formData.documents.certificateOfNoRecordBaptism) {
-        formDataObj.append(
-          "certificateOfNoRecordBaptism",
-          formData.documents.certificateOfNoRecordBaptism
-        );
-      }
+      Object.entries(formData.documents).forEach(([key, file]) => {
+        if (file) {
+          formDataObj.append(key, file);
+        }
+      });
 
       await axios.post(
         `${process.env.REACT_APP_API}/api/v1/baptismCreate`,
@@ -258,6 +270,7 @@ const BaptismForm = () => {
       );
 
       toast.success("Form submitted successfully!");
+      // Reset form
       setFormData({
         baptismDate: "",
         baptismTime: "",
@@ -286,7 +299,7 @@ const BaptismForm = () => {
         },
         previews: {},
         additionalDocs: {
-          baptismPermitFrom: "",
+          baptismPermitForm: "",
         },
       });
       setNinongGodparents([]);
@@ -302,77 +315,100 @@ const BaptismForm = () => {
     }
   };
 
-  const DocumentPreview = ({ file, previewUrl }) => {
-    if (!file || !previewUrl) return null;
-
-    return file.type.startsWith("image/") ? (
-      <Box mt={2}>
-        <img
-          src={previewUrl}
-          alt="Preview"
-          style={{ maxHeight: "150px", maxWidth: "100%" }}
-        />
-        <Typography variant="caption" display="block" mt={1}>
-          {file.name}
+  const renderFormFields = () => {
+    return allFormConfigs.map((section, sectionIndex) => (
+      <Box key={sectionIndex} sx={{ mb: 4 }}>
+        <Typography variant="h6" mt={3} mb={2}>
+          {section.section}
         </Typography>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {section.fields.map((field, fieldIndex) => (
+            <Box key={fieldIndex}>
+              <InputField
+                type={field.type}
+                label={field.label}
+                value={getNestedValue(formData, field.path)}
+                onChange={handleChange}
+                onFileChange={handleFileChange}
+                path={field.path}
+                fieldName={field.fieldName}
+                required={field.required}
+                options={field.options}
+                inputProps={field.inputProps}
+                customValidation={field.customValidation}
+                onCustomValidation={field.path === 'baptismDate' ? handleBaptismDateChange : undefined}
+              />
+
+              {/* {field.type === 'file' && field.fieldName && (
+                <>
+                  <InputLabel sx={{
+                    fontWeight: "bold",
+                    color: field.required ? "error.main" : "inherit",
+                    mt: 1
+                  }}>
+                    {field.label} {field.required && '*'}
+                  </InputLabel>
+                  <DocumentPreview
+                    file={formData.documents[field.fieldName]}
+                    previewUrl={formData.previews[field.fieldName]}
+                  />
+                </>
+              )} */}
+            </Box>
+          ))}
+        </Box>
       </Box>
-    ) : (
-      <Box mt={2} sx={{ width: "100%", height: "300px", mb: 4 }}>
-        <iframe
-          src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-          title="Document Preview"
-          style={{
-            width: "100%",
-            height: "100%",
-            border: "1px solid #ddd",
-            borderRadius: "4px",
-          }}
-        />
-        <Typography variant="caption" display="block" mt={1}>
-          {file.name}
+    ));
+  };
+
+  const renderDocumentsField = () => {
+    return documentsInformation.map((section, sectionIndex) => (
+      <Box key={sectionIndex} sx={{ mb: 4 }}>
+        <Typography variant="h6" mt={3} mb={2}>
+          {section.section}
         </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {section.fields.map((field, fieldIndex) => (
+            <Box key={fieldIndex}>
+              <>
+                <InputLabel sx={{
+                  fontWeight: "bold",
+                  color: field.required ? "error.main" : "inherit",
+                  mt: 1
+                }}>
+                  {field.label} {field.required && '*'}
+                </InputLabel>
+              </>
+              <InputField
+                type={field.type}
+                label={field.label}
+                value={getNestedValue(formData, field.path)}
+                onChange={handleChange}
+                onFileChange={handleFileChange}
+                path={field.path}
+                fieldName={field.fieldName}
+                required={field.required}
+                options={field.options}
+                inputProps={field.inputProps}
+                customValidation={field.customValidation}
+                onCustomValidation={field.path === 'baptismDate' ? handleBaptismDateChange : undefined}
+              />
+              {field.type === 'file' && field.fieldName && (
+                <>
+
+                  <DocumentPreview
+                    file={formData.documents[field.fieldName]}
+                    previewUrl={formData.previews[field.fieldName]}
+                  />
+                </>
+              )}
+            </Box>
+          ))}
+        </Box>
       </Box>
-    );
-  };
-
-  const handleAddGodparent = (type) => {
-    if (type === "ninong") {
-      setNinongGodparents([...NinongGodparents, { name: "" }]);
-    } else {
-      setNinangGodparents([...NinangGodparents, { name: "" }]);
-    }
-  };
-
-  const handleRemoveGodparent = (type, index) => {
-    if (type === "ninong") {
-      setNinongGodparents(NinongGodparents.filter((_, i) => i !== index));
-    } else {
-      setNinangGodparents(NinangGodparents.filter((_, i) => i !== index));
-    }
-  };
-
-  const handleGodparentChange = (type, index, value) => {
-    if (type === "ninong") {
-      const updated = [...NinongGodparents];
-      updated[index].name = value;
-      setNinongGodparents(updated);
-    } else {
-      const updated = [...NinangGodparents];
-      updated[index].name = value;
-      setNinangGodparents(updated);
-    }
-  };
-
-  const styles = {
-    disabledDate: {
-      backgroundColor: "#ffebee", // Light red background
-      color: "#b71c1c", // Dark red text
-      cursor: "not-allowed",
-      "&:hover": {
-        backgroundColor: "#ffcdd2", // Slightly darker red on hover
-      },
-    },
-  };
+    ))
+  }
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f9f9f9" }}>
@@ -388,26 +424,14 @@ const BaptismForm = () => {
       <GuestSidebar />
       <Box sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              maxWidth: 300,
-            }}
-          >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, maxWidth: 300 }}>
             <Typography variant="h6" sx={{ fontSize: "1.1rem" }}>
               Click here to see Available Dates
             </Typography>
             <Button
               variant="outlined"
               color="secondary"
-              sx={{
-                fontWeight: "bold",
-                borderRadius: 1,
-                px: 2,
-                fontSize: "0.95rem",
-              }}
+              sx={{ fontWeight: "bold", borderRadius: 1, px: 2, fontSize: "0.95rem" }}
               onClick={() => setShowOverlay(true)}
             >
               View Calendar
@@ -418,295 +442,33 @@ const BaptismForm = () => {
             onClose={() => setShowOverlay(false)}
           />
         </Box>
+
         <Paper elevation={2} sx={{ p: { xs: 2, md: 4 } }}>
           <Typography variant="h4" gutterBottom>
             Baptism Form
           </Typography>
+
           <Box component="form" onSubmit={handleSubmit} noValidate>
-            {/* Baptism Date and Time */}
-            <Box sx={{ mb: 3 }}>
-              <TextField
-                label="Baptism Date (Mondays not available)"
-                type="date"
-                value={formData.baptismDate}
-                onChange={(e) => {
-                  const selectedDate = new Date(e.target.value);
-                  if (isDateDisabled(selectedDate)) {
-                    if (selectedDate.getDay() === 1) {
-                      // Monday check
-                      setModalMessage("Every Monday schedules are not available.");
-                      setModalOpen(true);
-                    } else if (
-                      baptisms.some(
-                        (b) =>
-                          b.start.toISOString().split("T")[0] ===
-                          selectedDate.toISOString().split("T")[0]
-                      )
-                    ) {
-                      // Date already booked
-                      setModalMessage("This date is already booked. Please select a different date. See the calendar above the view the available dates ");
-                      setModalOpen(true);
-                    } else {
-                      // Date is in the past or invalid
-                      setModalMessage("Please select a future date.");
-                      setModalOpen(true);
-                    }
+            {renderFormFields()}
+            {renderDocumentsField()}
 
-                    return;
-                  }
-                  setFormData({ ...formData, baptismDate: e.target.value });
-                }}
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                required
-                inputProps={{
-                  min: new Date().toISOString().split("T")[0],
-                  style: {
-                    // This will apply to the input element
-                  },
-                }}
-                sx={{
-                  'input[type="date"]::-webkit-calendar-picker-indicator': {
-                    filter:
-                      formData.baptismDate &&
-                        isDateDisabled(new Date(formData.baptismDate))
-                        ? "grayscale(100%) brightness(100%)"
-                        : "none",
-                  },
-                  'input[type="date"]': {
-                    backgroundColor:
-                      formData.baptismDate &&
-                        isDateDisabled(new Date(formData.baptismDate))
-                        ? "#f51616"
-                        : "inherit",
-                  },
-                }}
-              />
-              <TextField
-                label="Baptism Time"
-                type="time"
-                value={formData.baptismTime}
-                onChange={(e) => handleChange(e, "baptismTime")}
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                required
-                sx={{ mt: 2 }}
-              />
-              <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
-                <DialogTitle>Date Unavailable</DialogTitle>
-                <DialogContent>
-                  {modalMessage}
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={() => setModalOpen(false)} autoFocus>
-                    OK
-                  </Button>
-                </DialogActions>
-              </Dialog>
+            <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
+              <DialogTitle>Date Unavailable</DialogTitle>
+              <DialogContent>{modalMessage}</DialogContent>
+              <DialogActions>
+                <Button onClick={() => setModalOpen(false)} autoFocus>OK</Button>
+              </DialogActions>
+            </Dialog>
 
-            </Box>
-
-            {/* Child Information */}
-            <Typography variant="h6" mt={3} mb={2}>
-              Child Information
-            </Typography>
-            <TextField
-              label="Child's Full Name"
-              value={formData.child.fullName}
-              onChange={(e) => handleChange(e, "child.fullName")}
-              fullWidth
-              required
-              sx={{ mb: 2 }}
-            />
-            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-              <TextField
-                label="Date of Birth"
-                type="date"
-                value={formData.child.dateOfBirth}
-                onChange={(e) => handleChange(e, "child.dateOfBirth")}
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                required
-              />
-              <TextField
-                label="Place of Birth"
-                value={formData.child.placeOfBirth}
-                onChange={(e) => handleChange(e, "child.placeOfBirth")}
-                fullWidth
-                required
-              />
-              <FormControl fullWidth required>
-                <InputLabel>Gender</InputLabel>
-                <Select
-                  value={formData.child.gender}
-                  onChange={(e) => handleChange(e, "child.gender")}
-                  label="Gender"
-                >
-                  <MenuItem value="Male">Male</MenuItem>
-                  <MenuItem value="Female">Female</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* Parents Information */}
-            <Typography variant="h6" mt={3} mb={2}>
-              Parents Information
-            </Typography>
-            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-              <TextField
-                label="Father's Full Name"
-                value={formData.parents.fatherFullName}
-                onChange={(e) => handleChange(e, "parents.fatherFullName")}
-                fullWidth
-                required
-              />
-              <TextField
-                label="Father's Birthplace"
-                value={formData.parents.placeOfFathersBirth}
-                onChange={(e) => handleChange(e, "parents.placeOfFathersBirth")}
-                fullWidth
-                required
-              />
-            </Box>
-            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-              <TextField
-                label="Mother's Full Name"
-                value={formData.parents.motherFullName}
-                onChange={(e) => handleChange(e, "parents.motherFullName")}
-                fullWidth
-                required
-              />
-              <TextField
-                label="Mother's Birthplace"
-                value={formData.parents.placeOfMothersBirth}
-                onChange={(e) => handleChange(e, "parents.placeOfMothersBirth")}
-                fullWidth
-                required
-              />
-            </Box>
-            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-              <TextField
-                label="Address"
-                value={formData.parents.address}
-                onChange={(e) => handleChange(e, "parents.address")}
-                fullWidth
-                required
-              />
-              <TextField
-                label="Contact Number"
-                value={formData.phone}
-                onChange={(e) => handleChange(e, "phone")}
-                fullWidth
-                required
-              />
-              <FormControl fullWidth required>
-                <InputLabel>Marriage Status</InputLabel>
-                <Select
-                  value={formData.parents.marriageStatus}
-                  onChange={(e) => handleChange(e, "parents.marriageStatus")}
-                  label="Marriage Status"
-                >
-                  <MenuItem value="Simbahan">Church Wedding</MenuItem>
-                  <MenuItem value="Civil">Civil Wedding</MenuItem>
-                  <MenuItem value="Nat">Not Married</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* Godparents */}
-            <Typography variant="h6" mt={3} mb={2}>
-              Godparents
-            </Typography>
-            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-              <TextField
-                label="Godfather Name"
-                value={formData.ninong.name}
-                onChange={(e) => handleChange(e, "ninong.name")}
-                fullWidth
-                required
-              />
-              <TextField
-                label="Godfather Address"
-                value={formData.ninong.address}
-                onChange={(e) => handleChange(e, "ninong.address")}
-                fullWidth
-                required
-              />
-              <TextField
-                label="Godfather Religion"
-                value={formData.ninong.religion}
-                onChange={(e) => handleChange(e, "ninong.religion")}
-                fullWidth
-                required
-              />
-            </Box>
-            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-              <TextField
-                label="Godmother Name"
-                value={formData.ninang.name}
-                onChange={(e) => handleChange(e, "ninang.name")}
-                fullWidth
-                required
-              />
-              <TextField
-                label="Godmother Address"
-                value={formData.ninang.address}
-                onChange={(e) => handleChange(e, "ninang.address")}
-                fullWidth
-                required
-              />
-              <TextField
-                label="Godmother Religion"
-                value={formData.ninang.religion}
-                onChange={(e) => handleChange(e, "ninang.religion")}
-                fullWidth
-                required
-              />
-            </Box>
-
-            {/* Documents */}
-            <Typography variant="h6" mt={3} mb={2}>
-              Required Documents
-            </Typography>
-            <Box sx={{ mb: 3 }}>
-              <InputLabel sx={{ fontWeight: "bold", color: "error.main" }}>
-                Birth Certificate *
-              </InputLabel>
-              <Button variant="contained" component="label" sx={{ mb: 1 }}>
-                Upload Birth Certificate
-                <input
-                  type="file"
-                  hidden
-                  onChange={(e) => handleFileChange(e, "birthCertificate")}
-                  accept="image/*,.pdf,.doc,.docx"
-                  required
-                />
-              </Button>
-              <DocumentPreview
-                file={formData.documents.birthCertificate}
-                previewUrl={formData.previews.birthCertificate}
-              />
-            </Box>
-
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mt: 4,
-              }}
-            >
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 4 }}>
               <FormControlLabel
                 control={
                   <Checkbox
                     checked={agreedToTerms}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        // Show terms modal when trying to check
                         setShowTermsModal(true);
-                        // Don't update state yet - wait for modal confirmation
                       } else {
-                        // Allow direct unchecking
                         setAgreedToTerms(false);
                       }
                     }}
@@ -724,15 +486,6 @@ const BaptismForm = () => {
                 {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             </Box>
-
-            <TermsModal
-              show={showTermsModal}
-              onHide={() => setShowTermsModal(false)}
-              onAgree={() => {
-                setAgreedToTerms(true);
-                setShowTermsModal(false);
-              }}
-            />
           </Box>
         </Paper>
       </Box>

@@ -583,14 +583,16 @@ const styles = {
 
   previewContainer: {
     textAlign: "center",
+    overflow: "hidden"
   },
 
   filePreview: {
     width: "100%",
-    height: "300px",
+    height: "305px", // Increased height by a small margin (e.g., 5px)
     border: "1px solid #ccc",
     borderRadius: "8px",
     marginBottom: "10px",
+    overflow: "hidden",
   },
 
   viewButton: {

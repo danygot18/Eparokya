@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import GuestSideBar from "./GuestSideBar";
 import MetaData from "./Layout/MetaData";
 import axios from "axios";
 import { FaHeart, FaComment } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { CircularProgress } from "@mui/material";
-import { useMemo } from "react";
 import Loader from "./Layout/Loader";
 import MassReadingsCard from "./MassReadingsCard";
 import MassIntentionCard from "./MassIntentionCard";
@@ -52,7 +50,6 @@ const PinnedAnnouncements = ({
 }) => {
   const startIdx = currentPinnedIndex * 4;
   const endIdx = startIdx + 4;
-
   const announcementsToDisplay = pinnedAnnouncements.slice(startIdx, endIdx);
 
   return (
@@ -86,15 +83,13 @@ const PinnedAnnouncements = ({
 export const Home = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [priests, setPriests] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentPinnedIndex, setCurrentPinnedIndex] = useState(0);
-  const [currentPinnedPage, setCurrentPinnedPage] = useState(0);
-  const itemsPerPage = 4;
   const navigate = useNavigate();
+  const itemsPerPage = 4;
 
   const bannerImages = [
     `${process.env.PUBLIC_URL}/Eparokya_UpdatedBanner.png`,
@@ -108,21 +103,8 @@ export const Home = () => {
   );
 
   useEffect(() => {
-    if (pinnedAnnouncements.length <= itemsPerPage) return;
-
-    const totalPages = Math.ceil(pinnedAnnouncements.length / itemsPerPage);
-
-    const interval = setInterval(() => {
-      setCurrentPinnedPage((prev) => (prev + 1) % totalPages);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [pinnedAnnouncements]);
-
-  useEffect(() => {
     fetchAnnouncements();
     fetchCategories();
-    // fetchPriests();
   }, []);
 
   const fetchAnnouncements = async () => {
@@ -131,19 +113,15 @@ export const Home = () => {
         `${process.env.REACT_APP_API}/api/v1/getAllAnnouncements`
       );
       const fetched = response.data.announcements || [];
-
       const sorted = fetched.sort((a, b) => {
         if (a.isFeatured && !b.isFeatured) return -1;
         if (!a.isFeatured && b.isFeatured) return 1;
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
-
       setAnnouncements(sorted);
       setFilteredAnnouncements(sorted);
     } catch (err) {
       console.error("Error fetching announcements:", err);
-      setAnnouncements([]);
-      setFilteredAnnouncements([]);
     } finally {
       setLoading(false);
     }
@@ -157,35 +135,30 @@ export const Home = () => {
       setCategories(response.data.categories || []);
     } catch (err) {
       console.error("Error fetching categories:", err);
-      setCategories([]);
     }
   };
 
   const goNext = () => {
     const totalPages = Math.ceil(pinnedAnnouncements.length / itemsPerPage);
-    setCurrentPinnedPage((prev) => (prev + 1) % totalPages);
+    setCurrentPinnedIndex((prev) => (prev + 1) % totalPages);
   };
 
   const goPrev = () => {
     const totalPages = Math.ceil(pinnedAnnouncements.length / itemsPerPage);
-    setCurrentPinnedPage((prev) => (prev - 1 + totalPages) % totalPages);
+    setCurrentPinnedIndex((prev) => (prev - 1 + totalPages) % totalPages);
   };
 
   const handleSearch = (term) => {
     setSearchTerm(term);
-
-    if (term.trim() === "") {
+    if (!term.trim()) {
       setFilteredAnnouncements(announcements);
       return;
     }
-
     const filtered = announcements.filter(
-      (announcement) =>
-        announcement.name.toLowerCase().includes(term.toLowerCase()) ||
-        (announcement.tags &&
-          announcement.tags.some((tag) =>
-            tag.toLowerCase().includes(term.toLowerCase())
-          ))
+      (a) =>
+        a.name.toLowerCase().includes(term.toLowerCase()) ||
+        (a.tags &&
+          a.tags.some((t) => t.toLowerCase().includes(term.toLowerCase())))
     );
     setFilteredAnnouncements(filtered);
   };
@@ -194,42 +167,34 @@ export const Home = () => {
     setSelectedCategory(categoryId);
   };
 
-  const handleCardClick = (announcementId) => {
-    navigate(`/announcementDetails/${announcementId}`);
+  const handleCardClick = (id) => {
+    navigate(`/announcementDetails/${id}`);
   };
 
-  const displayedAnnouncements = filteredAnnouncements.filter(
-    (announcement) => {
-      const matchesCategory = selectedCategory
-        ? announcement.announcementCategory?._id === selectedCategory
-        : true;
+  const displayedAnnouncements = filteredAnnouncements.filter((a) => {
+    const matchesCategory = selectedCategory
+      ? a.announcementCategory?._id === selectedCategory
+      : true;
+    const matchesSearch = searchTerm
+      ? a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (a.tags &&
+          a.tags.some((t) => t.toLowerCase().includes(searchTerm.toLowerCase())))
+      : true;
+    return matchesCategory && matchesSearch;
+  });
 
-      const matchesSearch = searchTerm
-        ? announcement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (announcement.tags &&
-          announcement.tags.some((tag) =>
-            tag.toLowerCase().includes(searchTerm.toLowerCase())
-          ))
-        : true;
-
-      return matchesCategory && matchesSearch;
-    }
-  );
-
-  if (loading) {
-    return <Loader />;
-  }
-
+  if (loading) return <Loader />;
 
   return (
     <div style={styles.homeContainer}>
       <MetaData title="Home" />
       <div style={styles.contentContainer}>
-        <GuestSideBar />
+        <div style={styles.sidebarContainer}>
+          <GuestSideBar />
+        </div>
 
-        {/* Main content and right sidebar */}
-        <div style={{ display: "flex", flex: 1 }}>
-          {/* Main Content */}
+        {/* Main + Right Section */}
+        <div style={styles.mainAndRightContainer}>
           <div style={styles.mainContent}>
             {/* Banner */}
             <div style={styles.bannerContainer}>
@@ -240,18 +205,18 @@ export const Home = () => {
               />
             </div>
 
-            {/* Search Bar */}
+            {/* Search */}
             <div style={styles.searchBarContainer}>
               <input
                 type="text"
-                placeholder="Search announcements by name or tags"
+                placeholder="Search announcements..."
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 style={styles.searchInput}
               />
             </div>
 
-            {/* Pinned Announcements */}
+            {/* Pinned */}
             {pinnedAnnouncements.length > 0 && (
               <PinnedAnnouncements
                 pinnedAnnouncements={pinnedAnnouncements}
@@ -260,9 +225,6 @@ export const Home = () => {
                 currentPinnedIndex={currentPinnedIndex}
               />
             )}
-
-            {/* Parish Priests */}
-            {/* {priests.length > 0 && <ParishPriests priests={priests} />} */}
 
             {/* Categories */}
             <div style={styles.categoriesContainer}>
@@ -276,17 +238,17 @@ export const Home = () => {
               >
                 All
               </span>
-              {categories.map((category) => (
+              {categories.map((c) => (
                 <span
-                  key={category._id}
+                  key={c._id}
                   style={{
                     ...styles.category,
                     backgroundColor:
-                      selectedCategory === category._id ? "#2c3e50" : "#3a5a40",
+                      selectedCategory === c._id ? "#2c3e50" : "#3a5a40",
                   }}
-                  onClick={() => handleCategoryClick(category._id)}
+                  onClick={() => handleCategoryClick(c._id)}
                 >
-                  {category.name}
+                  {c.name}
                 </span>
               ))}
             </div>
@@ -294,14 +256,14 @@ export const Home = () => {
             {/* Announcements */}
             <div style={styles.announcementsContainer}>
               {displayedAnnouncements.length > 0 ? (
-                displayedAnnouncements.map((announcement) => (
+                displayedAnnouncements.map((a) => (
                   <div
-                    key={announcement._id}
+                    key={a._id}
                     style={{
                       ...styles.announcementCard,
-                      border: announcement.isFeatured ? "3px solid gold" : "none",
+                      border: a.isFeatured ? "3px solid gold" : "none",
                     }}
-                    onClick={() => handleCardClick(announcement._id)}
+                    onClick={() => handleCardClick(a._id)}
                   >
                     <div style={styles.cardContent}>
                       <div style={styles.userInfo}>
@@ -313,42 +275,32 @@ export const Home = () => {
                         <span style={styles.userName}>Saint Joseph Parish</span>
                       </div>
 
-                      <h2 style={styles.announcementTitle}>
-                        {announcement.name}
-                      </h2>
+                      <h2 style={styles.announcementTitle}>{a.name}</h2>
                       <p style={styles.announcementDescription}>
-                        {announcement.description}
+                        {a.description}
                       </p>
 
-                      <div style={styles.imageSliderContainer}>
-                        {announcement.images && announcement.images.length > 0 ? (
-                          <ImageSlider images={announcement.images} />
-                        ) : announcement.image ? (
-                          <img
-                            src={announcement.image}
-                            alt={announcement.name}
-                            style={styles.announcementImage}
-                          />
-                        ) : null}
-                      </div>
+                      {a.images?.length ? (
+                        <ImageSlider images={a.images} />
+                      ) : a.image ? (
+                        <img
+                          src={a.image}
+                          alt={a.name}
+                          style={styles.announcementImage}
+                        />
+                      ) : null}
 
                       <p style={styles.announcementCategory}>
-                        Category:{" "}
-                        {announcement.announcementCategory?.name ||
-                          "Uncategorized"}
+                        Category: {a.announcementCategory?.name || "Uncategorized"}
                       </p>
-                      <p style={styles.tags}>
-                        Tags: {announcement.tags.join(", ")}
-                      </p>
+                      <p style={styles.tags}>Tags: {a.tags.join(", ")}</p>
 
                       <div style={styles.reactionsContainer}>
                         <span style={styles.reaction}>
-                          <FaHeart color="red" />{" "}
-                          {announcement.likedBy.length || 0}
+                          <FaHeart color="red" /> {a.likedBy.length || 0}
                         </span>
                         <span style={styles.reaction}>
-                          <FaComment color="blue" />{" "}
-                          {announcement.comments.length || 0}
+                          <FaComment color="blue" /> {a.comments.length || 0}
                         </span>
                       </div>
                     </div>
@@ -360,8 +312,8 @@ export const Home = () => {
             </div>
           </div>
 
-          {/* Right side: Mass Readings */}
-          <div style={{ display: "flex", flexDirection: "column", width: "450px"}}>
+          {/* Right side */}
+          <div style={styles.rightSidebar}>
             <MassReadingsCard />
             <MassIntentionCard />
           </div>
@@ -372,18 +324,27 @@ export const Home = () => {
 };
 
 const styles = {
-  homeContainer: { display: "flex" },
+  homeContainer: { display: "flex", flexDirection: "column" },
   contentContainer: {
     display: "flex",
+    flexWrap: "wrap",
     width: "100%",
     backgroundColor: "#f9f9f9",
   },
-  mainContent: { flex: 1, padding: "20px" },
-  bannerContainer: {
+  sidebarContainer: { width: "100%", maxWidth: "300px", flex: 1 },
+  mainAndRightContainer: {
     display: "flex",
-    justifyContent: "center",
-    marginBottom: "20px",
+    flexWrap: "wrap",
+    flex: 1,
+    justifyContent: "space-between",
+    padding: "10px",
   },
+  mainContent: {
+    flex: 1,
+    minWidth: "300px",
+    padding: "10px",
+  },
+  bannerContainer: { display: "flex", justifyContent: "center" },
   bannerImage: {
     width: "100%",
     maxWidth: "1200px",
@@ -393,25 +354,32 @@ const styles = {
   searchBarContainer: {
     display: "flex",
     justifyContent: "center",
-    marginBottom: "20px",
+    margin: "15px 0",
   },
   searchInput: {
-    width: "60%",
+    width: "90%",
+    maxWidth: "600px",
     padding: "10px",
     fontSize: "16px",
     borderRadius: "8px",
-    border: "1px solid #ddd",
+    border: "1px solid #ccc",
+  },
+  rightSidebar: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    maxWidth: "450px",
+    flex: 1,
   },
   categoriesContainer: {
     display: "flex",
     justifyContent: "center",
+    flexWrap: "wrap",
     gap: "10px",
     marginBottom: "20px",
-    flexWrap: "wrap",
   },
   category: {
     padding: "8px 12px",
-    backgroundColor: "#3a5a40",
     color: "#fff",
     borderRadius: "8px",
     cursor: "pointer",
@@ -421,24 +389,17 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "1fr",
     gap: "20px",
-    alignItems: "flex-start",
-    paddingLeft: "20px",
+    width: "100%",
   },
   announcementCard: {
     backgroundColor: "#e9ecef",
     borderRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    cursor: "pointer",
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    maxWidth: "800px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
     padding: "15px",
     textAlign: "left",
-    margin: "20px auto",
+    margin: "10px auto",
+    width: "100%",
   },
-  cardContent: {},
   userInfo: { display: "flex", alignItems: "center", marginBottom: "10px" },
   profileImage: {
     width: "40px",
@@ -447,91 +408,11 @@ const styles = {
     marginRight: "10px",
   },
   userName: { fontWeight: "bold" },
-  announcementTitle: { margin: "10px 0", fontSize: "24px" },
-  announcementDescription: { margin: "10px 0", fontSize: "16px" },
-  imageSliderContainer: {
-    width: "100%",
-    height: "300px",
-    position: "relative",
-    overflow: "hidden",
-    backgroundColor: "#000",
-    borderTopLeftRadius: "8px",
-    borderTopRightRadius: "8px",
-  },
-  sliderWrapper: { width: "100%", height: "100%", position: "relative" },
-  announcementImage: { width: "100%", height: "100%", objectFit: "cover" },
-  announcementCategory: { marginTop: "10px", fontWeight: "bold" },
-  tags: { color: "#666", fontSize: "14px" },
+  announcementTitle: { fontSize: "20px" },
+  announcementDescription: { fontSize: "16px" },
+  announcementImage: { width: "100%", borderRadius: "6px", objectFit: "cover" },
   reactionsContainer: { display: "flex", gap: "10px", marginTop: "10px" },
   reaction: { display: "flex", alignItems: "center", gap: "5px" },
-  sliderButtonLeft: {
-    position: "absolute",
-    left: "10px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    color: "white",
-    border: "none",
-    borderRadius: "50%",
-    width: "30px",
-    height: "30px",
-    cursor: "pointer",
-  },
-  sliderButtonRight: {
-    position: "absolute",
-    right: "10px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    color: "white",
-    border: "none",
-    borderRadius: "50%",
-    width: "30px",
-    height: "30px",
-    cursor: "pointer",
-  },
-  pinnedContainer: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: "20px",
-  },
-
-  pinnedWrapper: {
-    display: "flex",
-    overflow: "hidden",
-    justifyContent: "flex-start",
-    gap: "15px",
-    maxWidth: "80%",
-    position: "relative",
-  },
-  pinnedBox: {
-    position: "relative",
-    width: "250px",
-    height: "180px",
-    borderRadius: "8px",
-    overflow: "hidden",
-    textAlign: "left",
-    cursor: "pointer",
-    flexShrink: 0,
-  },
-
-  pinnedImage: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    opacity: 0.8,
-  },
-
-  pinnedTitle: {
-    position: "absolute",
-    bottom: "10px",
-    left: "10px",
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: "16px",
-  },
-
   arrowButton: {
     backgroundColor: "#3a5a40",
     color: "#fff",
@@ -540,11 +421,6 @@ const styles = {
     width: "30px",
     height: "30px",
     cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
-    margin: "0 15px",
   },
 };
 
