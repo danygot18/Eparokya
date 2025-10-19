@@ -78,6 +78,7 @@ const Header = () => {
       color: "#90C67C",
       backgroundColor: "rgba(144,198,124,0.1)",
     },
+    padding: "2px"
   });
 
   const mobileLinkStyle = {
@@ -301,7 +302,7 @@ const Header = () => {
           </Typography>
 
           {/* ✅ Desktop Navigation */}
-          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 2}}>
             {isAuthenticated && <NotificationUser user={user} />}
             {navItems.map((item) => (
               <Button key={item.label} component={Link} to={item.path} sx={navButtonStyle(item.path)}>
@@ -364,7 +365,7 @@ const Header = () => {
               </>
             ) : (
               <>
-                <Button component={Link} to="/login" variant="outlined" sx={navButtonStyle("/login")}>
+                <Button component={Link} to="/login" variant="outlined"  sx={navButtonStyle("/login")}>
                   Login
                 </Button>
                 <Button component={Link} to="/register" variant="outlined" sx={navButtonStyle("/register")}>

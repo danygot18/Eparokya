@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import Loader from "./Layout/Loader";
 import MassReadingsCard from "./MassReadingsCard";
 import MassIntentionCard from "./MassIntentionCard";
+import { useMediaQuery } from "@mui/material"; // Import for responsive check
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -90,6 +91,9 @@ export const Home = () => {
   const [currentPinnedIndex, setCurrentPinnedIndex] = useState(0);
   const navigate = useNavigate();
   const itemsPerPage = 4;
+
+  // Check if screen is mobile (max-width 768px)
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const bannerImages = [
     `${process.env.PUBLIC_URL}/Eparokya_UpdatedBanner.png`,
@@ -189,9 +193,12 @@ export const Home = () => {
     <div style={styles.homeContainer}>
       <MetaData title="Home" />
       <div style={styles.contentContainer}>
-        <div style={styles.sidebarContainer}>
-          <GuestSideBar />
-        </div>
+        {/* Conditionally render sidebar only on desktop */}
+        {!isMobile && (
+          <div style={styles.sidebarContainer}>
+            <GuestSideBar />
+          </div>
+        )}
 
         {/* Main + Right Section */}
         <div style={styles.mainAndRightContainer}>
@@ -368,7 +375,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     width: "100%",
-    maxWidth: "450px",
+    maxWidth: "300px",
     flex: 1,
   },
   categoriesContainer: {
@@ -422,6 +429,42 @@ const styles = {
     height: "30px",
     cursor: "pointer",
   },
+  // Add missing styles for slider, pinned, etc.
+  sliderWrapper: { position: "relative", width: "100%" },
+  sliderButtonLeft: {
+    position: "absolute",
+    left: "10px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "50%",
+    width: "30px",
+    height: "30px",
+    cursor: "pointer",
+  },
+  sliderButtonRight: {
+    position: "absolute",
+    right: "10px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "50%",
+    width: "30px",
+    height: "30px",
+    cursor: "pointer",
+  },
+  pinnedContainer: { display: "flex", alignItems: "center", marginBottom: "20px" },
+  pinnedWrapper: { display: "flex", gap: "10px", flex: 1, overflow: "hidden" },
+  pinnedBox: { flex: "0 0 25%", textAlign: "center" },
+  pinnedImage: { width: "100%", height: "100px", objectFit: "cover", borderRadius: "8px" },
+  pinnedTitle: { marginTop: "5px", fontSize: "14px" },
+  cardContent: {}, // Add if needed
+  announcementCategory: { fontSize: "14px", color: "#666" },
+  tags: { fontSize: "14px", color: "#666" },
 };
 
 export default Home;
