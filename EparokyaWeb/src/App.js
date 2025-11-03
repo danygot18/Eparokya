@@ -246,8 +246,9 @@ function Layout() {
 
   return (
     <div className="app-layout">
-      {isDashboard ? <AdminHeader /> : <Header />}
-
+      <div className="mb-16">
+        {isDashboard ? <AdminHeader /> : <Header />}
+      </div>
       <Routes>
         <Route
           path="/admin/dashboard"
@@ -304,8 +305,8 @@ function App() {
         <Route path="/GuidesPage" element={<Guides />} exact="true" />
         <Route path="/ParishHistory" element={<ParishHistory />} exact="true" />
 
-         <Route path="/missionsPage" element={<MissionsPage />} exact="true" />
-         <Route path="/missionsPageDetail/:id" element={<MissionsPageDetail />} exact="true" />
+        <Route path="/missionsPage" element={<MissionsPage />} exact="true" />
+        <Route path="/missionsPageDetail/:id" element={<MissionsPageDetail />} exact="true" />
 
         <Route
           path="/user/ministryAnnouncement"
@@ -853,7 +854,7 @@ function App() {
           }
         />
 
-          <Route
+        <Route
           path="/admin/prayerRequestIntentionFullList"
           element={
             <ProtectedRoute isAdmin={true}>

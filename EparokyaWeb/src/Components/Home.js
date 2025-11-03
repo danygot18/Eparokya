@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import Loader from "./Layout/Loader";
 import MassReadingsCard from "./MassReadingsCard";
 import MassIntentionCard from "./MassIntentionCard";
-import { useMediaQuery } from "@mui/material"; // Import for responsive check
+import { Button, useMediaQuery } from "@mui/material"; // Import for responsive check
 
 const ImageSlider = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -181,8 +181,8 @@ export const Home = () => {
       : true;
     const matchesSearch = searchTerm
       ? a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (a.tags &&
-          a.tags.some((t) => t.toLowerCase().includes(searchTerm.toLowerCase())))
+      (a.tags &&
+        a.tags.some((t) => t.toLowerCase().includes(searchTerm.toLowerCase())))
       : true;
     return matchesCategory && matchesSearch;
   });
@@ -211,6 +211,7 @@ export const Home = () => {
                 style={styles.bannerImage}
               />
             </div>
+
 
             {/* Search */}
             <div style={styles.searchBarContainer}>
@@ -320,10 +321,10 @@ export const Home = () => {
           </div>
 
           {/* Right side */}
-          <div style={styles.rightSidebar}>
+          {/* <div style={styles.rightSidebar}>
             <MassReadingsCard />
             <MassIntentionCard />
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

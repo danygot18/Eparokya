@@ -78,7 +78,6 @@ const Header = () => {
       color: "#90C67C",
       backgroundColor: "rgba(144,198,124,0.1)",
     },
-    padding: "2px"
   });
 
   const mobileLinkStyle = {
@@ -113,7 +112,7 @@ const Header = () => {
   const drawer = (
     <Box
       sx={{
-        width: 270,
+        width: "100%",
         backgroundColor: "#f5f5f5",
         height: "100%",
         display: "flex",
@@ -231,6 +230,17 @@ const Header = () => {
               >
                 Ministry Announcements
               </Button>
+              {user?.isAdmin && !user?.isPriest && (
+                <Button
+                  component={Link}
+                  to="/admin/dashboard"
+                  fullWidth
+                  sx={mobileLinkStyle}
+                  onClick={handleUserMenuClose}
+                >
+                  Dashboard
+                </Button>
+              )}
               <Button
                 component={Link}
                 to="/chatlist"
@@ -286,7 +296,18 @@ const Header = () => {
   return (
     <>
       {/* ✅ App Bar */}
-      <AppBar position="static" sx={{ backgroundColor: "#023b02", padding: "3px" }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          backgroundColor: "#023b02",
+          padding: "3px",
+          width: "100%",
+          marginBottom: "200px",
+          // zIndex: (theme) => theme.zIndex.drawer + 1, // ensures it stays above drawers
+        }}
+        className="w-full"
+        
+      >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography
             component={Link}
@@ -302,7 +323,7 @@ const Header = () => {
           </Typography>
 
           {/* ✅ Desktop Navigation */}
-          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 2}}>
+          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 2 }}>
             {isAuthenticated && <NotificationUser user={user} />}
             {navItems.map((item) => (
               <Button key={item.label} component={Link} to={item.path} sx={navButtonStyle(item.path)}>
@@ -355,6 +376,15 @@ const Header = () => {
                   <MenuItem component={Link} to="/user/ministryAnnouncement" onClick={handleUserMenuClose}>
                     Ministry Announcements
                   </MenuItem>
+                  {user?.isAdmin && !user?.isPriest && (
+                    <MenuItem
+                      component={Link}
+                      to="/admin/dashboard"
+                      onClick={handleUserMenuClose}
+                    >
+                      Dashboard
+                    </MenuItem>
+                  )}
                   <MenuItem component={Link} to="/chatlist" onClick={handleUserMenuClose}>
                     Chat
                   </MenuItem>
@@ -365,7 +395,7 @@ const Header = () => {
               </>
             ) : (
               <>
-                <Button component={Link} to="/login" variant="outlined"  sx={navButtonStyle("/login")}>
+                <Button component={Link} to="/login" variant="outlined" sx={navButtonStyle("/login")}>
                   Login
                 </Button>
                 <Button component={Link} to="/register" variant="outlined" sx={navButtonStyle("/register")}>
@@ -393,7 +423,7 @@ const Header = () => {
         open={mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{ keepMounted: true }}
-        sx={{ "& .MuiDrawer-paper": { width: 270, boxShadow: "0 0 10px rgba(0,0,0,0.2)" } }}
+        sx={{ "& .MuiDrawer-paper": { width: "80vw", boxShadow: "0 0 10px rgba(0,0,0,0.2)" } }}
       >
         {drawer}
       </Drawer>

@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
+import './index.css';
 import App from './App';
 import { ToastContainer } from 'react-toastify';
 // Don't forget to import the default CSS for react-toastify!
 import 'react-toastify/dist/ReactToastify.css'; // Add this line
-import './index.css'; // Your custom CSS (which should contain .Toastify__toast and .custom-close-button styles)
+
 
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
