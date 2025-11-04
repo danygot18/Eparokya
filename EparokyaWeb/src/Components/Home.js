@@ -89,6 +89,10 @@ export const Home = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentPinnedIndex, setCurrentPinnedIndex] = useState(0);
+  const [showSidePanel, setShowSidePanel] = useState(false);
+  const [showRightPanel, setShowRightPanel] = useState(false);
+
+
   const navigate = useNavigate();
   const itemsPerPage = 4;
 
@@ -192,6 +196,124 @@ export const Home = () => {
   return (
     <div style={styles.homeContainer}>
       <MetaData title="Home" />
+      {/* Mobile Header Menu Button */}
+      {isMobile && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+            padding: "10px",
+          }}
+        >
+          {/* Left-side button (existing) */}
+          <button
+            onClick={() => setShowSidePanel(!showSidePanel)}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "24px",
+              cursor: "pointer",
+            }}
+          >
+            ☰
+          </button>
+
+          {/* Right-side new button */}
+          <button
+            onClick={() => setShowRightPanel(!showRightPanel)}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "24px",
+              cursor: "pointer",
+            }}
+          >
+            📖
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Sidebar Overlay */}
+      {isMobile && showSidePanel && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setShowSidePanel(false)} // close when clicking outside
+        >
+          <div>
+
+            <div>
+              <GuestSideBar />
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Mobile Right Overlay */}
+      {isMobile && showRightPanel && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setShowRightPanel(false)} // close when clicking outside
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              width: "90%",
+              maxWidth: "400px",
+              borderRadius: "10px",
+              padding: "20px",
+              overflowY: "auto",
+              maxHeight: "80vh",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowRightPanel(false)}
+              style={{
+                position: "absolute",
+                top: "1px",
+                right: "5px",
+                background: "none",
+                border: "none",
+                fontSize: "20px",
+                cursor: "pointer",
+              }}
+            >
+              ✖
+            </button>
+
+            {/* Right side content */}
+            <MassReadingsCard />
+            <MassIntentionCard />
+          </div>
+        </div>
+      )}
+
+
+
+
       <div style={styles.contentContainer}>
         {/* Conditionally render sidebar only on desktop */}
         {!isMobile && (
@@ -321,10 +443,11 @@ export const Home = () => {
           </div>
 
           {/* Right side */}
-          {/* <div style={styles.rightSidebar}>
-            <MassReadingsCard />
-            <MassIntentionCard />
-          </div> */}
+          {!isMobile && (
+            <div style={styles.rightSidebar}>
+              <MassReadingsCard />
+              <MassIntentionCard />
+            </div>)}
         </div>
       </div>
     </div>
@@ -332,25 +455,27 @@ export const Home = () => {
 };
 
 const styles = {
-  homeContainer: { display: "flex", flexDirection: "column" },
+  homeContainer: { display: "flex", flexDirection: "column", alignItems: "center" },
   contentContainer: {
     display: "flex",
     flexWrap: "wrap",
     width: "100%",
     backgroundColor: "#f9f9f9",
+    justifyContent: "center",
   },
   sidebarContainer: { width: "100%", maxWidth: "300px", flex: 1 },
   mainAndRightContainer: {
     display: "flex",
     flexWrap: "wrap",
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "center",
     padding: "10px",
   },
   mainContent: {
     flex: 1,
     minWidth: "300px",
     padding: "10px",
+    maxWidth: "900px",
   },
   bannerContainer: { display: "flex", justifyContent: "center" },
   bannerImage: {
@@ -358,6 +483,8 @@ const styles = {
     maxWidth: "1200px",
     borderRadius: "8px",
     objectFit: "cover",
+    display: "block",
+    margin: "0 auto",
   },
   searchBarContainer: {
     display: "flex",
@@ -378,6 +505,7 @@ const styles = {
     width: "100%",
     maxWidth: "300px",
     flex: 1,
+    alignItems: "center",
   },
   categoriesContainer: {
     display: "flex",
@@ -398,6 +526,7 @@ const styles = {
     gridTemplateColumns: "1fr",
     gap: "20px",
     width: "100%",
+    justifyItems: "center",
   },
   announcementCard: {
     backgroundColor: "#e9ecef",
@@ -407,6 +536,7 @@ const styles = {
     textAlign: "left",
     margin: "10px auto",
     width: "100%",
+    maxWidth: "800px",
   },
   userInfo: { display: "flex", alignItems: "center", marginBottom: "10px" },
   profileImage: {
@@ -431,7 +561,7 @@ const styles = {
     cursor: "pointer",
   },
   // Add missing styles for slider, pinned, etc.
-  sliderWrapper: { position: "relative", width: "100%" },
+  sliderWrapper: { position: "relative", width: "100%", },
   sliderButtonLeft: {
     position: "absolute",
     left: "10px",
@@ -458,9 +588,22 @@ const styles = {
     height: "30px",
     cursor: "pointer",
   },
-  pinnedContainer: { display: "flex", alignItems: "center", marginBottom: "20px" },
-  pinnedWrapper: { display: "flex", gap: "10px", flex: 1, overflow: "hidden" },
-  pinnedBox: { flex: "0 0 25%", textAlign: "center" },
+  pinnedContainer: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: "20px",
+    justifyContent: "center",
+    width: "100%",
+  },
+  pinnedWrapper: {
+    display: "flex",
+    gap: "10px",
+    flex: 1,
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  pinnedBox: { flex: "0 0 22%", textAlign: "center" },
   pinnedImage: { width: "100%", height: "100px", objectFit: "cover", borderRadius: "8px" },
   pinnedTitle: { marginTop: "5px", fontSize: "14px" },
   cardContent: {}, // Add if needed

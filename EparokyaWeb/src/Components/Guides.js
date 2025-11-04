@@ -15,6 +15,7 @@ import {
   Divider,
 } from "@mui/material";
 import GuestSideBar from "./GuestSideBar";
+import { useMediaQuery } from "@mui/material";
 
 const guides = [
   {
@@ -88,80 +89,140 @@ const Guides = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGuide, setSelectedGuide] = useState(null);
 
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const startIndex = (currentPage - 1) * cardsPerPage;
   const paginatedGuides = guides.slice(startIndex, startIndex + cardsPerPage);
   const totalPages = Math.ceil(guides.length / cardsPerPage);
+  const [showSidePanel, setShowSidePanel] = useState(false);
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      <GuestSideBar />
-      <Box sx={{ flex: 1, py: 4, px: { xs: 2, sm: 4 } }}>
-        <Typography variant="h4" fontWeight="bold" textAlign="center" mb={4}>
-          Form Submission Guides
-        </Typography>
-
-        <Stack spacing={3}>
-          {paginatedGuides.map((guide, index) => (
-            <Card key={index} elevation={3}>
-              <CardContent>
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                  {guide.title}
-                </Typography>
-                <Divider sx={{ mb: 1 }} />
-                <Stack spacing={1} sx={{ pl: 2 }}>
-                  {guide.details.slice(0, 3).map((point, idx) => (
-                    <Typography key={idx} variant="body2" color="text.secondary">
-                      • {point}
-                    </Typography>
-                  ))}
-                  {guide.details.length > 3 && (
-                    <Typography variant="body2" color="primary" mt={1}>
-                      + {guide.details.length - 3} more...
-                    </Typography>
-                  )}
-                </Stack>
-              </CardContent>
-              <CardActions sx={{ justifyContent: "flex-end", px: 2, pb: 2 }}>
-                <Button size="small" onClick={() => setSelectedGuide(guide)}>
-                  View Full Guide
-                </Button>
-              </CardActions>
-            </Card>
-          ))}
-        </Stack>
-
-        <Box mt={4} display="flex" justifyContent="center">
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={(e, value) => setCurrentPage(value)}
-            color="primary"
-          />
-        </Box>
-
-        {/* Dialog for Full Guide */}
-        <Dialog
-          open={!!selectedGuide}
-          onClose={() => setSelectedGuide(null)}
-          fullWidth
-          maxWidth="md"
+    <Box >
+      {isMobile && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+            padding: "10px",
+          }}
         >
-          <DialogTitle fontWeight="bold">{selectedGuide?.title}</DialogTitle>
-          <DialogContent dividers>
-            <Stack spacing={1} sx={{ pl: 2 }}>
-              {selectedGuide?.details.map((detail, idx) => (
-                <Typography key={idx} variant="body1">
-                  • {detail}
-                </Typography>
-              ))}
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setSelectedGuide(null)} color="primary">
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
+          {/* Left-side button (existing) */}
+          <button
+            onClick={() => setShowSidePanel(!showSidePanel)}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "14px",
+              cursor: "pointer",
+            }}
+          >
+            ☰
+          </button>
+
+
+        </div>
+      )}
+
+      {/* Mobile Sidebar Overlay */}
+      {isMobile && showSidePanel && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setShowSidePanel(false)} // close when clicking outside
+        >
+          <div>
+
+            <div>
+              <GuestSideBar />
+            </div>
+          </div>
+        </div>
+      )}
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        {!isMobile && (
+          <div>
+            <GuestSideBar />
+          </div>
+        )}
+        <Box sx={{ flex: 1, py: 4, px: { xs: 2, sm: 4 } }}>
+          <Typography variant="h4" fontWeight="bold" textAlign="center" mb={4}>
+            Form Submission Guides
+          </Typography>
+
+          <Stack spacing={3}>
+            {paginatedGuides.map((guide, index) => (
+              <Card key={index} elevation={3}>
+                <CardContent>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    {guide.title}
+                  </Typography>
+                  <Divider sx={{ mb: 1 }} />
+                  <Stack spacing={1} sx={{ pl: 2 }}>
+                    {guide.details.slice(0, 3).map((point, idx) => (
+                      <Typography key={idx} variant="body2" color="text.secondary">
+                        • {point}
+                      </Typography>
+                    ))}
+                    {guide.details.length > 3 && (
+                      <Typography variant="body2" color="primary" mt={1}>
+                        + {guide.details.length - 3} more...
+                      </Typography>
+                    )}
+                  </Stack>
+                </CardContent>
+                <CardActions sx={{ justifyContent: "flex-end", px: 2, pb: 2 }}>
+                  <Button size="small" onClick={() => setSelectedGuide(guide)}>
+                    View Full Guide
+                  </Button>
+                </CardActions>
+              </Card>
+            ))}
+          </Stack>
+
+          <Box mt={4} display="flex" justifyContent="center">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(e, value) => setCurrentPage(value)}
+              color="primary"
+            />
+          </Box>
+
+          {/* Dialog for Full Guide */}
+          <Dialog
+            open={!!selectedGuide}
+            onClose={() => setSelectedGuide(null)}
+            fullWidth
+            maxWidth="md"
+          >
+            <DialogTitle fontWeight="bold">{selectedGuide?.title}</DialogTitle>
+            <DialogContent dividers>
+              <Stack spacing={1} sx={{ pl: 2 }}>
+                {selectedGuide?.details.map((detail, idx) => (
+                  <Typography key={idx} variant="body1">
+                    • {detail}
+                  </Typography>
+                ))}
+              </Stack>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setSelectedGuide(null)} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Box>
       </Box>
     </Box>
   );

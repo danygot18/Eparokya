@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Card, CardContent, Typography, Container } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Card, CardContent, Typography, Container, useMediaQuery } from "@mui/material";
 import GuestSideBar from "./GuestSideBar";
 
 const faqs = [
@@ -40,32 +40,93 @@ const faqs = [
   }
 ];
 
-const FAQs = () => {
-  return (
-    <Box sx={{ display: "flex", height: "100vh" }}>
-      <GuestSideBar />
-      <Container sx={{ py: 4, px: 3, overflowY: "auto" }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Frequently Asked Questions (FAQs)
-        </Typography>
 
-        {faqs.map((faq, index) => (
-          <Card key={index} sx={{ mb: 3, boxShadow: 2 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                {faq.question}
-              </Typography>
-              <Typography
-                variant="body1"
-                color="text.secondary"
-                sx={{ whiteSpace: "pre-line" }}
-              >
-                {faq.answer}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
-      </Container>
+const FAQs = () => {
+  const [showSidePanel, setShowSidePanel] = useState(false);
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  return (
+    <Box >
+      {isMobile && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+            padding: "10px",
+          }}
+        >
+          {/* Left-side button (existing) */}
+          <button
+            onClick={() => setShowSidePanel(!showSidePanel)}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "14px",
+              cursor: "pointer",
+            }}
+          >
+            ☰
+          </button>
+
+
+        </div>
+      )}
+
+      {/* Mobile Sidebar Overlay */}
+      {isMobile && showSidePanel && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setShowSidePanel(false)} // close when clicking outside
+        >
+          <div>
+
+            <div>
+              <GuestSideBar />
+            </div>
+          </div>
+        </div>
+      )}
+      <Box sx={{ display: "flex", height: "100vh" }}>
+        {!isMobile && (
+          <div>
+            <GuestSideBar />
+          </div>
+        )}
+        <Container sx={{ py: 4, px: 3, overflowY: "auto" }}>
+          <Typography variant="h4" fontWeight="bold" gutterBottom>
+            Frequently Asked Questions (FAQs)
+          </Typography>
+
+          {faqs.map((faq, index) => (
+            <Card key={index} sx={{ mb: 3, boxShadow: 2 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  {faq.question}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ whiteSpace: "pre-line" }}
+                >
+                  {faq.answer}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
+        </Container>
+      </Box>
     </Box>
   );
 };
