@@ -28,7 +28,6 @@ The system allows users to **book appointments**, **chat in real time**, **track
 ### 💬 Real-Time Chat (Socket.IO)
 
 * Live messaging between **admins** and **users**.
-* Read receipts, typing indicators, and notifications.
 * Built using **Socket.IO** for instant communication.
 
 ### 📦 Inventory Management
@@ -95,10 +94,10 @@ The system allows users to **book appointments**, **chat in real time**, **track
 * SyncStorage for session and token management
 
 **Backend:**
-
-* Node.js + Socket.IO (for real-time chat)
-* MongoDB (database)
-* Cloudinary (for image/files uploads)
+- Node.js + Express.js (for server and API handling)
+- Socket.IO (for real-time chat)
+- MongoDB (database)
+- Cloudinary (for image and file uploads)
 
 ---
 
