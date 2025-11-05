@@ -9,6 +9,7 @@ import {
   Modal,
   Button,
   Typography,
+  useMediaQuery
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
@@ -41,6 +42,8 @@ const GuestSideBar = () => {
   const handleDrawerToggle = () => setDrawerOpen(!drawerOpen);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     checkForActiveFeedbackForm();
@@ -97,18 +100,21 @@ const GuestSideBar = () => {
             boxSizing: "border-box",
             backgroundColor: "#d6e7c6",
             p: 2,
-            marginTop: "70px", 
-            height: "calc(100% - 64px)", 
-            zIndex: 1, 
+            marginTop: "70px",
+            height: "calc(100% - 64px)",
+            zIndex: 1,
           },
         }}
       >
         {/* Drawer Toggle Button */}
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-          <IconButton onClick={handleDrawerToggle}>
-            {drawerOpen ? <CloseIcon /> : <MenuIcon />}
-          </IconButton>
-        </Box>
+        {isMobile && (
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+            <IconButton onClick={handleDrawerToggle}>
+              {drawerOpen ? <CloseIcon /> : <MenuIcon />}
+            </IconButton>
+          </Box>
+        )}
+
 
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
           {/* Profile Section */}
@@ -238,8 +244,8 @@ const GuestSideBar = () => {
           {/* Bottom Section */}
           <ul style={{ ...styles.menuList, marginTop: "auto" }}>
             <li style={styles.menuItem}>
-              <Button 
-                color="success" 
+              <Button
+                color="success"
                 onClick={handleOpen}
                 style={{
                   ...styles.button,

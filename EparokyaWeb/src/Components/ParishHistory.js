@@ -67,7 +67,7 @@ const historyData = {
     ],
     location: 'Parish Center'
   },
-  '1984': { 
+  '1984': {
     image: y1984,
     title: 'Built Community',
     text: ' Lumago ang bilang ng partisipasyon at pakikipam ng mga mamamayan. Ito na ang kabuuang ng pananampalataya ng lahat ng kapilya na muling dumalo sa pamahalaan ng simbahan sa pamamagitan ng ang upang nababalitaan ng kapilya.',
@@ -141,204 +141,121 @@ const historyData = {
 
 function ParishHistory() {
   const [selectedTab, setSelectedTab] = useState(Object.keys(historyData)[0]);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const greenTheme = {
-    ...theme,
-    palette: {
-      ...theme.palette,
-      primary: {
-        main: '#97cf8a',
-        contrastText: '#fff'
-      }
-    }
-  };
-
-  const handleChange = (event, newValue) => {
-    setSelectedTab(newValue);
-  };
-
-  const navigateHistory = (direction) => {
-    const years = Object.keys(historyData);
-    const currentIndex = years.indexOf(selectedTab);
-
-    if (direction === 'next' && currentIndex < years.length - 1) {
-      setSelectedTab(years[currentIndex + 1]);
-    } else if (direction === 'prev' && currentIndex > 0) {
-      setSelectedTab(years[currentIndex - 1]);
-    }
-  };
+  const handleChange = (event, newValue) => setSelectedTab(newValue);
 
   const { image, title, text, keyPeople, location } = historyData[selectedTab] || {};
 
   return (
-    <Box sx={{
-      p: isMobile ? 2 : 4,
-      backgroundColor: '#f5f5f5',
-      minHeight: '100vh',
-      backgroundImage: 'linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url(/assets/background-pattern.png)',
-      backgroundAttachment: 'fixed'
-    }}>
-      {/* <Typography 
-        variant="h3" 
-        align="center" 
-        gutterBottom 
-        sx={{ 
-          fontWeight: 'bold',
-          color: '#2e7d32',
-          mb: 4,
-          textShadow: '1px 1px 3px rgba(0,0,0,0.1)'
-        }}
+    <Box
+      className="min-h-screen bg-gray-100 bg-fixed bg-cover bg-center"
+      sx={{
+        backgroundImage:
+          'linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url(/assets/background-pattern.png)',
+        padding: '2rem',
+      }}
+    >
+      {/* HEADER */}
+      <Typography
+        variant="h3"
+        align="center"
+        gutterBottom
+        className="font-bold text-green-800 text-2xl sm:text-4xl mb-8"
       >
         Our Parish History
-      </Typography> */}
+      </Typography>
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          mt: 2,
-          alignItems: 'flex-start',
-          justifyContent: 'center',
-          gap: 3
-        }}
-      >
-        {/* Vertical Tabs */}
-        <Tabs
-          orientation={isMobile ? 'horizontal' : 'vertical'}
-          value={selectedTab}
-          onChange={handleChange}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{
-            borderRight: isMobile ? 'none' : '1px solid #e0e0e0',
-            borderBottom: isMobile ? '1px solid #e0e0e0' : 'none',
-            mb: isMobile ? 2 : 0,
-            minWidth: isMobile ? '100%' : 180,
-            maxHeight: isMobile ? 'auto' : '70vh',
-            '& .MuiTabs-indicator': {
-              backgroundColor: '#97cf8a',
-              width: isMobile ? '100%' : 3
-            }
-          }}
-        >
-          {Object.keys(historyData).map((year) => (
-            <Tab
-              key={year}
-              label={
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: isMobile ? 'center' : 'flex-start',
-                  p: 1
-                }}>
-                  <Typography variant="body1" fontWeight="bold">{year}</Typography>
-                  {selectedTab === year && (
-                    <Typography variant="caption" sx={{ color: '#97cf8a' }}>
-                      {historyData[year].title.split('-')[0].trim()}
+      {/* MAIN CONTAINER */}
+      <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
+        {/* Tabs (Responsive: horizontal on mobile, vertical on large) */}
+        <div className="w-full lg:w-1/5">
+          <Tabs
+            orientation="vertical"
+            value={selectedTab}
+            onChange={handleChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              borderRight: { lg: '1px solid #e0e0e0' },
+              '& .MuiTabs-indicator': { backgroundColor: '#97cf8a', width: 3 },
+            }}
+          >
+            {Object.keys(historyData).map((year) => (
+              <Tab
+                key={year}
+                label={
+                  <Box sx={{ textAlign: 'left', p: 1 }}>
+                    <Typography variant="body1" fontWeight="bold">
+                      {year}
                     </Typography>
-                  )}
-                </Box>
-              }
-              value={year}
-              sx={{
-                alignItems: 'flex-start',
-                textAlign: 'left',
-                minHeight: 60,
-                '&.Mui-selected': {
-                  backgroundColor: 'rgba(151, 207, 138, 0.08)'
+                    {selectedTab === year && (
+                      <Typography variant="caption" sx={{ color: '#97cf8a' }}>
+                        {historyData[year].title.split('-')[0].trim()}
+                      </Typography>
+                    )}
+                  </Box>
                 }
-              }}
-            />
-          ))}
-        </Tabs>
+                value={year}
+                sx={{
+                  '&.Mui-selected': { backgroundColor: 'rgba(151,207,138,0.08)' },
+                }}
+              />
+            ))}
+          </Tabs>
+        </div>
 
-        {/* Main Content */}
-        <Box sx={{
-          flexGrow: 1,
-          width: isMobile ? '100%' : '70%',
-          position: 'relative'
-        }}>
-          <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mb: 2
-          }}>
-            <Typography
-              variant="h4"
-              align="center"
-              sx={{
-                fontWeight: 'bold',
-                color: '#2e7d32',
-                mx: 2
-              }}
-            >
-              {title}
-            </Typography>
-          </Box>
+        {/* MAIN CONTENT */}
+        <div className="flex-1 w-full">
+          {/* Title */}
+          <Typography
+            variant="h4"
+            align="center"
+            className="font-bold text-green-800 mb-4 text-xl sm:text-3xl"
+          >
+            {title}
+          </Typography>
 
-
+          {/* Main card */}
           <Slide direction="up" in={true} mountOnEnter unmountOnExit>
             <Paper
               elevation={4}
-              sx={{
-                p: 3,
-                backgroundColor: '#fff',
-                borderRadius: 3,
-                mb: 3,
-                boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
-              }}
+              className="p-4 sm:p-6 rounded-3xl bg-white shadow-lg mb-8"
             >
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Box sx={{
-                    position: 'relative',
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
-                    height: '100%',
-                    minHeight: 300
-                  }}>
-                    <Fade in={true}>
-                      <Box
-                        component="img"
-                        src={image}
-                        alt={title}
-                        sx={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block'
-                        }}
-                      />
-                    </Fade>
-                  </Box>
-                </Grid>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                {/* Image */}
+                <Fade in={true}>
+                  <div className="rounded-2xl overflow-hidden shadow-md h-[250px] sm:h-[300px] md:h-full">
+                    <img
+                      src={image}
+                      alt={title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </Fade>
 
-                <Grid item xs={12} md={6}>
-                  <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.7 }}>
+                {/* Details */}
+                <div>
+                  <Typography variant="body1" paragraph className="text-[1rem] leading-7">
                     {text}
                   </Typography>
 
-                  <Divider sx={{ my: 2 }} />
+                  <Divider className="my-4" />
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <div className="flex items-center mb-2">
                     <Place sx={{ mr: 1, color: '#97cf8a' }} />
                     <Typography variant="subtitle1">
                       <strong>Location:</strong> {location}
                     </Typography>
-                  </Box>
+                  </div>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <div className="flex items-center mb-2">
                     <Group sx={{ mr: 1, color: '#97cf8a' }} />
                     <Typography variant="subtitle1">
                       <strong>Key People:</strong>
                     </Typography>
-                  </Box>
+                  </div>
 
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
+                  <div className="flex flex-wrap gap-2">
                     {keyPeople.map((person, index) => (
                       <Chip
                         key={index}
@@ -348,28 +265,17 @@ function ParishHistory() {
                         sx={{ borderColor: '#97cf8a', color: '#2e7d32' }}
                       />
                     ))}
-                  </Box>
-
-                  {/* <Button
-                    variant="contained"
-                    sx={{
-                      mr: 2,
-                      backgroundColor: '#97cf8a',
-                      '&:hover': {
-                        backgroundColor: '#7cb56d'
-                      }
-                    }}
-                    onClick={() => window.open(image, '_blank')}
-                  >
-                    View Full Image
-                  </Button> */}
-                </Grid>
-              </Grid>
+                  </div>
+                </div>
+              </div>
             </Paper>
           </Slide>
 
           {/* Related Events */}
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold', color: '#2e7d32' }}>
+          <Typography
+            variant="h5"
+            className="mb-4 font-bold text-green-800 text-lg sm:text-2xl"
+          >
             Related Historical Events
           </Typography>
 
@@ -387,17 +293,12 @@ function ParishHistory() {
                       transition: 'transform 0.3s, box-shadow 0.3s',
                       '&:hover': {
                         transform: 'translateY(-5px)',
-                        boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
-                      }
+                        boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
+                      },
                     }}
                     onClick={() => setSelectedTab(year)}
                   >
-                    <CardMedia
-                      component="img"
-                      height="160"
-                      image={data.image}
-                      alt={data.title}
-                    />
+                    <CardMedia component="img" height="160" image={data.image} alt={data.title} />
                     <CardContent sx={{ flexGrow: 1 }}>
                       <Typography gutterBottom variant="h6" component="div">
                         {year}: {data.title.split('-')[0].trim()}
@@ -415,8 +316,8 @@ function ParishHistory() {
                 </Grid>
               ))}
           </Grid>
-        </Box>
-      </Box>
+        </div>
+      </div>
     </Box>
   );
 }
