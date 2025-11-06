@@ -12,11 +12,9 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './store';
 import { socket } from './socket/index';
 
-// Define CustomCloseButton directly in this file
-// REMOVE: import CustomCloseButton from './Components/Layout/CustomCloseButton'
 const CustomCloseButton = ({ closeToast }) => (
   <button className="custom-close-button" onClick={closeToast}>
-    X {/* Changed 'Close' to 'X' as it's common for close buttons */}
+    X 
   </button>
 );
 
@@ -29,12 +27,12 @@ const RootComponent = () => {
       socket.connect();
 
       socket.on('connect', () => {
-        console.log("Socket connected:", socket.connected); // ✅ True
-        console.log("Socket ID:", socket.id); // ✅ Now has a value
+        console.log("Socket connected:", socket.connected);
+        console.log("Socket ID:", socket.id); 
       });
 
       socket.on('connect_error', (err) => {
-        console.log("Connection error:", err); // ✅ Helps debug failures
+        console.log("Connection error:", err); 
       });
     }
 
@@ -45,8 +43,7 @@ const RootComponent = () => {
       }
     };
   }, []);
-  // Removed the duplicate useEffect block - keep only one
-
+ 
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
@@ -57,8 +54,8 @@ const RootComponent = () => {
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}
-        closeOnClick={false} // <--- IMPORTANT: Set closeOnClick to false if you are providing a custom closeButton
-        closeButton={CustomCloseButton} // <--- Pass your custom component here
+        closeOnClick={false} 
+        closeButton={CustomCloseButton}
         pauseOnHover
         draggable
         theme="colored"

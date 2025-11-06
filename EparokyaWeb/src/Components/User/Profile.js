@@ -2,20 +2,22 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Loader from '../Layout/Loader';
 import {
-  Avatar, Button, Card, CardContent, Grid, List, ListItem, ListItemText, Typography, Divider, Box
+  Avatar, Button, Card, CardContent, Grid, List, ListItem, ListItemText, useMediaQuery, Typography, Divider, Box
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import DescriptionIcon from '@mui/icons-material/Description';
 import MetaData from '../Layout/MetaData';
 import { useSelector } from 'react-redux';
-import '../Layout/styles/style.css'; 
+import '../Layout/styles/style.css';
 import axios from 'axios';
 import GuestSideBar from '../GuestSideBar';
 
 const Profile = () => {
   const { user: reduxUser, loading } = useSelector((state) => state.auth);
   const [user, setUser] = useState(reduxUser);
+
+  const isMobile = useMediaQuery('(max-width: 768px)')
 
   // console.log('user', reduxUser);
 
@@ -47,16 +49,19 @@ const Profile = () => {
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
-      <GuestSideBar />
-      <div style={{ 
-        flex: 1, 
-        padding: "24px", 
+      {!isMobile && (
+        <GuestSideBar />
+      )}
+
+      <div style={{
+        flex: 1,
+        padding: "24px",
         backgroundColor: "#f8fafc",
-        marginLeft: "30px" // Match sidebar width
+
       }}>
         <Fragment>
           <MetaData title="Profile" />
-  
+
           {/* Header Section */}
           <Box sx={{ mb: 4 }}>
             <Typography variant="h4" color="success" sx={{ fontWeight: 600 }}>
@@ -66,106 +71,21 @@ const Profile = () => {
               Manage your account information and settings
             </Typography>
           </Box>
-  
+
           <Grid container spacing={3}>
             {/* Left Side (Avatar & Actions) */}
-            <Grid item xs={12} md={4}>
-              <Card sx={{ 
-                p: 3, 
-                textAlign: 'center',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                borderRadius: 3
-              }}>
-                <Avatar
-                  src={user?.avatar?.url || '/default-avatar.png'}
-                  alt={user?.name || 'User Avatar'}
-                  sx={{ 
-                    width: 150, 
-                    height: 150, 
-                    mx: 'auto', 
-                    mb: 2,
-                    border: '4px solid #fff',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                  }}
-                />
-  
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  <Box component="span" sx={{ fontWeight: 600 }}>Member since:</Box> {String(user?.createdAt).substring(0, 10)}
-                </Typography>
-  
-                <Divider sx={{ my: 3, borderColor: 'divider' }} />
-  
-              <Grid container spacing={2}>
-      {[
-        { label: 'Edit Profile', path: '/UpdateProfile' },
-        { label: 'Change Password', path: '/password/update' },
-        { label: 'View Forms', path: '/user/SubmittedFormsNavigation' },
-        { label: 'Prayer Wall', path: '/user/SubmittedPrayerWallList' },
-        { label: 'Feedback', path: '/user/submittedFeedback' }
-      ].map((item, index) => (
-        <Grid item xs={12} key={index}>
-          <Button
-            component={Link}
-            to={item.path}
-            fullWidth
-            variant="outlined"
-            color="success"
-            sx={{
-              justifyContent: 'flex-start',
-              py: 1.5,
-              borderRadius: 2,
-              textTransform: 'none',
-              '&:hover': {
-                backgroundColor: 'success.light',
-                color: 'success.main'
-              }
-            }}
-          >
-            {item.label}
-          </Button>
-        </Grid>
-      ))}
 
-      {/* Conditionally render Request Ministry Item button */}
-      {user?.ministryRoles?.some(
-        (role) => role.role === 'Coordinator' || role.role === 'Assistant Coordinator'
-      ) && (
-        <Grid item xs={12}>
-          <Button
-            component={Link}
-            to="/user/RequestItem"
-            fullWidth
-            variant="contained"
-            color="success"
-            sx={{
-              justifyContent: 'flex-start',
-              py: 1.5,
-              borderRadius: 2,
-              textTransform: 'none',
-              backgroundColor: 'success.main',
-              '&:hover': {
-                backgroundColor: 'success.dark'
-              }
-            }}
-          >
-            Request Ministry Item
-          </Button>
-        </Grid>
-      )}
-    </Grid>
-              </Card>
-            </Grid>
-  
+
             {/* Right Side (Profile Details) */}
             <Grid item xs={12} md={8}>
-              <Card sx={{ 
+              <Card sx={{
                 p: 0,
                 boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
                 borderRadius: 3
               }}>
                 {/* Profile Header */}
-                <Box sx={{ 
-                  p: 3, 
+                <Box sx={{
+                  p: 3,
                   backgroundColor: 'success.main',
                   color: 'common.white',
                   borderTopLeftRadius: 3,
@@ -178,18 +98,18 @@ const Profile = () => {
                     Here's your profile information
                   </Typography>
                 </Box>
-  
+
                 <Box sx={{ p: 3 }}>
                   {/* Personal Information Section */}
                   <Box sx={{ mb: 4 }}>
-                    <Typography variant="h6" sx={{ 
-                      mb: 2, 
+                    <Typography variant="h6" sx={{
+                      mb: 2,
                       fontWeight: 600,
                       color: 'text.primary'
                     }}>
                       Personal Information
                     </Typography>
-                    
+
                     <Grid container spacing={2}>
                       {[
                         { label: 'Full Name', value: user?.name },
@@ -199,8 +119,8 @@ const Profile = () => {
                         { label: 'Email', value: user?.email || 'N/A' },
                       ].map((item, index) => (
                         <Grid item xs={12} sm={6} key={index}>
-                          <Box sx={{ 
-                            p: 2, 
+                          <Box sx={{
+                            p: 2,
                             backgroundColor: 'action.hover',
                             borderRadius: 2
                           }}>
@@ -215,18 +135,18 @@ const Profile = () => {
                       ))}
                     </Grid>
                   </Box>
-  
+
                   {/* Address Section */}
                   <Box sx={{ mb: 4 }}>
-                    <Typography variant="h6" sx={{ 
-                      mb: 2, 
+                    <Typography variant="h6" sx={{
+                      mb: 2,
                       fontWeight: 600,
                       color: 'text.primary'
                     }}>
                       Address
                     </Typography>
-                    <Box sx={{ 
-                      p: 2, 
+                    <Box sx={{
+                      p: 2,
                       backgroundColor: 'action.hover',
                       borderRadius: 2
                     }}>
@@ -243,23 +163,23 @@ const Profile = () => {
                       </Typography>
                     </Box>
                   </Box>
-  
+
                   {/* Ministries Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ 
-                      mb: 2, 
+                    <Typography variant="h6" sx={{
+                      mb: 2,
                       fontWeight: 600,
                       color: 'text.primary'
                     }}>
                       Ministries
                     </Typography>
-  
+
                     {user?.ministryRoles?.length > 0 ? (
                       <Grid container spacing={2}>
                         {user.ministryRoles.map((roleItem, index) => (
                           <Grid item xs={12} sm={6} key={index}>
-                            <Card sx={{ 
-                              p: 2, 
+                            <Card sx={{
+                              p: 2,
                               borderRadius: 2,
                               borderLeft: '4px solid',
                               borderLeftColor: 'success.main'
@@ -285,8 +205,8 @@ const Profile = () => {
                         ))}
                       </Grid>
                     ) : (
-                      <Box sx={{ 
-                        p: 3, 
+                      <Box sx={{
+                        p: 3,
                         textAlign: 'center',
                         backgroundColor: 'action.hover',
                         borderRadius: 2
@@ -298,6 +218,92 @@ const Profile = () => {
                     )}
                   </Box>
                 </Box>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card sx={{
+                p: 3,
+                textAlign: 'center',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                borderRadius: 3
+              }}>
+                <Avatar
+                  src={user?.avatar?.url || '/default-avatar.png'}
+                  alt={user?.name || 'User Avatar'}
+                  sx={{
+                    width: 150,
+                    height: 150,
+                    mx: 'auto',
+                    mb: 2,
+                    border: '4px solid #fff',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                />
+
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Box component="span" sx={{ fontWeight: 600 }}>Member since:</Box> {String(user?.createdAt).substring(0, 10)}
+                </Typography>
+
+                <Divider sx={{ my: 3, borderColor: 'divider' }} />
+
+                <Grid container spacing={2}>
+                  {[
+                    { label: 'Edit Profile', path: '/UpdateProfile' },
+                    { label: 'Change Password', path: '/password/update' },
+                    { label: 'View Forms', path: '/user/SubmittedFormsNavigation' },
+                    { label: 'Prayer Wall', path: '/user/SubmittedPrayerWallList' },
+                    { label: 'Feedback', path: '/user/submittedFeedback' }
+                  ].map((item, index) => (
+                    <Grid item xs={12} key={index}>
+                      <Button
+                        component={Link}
+                        to={item.path}
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{
+                          justifyContent: 'flex-start',
+                          py: 1.5,
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          '&:hover': {
+                            backgroundColor: 'success.light',
+                            color: 'success.main'
+                          }
+                        }}
+                      >
+                        {item.label}
+                      </Button>
+                    </Grid>
+                  ))}
+
+                  {/* Conditionally render Request Ministry Item button */}
+                  {user?.ministryRoles?.some(
+                    (role) => role.role === 'Coordinator' || role.role === 'Assistant Coordinator'
+                  ) && (
+                      <Grid item xs={12}>
+                        <Button
+                          component={Link}
+                          to="/user/RequestItem"
+                          fullWidth
+                          variant="contained"
+                          color="success"
+                          sx={{
+                            justifyContent: 'flex-start',
+                            py: 1.5,
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            backgroundColor: 'success.main',
+                            '&:hover': {
+                              backgroundColor: 'success.dark'
+                            }
+                          }}
+                        >
+                          Request Ministry Item
+                        </Button>
+                      </Grid>
+                    )}
+                </Grid>
               </Card>
             </Grid>
           </Grid>

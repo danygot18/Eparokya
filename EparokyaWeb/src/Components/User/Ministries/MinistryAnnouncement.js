@@ -164,39 +164,54 @@ const MinistryAnnouncement = () => {
   });
 
   return (
-    <Container>
-      <div className="content-container">
-        {/* Left Section: Announcements and Pinned Announcements */}
-        <div className="main-content">
+    <Container maxWidth="xl" sx={{ mt: 10 }}>
+      <Grid container spacing={3}>
+       
+        <Grid item xs={12} md={8}>
           {/* Pinned Announcements */}
           {pinnedAnnouncements.length > 0 && (
-            <div className="pinned-container">
-              <Typography variant="h6">Pinned Announcements</Typography>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" fontWeight="bold">
+                Pinned Announcements
+              </Typography>
               {pinnedAnnouncements.map((announcement) => {
                 const isAcknowledged = hasUserAcknowledged(announcement);
                 return (
-                  <Card key={announcement._id} className="announcement">
+                  <Card key={announcement._id} sx={{ my: 2 }}>
                     <CardContent>
                       <Typography variant="h6">{announcement.title}</Typography>
-                      <Typography variant="body2">
+                      <Typography variant="body2" sx={{ mb: 1 }}>
                         {announcement.description}
                       </Typography>
 
                       {announcement.images?.length > 0 && (
-                        <div className="announcement-images">
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 1,
+                            justifyContent: "center",
+                          }}
+                        >
                           {announcement.images.map((image, index) => (
-                            <img
+                            <Box
                               key={index}
+                              component="img"
                               src={image.url}
-                              alt={`Announcement Image ${index}`}
-                              className="announcement-image-slider"
+                              alt={`Announcement ${index}`}
+                              sx={{
+                                width: "100%",
+                                maxWidth: 400,
+                                borderRadius: 2,
+                                objectFit: "cover",
+                              }}
                             />
                           ))}
-                        </div>
+                        </Box>
                       )}
 
                       {announcement.tags?.length > 0 && (
-                        <Typography variant="body2" className="announcement-tags">
+                        <Typography variant="body2" sx={{ mt: 1 }}>
                           <strong>Tags:</strong> {announcement.tags.join(", ")}
                         </Typography>
                       )}
@@ -205,41 +220,37 @@ const MinistryAnnouncement = () => {
                         <strong>Ministry Category:</strong>{" "}
                         {announcement.ministryCategory?.name || "N/A"}
                       </Typography>
-
                       <Typography variant="body2">
                         <strong>Acknowledge Count:</strong>{" "}
                         {announcement.acknowledgeCount}
                       </Typography>
-
                       {announcement.notedBy?.length > 0 && (
                         <Typography variant="body2">
                           <strong>Noted By:</strong>{" "}
                           {announcement.notedBy.join(", ")}
                         </Typography>
                       )}
-
                       <Typography variant="body2">
                         <strong>Date Created:</strong>{" "}
                         {new Date(announcement.createdAt).toLocaleDateString(
                           "en-US",
-                          {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          }
+                          { month: "long", day: "numeric", year: "numeric" }
                         )}
                       </Typography>
 
                       <Button
                         variant="contained"
                         fullWidth
-                        style={{
-                          backgroundColor: isAcknowledged ? "#ccc" : "#1976d2",
+                        disabled={isAcknowledged}
+                        onClick={() => handleAcknowledgeClick(announcement)}
+                        sx={{
+                          mt: 1.5,
+                          backgroundColor: isAcknowledged
+                            ? "#ccc"
+                            : "primary.main",
                           color: isAcknowledged ? "#666" : "#fff",
                           cursor: isAcknowledged ? "not-allowed" : "pointer",
                         }}
-                        disabled={isAcknowledged}
-                        onClick={() => handleAcknowledgeClick(announcement)}
                       >
                         {isAcknowledged ? "Acknowledged" : "Acknowledge"}
                       </Button>
@@ -247,98 +258,118 @@ const MinistryAnnouncement = () => {
                   </Card>
                 );
               })}
-            </div>
+            </Box>
           )}
 
           {/* Other Announcements */}
-          <div className="other-announcements">
-            <Typography variant="h6">Announcements</Typography>
-            {announcements.map((announcement) => {
-              const isAcknowledged = hasUserAcknowledged(announcement);
-              return (
-                <Card key={announcement._id} className="announcement">
-                  <CardContent>
-                    <div className="announcement-header">
-                      <img
-                        src={eparokyaLogo}
-                        alt="Saint Joseph Parish - Taguig"
-                        className="announcement-image"
-                      />
-                      <div className="announcement-title">
-                        <strong>{announcement.title}</strong>
-                      </div>
-                    </div>
+          <Typography variant="h6" fontWeight="bold">
+            Announcements
+          </Typography>
+          {announcements.map((announcement) => {
+            const isAcknowledged = hasUserAcknowledged(announcement);
+            return (
+              <Card key={announcement._id} sx={{ my: 2 }}>
+                <CardContent>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                    <Box
+                      component="img"
+                      src={eparokyaLogo}
+                      alt="Saint Joseph Parish - Taguig"
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: "50%",
+                        mr: 2,
+                        objectFit: "cover",
+                      }}
+                    />
+                    <Typography variant="h6">{announcement.title}</Typography>
+                  </Box>
 
-                    <div className="announcement-body">
-                      {announcement.images?.length > 0 && (
-                        <div className="announcement-images">
-                          {announcement.images.map((image, index) => (
-                            <img
-                              key={index}
-                              src={image.url}
-                              alt={`Announcement ${index}`}
-                              className="announcement-image-slider"
-                            />
-                          ))}
-                        </div>
-                      )}
+                  {announcement.images?.length > 0 && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 1,
+                        justifyContent: "center",
+                        mb: 1,
+                      }}
+                    >
+                      {announcement.images.map((image, index) => (
+                        <Box
+                          key={index}
+                          component="img"
+                          src={image.url}
+                          alt={`Announcement ${index}`}
+                          sx={{
+                            width: "100%",
+                            maxWidth: 400,
+                            borderRadius: 2,
+                            objectFit: "cover",
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  )}
 
-                      <p>
-                        <strong>Description:</strong> {announcement.description}
-                      </p>
-                      {announcement.tags?.length > 0 && (
-                        <p className="announcement-tags">
-                          <strong>Tags:</strong> {announcement.tags.join(", ")}
-                        </p>
-                      )}
-                      <p>
-                        <strong>Ministry Category:</strong>{" "}
-                        {announcement.ministryCategory?.name}
-                      </p>
-                      <p>
-                        <strong>Acknowledge Count:</strong>{" "}
-                        {announcement.acknowledgeCount}
-                      </p>
-                      {announcement.notedBy?.length > 0 && (
-                        <p>
-                          <strong>Noted By:</strong>{" "}
-                          {announcement.notedBy.join(", ")}
-                        </p>
-                      )}
-                      <p>
-                        <strong>Date Created:</strong>{" "}
-                        {new Date(announcement.createdAt).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          }
-                        )}
-                      </p>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Description:</strong> {announcement.description}
+                  </Typography>
 
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        disabled={isAcknowledged}
-                        onClick={() => handleAcknowledgeClick(announcement)}
-                        fullWidth
-                      >
-                        {isAcknowledged ? "Acknowledged" : "Acknowledge"}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
+                  {announcement.tags?.length > 0 && (
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      <strong>Tags:</strong> {announcement.tags.join(", ")}
+                    </Typography>
+                  )}
 
-        {/* Right Sidebar: Ministry List & Ministry Members */}
-        <div className="right-sidebar">
-          {/* Ministry List */}
-          <div className="ministry-list">
-            <Typography variant="h5">Your Ministries</Typography>
+                  <Typography variant="body2">
+                    <strong>Ministry Category:</strong>{" "}
+                    {announcement.ministryCategory?.name}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Acknowledge Count:</strong>{" "}
+                    {announcement.acknowledgeCount}
+                  </Typography>
+
+                  <Typography variant="body2">
+                    <strong>Date Created:</strong>{" "}
+                    {new Date(announcement.createdAt).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </Typography>
+
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={isAcknowledged}
+                    onClick={() => handleAcknowledgeClick(announcement)}
+                    fullWidth
+                    sx={{ mt: 1.5 }}
+                  >
+                    {isAcknowledged ? "Acknowledged" : "Acknowledge"}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </Grid>
+
+        {/* ================= SIDEBAR ================= */}
+        <Grid item xs={12} md={4}>
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              backgroundColor: "#fafafa",
+              boxShadow: 1,
+            }}
+          >
+            <Typography variant="h5" sx={{ mb: 1 }}>
+              Your Ministries
+            </Typography>
             <List>
               {ministryCategory.map((ministry) => (
                 <ListItem
@@ -346,76 +377,82 @@ const MinistryAnnouncement = () => {
                   button
                   selected={ministryCategoryId === ministry.ministryId}
                   onClick={() => handleMinistryClick(ministry.ministryId)}
-                  style={{
-                    backgroundColor: ministryCategoryId === ministry.ministryId ? "#e3f2fd" : undefined,
-                    cursor: "pointer"
+                  sx={{
+                    backgroundColor:
+                      ministryCategoryId === ministry.ministryId
+                        ? "#e3f2fd"
+                        : "transparent",
+                    mb: 1,
+                    borderRadius: 1,
                   }}
                 >
                   {ministry.ministryName}
                 </ListItem>
               ))}
             </List>
-          </div>
 
-          {/* Ministry Members */}
-          <div className="usersMinistry-container">
-            <Typography variant="h6">Ministry Members</Typography>
-
+            <Typography variant="h6" sx={{ mt: 3 }}>
+              Ministry Members
+            </Typography>
             <TextField
               fullWidth
               variant="outlined"
               placeholder="Search member..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ marginBottom: "10px" }}
+              sx={{ mb: 2 }}
             />
-
             <List>
               {filteredUsers.map((user) => (
-                <ListItem key={user._id} className="userMinistry-item">
+                <ListItem key={user._id}>
                   <Avatar src={user.avatar} alt={user.name} />
-                  <div style={{ marginLeft: "10px" }}>
+                  <Box sx={{ ml: 1 }}>
                     <Typography>{user.name}</Typography>
-                    {user.ministryRoles?.length > 0 ? (
-                      user.ministryRoles.map((ministryRole, index) => (
-                        <Typography
-                          key={index}
-                          variant="body2"
-                          color="textSecondary"
-                          style={{ fontSize: "0.75rem" }}
-                        >
-                          {ministryRole.role === "Others"
-                            ? ministryRole.customRole || "Others"
-                            : ministryRole.role || "Member"}
-                        </Typography>
-                      ))
-                    ) : (
-                      <Typography
-                        variant="body2"
-                        color="textSecondary"
-                        style={{ fontSize: "0.75rem" }}
-                      >
-                        Member
-                      </Typography>
-                    )}
-                  </div>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ fontSize: "0.75rem" }}
+                    >
+                      {user.ministryRoles?.length > 0
+                        ? user.ministryRoles
+                          .map((role) =>
+                            role.role === "Others"
+                              ? role.customRole || "Others"
+                              : role.role || "Member"
+                          )
+                          .join(", ")
+                        : "Member"}
+                    </Typography>
+                  </Box>
                 </ListItem>
               ))}
             </List>
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Grid>
+      </Grid>
 
-      {/* Acknowledge Confirmation Modal */}
+      {/* MODAL */}
       <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <Box className="modal-content">
-          <Typography variant="h6">
+        <Box
+          sx={{
+            p: 3,
+            borderRadius: 2,
+            backgroundColor: "white",
+            boxShadow: 3,
+            maxWidth: 400,
+            mx: "auto",
+            mt: "20vh",
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 2 }}>
             Are you sure you have read the announcement?
           </Typography>
           <Button
             variant="contained"
             color="success"
             onClick={handleConfirmAcknowledge}
+            sx={{ mr: 1 }}
           >
             Yes
           </Button>
@@ -425,6 +462,7 @@ const MinistryAnnouncement = () => {
         </Box>
       </Modal>
     </Container>
+
   );
 };
 

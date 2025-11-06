@@ -212,7 +212,7 @@ export const Home = () => {
             style={{
               background: "none",
               border: "none",
-              fontSize: "24px",
+              fontSize: "14px",
               cursor: "pointer",
             }}
           >
@@ -225,7 +225,7 @@ export const Home = () => {
             style={{
               background: "none",
               border: "none",
-              fontSize: "24px",
+              fontSize: "14px",
               cursor: "pointer",
             }}
           >

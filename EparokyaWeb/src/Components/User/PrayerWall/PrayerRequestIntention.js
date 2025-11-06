@@ -151,10 +151,15 @@ const PrayerRequestIntention = () => {
               padding: "10px",
             }}
           >
-            {/* Left-side button (existing) */}
+
             <button
               onClick={() => setShowSidePanel(!showSidePanel)}
-              className="outline outline-offset-1 outline-green-900/100"
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
             >
               ☰
             </button>
@@ -163,7 +168,7 @@ const PrayerRequestIntention = () => {
           </div>
         )}
 
-        {/* Mobile Sidebar Overlay */}
+
         {isMobile && showSidePanel && (
           <div
             style={{
@@ -178,7 +183,7 @@ const PrayerRequestIntention = () => {
               alignItems: "center",
               zIndex: 1000,
             }}
-            onClick={() => setShowSidePanel(false)} // close when clicking outside
+            onClick={() => setShowSidePanel(false)}
           >
             <div>
 

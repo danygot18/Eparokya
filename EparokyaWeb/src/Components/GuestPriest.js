@@ -12,7 +12,8 @@ import {
   CircularProgress,
   Avatar,
   Paper,
-  styled
+  styled,
+  useMediaQuery
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -86,7 +87,7 @@ const DetailItem = styled(Box)(({ theme }) => ({
 const GuestPriest = () => {
   const [priests, setPriests] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const isMobile = useMediaQuery('(max-width: 768px)');
   useEffect(() => {
     const fetchPriests = async () => {
       try {
@@ -109,14 +110,14 @@ const GuestPriest = () => {
     return new Date(dateStr).toLocaleDateString(undefined, options);
   };
 
-const formatTime = (timeStr) => {
-  if (!timeStr) return '—';
-  const [hour, minute] = timeStr.split(':');
-  const date = new Date();
-  date.setHours(+hour);
-  date.setMinutes(+minute);
-  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
-};
+  const formatTime = (timeStr) => {
+    if (!timeStr) return '—';
+    const [hour, minute] = timeStr.split(':');
+    const date = new Date();
+    date.setHours(+hour);
+    date.setMinutes(+minute);
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+  };
 
 
   if (loading) {
@@ -127,9 +128,14 @@ const formatTime = (timeStr) => {
     );
   }
 
+
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <GuestSideBar />
+      {!isMobile && (
+        <GuestSideBar />
+      )}
+
       <Container maxWidth="lg" sx={{ py: 4, ml: { xs: 0, md: '240px' } }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{
           fontWeight: 'bold',
@@ -201,29 +207,29 @@ const formatTime = (timeStr) => {
 
                 <Divider sx={{ my: 2 }} />
 
-              <DetailRow>
-  <DetailItem>
-    <PersonIcon color="action" sx={{ mr: 1 }} />
-    <Typography variant="body1">
-      <strong>Attended:</strong> {priest.guestDetails?.attended || '—'}
-    </Typography>
-  </DetailItem>
-  <DetailItem>
-    <CalendarIcon color="action" sx={{ mr: 1 }} />
-    <Typography variant="body1">
-      <strong>Date:</strong> {formatDate(priest.guestDetails?.date)}
-    </Typography>
-  </DetailItem>
-</DetailRow>
+                <DetailRow>
+                  <DetailItem>
+                    <PersonIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body1">
+                      <strong>Attended:</strong> {priest.guestDetails?.attended || '—'}
+                    </Typography>
+                  </DetailItem>
+                  <DetailItem>
+                    <CalendarIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body1">
+                      <strong>Date:</strong> {formatDate(priest.guestDetails?.date)}
+                    </Typography>
+                  </DetailItem>
+                </DetailRow>
 
-<DetailRow>
-  <DetailItem>
-    <AccessTimeIcon color="action" sx={{ mr: 1 }} />
-    <Typography variant="body1">
-      <strong>Time:</strong> {formatTime(priest.guestDetails?.time)}
-    </Typography>
-  </DetailItem>
-</DetailRow>
+                <DetailRow>
+                  <DetailItem>
+                    <AccessTimeIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body1">
+                      <strong>Time:</strong> {formatTime(priest.guestDetails?.time)}
+                    </Typography>
+                  </DetailItem>
+                </DetailRow>
 
 
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>

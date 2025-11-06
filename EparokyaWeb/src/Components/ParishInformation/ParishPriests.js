@@ -12,7 +12,8 @@ import {
   CircularProgress,
   Avatar,
   Paper,
-  styled
+  styled,
+  useMediaQuery
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -87,6 +88,8 @@ const ParishPriest = () => {
   const [priests, setPriests] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const isMobile = useMediaQuery('(max-width: 768px')
+
   useEffect(() => {
     const fetchPriests = async () => {
       try {
@@ -114,7 +117,10 @@ const ParishPriest = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <GuestSideBar />
+      {!isMobile && (
+        <GuestSideBar />
+      )}
+
       <Container maxWidth="lg" sx={{ py: 4, ml: { xs: 0, md: '240px' } }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{
           fontWeight: 'bold',

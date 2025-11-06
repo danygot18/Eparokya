@@ -84,7 +84,7 @@ const MemberHistory = () => {
   });
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 10, mb: 4 }}>
       <Typography variant="h4" gutterBottom>
         Parish Members
       </Typography>

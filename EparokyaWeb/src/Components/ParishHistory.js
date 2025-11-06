@@ -18,7 +18,12 @@ import {
   Card,
   CardMedia,
   CardContent,
-  CardActions
+  CardActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
+
 } from '@mui/material';
 import {
   ArrowBack,
@@ -145,6 +150,7 @@ function ParishHistory() {
   const handleChange = (event, newValue) => setSelectedTab(newValue);
 
   const { image, title, text, keyPeople, location } = historyData[selectedTab] || {};
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   return (
     <Box
@@ -168,41 +174,84 @@ function ParishHistory() {
       {/* MAIN CONTAINER */}
       <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
         {/* Tabs (Responsive: horizontal on mobile, vertical on large) */}
-        <div className="w-full lg:w-1/5">
-          <Tabs
-            orientation="vertical"
-            value={selectedTab}
-            onChange={handleChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{
-              borderRight: { lg: '1px solid #e0e0e0' },
-              '& .MuiTabs-indicator': { backgroundColor: '#97cf8a', width: 3 },
-            }}
-          >
-            {Object.keys(historyData).map((year) => (
-              <Tab
-                key={year}
-                label={
-                  <Box sx={{ textAlign: 'left', p: 1 }}>
-                    <Typography variant="body1" fontWeight="bold">
-                      {year}
-                    </Typography>
-                    {selectedTab === year && (
-                      <Typography variant="caption" sx={{ color: '#97cf8a' }}>
-                        {historyData[year].title.split('-')[0].trim()}
+        {isMobile && (
+          <div className="w-full mb-4">
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="history-year-select-label">Select Year</InputLabel>
+                <Select
+                  labelId="history-year-select-label"
+                  value={selectedTab}
+                  label="Select Year"
+                  onChange={(e) => handleChange(null, e.target.value)}
+                  sx={{
+                    backgroundColor: 'white',
+                    borderRadius: 2,
+                    boxShadow: 1,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#97cf8a',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: '#7db86e',
+                    },
+                  }}
+                >
+                  {Object.keys(historyData).map((year) => (
+                    <MenuItem key={year} value={year}>
+                      <Box>
+                        <Typography variant="body1" fontWeight="bold">
+                          {year}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#97cf8a' }}>
+                          {historyData[year].title.split('-')[0].trim()}
+                        </Typography>
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </div>
+        )}
+
+
+        {!isMobile && (
+          < div className="w-full lg:w-1/5">
+            <Tabs
+              orientation="vertical"
+              value={selectedTab}
+              onChange={handleChange}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                borderRight: { lg: '1px solid #e0e0e0' },
+                '& .MuiTabs-indicator': { backgroundColor: '#97cf8a', width: 3 },
+              }}
+            >
+              {Object.keys(historyData).map((year) => (
+                <Tab
+                  key={year}
+                  label={
+                    <Box sx={{ textAlign: 'left', p: 1 }}>
+                      <Typography variant="body1" fontWeight="bold">
+                        {year}
                       </Typography>
-                    )}
-                  </Box>
-                }
-                value={year}
-                sx={{
-                  '&.Mui-selected': { backgroundColor: 'rgba(151,207,138,0.08)' },
-                }}
-              />
-            ))}
-          </Tabs>
-        </div>
+                      {selectedTab === year && (
+                        <Typography variant="caption" sx={{ color: '#97cf8a' }}>
+                          {historyData[year].title.split('-')[0].trim()}
+                        </Typography>
+                      )}
+                    </Box>
+                  }
+                  value={year}
+                  sx={{
+                    '&.Mui-selected': { backgroundColor: 'rgba(151,207,138,0.08)' },
+                  }}
+                />
+              ))}
+            </Tabs>
+          </div>
+        )}
 
         {/* MAIN CONTENT */}
         <div className="flex-1 w-full">
@@ -318,7 +367,7 @@ function ParishHistory() {
           </Grid>
         </div>
       </div>
-    </Box>
+    </Box >
   );
 }
 
