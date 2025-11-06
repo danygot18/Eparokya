@@ -8,6 +8,7 @@ router.get('/getMinistry/:ministryId', ministryCategoryController.getMinistryId 
 router.post('/ministryCategory/create', ministryCategoryController.createMinistry );
 
 router.get('/ministryEvents/:ministryId', ministryCategoryController.getMinistryEvents);
+router.get('/getAllMinistryEvents', ministryCategoryController.getAllMinistryEvents)
 router.delete('/deleteMinistryCategory/:ministryId', ministryCategoryController.deleteMinistry );
 router.put('/updateMinistryCategory/:ministryId', ministryCategoryController.updateMinistryCategory );
 router.get("/:ministryCategoryId/users", ministryCategoryController.getUsersByMinistryCategory);

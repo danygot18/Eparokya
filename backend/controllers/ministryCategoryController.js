@@ -136,6 +136,35 @@ exports.getUsersByMinistryCategory = async (req, res) => {
   }
 };
 
+exports.getAllMinistryEvents = async (req, res) => {
+  try {
+    const events = await CustomEvent.find()
+      .populate('ministryCategory')
+      .sort({ createdAt: -1 });
+
+    if (!events || events.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "No ministry events found" 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: events.length,
+      data: events
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch ministry events",
+      error: error.message
+    });
+  }
+};
+
+
+
 exports.getMinistryEvents = async (req, res) => {
   try {
     const { ministryId } = req.params;
