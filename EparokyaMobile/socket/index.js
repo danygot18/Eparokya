@@ -7,7 +7,6 @@ const config = {
 
 export const socket = io(
     `https://eparokya.onrender.com`,
-    // `http://192.168.1.5:4001`,
      {
     autoConnect: false,
     reconnection: true, // enables auto reconnection
