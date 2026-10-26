@@ -110,7 +110,7 @@ The system allows users to **book appointments**, **chat in real time**, **track
 
 ## 👥 Contributors
 - [Dan Russell](https://github.com/danygot18)
-- [Bea Clarisse](https://github.com/coketamin3)
+- [Bea Clarisse](https://github.com/clarisseeal)
 
 ## 🙏 Acknowledgements
 
